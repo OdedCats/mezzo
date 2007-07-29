@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="mezzoAnalyzer"
 	ProjectGUID="{9AC6C523-2B36-463F-99E6-5A6ECE5D3A3B}"
 	Keyword="MakeFileProj"
@@ -23,7 +23,7 @@
 			<Tool
 				Name="VCNMakeTool"
 				BuildCommandLine="nmake debug"
-				ReBuildCommandLine="qmake&#x0D;&#x0A;nmake debug"
+				ReBuildCommandLine="nmake clean&#x0D;&#x0A;qmake&#x0D;&#x0A;nmake clean&#x0D;&#x0A;nmake debug"
 				CleanCommandLine="nmake clean"
 				Output="debug\mezzoAnalyzer.a"
 				PreprocessorDefinitions="WIN32;_DEBUG"

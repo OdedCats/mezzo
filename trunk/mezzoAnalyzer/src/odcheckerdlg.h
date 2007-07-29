@@ -10,6 +10,7 @@
 #include <QTableView>
 #include <QStandardItemModel>
 #include <QStandardItem>
+#include <QComboBox>
 
 #include <QString>
 #include <Qt3Support>
@@ -25,32 +26,35 @@
 
 class ODCheckerDlg : public QDialog, public Ui::ODCheckerDlg
 {
-   Q_OBJECT
+	Q_OBJECT
  public:
-   ODCheckerDlg(QWidget* parent);
-   ~ODCheckerDlg();
-   void setNetwork(Network* mezzonet);
-   bool getNetworkState(){return networkset_;}
-   void setNetworkState(bool networkset){networkset_=networkset;}
+	ODCheckerDlg(QWidget* parent);
+	~ODCheckerDlg();
+	void setNetwork(Network* mezzonet);
+	bool getNetworkState(){return networkset_;}
+	void setNetworkState(bool networkset){networkset_=networkset;}
 
  public slots:
-   virtual void reject(); // virutal function of QDialog
+	virtual void reject(); // virutal function of QDialog
 
  private slots:
-   void checkOD(bool check_);
+	void checkOD(bool check_);
+	void loadDestCombwithO(const QString& curtext);
+	void loadOrigCombwithD(const QString& curtext);
    
  private:
+    void loadInitOD();
 
-	 //properties 
-	 QStandardItemModel* itemmodel_; // model to the tableview 
-	 int orgId_;
-	 int destId_;
+	//properties 
+	QStandardItemModel* itemmodel_; // model to the tableview 
+	int orgId_;
+	int destId_;
 
-	 //internal state
-	 bool networkset_;
+	//internal state
+	bool networkset_;
 
-	 // references 
-	 Network* mezzonet_;
+	// references 
+	Network* mezzonet_;
 	  
 };
 
