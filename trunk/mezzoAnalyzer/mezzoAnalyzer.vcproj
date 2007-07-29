@@ -22,7 +22,7 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="nmake debug"
+				BuildCommandLine="qmake&#x0D;&#x0A;nmake debug"
 				ReBuildCommandLine="nmake clean&#x0D;&#x0A;qmake&#x0D;&#x0A;nmake clean&#x0D;&#x0A;nmake debug"
 				CleanCommandLine="nmake clean"
 				Output="debug\mezzoAnalyzer.a"
