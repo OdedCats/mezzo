@@ -1,3 +1,6 @@
+#ifndef MEZZOASSIST_H
+#define MEZZOASSIST_H
+
 #include "../mezzo_lib/src/od.h" 
 
 namespace assist{
@@ -8,4 +11,7 @@ namespace assist{
 		bool operator () (ODpair* odpair){return (odpair->odids()==val);}
 	    odval val;
 	};
-}
+};
+
+#endif
+

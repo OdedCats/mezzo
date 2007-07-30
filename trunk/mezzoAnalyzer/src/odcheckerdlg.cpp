@@ -2,10 +2,11 @@
 #include <algorithm>
 #include "odcheckerdlg.h"
 #include "assist.h"
+#include "odtabledelegate.h"
 
 /**
  *  constructor of OD check dialog
- * */
+ */
 ODCheckerDlg::ODCheckerDlg(QWidget* parent):QDialog(parent)
 {
    setupUi(this);
@@ -23,15 +24,18 @@ ODCheckerDlg::ODCheckerDlg(QWidget* parent):QDialog(parent)
 					this, SLOT(loadDestCombwithO(const QString&)));
    QObject::connect(destcomb, SIGNAL(activated(const QString)),
 	                this, SLOT(loadOrigCombwithD(const QString)));
-   
+
    // create the model for the tableview
-   itemmodel_=new QStandardItemModel(0,4);
+   itemmodel_=new QStandardItemModel(0,5);
    itemmodel_->setHeaderData(0, Qt::Horizontal, tr("Route"));
    itemmodel_->setHeaderData(1, Qt::Horizontal, tr("Proportion"));
    itemmodel_->setHeaderData(2, Qt::Horizontal, tr("Travel time"));
    itemmodel_->setHeaderData(3, Qt::Horizontal, tr("Distance"));
-   //itemmodel_->setHeaderData(4, Qt::Horizontal, tr("View"));
+   itemmodel_->setHeaderData(4, Qt::Horizontal, tr("View"));
 
+   // create new tableview delegate
+   ODTableViewDelegate* tbdlgt=new ODTableViewDelegate(4, this);
+   ODTableView->setItemDelegate(tbdlgt);
    ODTableView->setModel(itemmodel_);
    ODTableView->hide();
    
@@ -194,6 +198,10 @@ void ODCheckerDlg::checkOD(bool check_)
 				QStandardItem* cell4=new QStandardItem(QString("100"));
 				onerowptr->append(cell4);
 
+				// add the item of view
+				QStandardItem* cell5=new QStandardItem();
+				onerowptr->append(cell5);
+
 				// add the row to the tableview model
 				itemmodel_->appendRow(*onerowptr);
 			}
@@ -230,3 +238,5 @@ void ODCheckerDlg::loadInitOD()
 	for(unsigned i=0; i<dests.size(); i++)
 		destcomb->addItem(QString::number(dests[i]->get_id()));
 }
+
+
