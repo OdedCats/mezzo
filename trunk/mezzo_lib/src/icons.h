@@ -40,19 +40,23 @@ class Drawing
 class Icon
 {
   public:
-      Icon() {selected = false;}
-      Icon( int startx_, int starty_) : startx(startx_), starty(starty_) {selected = false;}
-      virtual ~Icon();
-  		virtual void draw(QPixmap * pm,QMatrix * wm);
-		void settext(const string st) {text=QString(st.c_str());}
-       int get_x()  { return startx;}
-     int get_y()  { return starty;}
-	 void set_selected (const bool sel) {selected = sel;}
-	 bool get_selected () {return selected;}
+	  Icon() {selected = false;}
+	  Icon( int startx_, int starty_) : startx(startx_), starty(starty_) 
+			{selected = false; selected_color = theParameters->selectedcolor;}
+	  virtual ~Icon();
+	  virtual void draw(QPixmap * pm,QMatrix * wm);
+	  void settext(const string st) {text=QString(st.c_str());}
+	  const int get_x()  { return startx;}
+	  const int get_y()  { return starty;}
+	  void set_selected (const bool sel) {selected = sel;} // sets if object is selected or not
+	  const bool get_selected () {return selected;} // gets the selected status of object
+	  void set_selected_color (const QColor selcolor) {selected_color = selcolor;}
+	  const QColor get_selected_color () {return selected_color;}
   protected:
       QString text;
       int startx, starty; // the icon's position
 	  bool selected;
+	  QColor selected_color; // local selected color, default is taken from Parameters object 
 };
 
 class LinkIcon : public Icon

@@ -89,6 +89,17 @@ odval Route::get_oid_did()
 	 }
  }
 
+#ifndef _NO_GUI
+ void Route::set_selected_color(QColor selcolor)
+ {
+	vector <Link*>::iterator iter = links.begin();
+	 for (iter;iter < links.end(); iter++)
+	 {
+		 (*iter)->set_selected_color(selcolor);
+	 }
+ }
+#endif
+
  bool Route::equals (Route& route) // returns true if same route 
  {
 	 odval val=route.get_oid_did();

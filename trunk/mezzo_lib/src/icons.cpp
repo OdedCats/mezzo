@@ -5,7 +5,6 @@
 #include "parameters.h"
 #include <math.h>
 #include <qimage.h>
-//Added by qt3to4:
 #include <QPixmap>
 #include <iostream>
 // Drawing functions
@@ -31,18 +30,7 @@ void Drawing::draw(QPixmap* pm,QMatrix * wm)
 	}
 	if (bpm && bg_set && theParameters->show_background)
 	{
-		/* *** Scaling DOES NOT WORK (HAS NO EFFECT) ***
-		QImage im=bpm->convertToImage();
-		QWMatrix cwm;
-		double scale = 0.5;
-		cwm.scale (scale,scale);
-		im.xForm(cwm);
-		//im.scale(im.width()*scale, im.height()*scale);
-		//pm->convertFromImage(im,0);
-		*pm=im;
-		*/
-		*pm = *bpm;
-		
+		*pm = *bpm;	
 	}
 	else	
 	{
@@ -89,16 +77,11 @@ Icon::~Icon()
 {}
 
 // LinkIcon functions
-//LinkIcon::LinkIcon(int x, int y, int tox, int toy ): startx(x), starty(y), stopx(tox), stopy(toy)
 LinkIcon::LinkIcon(int x, int y, int tox, int toy ): Icon (x, y), stopx(tox), stopy(toy)
 {
 	int vx=stopx-startx;
 	int vy=stopy-starty;
 	double q=((theParameters->queue_thickness/2.0)+1.0);
-
- 
-
-  
   // calculating the shift to make the links excentric (start & end at the side of nodes)
 	if (vx==0)
 	{
@@ -168,7 +151,7 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 	if (!selected)
 		pen1 =QPen( theParameters->linkcolor , theParameters->link_thickness); // pen for the link base
 	else
-		pen1 =QPen( theParameters->selectedcolor , theParameters->selected_thickness); // pen for the link base
+		pen1 =QPen( selected_color , theParameters->selected_thickness); // pen for the link base
 	
    QPen pen2 ( theParameters->queuecolor , theParameters->queue_thickness); // pen for queue
 #ifdef FIXED_RUNNING
@@ -268,28 +251,27 @@ NodeIcon::NodeIcon( int x, int y)  : Icon(x,y)
  	//starty=y;
  	width=2*theParameters->node_radius;
  	height=2*theParameters->node_radius;
-  text="";
+	text="";
 }
 
 NodeIcon::~NodeIcon() {}
 
 void NodeIcon::draw(QPixmap * pm,QMatrix * wm)
 {
-   width=2*theParameters->node_radius;
- 	height=2*theParameters->node_radius;
-	
-   QPainter paint(pm); // automatic paint.begin()
-    paint.setRenderHint(QPainter::Antialiasing); // smooth lines
-    paint.setWorldMatrix(*wm);
-   QPen pen ( theParameters->nodecolor , theParameters->node_thickness);
-   paint.setPen(pen);
-   paint.drawEllipse (startx,starty, width,height ); // draw a line
-   /*
-   QPen pen2 ( Qt::blue , 1);
-   paint.setPen(pen2);
-   paint.drawText (startx+5,starty, text);
-   */
-   paint.end();	
+	width=2*theParameters->node_radius;
+	height=2*theParameters->node_radius;
+	QPainter paint(pm); // automatic paint.begin()
+	paint.setRenderHint(QPainter::Antialiasing); // smooth lines
+	paint.setWorldMatrix(*wm);
+	QPen pen ( theParameters->nodecolor , theParameters->node_thickness);
+	paint.setPen(pen);
+	paint.drawEllipse (startx,starty, width,height ); // draw a line
+	/*
+	QPen pen2 ( Qt::blue , 1);
+	paint.setPen(pen2);
+	paint.drawText (startx+5,starty, text);
+	*/
+	paint.end();	
 	// draw the stuff on pixmap
 }
 

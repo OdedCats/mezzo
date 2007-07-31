@@ -73,108 +73,112 @@ class Vehicle;
 
 class Link
 {
-  public:
+public:
 	Link (int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* sdfunc_);
 	Link();
-   virtual ~Link();
-   // accessors, they are inline where possible, but inline keyword not necessary
-   const int get_id () {return id;}
-   const int get_out_node_id () ;
+	virtual ~Link();
+	// accessors, they are inline where possible, but inline keyword not necessary
+	const int get_id () {return id;}
+	const int get_out_node_id () ;
 	const int get_in_node_id() ;
-   const int get_length() {return length;}	
+	const int get_length() {return length;}	
 	const int get_nr_lanes() {return nr_lanes;}
 	//const int Link::size();
 	const int size();
 	void set_hist_time(double time) {	hist_time=time;}
-	void set_histtimes(LinkTime* ltime) {histtimes=ltime;
-																			avgtimes->nrperiods=histtimes->nrperiods;
-																			avgtimes->periodlength=histtimes->periodlength;
-																			curr_period=0;
-																			tmp_avg=0.0;
-																			tmp_passed=0;}
+	void set_histtimes(LinkTime* ltime) {
+		histtimes=ltime;
+		avgtimes->nrperiods=histtimes->nrperiods;
+		avgtimes->periodlength=histtimes->periodlength;
+		curr_period=0;
+		tmp_avg=0.0;
+		tmp_passed=0;
+		}
 	const double get_hist_time() {return hist_time;}
 	double get_cost (double time) {
-																if (histtimes)	
-																	return histtimes->cost(time);
-																else	
-																	 return get_freeflow_time();
-																	}
+		if (histtimes)	
+			return histtimes->cost(time);
+		else	
+			return get_freeflow_time();
+		}
 	const double get_freeflow_time() {return freeflowtime;}
-  const double get_blocked() {return (blocked_until);}  // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
-  const void set_blocked(double time) {blocked_until=time;}  // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
-    virtual const bool full();
-      virtual const bool full(double time);
-  	const bool empty();
-  	const bool exit_ok() {	return ok;}
-  	const double next_action (double time);
+	const double get_blocked() {return (blocked_until);}  // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
+	const void set_blocked(double time) {blocked_until=time;}  // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
+	virtual const bool full();
+	virtual const bool full(double time);
+	const bool empty();
+	const bool exit_ok() {	return ok;}
+	const double next_action (double time);
 #ifndef _NO_GUI   
-  	void set_icon(LinkIcon* icon_) {icon=icon_; icon->set_pointers(&queue_percentage, &running_percentage);}
+	void set_icon(LinkIcon* icon_) {icon=icon_; icon->set_pointers(&queue_percentage, &running_percentage);}
+	void set_selected_color(QColor selcolor) {icon->set_selected_color(selcolor);}
+	const QColor get_selected_color () {return (icon->get_selected_color());}
 #endif // _NO_GUI                  
 	double get_nr_passed() {return nr_passed;}
-	
+
 	LinkTime* get_histtimes () {if (histtimes)
-															return histtimes;
-														else
-															return NULL;}
+		return histtimes;
+	else
+		return NULL;}
 	LinkTime* get_avgtimes () {return avgtimes;}
-  	void add_alternative(int dest, vector<Link*> route) ;
-  	void receive_broadcast(Vehicle* veh, int lid, vector <double> parameters) ;
-  	// methods  	
-  	virtual bool enter_veh(Vehicle* veh, double time);
-  	virtual Vehicle* exit_veh(double time, Link* nextlink, int lookback);
-    void update_exit_times(double time,Link* nextlink, int lookback);
-  	virtual Vehicle* exit_veh(double time);
-   	virtual const double density();
-   	const double density_running(double time);
-   	const double density_running_only(double time);
-    virtual double speed_density(double density_);
+	void add_alternative(int dest, vector<Link*> route) ;
+	void receive_broadcast(Vehicle* veh, int lid, vector <double> parameters) ;
+	// methods  	
+	virtual bool enter_veh(Vehicle* veh, double time);
+	virtual Vehicle* exit_veh(double time, Link* nextlink, int lookback);
+	void update_exit_times(double time,Link* nextlink, int lookback);
+	virtual Vehicle* exit_veh(double time);
+	virtual const double density();
+	const double density_running(double time);
+	const double density_running_only(double time);
+	virtual double speed_density(double density_);
 
-    double speed(double time);
-   bool write(ostream& out);
+	double speed(double time);
+	bool write(ostream& out);
 	void write_time(ostream& out);	
-   void update_icon(double time);
-   void set_incident(Sdfunc* sdptr, bool blocked_);
-   void unset_incident();
-   void broadcast_incident_start(int lid, vector <double> parameters);
-   void write_speeds(ostream & out ) {out << id << "\t" ; moe_speed->write_values(out);}
-   void write_speed(ostream & out, int index ) {moe_speed->write_value(out,index);}
-   void write_inflows(ostream & out ) {out << id << "\t" ; moe_inflow->write_values(out);}
-   void write_inflow(ostream & out, int index ) {moe_inflow->write_value(out,index);}
-   void write_outflows(ostream & out ) {out << id << "\t" ; moe_outflow->write_values(out);}
-   void write_outflow(ostream & out, int index ) {moe_outflow->write_value(out,index);}
-   void write_queues(ostream & out ) {out << id << "\t" ; moe_queue->write_values(out);}
-   void write_queue(ostream & out, int index ) {moe_queue->write_value(out,index);}
-   void write_densities(ostream & out ) {out << id << "\t" ; moe_density->write_values(out);}
-   void write_density(ostream & out, int index ) {moe_density->write_value(out,index);}
-   int max_moe_size() {return _MAX(moe_speed->get_size(), _MAX (moe_inflow->get_size(),_MAX(moe_outflow->get_size(),_MAX(moe_queue->get_size(),moe_density->get_size()))));}
-   void add_blocked_exit() {nr_exits_blocked++;}
-   void remove_blocked_exit() {nr_exits_blocked--;}
-   
-   void set_use_ass_matrix(const bool value)  {use_ass_matrix=value; /*set_selected(value);*/}
-   void write_ass_matrix (ostream & out, int linkflowperiod); // writes the Assignment matrix for this link and given linkflow period
-   void set_selected (const bool sel) ;
-   bool get_selected () {return selected;}
+	void update_icon(double time);
+	void set_incident(Sdfunc* sdptr, bool blocked_);
+	void unset_incident();
+	void broadcast_incident_start(int lid, vector <double> parameters);
+	void write_speeds(ostream & out ) {out << id << "\t" ; moe_speed->write_values(out);}
+	void write_speed(ostream & out, int index ) {moe_speed->write_value(out,index);}
+	void write_inflows(ostream & out ) {out << id << "\t" ; moe_inflow->write_values(out);}
+	void write_inflow(ostream & out, int index ) {moe_inflow->write_value(out,index);}
+	void write_outflows(ostream & out ) {out << id << "\t" ; moe_outflow->write_values(out);}
+	void write_outflow(ostream & out, int index ) {moe_outflow->write_value(out,index);}
+	void write_queues(ostream & out ) {out << id << "\t" ; moe_queue->write_values(out);}
+	void write_queue(ostream & out, int index ) {moe_queue->write_value(out,index);}
+	void write_densities(ostream & out ) {out << id << "\t" ; moe_density->write_values(out);}
+	void write_density(ostream & out, int index ) {moe_density->write_value(out,index);}
+	int max_moe_size() {return _MAX(moe_speed->get_size(), _MAX (moe_inflow->get_size(),_MAX(moe_outflow->get_size(),_MAX(moe_queue->get_size(),moe_density->get_size()))));}
+	void add_blocked_exit() {nr_exits_blocked++;}
+	void remove_blocked_exit() {nr_exits_blocked--;}
 
-   // convergence measure
-   double calc_diff_input_output_linktimes ();
-   double calc_sumsq_input_output_linktimes ();
-  
+	void set_use_ass_matrix(const bool value)  {use_ass_matrix=value; /*set_selected(value);*/}
+	void write_ass_matrix (ostream & out, int linkflowperiod); // writes the Assignment matrix for this link and given linkflow period
+	void set_selected (const bool sel) ;
+	bool get_selected () {return selected;}
+
+	// convergence measure
+	double calc_diff_input_output_linktimes ();
+	double calc_sumsq_input_output_linktimes ();
+
 #ifdef _VISSIMCOM
-   long parkinglot;
+	long parkinglot;
 	long pathid;
 	long lastlink;
 #endif //_VISSIMCOM
 
 
-  protected:
-   int id;
-  	Node* in_node;
-  	Node* out_node;
-  	Q* queue;
-  	Sdfunc* temp_sdfunc;
-  	int length; // length of the link in meters
-  	int nr_lanes; // nr of lanes in the link
-	  Sdfunc* sdfunc;
+protected:
+	int id;
+	Node* in_node;
+	Node* out_node;
+	Q* queue;
+	Sdfunc* temp_sdfunc;
+	int length; // length of the link in meters
+	int nr_lanes; // nr of lanes in the link
+	Sdfunc* sdfunc;
 	Grid* grid;
 #ifndef _NO_GUI	
 	LinkIcon* icon;
@@ -201,8 +205,8 @@ class Link
 	MOE* moe_density;
 	// Newly added for Assignment matrix
 	map < int , map <odval, map <int,int>,less_odval > > ass_matrix; // assignment matrix which is indexed as follows:
-			// ass_matrix [linkflow_period] [od_pair] [od_period]
-			// it is accessed by the following iterator, which has to be set to the correct linkflow_period
+	// ass_matrix [linkflow_period] [od_pair] [od_period]
+	// it is accessed by the following iterator, which has to be set to the correct linkflow_period
 	map <odval, map <int,int>, less_odval > ::iterator ass_iter; // used to write the assignment matrix for given linkperiod
 	bool use_ass_matrix; // boolean set to true if this link collects assignment matrix data
 	bool selected; //true if link is 'selected'

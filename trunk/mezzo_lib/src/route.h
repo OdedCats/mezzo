@@ -26,6 +26,9 @@ class Route
 	Destination* get_destination() {return destination;}
 	odval get_oid_did();
 	void set_selected(bool selected); // sets the links' selected attribute
+#ifndef _NO_GUI
+	void set_selected_color(QColor selcolor);
+#endif
 	bool check (int oid, int did);
 	bool less_than(Route* route);
 	double cost(double time=0.0);
