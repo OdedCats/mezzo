@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="mezzo_lib"
 	ProjectGUID="{E32F58A9-4DA9-441D-A9F5-057F6A77B1AA}"
 	Keyword="MakeFileProj"
@@ -22,7 +22,7 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="nmake debug"
+				BuildCommandLine="qmake&#x0D;&#x0A;nmake debug"
 				ReBuildCommandLine="qmake&#x0D;&#x0A;nmake debug"
 				CleanCommandLine="nmake clean"
 				Output="Debug\mezzo_lib.lib"
@@ -42,7 +42,7 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="nmake release"
+				BuildCommandLine="qmake&#x0D;&#x0A;nmake release"
 				ReBuildCommandLine="qmake&#x0D;&#x0A;nmake release"
 				CleanCommandLine="nmake clean"
 				Output="Release\mezzo_lib.lib"
