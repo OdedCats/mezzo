@@ -1,3 +1,12 @@
+/**
+* definition of the custom delegate for the 
+* tableview of routes of a given OD pair
+*
+* Xiaoliang Ma
+* last update: 2007-07-30
+*
+*/
+
 #ifndef ODTABLEDELEGATE_H
 #define ODTABLEDELEGATE_H
 
