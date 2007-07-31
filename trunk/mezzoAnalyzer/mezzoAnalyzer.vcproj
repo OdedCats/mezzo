@@ -23,7 +23,7 @@
 			<Tool
 				Name="VCNMakeTool"
 				BuildCommandLine="qmake&#x0D;&#x0A;nmake debug"
-				ReBuildCommandLine="nmake clean&#x0D;&#x0A;qmake&#x0D;&#x0A;nmake clean&#x0D;&#x0A;nmake debug"
+				ReBuildCommandLine="qmake&#x0D;&#x0A;nmake clean&#x0D;&#x0A;nmake debug"
 				CleanCommandLine="nmake clean"
 				Output="debug\mezzoAnalyzer.a"
 				PreprocessorDefinitions="WIN32;_DEBUG"
@@ -43,7 +43,7 @@
 			<Tool
 				Name="VCNMakeTool"
 				BuildCommandLine="qmake&#x0D;&#x0A;nmake release "
-				ReBuildCommandLine="qmake &#x0D;&#x0A;nmake release"
+				ReBuildCommandLine="qmake &#x0D;&#x0A;nmake clean&#x0D;&#x0A;nmake release"
 				CleanCommandLine="nmake clean"
 				Output="release\mezzoAnalyzer.lib"
 				PreprocessorDefinitions="WIN32;NDEBUG"
