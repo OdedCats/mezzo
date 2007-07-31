@@ -1,0 +1,3705 @@
+// Created by Microsoft (R) C/C++ Compiler Version 12.00.9782.0 (0e047e23).
+//
+// vissim.tlh
+//
+// C++ source equivalent of Win32 type library C:\Program\VISSIM_420-00_beta\vissim.exe
+// compiler-generated file created 06/21/06 at 14:48:26 - DO NOT EDIT!
+
+#pragma once
+#pragma pack(push, 8)
+
+#include <comdef.h>
+
+namespace VISSIM_COMSERVERLib {
+
+//
+// Forward references and typedefs
+//
+
+struct __declspec(uuid("4dc406dc-6af4-4cb8-9909-4b53c630f0d2"))
+/* dual interface */ IOnline;
+struct TurnRelation;
+struct NodeRel;
+struct __declspec(uuid("e03e45c5-9666-4887-a4a2-d7191ba3b736"))
+/* dual interface */ IWorldPoint;
+struct __declspec(uuid("9372904c-c40c-41e5-ad2e-efffe80bfa9f"))
+/* dual interface */ IWorldPoints;
+struct __declspec(uuid("9bf908d3-1f1b-449c-b9a4-df1fae452ef4"))
+/* dual interface */ IStaticObject;
+struct __declspec(uuid("c1897544-e7f4-401d-95e2-4cf184e7f0ec"))
+/* dual interface */ IStaticObjects;
+struct __declspec(uuid("f0b6c7a7-86d5-4c5e-b58c-0c1ba36c2e0e"))
+/* dual interface */ IStopSign;
+struct __declspec(uuid("3d4ce4ff-1ad8-4865-9ebc-5c2c118e258c"))
+/* dual interface */ IStopSigns;
+struct __declspec(uuid("dc6ce0b7-264a-41ef-9972-844c447e266f"))
+/* dual interface */ IDelay;
+struct __declspec(uuid("ce8aff71-116a-41d9-8c27-efa5ebced2b5"))
+/* dual interface */ IDelays;
+struct __declspec(uuid("165d60b3-af13-4e4c-9822-65327badd9a7"))
+/* dual interface */ ITravelTime;
+struct __declspec(uuid("ba5b7e74-2590-4965-b03b-9c2e945d558e"))
+/* dual interface */ ITravelTimes;
+struct __declspec(uuid("859b5c7b-c2e8-49dd-9f47-b0255136f3cc"))
+/* dual interface */ IDataCollection;
+struct __declspec(uuid("5d53acb6-2ffb-4966-8a88-37b7aba4f88d"))
+/* dual interface */ IDataCollections;
+struct __declspec(uuid("b19ebc49-f4ce-43dd-ae62-2f359bdfa798"))
+/* dual interface */ IQueueCounter;
+struct __declspec(uuid("20731b59-97f0-4137-bea5-08d11936771f"))
+/* dual interface */ IQueueCounters;
+struct __declspec(uuid("f512fd12-a7ad-4635-a335-ac727bd0091a"))
+/* dual interface */ IDetector;
+struct __declspec(uuid("08e528f1-a433-4829-8059-6feb4975fef5"))
+/* dual interface */ IDetectors;
+struct __declspec(uuid("62835aae-cf18-4f49-af17-d2ba1bb44c48"))
+/* dual interface */ IPTCallingPoints;
+struct __declspec(uuid("87a20212-6ed4-4788-8fed-b09fde9ea245"))
+/* dual interface */ ISignalHead;
+struct __declspec(uuid("1edd5e96-fc57-4303-8293-a678a21028c6"))
+/* dual interface */ ISignalHeads;
+struct __declspec(uuid("259d5250-7706-42b6-9e7f-35f931258ea3"))
+/* dual interface */ ISignalGroup;
+struct __declspec(uuid("af0620bc-9411-4f1c-86f1-f5317487c505"))
+/* dual interface */ ISignalGroups;
+struct __declspec(uuid("0a2472b5-49dd-4ee1-9047-e982d175c83d"))
+/* dual interface */ ISignalController;
+struct __declspec(uuid("a550f5f9-dcf1-455d-87e6-780b90a7c7fc"))
+/* dual interface */ ISignalControllers;
+struct __declspec(uuid("8d60481f-c5c9-4847-a352-c43f707da32d"))
+/* dual interface */ IRoute;
+struct __declspec(uuid("d93a197b-dae2-48a4-9f3e-eb02f52c2a49"))
+/* dual interface */ IRoutes;
+struct __declspec(uuid("37d931a7-da58-423e-80c1-a296b4ed4d0f"))
+/* dual interface */ IRoutingDecision;
+struct __declspec(uuid("5406c2cc-f415-4b66-9dae-c9c12131bc9d"))
+/* dual interface */ IRoutingDecisions;
+struct __declspec(uuid("c29976fe-b187-4a9c-88b1-528115a7a18b"))
+/* dual interface */ ITrafficComposition;
+struct __declspec(uuid("432f9f3f-2b0f-4933-b71d-e8eba00fc469"))
+/* dual interface */ ITrafficCompositions;
+struct __declspec(uuid("2358996e-6137-477a-a735-488850f6d04e"))
+/* dual interface */ IVehicleInput;
+struct __declspec(uuid("455aa216-044f-4fb0-add6-8ab3c7beff6f"))
+/* dual interface */ IVehicleInputs;
+struct __declspec(uuid("64ee793a-2a32-4ade-bca9-025eb9ebbe0a"))
+/* dual interface */ IVehicle;
+struct __declspec(uuid("6725f5de-fb66-4930-b222-e1051e0d3251"))
+/* dual interface */ IVehicles;
+struct __declspec(uuid("b3c15960-24c7-4e4d-9c48-d03ea13df94e"))
+/* dual interface */ IPath;
+struct __declspec(uuid("35d8ae9e-af5a-4787-aa8b-d45c2ab0eaa5"))
+/* dual interface */ IPaths;
+struct __declspec(uuid("ff1f393a-fabc-4903-8439-37e81308443b"))
+/* dual interface */ IParkingLot;
+struct __declspec(uuid("3320f648-1323-4275-9982-b5f32725f9c0"))
+/* dual interface */ IParkingLots;
+struct __declspec(uuid("5f04524c-d854-4700-ad04-1d6099cad7d3"))
+/* dual interface */ INode;
+struct __declspec(uuid("118eaa8a-e4f2-402e-892f-b361f27f6186"))
+/* dual interface */ INodes;
+struct __declspec(uuid("54e9ee44-e807-4394-940b-cfabf4e35193"))
+/* dual interface */ ILink;
+struct __declspec(uuid("019a0a39-47c3-41f5-b34e-2386a2b13060"))
+/* dual interface */ ILinks;
+struct __declspec(uuid("b2622c44-a395-4ce0-888f-bfa8022485f8"))
+/* dual interface */ IPresentation;
+struct __declspec(uuid("6c1d93bd-7e85-4cbe-be4e-be68acc1f581"))
+/* dual interface */ INodeEvaluation;
+struct __declspec(uuid("a965943c-9ccf-4b84-a14c-16f0c92f8ed3"))
+/* dual interface */ ITravelTimeEvaluation;
+struct __declspec(uuid("2063cd7f-9ada-4493-b448-61e2f9ddb2f3"))
+/* dual interface */ IDelayEvaluation;
+struct __declspec(uuid("4cf55fdb-6996-4423-82d5-4fada047cf58"))
+/* dual interface */ IQueueCounterEvaluation;
+struct __declspec(uuid("408c85c2-33b3-4869-8eca-fbe39c2cb9dd"))
+/* dual interface */ IDataCollectionEvaluation;
+struct __declspec(uuid("995c7259-066a-4844-9351-6731d1eba765"))
+/* dual interface */ ILinkEvaluation;
+struct __declspec(uuid("19480615-dc0e-40ef-bf8f-8d5976bc86aa"))
+/* dual interface */ IEvaluation;
+struct __declspec(uuid("8da2801c-ebc5-4a5d-a348-097d64884306"))
+/* dual interface */ IGraphics;
+struct __declspec(uuid("62bf5890-637a-4b4b-b2dc-b27a846966a5"))
+/* dual interface */ IDynamicAssignment;
+struct __declspec(uuid("ba315b05-ae4d-4235-86fe-b7a38abb1642"))
+/* dual interface */ IDynamicAssignmentEvents;
+struct __declspec(uuid("7d04a0fe-4bfa-4134-873a-8a3a518a3f29"))
+/* dual interface */ ISimulation;
+struct __declspec(uuid("8d92fe46-02c5-4582-881e-b12182061f7f"))
+/* dual interface */ INet;
+struct __declspec(uuid("6cff911e-e5ed-4689-9cba-3741423fd63b"))
+/* dual interface */ IVissim;
+struct __declspec(uuid("49f05bc5-e42d-4eca-b596-1cc1d732d398"))
+/* dual interface */ IAnimation;
+struct VisualVehicle;
+struct /* coclass */ Vissim;
+struct /* coclass */ Simulation;
+struct /* coclass */ DynamicAssignment;
+struct /* coclass */ Net;
+struct /* coclass */ Graphics;
+struct /* coclass */ Presentation;
+struct /* coclass */ Evaluation;
+struct /* coclass */ Links;
+struct /* coclass */ Link;
+struct /* coclass */ StopSigns;
+struct /* coclass */ StopSign;
+struct /* coclass */ Nodes;
+struct /* coclass */ Node;
+struct /* coclass */ ParkingLots;
+struct /* coclass */ ParkingLot;
+struct /* coclass */ Paths;
+struct /* coclass */ Path;
+struct /* coclass */ Vehicles;
+struct /* coclass */ Vehicle;
+struct /* coclass */ TrafficCompositions;
+struct /* coclass */ TrafficComposition;
+struct /* coclass */ VehicleInputs;
+struct /* coclass */ VehicleInput;
+struct /* coclass */ RoutingDecisions;
+struct /* coclass */ RoutingDecision;
+struct /* coclass */ Routes;
+struct /* coclass */ Route;
+struct /* coclass */ SignalControllers;
+struct /* coclass */ SignalController;
+struct /* coclass */ SignalGroups;
+struct /* coclass */ SignalGroup;
+struct /* coclass */ SignalHeads;
+struct /* coclass */ SignalHead;
+struct /* coclass */ DataCollections;
+struct /* coclass */ DataCollection;
+struct /* coclass */ QueueCounters;
+struct /* coclass */ QueueCounter;
+struct /* coclass */ Detectors;
+struct /* coclass */ Detector;
+struct /* coclass */ TravelTimes;
+struct /* coclass */ TravelTime;
+struct /* coclass */ Delays;
+struct /* coclass */ Delay;
+struct /* coclass */ PTCallingPoints;
+struct /* coclass */ StaticObjects;
+struct /* coclass */ StaticObject;
+struct /* coclass */ WorldPoint;
+struct /* coclass */ LinkEvaluation;
+struct /* coclass */ DataCollectionEvaluation;
+struct /* coclass */ QueueCounterEvaluation;
+struct /* coclass */ TravelTimeEvaluation;
+struct /* coclass */ DelayEvaluation;
+struct /* coclass */ NodeEvaluation;
+struct /* coclass */ Online;
+struct /* coclass */ Animation;
+
+//
+// Smart pointer typedef declarations
+//
+
+_COM_SMARTPTR_TYPEDEF(IOnline, __uuidof(IOnline));
+_COM_SMARTPTR_TYPEDEF(IWorldPoint, __uuidof(IWorldPoint));
+_COM_SMARTPTR_TYPEDEF(IWorldPoints, __uuidof(IWorldPoints));
+_COM_SMARTPTR_TYPEDEF(IStaticObject, __uuidof(IStaticObject));
+_COM_SMARTPTR_TYPEDEF(IStaticObjects, __uuidof(IStaticObjects));
+_COM_SMARTPTR_TYPEDEF(IStopSign, __uuidof(IStopSign));
+_COM_SMARTPTR_TYPEDEF(IStopSigns, __uuidof(IStopSigns));
+_COM_SMARTPTR_TYPEDEF(IDelay, __uuidof(IDelay));
+_COM_SMARTPTR_TYPEDEF(IDelays, __uuidof(IDelays));
+_COM_SMARTPTR_TYPEDEF(ITravelTime, __uuidof(ITravelTime));
+_COM_SMARTPTR_TYPEDEF(ITravelTimes, __uuidof(ITravelTimes));
+_COM_SMARTPTR_TYPEDEF(IDataCollection, __uuidof(IDataCollection));
+_COM_SMARTPTR_TYPEDEF(IDataCollections, __uuidof(IDataCollections));
+_COM_SMARTPTR_TYPEDEF(IQueueCounter, __uuidof(IQueueCounter));
+_COM_SMARTPTR_TYPEDEF(IQueueCounters, __uuidof(IQueueCounters));
+_COM_SMARTPTR_TYPEDEF(IDetector, __uuidof(IDetector));
+_COM_SMARTPTR_TYPEDEF(IDetectors, __uuidof(IDetectors));
+_COM_SMARTPTR_TYPEDEF(IPTCallingPoints, __uuidof(IPTCallingPoints));
+_COM_SMARTPTR_TYPEDEF(ISignalHead, __uuidof(ISignalHead));
+_COM_SMARTPTR_TYPEDEF(ISignalHeads, __uuidof(ISignalHeads));
+_COM_SMARTPTR_TYPEDEF(ISignalGroup, __uuidof(ISignalGroup));
+_COM_SMARTPTR_TYPEDEF(ISignalGroups, __uuidof(ISignalGroups));
+_COM_SMARTPTR_TYPEDEF(ISignalController, __uuidof(ISignalController));
+_COM_SMARTPTR_TYPEDEF(ISignalControllers, __uuidof(ISignalControllers));
+_COM_SMARTPTR_TYPEDEF(IRoute, __uuidof(IRoute));
+_COM_SMARTPTR_TYPEDEF(IRoutes, __uuidof(IRoutes));
+_COM_SMARTPTR_TYPEDEF(IRoutingDecision, __uuidof(IRoutingDecision));
+_COM_SMARTPTR_TYPEDEF(IRoutingDecisions, __uuidof(IRoutingDecisions));
+_COM_SMARTPTR_TYPEDEF(ITrafficComposition, __uuidof(ITrafficComposition));
+_COM_SMARTPTR_TYPEDEF(ITrafficCompositions, __uuidof(ITrafficCompositions));
+_COM_SMARTPTR_TYPEDEF(IVehicleInput, __uuidof(IVehicleInput));
+_COM_SMARTPTR_TYPEDEF(IVehicleInputs, __uuidof(IVehicleInputs));
+_COM_SMARTPTR_TYPEDEF(IVehicle, __uuidof(IVehicle));
+_COM_SMARTPTR_TYPEDEF(IVehicles, __uuidof(IVehicles));
+_COM_SMARTPTR_TYPEDEF(IPath, __uuidof(IPath));
+_COM_SMARTPTR_TYPEDEF(IPaths, __uuidof(IPaths));
+_COM_SMARTPTR_TYPEDEF(IParkingLot, __uuidof(IParkingLot));
+_COM_SMARTPTR_TYPEDEF(IParkingLots, __uuidof(IParkingLots));
+_COM_SMARTPTR_TYPEDEF(INode, __uuidof(INode));
+_COM_SMARTPTR_TYPEDEF(INodes, __uuidof(INodes));
+_COM_SMARTPTR_TYPEDEF(ILink, __uuidof(ILink));
+_COM_SMARTPTR_TYPEDEF(ILinks, __uuidof(ILinks));
+_COM_SMARTPTR_TYPEDEF(IPresentation, __uuidof(IPresentation));
+_COM_SMARTPTR_TYPEDEF(INodeEvaluation, __uuidof(INodeEvaluation));
+_COM_SMARTPTR_TYPEDEF(ITravelTimeEvaluation, __uuidof(ITravelTimeEvaluation));
+_COM_SMARTPTR_TYPEDEF(IDelayEvaluation, __uuidof(IDelayEvaluation));
+_COM_SMARTPTR_TYPEDEF(IQueueCounterEvaluation, __uuidof(IQueueCounterEvaluation));
+_COM_SMARTPTR_TYPEDEF(IDataCollectionEvaluation, __uuidof(IDataCollectionEvaluation));
+_COM_SMARTPTR_TYPEDEF(ILinkEvaluation, __uuidof(ILinkEvaluation));
+_COM_SMARTPTR_TYPEDEF(IEvaluation, __uuidof(IEvaluation));
+_COM_SMARTPTR_TYPEDEF(IGraphics, __uuidof(IGraphics));
+_COM_SMARTPTR_TYPEDEF(IDynamicAssignment, __uuidof(IDynamicAssignment));
+_COM_SMARTPTR_TYPEDEF(IDynamicAssignmentEvents, __uuidof(IDynamicAssignmentEvents));
+_COM_SMARTPTR_TYPEDEF(ISimulation, __uuidof(ISimulation));
+_COM_SMARTPTR_TYPEDEF(INet, __uuidof(INet));
+_COM_SMARTPTR_TYPEDEF(IVissim, __uuidof(IVissim));
+_COM_SMARTPTR_TYPEDEF(IAnimation, __uuidof(IAnimation));
+
+//
+// Type library items
+//
+
+struct __declspec(uuid("4dc406dc-6af4-4cb8-9909-4b53c630f0d2"))
+IOnline : IDispatch
+{
+    //
+    // Wrapper methods for error-handling
+    //
+
+    HRESULT PropagateRealVolumes (
+        long flag );
+    HRESULT GetMultiAttValues (
+        const _variant_t & IDs,
+        _bstr_t Attribute,
+        VARIANT * pValues );
+    HRESULT SetMultiAttValues (
+        const _variant_t & IDs,
+        _bstr_t Attribute,
+        const _variant_t & Values );
+    HRESULT SetTurnRelations (
+        struct TurnRelation TurnRel );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall raw_PropagateRealVolumes (
+        long flag ) = 0;
+    virtual HRESULT __stdcall raw_GetMultiAttValues (
+        VARIANT IDs,
+        BSTR Attribute,
+        VARIANT * pValues ) = 0;
+    virtual HRESULT __stdcall raw_SetMultiAttValues (
+        VARIANT IDs,
+        BSTR Attribute,
+        VARIANT Values ) = 0;
+    virtual HRESULT __stdcall raw_SetTurnRelations (
+        struct TurnRelation TurnRel ) = 0;
+};
+
+struct TurnRelation
+{
+    BSTR Name;
+    long nNodeRels;
+    struct NodeRel * NodeRels;
+};
+
+struct NodeRel
+{
+    long From;
+    long Via;
+    long To;
+};
+
+struct __declspec(uuid("e03e45c5-9666-4887-a4a2-d7191ba3b736"))
+IWorldPoint : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetX,put=PutX))
+    double X;
+    __declspec(property(get=GetY,put=PutY))
+    double Y;
+    __declspec(property(get=GetZ,put=PutZ))
+    double Z;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    double GetX ( );
+    void PutX (
+        double pX );
+    double GetY ( );
+    void PutY (
+        double pY );
+    double GetZ ( );
+    void PutZ (
+        double pZ );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_X (
+        double * pX ) = 0;
+    virtual HRESULT __stdcall put_X (
+        double pX ) = 0;
+    virtual HRESULT __stdcall get_Y (
+        double * pY ) = 0;
+    virtual HRESULT __stdcall put_Y (
+        double pY ) = 0;
+    virtual HRESULT __stdcall get_Z (
+        double * pZ ) = 0;
+    virtual HRESULT __stdcall put_Z (
+        double pZ ) = 0;
+};
+
+struct __declspec(uuid("9372904c-c40c-41e5-ad2e-efffe80bfa9f"))
+IWorldPoints : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetItem))
+    _variant_t Item[];
+    __declspec(property(get=GetCount))
+    long Count;
+    __declspec(property(get=Get_NewEnum))
+    IUnknownPtr _NewEnum;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    IUnknownPtr Get_NewEnum ( );
+    _variant_t GetItem (
+        const _variant_t & index );
+    long GetCount ( );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get__NewEnum (
+        IUnknown * * pVal ) = 0;
+    virtual HRESULT __stdcall get_Item (
+        VARIANT index,
+        VARIANT * pVal ) = 0;
+    virtual HRESULT __stdcall get_Count (
+        long * pVal ) = 0;
+};
+
+struct __declspec(uuid("9bf908d3-1f1b-449c-b9a4-df1fae452ef4"))
+IStaticObject : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetID,put=PutID))
+    long ID;
+    __declspec(property(get=GetName,put=PutName))
+    _bstr_t Name;
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    long GetID ( );
+    void PutID (
+        long pID );
+    _bstr_t GetName ( );
+    void PutName (
+        _bstr_t pName );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_ID (
+        long * pID ) = 0;
+    virtual HRESULT __stdcall put_ID (
+        long pID ) = 0;
+    virtual HRESULT __stdcall get_Name (
+        BSTR * pName ) = 0;
+    virtual HRESULT __stdcall put_Name (
+        BSTR pName ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+};
+
+struct __declspec(uuid("c1897544-e7f4-401d-95e2-4cf184e7f0ec"))
+IStaticObjects : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetItem))
+    IStaticObjectPtr Item[];
+    __declspec(property(get=GetCount))
+    long Count;
+    __declspec(property(get=Get_NewEnum))
+    IUnknownPtr _NewEnum;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    IUnknownPtr Get_NewEnum ( );
+    IStaticObjectPtr GetItem (
+        const _variant_t & index );
+    long GetCount ( );
+    IStaticObjectPtr GetStaticObjectByName (
+        _bstr_t Name,
+        struct IWorldPoint * pWorldPoint );
+    IStaticObjectPtr GetStaticObjectByCoord (
+        struct IWorldPoint * pWorldPoint,
+        _bstr_t Name );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get__NewEnum (
+        IUnknown * * pUnk ) = 0;
+    virtual HRESULT __stdcall get_Item (
+        VARIANT index,
+        struct IStaticObject * * ppStaticObject ) = 0;
+    virtual HRESULT __stdcall get_Count (
+        long * pCount ) = 0;
+    virtual HRESULT __stdcall raw_GetStaticObjectByName (
+        BSTR Name,
+        struct IWorldPoint * pWorldPoint,
+        struct IStaticObject * * ppStaticObject ) = 0;
+    virtual HRESULT __stdcall raw_GetStaticObjectByCoord (
+        struct IWorldPoint * pWorldPoint,
+        BSTR Name,
+        struct IStaticObject * * ppStaticObject ) = 0;
+};
+
+struct __declspec(uuid("f0b6c7a7-86d5-4c5e-b58c-0c1ba36c2e0e"))
+IStopSign : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetID,put=PutID))
+    long ID;
+    __declspec(property(get=GetName,put=PutName))
+    _bstr_t Name;
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+    __declspec(property(get=GetAttValue1,put=PutAttValue1))
+    _variant_t AttValue1[][];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    long GetID ( );
+    void PutID (
+        long pID );
+    _bstr_t GetName ( );
+    void PutName (
+        _bstr_t pName );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+    _variant_t GetAttValue1 (
+        _bstr_t Attribute,
+        const _variant_t & Parameter );
+    void PutAttValue1 (
+        _bstr_t Attribute,
+        const _variant_t & Parameter,
+        const _variant_t & pValue );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_ID (
+        long * pID ) = 0;
+    virtual HRESULT __stdcall put_ID (
+        long pID ) = 0;
+    virtual HRESULT __stdcall get_Name (
+        BSTR * pName ) = 0;
+    virtual HRESULT __stdcall put_Name (
+        BSTR pName ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall get_AttValue1 (
+        BSTR Attribute,
+        VARIANT Parameter,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue1 (
+        BSTR Attribute,
+        VARIANT Parameter,
+        VARIANT pValue ) = 0;
+};
+
+struct __declspec(uuid("3d4ce4ff-1ad8-4865-9ebc-5c2c118e258c"))
+IStopSigns : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetItem))
+    IStopSignPtr Item[];
+    __declspec(property(get=GetCount))
+    long Count;
+    __declspec(property(get=Get_NewEnum))
+    IUnknownPtr _NewEnum;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    IUnknownPtr Get_NewEnum ( );
+    IStopSignPtr GetItem (
+        const _variant_t & index );
+    long GetCount ( );
+    IStopSignPtr GetStopSignByNumber (
+        long Number );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get__NewEnum (
+        IUnknown * * pUnk ) = 0;
+    virtual HRESULT __stdcall get_Item (
+        VARIANT index,
+        struct IStopSign * * ppStopSign ) = 0;
+    virtual HRESULT __stdcall get_Count (
+        long * pCount ) = 0;
+    virtual HRESULT __stdcall raw_GetStopSignByNumber (
+        long Number,
+        struct IStopSign * * ppStopSign ) = 0;
+};
+
+struct __declspec(uuid("dc6ce0b7-264a-41ef-9972-844c447e266f"))
+IDelay : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetID,put=PutID))
+    long ID;
+    __declspec(property(get=GetName,put=PutName))
+    _bstr_t Name;
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    long GetID ( );
+    void PutID (
+        long pID );
+    _bstr_t GetName ( );
+    void PutName (
+        _bstr_t pName );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+    _variant_t GetResult (
+        double Time,
+        _bstr_t Parameter,
+        _bstr_t Function,
+        long VehicleClass );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_ID (
+        long * pID ) = 0;
+    virtual HRESULT __stdcall put_ID (
+        long pID ) = 0;
+    virtual HRESULT __stdcall get_Name (
+        BSTR * pName ) = 0;
+    virtual HRESULT __stdcall put_Name (
+        BSTR pName ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall raw_GetResult (
+        double Time,
+        BSTR Parameter,
+        BSTR Function,
+        long VehicleClass,
+        VARIANT * pValue ) = 0;
+};
+
+struct __declspec(uuid("ce8aff71-116a-41d9-8c27-efa5ebced2b5"))
+IDelays : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetItem))
+    IDelayPtr Item[];
+    __declspec(property(get=GetCount))
+    long Count;
+    __declspec(property(get=Get_NewEnum))
+    IUnknownPtr _NewEnum;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    IUnknownPtr Get_NewEnum ( );
+    IDelayPtr GetItem (
+        const _variant_t & index );
+    long GetCount ( );
+    IDelayPtr GetDelayByNumber (
+        long Number );
+    HRESULT GetIDs (
+        VARIANT * pIDs,
+        _bstr_t Attribute,
+        const _variant_t & Value,
+        short Compare );
+    HRESULT GetMultiAttValues (
+        const _variant_t & IDs,
+        _bstr_t Attribute,
+        VARIANT * pValues );
+    HRESULT SetMultiAttValues (
+        const _variant_t & IDs,
+        _bstr_t Attribute,
+        const _variant_t & Values );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get__NewEnum (
+        IUnknown * * pUnk ) = 0;
+    virtual HRESULT __stdcall get_Item (
+        VARIANT index,
+        struct IDelay * * ppDelay ) = 0;
+    virtual HRESULT __stdcall get_Count (
+        long * pCount ) = 0;
+    virtual HRESULT __stdcall raw_GetDelayByNumber (
+        long Number,
+        struct IDelay * * ppDelay ) = 0;
+    virtual HRESULT __stdcall raw_GetIDs (
+        VARIANT * pIDs,
+        BSTR Attribute,
+        VARIANT Value,
+        short Compare ) = 0;
+    virtual HRESULT __stdcall raw_GetMultiAttValues (
+        VARIANT IDs,
+        BSTR Attribute,
+        VARIANT * pValues ) = 0;
+    virtual HRESULT __stdcall raw_SetMultiAttValues (
+        VARIANT IDs,
+        BSTR Attribute,
+        VARIANT Values ) = 0;
+};
+
+struct __declspec(uuid("165d60b3-af13-4e4c-9822-65327badd9a7"))
+ITravelTime : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetID,put=PutID))
+    long ID;
+    __declspec(property(get=GetName,put=PutName))
+    _bstr_t Name;
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    long GetID ( );
+    void PutID (
+        long pID );
+    _bstr_t GetName ( );
+    void PutName (
+        _bstr_t pName );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+    _variant_t GetResult (
+        double Time,
+        _bstr_t Parameter,
+        _bstr_t Function,
+        long VehicleClass );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_ID (
+        long * pID ) = 0;
+    virtual HRESULT __stdcall put_ID (
+        long pID ) = 0;
+    virtual HRESULT __stdcall get_Name (
+        BSTR * pName ) = 0;
+    virtual HRESULT __stdcall put_Name (
+        BSTR pName ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall raw_GetResult (
+        double Time,
+        BSTR Parameter,
+        BSTR Function,
+        long VehicleClass,
+        VARIANT * pValue ) = 0;
+};
+
+struct __declspec(uuid("ba5b7e74-2590-4965-b03b-9c2e945d558e"))
+ITravelTimes : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetItem))
+    ITravelTimePtr Item[];
+    __declspec(property(get=GetCount))
+    long Count;
+    __declspec(property(get=Get_NewEnum))
+    IUnknownPtr _NewEnum;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    IUnknownPtr Get_NewEnum ( );
+    ITravelTimePtr GetItem (
+        const _variant_t & index );
+    long GetCount ( );
+    ITravelTimePtr GetTravelTimeByNumber (
+        long Number );
+    HRESULT GetIDs (
+        VARIANT * pIDs,
+        _bstr_t Attribute,
+        const _variant_t & Value,
+        short Compare );
+    HRESULT GetMultiAttValues (
+        const _variant_t & IDs,
+        _bstr_t Attribute,
+        VARIANT * pValues );
+    HRESULT SetMultiAttValues (
+        const _variant_t & IDs,
+        _bstr_t Attribute,
+        const _variant_t & Values );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get__NewEnum (
+        IUnknown * * pUnk ) = 0;
+    virtual HRESULT __stdcall get_Item (
+        VARIANT index,
+        struct ITravelTime * * ppTravelTime ) = 0;
+    virtual HRESULT __stdcall get_Count (
+        long * pCount ) = 0;
+    virtual HRESULT __stdcall raw_GetTravelTimeByNumber (
+        long Number,
+        struct ITravelTime * * ppTravelTime ) = 0;
+    virtual HRESULT __stdcall raw_GetIDs (
+        VARIANT * pIDs,
+        BSTR Attribute,
+        VARIANT Value,
+        short Compare ) = 0;
+    virtual HRESULT __stdcall raw_GetMultiAttValues (
+        VARIANT IDs,
+        BSTR Attribute,
+        VARIANT * pValues ) = 0;
+    virtual HRESULT __stdcall raw_SetMultiAttValues (
+        VARIANT IDs,
+        BSTR Attribute,
+        VARIANT Values ) = 0;
+};
+
+struct __declspec(uuid("859b5c7b-c2e8-49dd-9f47-b0255136f3cc"))
+IDataCollection : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetID,put=PutID))
+    long ID;
+    __declspec(property(get=GetName,put=PutName))
+    _bstr_t Name;
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    long GetID ( );
+    void PutID (
+        long pID );
+    _bstr_t GetName ( );
+    void PutName (
+        _bstr_t pName );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+    _variant_t GetResult (
+        _bstr_t Parameter,
+        _bstr_t Function,
+        long VehicleClass );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_ID (
+        long * pID ) = 0;
+    virtual HRESULT __stdcall put_ID (
+        long pID ) = 0;
+    virtual HRESULT __stdcall get_Name (
+        BSTR * pName ) = 0;
+    virtual HRESULT __stdcall put_Name (
+        BSTR pName ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall raw_GetResult (
+        BSTR Parameter,
+        BSTR Function,
+        long VehicleClass,
+        VARIANT * pValue ) = 0;
+};
+
+struct __declspec(uuid("5d53acb6-2ffb-4966-8a88-37b7aba4f88d"))
+IDataCollections : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetItem))
+    IDataCollectionPtr Item[];
+    __declspec(property(get=GetCount))
+    long Count;
+    __declspec(property(get=Get_NewEnum))
+    IUnknownPtr _NewEnum;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    IUnknownPtr Get_NewEnum ( );
+    IDataCollectionPtr GetItem (
+        const _variant_t & index );
+    long GetCount ( );
+    IDataCollectionPtr GetDataCollectionByNumber (
+        long Number );
+    HRESULT GetIDs (
+        VARIANT * pIDs,
+        _bstr_t Attribute,
+        const _variant_t & Value,
+        short Compare );
+    HRESULT GetMultiAttValues (
+        const _variant_t & IDs,
+        _bstr_t Attribute,
+        VARIANT * pValues );
+    HRESULT SetMultiAttValues (
+        const _variant_t & IDs,
+        _bstr_t Attribute,
+        const _variant_t & Values );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get__NewEnum (
+        IUnknown * * pUnk ) = 0;
+    virtual HRESULT __stdcall get_Item (
+        VARIANT index,
+        struct IDataCollection * * ppDataCollection ) = 0;
+    virtual HRESULT __stdcall get_Count (
+        long * pCount ) = 0;
+    virtual HRESULT __stdcall raw_GetDataCollectionByNumber (
+        long Number,
+        struct IDataCollection * * ppDataCollection ) = 0;
+    virtual HRESULT __stdcall raw_GetIDs (
+        VARIANT * pIDs,
+        BSTR Attribute,
+        VARIANT Value,
+        short Compare ) = 0;
+    virtual HRESULT __stdcall raw_GetMultiAttValues (
+        VARIANT IDs,
+        BSTR Attribute,
+        VARIANT * pValues ) = 0;
+    virtual HRESULT __stdcall raw_SetMultiAttValues (
+        VARIANT IDs,
+        BSTR Attribute,
+        VARIANT Values ) = 0;
+};
+
+struct __declspec(uuid("b19ebc49-f4ce-43dd-ae62-2f359bdfa798"))
+IQueueCounter : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetID,put=PutID))
+    long ID;
+    __declspec(property(get=GetName,put=PutName))
+    _bstr_t Name;
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    long GetID ( );
+    void PutID (
+        long pID );
+    _bstr_t GetName ( );
+    void PutName (
+        _bstr_t pName );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+    _variant_t GetResult (
+        double Time,
+        _bstr_t Parameter );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_ID (
+        long * pID ) = 0;
+    virtual HRESULT __stdcall put_ID (
+        long pID ) = 0;
+    virtual HRESULT __stdcall get_Name (
+        BSTR * pName ) = 0;
+    virtual HRESULT __stdcall put_Name (
+        BSTR pName ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall raw_GetResult (
+        double Time,
+        BSTR Parameter,
+        VARIANT * pValue ) = 0;
+};
+
+struct __declspec(uuid("20731b59-97f0-4137-bea5-08d11936771f"))
+IQueueCounters : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetItem))
+    IQueueCounterPtr Item[];
+    __declspec(property(get=GetCount))
+    long Count;
+    __declspec(property(get=Get_NewEnum))
+    IUnknownPtr _NewEnum;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    IUnknownPtr Get_NewEnum ( );
+    IQueueCounterPtr GetItem (
+        const _variant_t & index );
+    long GetCount ( );
+    IQueueCounterPtr GetQueueCounterByNumber (
+        long Number );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get__NewEnum (
+        IUnknown * * pUnk ) = 0;
+    virtual HRESULT __stdcall get_Item (
+        VARIANT index,
+        struct IQueueCounter * * ppQueueCounter ) = 0;
+    virtual HRESULT __stdcall get_Count (
+        long * pCount ) = 0;
+    virtual HRESULT __stdcall raw_GetQueueCounterByNumber (
+        long Number,
+        struct IQueueCounter * * ppQueueCounter ) = 0;
+};
+
+struct __declspec(uuid("f512fd12-a7ad-4635-a335-ac727bd0091a"))
+IDetector : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetID,put=PutID))
+    long ID;
+    __declspec(property(get=GetName,put=PutName))
+    _bstr_t Name;
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    long GetID ( );
+    void PutID (
+        long pID );
+    _bstr_t GetName ( );
+    void PutName (
+        _bstr_t pName );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_ID (
+        long * pID ) = 0;
+    virtual HRESULT __stdcall put_ID (
+        long pID ) = 0;
+    virtual HRESULT __stdcall get_Name (
+        BSTR * pName ) = 0;
+    virtual HRESULT __stdcall put_Name (
+        BSTR pName ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+};
+
+struct __declspec(uuid("08e528f1-a433-4829-8059-6feb4975fef5"))
+IDetectors : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetItem))
+    IDetectorPtr Item[];
+    __declspec(property(get=GetCount))
+    long Count;
+    __declspec(property(get=Get_NewEnum))
+    IUnknownPtr _NewEnum;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    IUnknownPtr Get_NewEnum ( );
+    IDetectorPtr GetItem (
+        const _variant_t & index );
+    long GetCount ( );
+    IDetectorPtr GetDetectorByNumber (
+        long Number );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get__NewEnum (
+        IUnknown * * pUnk ) = 0;
+    virtual HRESULT __stdcall get_Item (
+        VARIANT index,
+        struct IDetector * * ppDetector ) = 0;
+    virtual HRESULT __stdcall get_Count (
+        long * pCount ) = 0;
+    virtual HRESULT __stdcall raw_GetDetectorByNumber (
+        long Number,
+        struct IDetector * * ppDetector ) = 0;
+};
+
+struct __declspec(uuid("62835aae-cf18-4f49-af17-d2ba1bb44c48"))
+IPTCallingPoints : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetItem))
+    IDetectorPtr Item[];
+    __declspec(property(get=GetCount))
+    long Count;
+    __declspec(property(get=Get_NewEnum))
+    IUnknownPtr _NewEnum;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    IUnknownPtr Get_NewEnum ( );
+    IDetectorPtr GetItem (
+        const _variant_t & index );
+    long GetCount ( );
+    IDetectorPtr GetPTCallingPointByNumber (
+        long Number );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get__NewEnum (
+        IUnknown * * pUnk ) = 0;
+    virtual HRESULT __stdcall get_Item (
+        VARIANT index,
+        struct IDetector * * ppPTCallingPoint ) = 0;
+    virtual HRESULT __stdcall get_Count (
+        long * pCount ) = 0;
+    virtual HRESULT __stdcall raw_GetPTCallingPointByNumber (
+        long Number,
+        struct IDetector * * ppPTCallingPoint ) = 0;
+};
+
+struct __declspec(uuid("87a20212-6ed4-4788-8fed-b09fde9ea245"))
+ISignalHead : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetID,put=PutID))
+    long ID;
+    __declspec(property(get=GetName,put=PutName))
+    _bstr_t Name;
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    long GetID ( );
+    void PutID (
+        long pID );
+    _bstr_t GetName ( );
+    void PutName (
+        _bstr_t pName );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_ID (
+        long * pID ) = 0;
+    virtual HRESULT __stdcall put_ID (
+        long pID ) = 0;
+    virtual HRESULT __stdcall get_Name (
+        BSTR * pName ) = 0;
+    virtual HRESULT __stdcall put_Name (
+        BSTR pName ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+};
+
+struct __declspec(uuid("1edd5e96-fc57-4303-8293-a678a21028c6"))
+ISignalHeads : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetItem))
+    ISignalHeadPtr Item[];
+    __declspec(property(get=GetCount))
+    long Count;
+    __declspec(property(get=Get_NewEnum))
+    IUnknownPtr _NewEnum;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    IUnknownPtr Get_NewEnum ( );
+    ISignalHeadPtr GetItem (
+        const _variant_t & index );
+    long GetCount ( );
+    ISignalHeadPtr GetSignalHeadByNumber (
+        long Number );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get__NewEnum (
+        IUnknown * * pVal ) = 0;
+    virtual HRESULT __stdcall get_Item (
+        VARIANT index,
+        struct ISignalHead * * ppSignalHead ) = 0;
+    virtual HRESULT __stdcall get_Count (
+        long * pCount ) = 0;
+    virtual HRESULT __stdcall raw_GetSignalHeadByNumber (
+        long Number,
+        struct ISignalHead * * ppSignalHead ) = 0;
+};
+
+struct __declspec(uuid("259d5250-7706-42b6-9e7f-35f931258ea3"))
+ISignalGroup : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetID,put=PutID))
+    long ID;
+    __declspec(property(get=GetName,put=PutName))
+    _bstr_t Name;
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+    __declspec(property(get=GetSignalHeads))
+    ISignalHeadsPtr SignalHeads;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    long GetID ( );
+    void PutID (
+        long pID );
+    _bstr_t GetName ( );
+    void PutName (
+        _bstr_t pName );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+    ISignalHeadsPtr GetSignalHeads ( );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_ID (
+        long * pID ) = 0;
+    virtual HRESULT __stdcall put_ID (
+        long pID ) = 0;
+    virtual HRESULT __stdcall get_Name (
+        BSTR * pName ) = 0;
+    virtual HRESULT __stdcall put_Name (
+        BSTR pName ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall get_SignalHeads (
+        struct ISignalHeads * * SignalHeads ) = 0;
+};
+
+struct __declspec(uuid("af0620bc-9411-4f1c-86f1-f5317487c505"))
+ISignalGroups : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetItem))
+    ISignalGroupPtr Item[];
+    __declspec(property(get=GetCount))
+    long Count;
+    __declspec(property(get=Get_NewEnum))
+    IUnknownPtr _NewEnum;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    IUnknownPtr Get_NewEnum ( );
+    ISignalGroupPtr GetItem (
+        const _variant_t & index );
+    long GetCount ( );
+    ISignalGroupPtr GetSignalGroupByNumber (
+        long Number );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get__NewEnum (
+        IUnknown * * pVal ) = 0;
+    virtual HRESULT __stdcall get_Item (
+        VARIANT index,
+        struct ISignalGroup * * ppSignalGroup ) = 0;
+    virtual HRESULT __stdcall get_Count (
+        long * pCount ) = 0;
+    virtual HRESULT __stdcall raw_GetSignalGroupByNumber (
+        long Number,
+        struct ISignalGroup * * ppSignalGroup ) = 0;
+};
+
+struct __declspec(uuid("0a2472b5-49dd-4ee1-9047-e982d175c83d"))
+ISignalController : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetID,put=PutID))
+    long ID;
+    __declspec(property(get=GetName,put=PutName))
+    _bstr_t Name;
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+    __declspec(property(get=GetDetectors))
+    IDetectorsPtr Detectors;
+    __declspec(property(get=GetSignalGroups))
+    ISignalGroupsPtr SignalGroups;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    long GetID ( );
+    void PutID (
+        long pID );
+    _bstr_t GetName ( );
+    void PutName (
+        _bstr_t pName );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+    IDetectorsPtr GetDetectors ( );
+    ISignalGroupsPtr GetSignalGroups ( );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_ID (
+        long * pID ) = 0;
+    virtual HRESULT __stdcall put_ID (
+        long pID ) = 0;
+    virtual HRESULT __stdcall get_Name (
+        BSTR * pName ) = 0;
+    virtual HRESULT __stdcall put_Name (
+        BSTR pName ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall get_Detectors (
+        struct IDetectors * * ppDetectors ) = 0;
+    virtual HRESULT __stdcall get_SignalGroups (
+        struct ISignalGroups * * ppSignalGroups ) = 0;
+};
+
+struct __declspec(uuid("a550f5f9-dcf1-455d-87e6-780b90a7c7fc"))
+ISignalControllers : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetItem))
+    ISignalControllerPtr Item[];
+    __declspec(property(get=GetCount))
+    long Count;
+    __declspec(property(get=Get_NewEnum))
+    IUnknownPtr _NewEnum;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    IUnknownPtr Get_NewEnum ( );
+    ISignalControllerPtr GetItem (
+        const _variant_t & index );
+    long GetCount ( );
+    ISignalControllerPtr GetSignalControllerByNumber (
+        long Number );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get__NewEnum (
+        IUnknown * * pVal ) = 0;
+    virtual HRESULT __stdcall get_Item (
+        VARIANT index,
+        struct ISignalController * * ppSignalController ) = 0;
+    virtual HRESULT __stdcall get_Count (
+        long * pCount ) = 0;
+    virtual HRESULT __stdcall raw_GetSignalControllerByNumber (
+        long Number,
+        struct ISignalController * * ppSignalController ) = 0;
+};
+
+struct __declspec(uuid("8d60481f-c5c9-4847-a352-c43f707da32d"))
+IRoute : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetID,put=PutID))
+    long ID;
+    __declspec(property(get=GetName,put=PutName))
+    _bstr_t Name;
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+    __declspec(property(get=GetAttValue1,put=PutAttValue1))
+    _variant_t AttValue1[][];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    long GetID ( );
+    void PutID (
+        long pID );
+    _bstr_t GetName ( );
+    void PutName (
+        _bstr_t pName );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+    _variant_t GetAttValue1 (
+        _bstr_t Attribute,
+        const _variant_t & Parameter );
+    void PutAttValue1 (
+        _bstr_t Attribute,
+        const _variant_t & Parameter,
+        const _variant_t & pValue );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_ID (
+        long * pID ) = 0;
+    virtual HRESULT __stdcall put_ID (
+        long pID ) = 0;
+    virtual HRESULT __stdcall get_Name (
+        BSTR * pName ) = 0;
+    virtual HRESULT __stdcall put_Name (
+        BSTR pName ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall get_AttValue1 (
+        BSTR Attribute,
+        VARIANT Parameter,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue1 (
+        BSTR Attribute,
+        VARIANT Parameter,
+        VARIANT pValue ) = 0;
+};
+
+struct __declspec(uuid("d93a197b-dae2-48a4-9f3e-eb02f52c2a49"))
+IRoutes : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetItem))
+    IRoutePtr Item[];
+    __declspec(property(get=GetCount))
+    long Count;
+    __declspec(property(get=Get_NewEnum))
+    IUnknownPtr _NewEnum;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    IUnknownPtr Get_NewEnum ( );
+    IRoutePtr GetItem (
+        const _variant_t & index );
+    long GetCount ( );
+    IRoutePtr GetRouteByNumber (
+        long Number );
+    long AddRoute (
+        long Link,
+        double XCoord );
+    HRESULT RemoveRoute (
+        long Number );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get__NewEnum (
+        IUnknown * * ppUnk ) = 0;
+    virtual HRESULT __stdcall get_Item (
+        VARIANT index,
+        struct IRoute * * ppRoute ) = 0;
+    virtual HRESULT __stdcall get_Count (
+        long * pCount ) = 0;
+    virtual HRESULT __stdcall raw_GetRouteByNumber (
+        long Number,
+        struct IRoute * * ppRoute ) = 0;
+    virtual HRESULT __stdcall raw_AddRoute (
+        long Link,
+        double XCoord,
+        long * pNumber ) = 0;
+    virtual HRESULT __stdcall raw_RemoveRoute (
+        long Number ) = 0;
+};
+
+struct __declspec(uuid("37d931a7-da58-423e-80c1-a296b4ed4d0f"))
+IRoutingDecision : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetID,put=PutID))
+    long ID;
+    __declspec(property(get=GetName,put=PutName))
+    _bstr_t Name;
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+    __declspec(property(get=GetAttValue1,put=PutAttValue1))
+    _variant_t AttValue1[][];
+    __declspec(property(get=GetAttValue2,put=PutAttValue2))
+    _variant_t AttValue2[][][];
+    __declspec(property(get=GetRoutes))
+    IRoutesPtr Routes;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    long GetID ( );
+    void PutID (
+        long pID );
+    _bstr_t GetName ( );
+    void PutName (
+        _bstr_t pName );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+    _variant_t GetAttValue1 (
+        _bstr_t Attribute,
+        const _variant_t & Parameter );
+    void PutAttValue1 (
+        _bstr_t Attribute,
+        const _variant_t & Parameter,
+        const _variant_t & pValue );
+    _variant_t GetAttValue2 (
+        _bstr_t Attribute,
+        const _variant_t & Parameter1,
+        const _variant_t & Parameter2 );
+    void PutAttValue2 (
+        _bstr_t Attribute,
+        const _variant_t & Parameter1,
+        const _variant_t & Parameter2,
+        const _variant_t & pValue );
+    IRoutesPtr GetRoutes ( );
+    long AddTimeInterval (
+        double From,
+        double To );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_ID (
+        long * pID ) = 0;
+    virtual HRESULT __stdcall put_ID (
+        long pID ) = 0;
+    virtual HRESULT __stdcall get_Name (
+        BSTR * pName ) = 0;
+    virtual HRESULT __stdcall put_Name (
+        BSTR pName ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall get_AttValue1 (
+        BSTR Attribute,
+        VARIANT Parameter,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue1 (
+        BSTR Attribute,
+        VARIANT Parameter,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall get_AttValue2 (
+        BSTR Attribute,
+        VARIANT Parameter1,
+        VARIANT Parameter2,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue2 (
+        BSTR Attribute,
+        VARIANT Parameter1,
+        VARIANT Parameter2,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall get_Routes (
+        struct IRoutes * * Routes ) = 0;
+    virtual HRESULT __stdcall raw_AddTimeInterval (
+        double From,
+        double To,
+        long * pIndex ) = 0;
+};
+
+struct __declspec(uuid("5406c2cc-f415-4b66-9dae-c9c12131bc9d"))
+IRoutingDecisions : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetItem))
+    IRoutingDecisionPtr Item[];
+    __declspec(property(get=GetCount))
+    long Count;
+    __declspec(property(get=Get_NewEnum))
+    IUnknownPtr _NewEnum;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    IUnknownPtr Get_NewEnum ( );
+    IRoutingDecisionPtr GetItem (
+        const _variant_t & index );
+    long GetCount ( );
+    IRoutingDecisionPtr GetRoutingDecisionByNumber (
+        long Number );
+    long AddStaticRoutingDecision (
+        long Link,
+        double XCoord );
+    HRESULT RemoveRoutingDecision (
+        long Number );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get__NewEnum (
+        IUnknown * * ppUnk ) = 0;
+    virtual HRESULT __stdcall get_Item (
+        VARIANT index,
+        struct IRoutingDecision * * ppRoutingDecision ) = 0;
+    virtual HRESULT __stdcall get_Count (
+        long * pCount ) = 0;
+    virtual HRESULT __stdcall raw_GetRoutingDecisionByNumber (
+        long Number,
+        struct IRoutingDecision * * ppRoutingDecision ) = 0;
+    virtual HRESULT __stdcall raw_AddStaticRoutingDecision (
+        long Link,
+        double XCoord,
+        long * pNumber ) = 0;
+    virtual HRESULT __stdcall raw_RemoveRoutingDecision (
+        long Number ) = 0;
+};
+
+struct __declspec(uuid("c29976fe-b187-4a9c-88b1-528115a7a18b"))
+ITrafficComposition : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetID,put=PutID))
+    long ID;
+    __declspec(property(get=GetName,put=PutName))
+    _bstr_t Name;
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+    __declspec(property(get=GetAttValue1,put=PutAttValue1))
+    _variant_t AttValue1[][];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    long GetID ( );
+    void PutID (
+        long pID );
+    _bstr_t GetName ( );
+    void PutName (
+        _bstr_t pName );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+    _variant_t GetAttValue1 (
+        _bstr_t Attribute,
+        const _variant_t & Parameter );
+    void PutAttValue1 (
+        _bstr_t Attribute,
+        const _variant_t & Parameter,
+        const _variant_t & pValue );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_ID (
+        long * pID ) = 0;
+    virtual HRESULT __stdcall put_ID (
+        long pID ) = 0;
+    virtual HRESULT __stdcall get_Name (
+        BSTR * pName ) = 0;
+    virtual HRESULT __stdcall put_Name (
+        BSTR pName ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall get_AttValue1 (
+        BSTR Attribute,
+        VARIANT Parameter,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue1 (
+        BSTR Attribute,
+        VARIANT Parameter,
+        VARIANT pValue ) = 0;
+};
+
+struct __declspec(uuid("432f9f3f-2b0f-4933-b71d-e8eba00fc469"))
+ITrafficCompositions : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetItem))
+    ITrafficCompositionPtr Item[];
+    __declspec(property(get=GetCount))
+    long Count;
+    __declspec(property(get=Get_NewEnum))
+    IUnknownPtr _NewEnum;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    IUnknownPtr Get_NewEnum ( );
+    ITrafficCompositionPtr GetItem (
+        const _variant_t & index );
+    long GetCount ( );
+    ITrafficCompositionPtr GetTrafficCompositionByNumber (
+        long Number );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get__NewEnum (
+        IUnknown * * pUnk ) = 0;
+    virtual HRESULT __stdcall get_Item (
+        VARIANT index,
+        struct ITrafficComposition * * ppTrafficComposition ) = 0;
+    virtual HRESULT __stdcall get_Count (
+        long * pCount ) = 0;
+    virtual HRESULT __stdcall raw_GetTrafficCompositionByNumber (
+        long Number,
+        struct ITrafficComposition * * ppTrafficComposition ) = 0;
+};
+
+struct __declspec(uuid("2358996e-6137-477a-a735-488850f6d04e"))
+IVehicleInput : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetID,put=PutID))
+    long ID;
+    __declspec(property(get=GetName,put=PutName))
+    _bstr_t Name;
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    long GetID ( );
+    void PutID (
+        long pID );
+    _bstr_t GetName ( );
+    void PutName (
+        _bstr_t pName );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_ID (
+        long * pID ) = 0;
+    virtual HRESULT __stdcall put_ID (
+        long pID ) = 0;
+    virtual HRESULT __stdcall get_Name (
+        BSTR * pName ) = 0;
+    virtual HRESULT __stdcall put_Name (
+        BSTR pName ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+};
+
+struct __declspec(uuid("455aa216-044f-4fb0-add6-8ab3c7beff6f"))
+IVehicleInputs : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetItem))
+    IVehicleInputPtr Item[];
+    __declspec(property(get=GetCount))
+    long Count;
+    __declspec(property(get=Get_NewEnum))
+    IUnknownPtr _NewEnum;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    IUnknownPtr Get_NewEnum ( );
+    IVehicleInputPtr GetItem (
+        const _variant_t & index );
+    long GetCount ( );
+    IVehicleInputPtr GetVehicleInputByNumber (
+        long Number );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get__NewEnum (
+        IUnknown * * ppUnk ) = 0;
+    virtual HRESULT __stdcall get_Item (
+        VARIANT index,
+        struct IVehicleInput * * ppVehicleInput ) = 0;
+    virtual HRESULT __stdcall get_Count (
+        long * pCount ) = 0;
+    virtual HRESULT __stdcall raw_GetVehicleInputByNumber (
+        long Number,
+        struct IVehicleInput * * ppVehicleInput ) = 0;
+};
+
+struct __declspec(uuid("64ee793a-2a32-4ade-bca9-025eb9ebbe0a"))
+IVehicle : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetID,put=PutID))
+    long ID;
+    __declspec(property(get=GetName,put=PutName))
+    _bstr_t Name;
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    long GetID ( );
+    void PutID (
+        long pID );
+    _bstr_t GetName ( );
+    void PutName (
+        _bstr_t pName );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+    HRESULT MoveToLinkCoordinate (
+        long Link,
+        int Lane,
+        double XCoord );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_ID (
+        long * pID ) = 0;
+    virtual HRESULT __stdcall put_ID (
+        long pID ) = 0;
+    virtual HRESULT __stdcall get_Name (
+        BSTR * pName ) = 0;
+    virtual HRESULT __stdcall put_Name (
+        BSTR pName ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall raw_MoveToLinkCoordinate (
+        long Link,
+        int Lane,
+        double XCoord ) = 0;
+};
+
+struct __declspec(uuid("6725f5de-fb66-4930-b222-e1051e0d3251"))
+IVehicles : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetItem))
+    IVehiclePtr Item[];
+    __declspec(property(get=GetCount))
+    long Count;
+    __declspec(property(get=GetIDs))
+    _variant_t IDs[][];
+    __declspec(property(get=Get_NewEnum))
+    IUnknownPtr _NewEnum;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    IUnknownPtr Get_NewEnum ( );
+    IVehiclePtr GetItem (
+        const _variant_t & index );
+    long GetCount ( );
+    _variant_t GetIDs (
+        _bstr_t Attribute,
+        const _variant_t & Value );
+    IVehiclePtr GetVehicleByNumber (
+        long Number );
+    HRESULT GetMultiAttValues (
+        const _variant_t & IDs,
+        _bstr_t Attribute,
+        VARIANT * pValues );
+    HRESULT SetMultiAttValues (
+        const _variant_t & IDs,
+        _bstr_t Attribute,
+        const _variant_t & Values );
+    IVehiclePtr AddVehicleInParkingLot (
+        long Type,
+        long ParkingID );
+    IVehiclePtr AddVehicleAtLinkCoordinate (
+        long Type,
+        double DesiredSpeed,
+        long Link,
+        int Lane,
+        double XCoord,
+        unsigned char Interaction );
+    IVehiclePtr AddVehicleBetweenNodes (
+        long Type,
+        long FromNode,
+        long ToNode );
+    HRESULT RemoveVehicle (
+        long Number );
+    IVehiclesPtr GetQueued ( );
+    IVehiclesPtr GetArrived ( );
+    IVehiclesPtr GetParked ( );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get__NewEnum (
+        IUnknown * * ppUnk ) = 0;
+    virtual HRESULT __stdcall get_Item (
+        VARIANT index,
+        struct IVehicle * * ppVehicle ) = 0;
+    virtual HRESULT __stdcall get_Count (
+        long * pCount ) = 0;
+    virtual HRESULT __stdcall get_IDs (
+        BSTR Attribute,
+        VARIANT Value,
+        VARIANT * pIDs ) = 0;
+    virtual HRESULT __stdcall raw_GetVehicleByNumber (
+        long Number,
+        struct IVehicle * * ppVehicle ) = 0;
+    virtual HRESULT __stdcall raw_GetMultiAttValues (
+        VARIANT IDs,
+        BSTR Attribute,
+        VARIANT * pValues ) = 0;
+    virtual HRESULT __stdcall raw_SetMultiAttValues (
+        VARIANT IDs,
+        BSTR Attribute,
+        VARIANT Values ) = 0;
+    virtual HRESULT __stdcall raw_AddVehicleInParkingLot (
+        long Type,
+        long ParkingID,
+        struct IVehicle * * ppVehicle ) = 0;
+    virtual HRESULT __stdcall raw_AddVehicleAtLinkCoordinate (
+        long Type,
+        double DesiredSpeed,
+        long Link,
+        int Lane,
+        double XCoord,
+        unsigned char Interaction,
+        struct IVehicle * * ppVehicle ) = 0;
+    virtual HRESULT __stdcall raw_AddVehicleBetweenNodes (
+        long Type,
+        long FromNode,
+        long ToNode,
+        struct IVehicle * * ppVehicle ) = 0;
+    virtual HRESULT __stdcall raw_RemoveVehicle (
+        long Number ) = 0;
+    virtual HRESULT __stdcall raw_GetQueued (
+        struct IVehicles * * ppVehicles ) = 0;
+    virtual HRESULT __stdcall raw_GetArrived (
+        struct IVehicles * * ppVehicles ) = 0;
+    virtual HRESULT __stdcall raw_GetParked (
+        struct IVehicles * * ppVehicles ) = 0;
+};
+
+struct __declspec(uuid("b3c15960-24c7-4e4d-9c48-d03ea13df94e"))
+IPath : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetID,put=PutID))
+    long ID;
+    __declspec(property(get=GetName,put=PutName))
+    _bstr_t Name;
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    long GetID ( );
+    void PutID (
+        long pID );
+    _bstr_t GetName ( );
+    void PutName (
+        _bstr_t pName );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_ID (
+        long * pID ) = 0;
+    virtual HRESULT __stdcall put_ID (
+        long pID ) = 0;
+    virtual HRESULT __stdcall get_Name (
+        BSTR * pName ) = 0;
+    virtual HRESULT __stdcall put_Name (
+        BSTR pName ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+};
+
+struct __declspec(uuid("35d8ae9e-af5a-4787-aa8b-d45c2ab0eaa5"))
+IPaths : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetItem))
+    IPathPtr Item[];
+    __declspec(property(get=GetCount))
+    long Count;
+    __declspec(property(get=Get_NewEnum))
+    IUnknownPtr _NewEnum;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    IUnknownPtr Get_NewEnum ( );
+    IPathPtr GetItem (
+        const _variant_t & index );
+    long GetCount ( );
+    IPathPtr GetPathByNumber (
+        long Number );
+    IPathPtr AddPathAsNodeSequence (
+        long Number,
+        const _variant_t & Nodes );
+    HRESULT RemovePath (
+        long Number );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get__NewEnum (
+        IUnknown * * pUnk ) = 0;
+    virtual HRESULT __stdcall get_Item (
+        VARIANT index,
+        struct IPath * * ppPath ) = 0;
+    virtual HRESULT __stdcall get_Count (
+        long * pCount ) = 0;
+    virtual HRESULT __stdcall raw_GetPathByNumber (
+        long Number,
+        struct IPath * * ppPath ) = 0;
+    virtual HRESULT __stdcall raw_AddPathAsNodeSequence (
+        long Number,
+        VARIANT Nodes,
+        struct IPath * * ppPath ) = 0;
+    virtual HRESULT __stdcall raw_RemovePath (
+        long Number ) = 0;
+};
+
+struct __declspec(uuid("ff1f393a-fabc-4903-8439-37e81308443b"))
+IParkingLot : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetID,put=PutID))
+    long ID;
+    __declspec(property(get=GetName,put=PutName))
+    _bstr_t Name;
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    long GetID ( );
+    void PutID (
+        long pID );
+    _bstr_t GetName ( );
+    void PutName (
+        _bstr_t pName );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_ID (
+        long * pID ) = 0;
+    virtual HRESULT __stdcall put_ID (
+        long pID ) = 0;
+    virtual HRESULT __stdcall get_Name (
+        BSTR * pName ) = 0;
+    virtual HRESULT __stdcall put_Name (
+        BSTR pName ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+};
+
+struct __declspec(uuid("3320f648-1323-4275-9982-b5f32725f9c0"))
+IParkingLots : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetItem))
+    IParkingLotPtr Item[];
+    __declspec(property(get=GetCount))
+    long Count;
+    __declspec(property(get=Get_NewEnum))
+    IUnknownPtr _NewEnum;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    IUnknownPtr Get_NewEnum ( );
+    IParkingLotPtr GetItem (
+        const _variant_t & index );
+    long GetCount ( );
+    IParkingLotPtr GetParkingLotByNumber (
+        long Number );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get__NewEnum (
+        IUnknown * * ppUnk ) = 0;
+    virtual HRESULT __stdcall get_Item (
+        VARIANT index,
+        struct IParkingLot * * ppParkingLot ) = 0;
+    virtual HRESULT __stdcall get_Count (
+        long * pCount ) = 0;
+    virtual HRESULT __stdcall raw_GetParkingLotByNumber (
+        long Number,
+        struct IParkingLot * * ppParkingLot ) = 0;
+};
+
+struct __declspec(uuid("5f04524c-d854-4700-ad04-1d6099cad7d3"))
+INode : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetID,put=PutID))
+    long ID;
+    __declspec(property(get=GetName,put=PutName))
+    _bstr_t Name;
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    long GetID ( );
+    void PutID (
+        long pID );
+    _bstr_t GetName ( );
+    void PutName (
+        _bstr_t pName );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+    _variant_t GetResult (
+        double Time,
+        _bstr_t Parameter,
+        _bstr_t Function,
+        long VehicleClass );
+    _variant_t GetMovementResult (
+        double Time,
+        long FromLink,
+        long ToLink,
+        _bstr_t Parameter,
+        _bstr_t Function,
+        long VehicleClass );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_ID (
+        long * pID ) = 0;
+    virtual HRESULT __stdcall put_ID (
+        long pID ) = 0;
+    virtual HRESULT __stdcall get_Name (
+        BSTR * pName ) = 0;
+    virtual HRESULT __stdcall put_Name (
+        BSTR pName ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall raw_GetResult (
+        double Time,
+        BSTR Parameter,
+        BSTR Function,
+        long VehicleClass,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall raw_GetMovementResult (
+        double Time,
+        long FromLink,
+        long ToLink,
+        BSTR Parameter,
+        BSTR Function,
+        long VehicleClass,
+        VARIANT * pValue ) = 0;
+};
+
+struct __declspec(uuid("118eaa8a-e4f2-402e-892f-b361f27f6186"))
+INodes : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetItem))
+    INodePtr Item[];
+    __declspec(property(get=GetCount))
+    long Count;
+    __declspec(property(get=Get_NewEnum))
+    IUnknownPtr _NewEnum;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    IUnknownPtr Get_NewEnum ( );
+    INodePtr GetItem (
+        const _variant_t & index );
+    long GetCount ( );
+    INodePtr GetNodeByNumber (
+        long Number );
+    _variant_t GetResult (
+        double Time,
+        _bstr_t Parameter,
+        _bstr_t Function,
+        long VehicleClass );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get__NewEnum (
+        IUnknown * * ppUnk ) = 0;
+    virtual HRESULT __stdcall get_Item (
+        VARIANT index,
+        struct INode * * ppNode ) = 0;
+    virtual HRESULT __stdcall get_Count (
+        long * pCount ) = 0;
+    virtual HRESULT __stdcall raw_GetNodeByNumber (
+        long Number,
+        struct INode * * ppNode ) = 0;
+    virtual HRESULT __stdcall raw_GetResult (
+        double Time,
+        BSTR Parameter,
+        BSTR Function,
+        long VehicleClass,
+        VARIANT * pValue ) = 0;
+};
+
+struct __declspec(uuid("54e9ee44-e807-4394-940b-cfabf4e35193"))
+ILink : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetID,put=PutID))
+    long ID;
+    __declspec(property(get=GetName,put=PutName))
+    _bstr_t Name;
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+    __declspec(property(get=GetAttValue1,put=PutAttValue1))
+    _variant_t AttValue1[][];
+    __declspec(property(get=GetAttValue2,put=PutAttValue2))
+    _variant_t AttValue2[][][];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    long GetID ( );
+    void PutID (
+        long pID );
+    _bstr_t GetName ( );
+    void PutName (
+        _bstr_t pName );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+    _variant_t GetAttValue1 (
+        _bstr_t Attribute,
+        const _variant_t & Parameter );
+    void PutAttValue1 (
+        _bstr_t Attribute,
+        const _variant_t & Parameter,
+        const _variant_t & pValue );
+    _variant_t GetAttValue2 (
+        _bstr_t Attribute,
+        const _variant_t & Parameter1,
+        const _variant_t & Parameter2 );
+    void PutAttValue2 (
+        _bstr_t Attribute,
+        const _variant_t & Parameter1,
+        const _variant_t & Parameter2,
+        const _variant_t & pValue );
+    _variant_t GetSegmentResult (
+        _bstr_t Parameter,
+        long VehicleClass,
+        double XCoord,
+        int Lane,
+        unsigned char Cumulative );
+    IVehiclesPtr GetVehicles ( );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_ID (
+        long * pID ) = 0;
+    virtual HRESULT __stdcall put_ID (
+        long pID ) = 0;
+    virtual HRESULT __stdcall get_Name (
+        BSTR * pName ) = 0;
+    virtual HRESULT __stdcall put_Name (
+        BSTR pName ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall get_AttValue1 (
+        BSTR Attribute,
+        VARIANT Parameter,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue1 (
+        BSTR Attribute,
+        VARIANT Parameter,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall get_AttValue2 (
+        BSTR Attribute,
+        VARIANT Parameter1,
+        VARIANT Parameter2,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue2 (
+        BSTR Attribute,
+        VARIANT Parameter1,
+        VARIANT Parameter2,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall raw_GetSegmentResult (
+        BSTR Parameter,
+        long VehicleClass,
+        double XCoord,
+        int Lane,
+        unsigned char Cumulative,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall raw_GetVehicles (
+        struct IVehicles * * ppVehicles ) = 0;
+};
+
+struct __declspec(uuid("019a0a39-47c3-41f5-b34e-2386a2b13060"))
+ILinks : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetItem))
+    ILinkPtr Item[];
+    __declspec(property(get=GetCount))
+    long Count;
+    __declspec(property(get=Get_NewEnum))
+    IUnknownPtr _NewEnum;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    IUnknownPtr Get_NewEnum ( );
+    ILinkPtr GetItem (
+        const _variant_t & index );
+    long GetCount ( );
+    ILinkPtr GetLinkByNumber (
+        long Number );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get__NewEnum (
+        IUnknown * * ppUnk ) = 0;
+    virtual HRESULT __stdcall get_Item (
+        VARIANT index,
+        struct ILink * * ppLink ) = 0;
+    virtual HRESULT __stdcall get_Count (
+        long * pCount ) = 0;
+    virtual HRESULT __stdcall raw_GetLinkByNumber (
+        long Number,
+        struct ILink * * ppLink ) = 0;
+};
+
+struct __declspec(uuid("b2622c44-a395-4ce0-888f-bfa8022485f8"))
+IPresentation : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+    HRESULT RunContinuous ( );
+    HRESULT RunSingleStep ( );
+    HRESULT Stop ( );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall raw_RunContinuous ( ) = 0;
+    virtual HRESULT __stdcall raw_RunSingleStep ( ) = 0;
+    virtual HRESULT __stdcall raw_Stop ( ) = 0;
+};
+
+struct __declspec(uuid("6c1d93bd-7e85-4cbe-be4e-be68acc1f581"))
+INodeEvaluation : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+};
+
+struct __declspec(uuid("a965943c-9ccf-4b84-a14c-16f0c92f8ed3"))
+ITravelTimeEvaluation : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+};
+
+struct __declspec(uuid("2063cd7f-9ada-4493-b448-61e2f9ddb2f3"))
+IDelayEvaluation : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+};
+
+struct __declspec(uuid("4cf55fdb-6996-4423-82d5-4fada047cf58"))
+IQueueCounterEvaluation : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+};
+
+struct __declspec(uuid("408c85c2-33b3-4869-8eca-fbe39c2cb9dd"))
+IDataCollectionEvaluation : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+    HRESULT LoadConfiguration (
+        _bstr_t ConfigurationPath );
+    HRESULT SaveConfiguration (
+        _bstr_t ConfigurationPath );
+    HRESULT AddParameter (
+        _bstr_t Parameter,
+        _bstr_t Function,
+        long VehicleClass );
+    HRESULT RemoveParameter (
+        _bstr_t Parameter,
+        _bstr_t Function,
+        long VehicleClass );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall raw_LoadConfiguration (
+        BSTR ConfigurationPath ) = 0;
+    virtual HRESULT __stdcall raw_SaveConfiguration (
+        BSTR ConfigurationPath ) = 0;
+    virtual HRESULT __stdcall raw_AddParameter (
+        BSTR Parameter,
+        BSTR Function,
+        long VehicleClass ) = 0;
+    virtual HRESULT __stdcall raw_RemoveParameter (
+        BSTR Parameter,
+        BSTR Function,
+        long VehicleClass ) = 0;
+};
+
+struct __declspec(uuid("995c7259-066a-4844-9351-6731d1eba765"))
+ILinkEvaluation : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+    HRESULT LoadConfiguration (
+        _bstr_t ConfigurationPath );
+    HRESULT SaveConfiguration (
+        _bstr_t ConfigurationPath );
+    HRESULT AddParameter (
+        _bstr_t Parameter,
+        long VehicleClass );
+    HRESULT RemoveParameter (
+        _bstr_t Parameter,
+        long VehicleClass );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall raw_LoadConfiguration (
+        BSTR ConfigurationPath ) = 0;
+    virtual HRESULT __stdcall raw_SaveConfiguration (
+        BSTR ConfigurationPath ) = 0;
+    virtual HRESULT __stdcall raw_AddParameter (
+        BSTR Parameter,
+        long VehicleClass ) = 0;
+    virtual HRESULT __stdcall raw_RemoveParameter (
+        BSTR Parameter,
+        long VehicleClass ) = 0;
+};
+
+struct __declspec(uuid("19480615-dc0e-40ef-bf8f-8d5976bc86aa"))
+IEvaluation : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+    __declspec(property(get=GetLinkEvaluation))
+    ILinkEvaluationPtr LinkEvaluation;
+    __declspec(property(get=GetDataCollectionEvaluation))
+    IDataCollectionEvaluationPtr DataCollectionEvaluation;
+    __declspec(property(get=GetQueueCounterEvaluation))
+    IQueueCounterEvaluationPtr QueueCounterEvaluation;
+    __declspec(property(get=GetTravelTimeEvaluation))
+    ITravelTimeEvaluationPtr TravelTimeEvaluation;
+    __declspec(property(get=GetDelayEvaluation))
+    IDelayEvaluationPtr DelayEvaluation;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+    ILinkEvaluationPtr GetLinkEvaluation ( );
+    IDataCollectionEvaluationPtr GetDataCollectionEvaluation ( );
+    IQueueCounterEvaluationPtr GetQueueCounterEvaluation ( );
+    ITravelTimeEvaluationPtr GetTravelTimeEvaluation ( );
+    IDelayEvaluationPtr GetDelayEvaluation ( );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall get_LinkEvaluation (
+        struct ILinkEvaluation * * ppLinkEvaluation ) = 0;
+    virtual HRESULT __stdcall get_DataCollectionEvaluation (
+        struct IDataCollectionEvaluation * * ppDataCollectionEvaluation ) = 0;
+    virtual HRESULT __stdcall get_QueueCounterEvaluation (
+        struct IQueueCounterEvaluation * * ppQueueCounterEvaluation ) = 0;
+    virtual HRESULT __stdcall get_TravelTimeEvaluation (
+        struct ITravelTimeEvaluation * * ppTravelTimeEvaluation ) = 0;
+    virtual HRESULT __stdcall get_DelayEvaluation (
+        struct IDelayEvaluation * * ppDelayEvaluation ) = 0;
+};
+
+struct __declspec(uuid("8da2801c-ebc5-4a5d-a348-097d64884306"))
+IGraphics : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+    HRESULT Redraw ( );
+    HRESULT GetWindow (
+        _bstr_t WinName,
+        VARIANT * Top,
+        VARIANT * Left,
+        VARIANT * Bottom,
+        VARIANT * Right,
+        long ID );
+    HRESULT SetWindow (
+        _bstr_t WinName,
+        const _variant_t & Top,
+        const _variant_t & Left,
+        const _variant_t & Bottom,
+        const _variant_t & Right,
+        long ID );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall raw_Redraw ( ) = 0;
+    virtual HRESULT __stdcall raw_GetWindow (
+        BSTR WinName,
+        VARIANT * Top,
+        VARIANT * Left,
+        VARIANT * Bottom,
+        VARIANT * Right,
+        long ID ) = 0;
+    virtual HRESULT __stdcall raw_SetWindow (
+        BSTR WinName,
+        VARIANT Top,
+        VARIANT Left,
+        VARIANT Bottom,
+        VARIANT Right,
+        long ID ) = 0;
+};
+
+struct __declspec(uuid("62bf5890-637a-4b4b-b2dc-b27a846966a5"))
+IDynamicAssignment : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+};
+
+struct __declspec(uuid("ba315b05-ae4d-4235-86fe-b7a38abb1642"))
+IDynamicAssignmentEvents : IDispatch
+{
+    //
+    // Wrapper methods for error-handling
+    //
+
+    double EdgeSmoothing (
+        double oldVal,
+        double newVal );
+    HRESULT RouteChoiceDistribution (
+        const _variant_t & Costs,
+        VARIANT * Distribution );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall raw_EdgeSmoothing (
+        double oldVal,
+        double newVal,
+        double * retValue ) = 0;
+    virtual HRESULT __stdcall raw_RouteChoiceDistribution (
+        VARIANT Costs,
+        VARIANT * Distribution ) = 0;
+};
+
+struct __declspec(uuid("7d04a0fe-4bfa-4134-873a-8a3a518a3f29"))
+ISimulation : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetComment,put=PutComment))
+    _bstr_t Comment;
+    __declspec(property(get=GetPeriod,put=PutPeriod))
+    double Period;
+    __declspec(property(get=GetStartTime,put=PutStartTime))
+    _bstr_t StartTime;
+    __declspec(property(get=GetSpeed,put=PutSpeed))
+    double Speed;
+    __declspec(property(get=GetResolution,put=PutResolution))
+    long Resolution;
+    __declspec(property(get=GetRandomSeed,put=PutRandomSeed))
+    long RandomSeed;
+    __declspec(property(get=GetBreakAt,put=PutBreakAt))
+    double BreakAt;
+    __declspec(property(get=GetLeftSideTraffic,put=PutLeftSideTraffic))
+    unsigned char LeftSideTraffic;
+    __declspec(property(get=GetRunIndex,put=PutRunIndex))
+    long RunIndex;
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    _bstr_t GetComment ( );
+    void PutComment (
+        _bstr_t pComment );
+    double GetPeriod ( );
+    void PutPeriod (
+        double pPeriod );
+    _bstr_t GetStartTime ( );
+    void PutStartTime (
+        _bstr_t pStartTime );
+    double GetSpeed ( );
+    void PutSpeed (
+        double pSpeed );
+    long GetResolution ( );
+    void PutResolution (
+        long pResolution );
+    long GetRandomSeed ( );
+    void PutRandomSeed (
+        long pRandomSeed );
+    double GetBreakAt ( );
+    void PutBreakAt (
+        double pBreakAt );
+    unsigned char GetLeftSideTraffic ( );
+    void PutLeftSideTraffic (
+        unsigned char pLeftSideTraffic );
+    long GetRunIndex ( );
+    void PutRunIndex (
+        long pIndex );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+    HRESULT RunContinuous ( );
+    HRESULT RunSingleStep ( );
+    HRESULT Stop ( );
+    HRESULT LoadSnapshot (
+        _bstr_t SnapshotPath );
+    HRESULT SaveSnapshot (
+        _bstr_t SnapshotPath );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_Comment (
+        BSTR * pComment ) = 0;
+    virtual HRESULT __stdcall put_Comment (
+        BSTR pComment ) = 0;
+    virtual HRESULT __stdcall get_Period (
+        double * pPeriod ) = 0;
+    virtual HRESULT __stdcall put_Period (
+        double pPeriod ) = 0;
+    virtual HRESULT __stdcall get_StartTime (
+        BSTR * pStartTime ) = 0;
+    virtual HRESULT __stdcall put_StartTime (
+        BSTR pStartTime ) = 0;
+    virtual HRESULT __stdcall get_Speed (
+        double * pSpeed ) = 0;
+    virtual HRESULT __stdcall put_Speed (
+        double pSpeed ) = 0;
+    virtual HRESULT __stdcall get_Resolution (
+        long * pResolution ) = 0;
+    virtual HRESULT __stdcall put_Resolution (
+        long pResolution ) = 0;
+    virtual HRESULT __stdcall get_RandomSeed (
+        long * pRandomSeed ) = 0;
+    virtual HRESULT __stdcall put_RandomSeed (
+        long pRandomSeed ) = 0;
+    virtual HRESULT __stdcall get_BreakAt (
+        double * pBreakAt ) = 0;
+    virtual HRESULT __stdcall put_BreakAt (
+        double pBreakAt ) = 0;
+    virtual HRESULT __stdcall get_LeftSideTraffic (
+        unsigned char * pLeftSideTraffic ) = 0;
+    virtual HRESULT __stdcall put_LeftSideTraffic (
+        unsigned char pLeftSideTraffic ) = 0;
+    virtual HRESULT __stdcall get_RunIndex (
+        long * pIndex ) = 0;
+    virtual HRESULT __stdcall put_RunIndex (
+        long pIndex ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall raw_RunContinuous ( ) = 0;
+    virtual HRESULT __stdcall raw_RunSingleStep ( ) = 0;
+    virtual HRESULT __stdcall raw_Stop ( ) = 0;
+    virtual HRESULT __stdcall raw_LoadSnapshot (
+        BSTR SnapshotPath ) = 0;
+    virtual HRESULT __stdcall raw_SaveSnapshot (
+        BSTR SnapshotPath ) = 0;
+};
+
+struct __declspec(uuid("8d92fe46-02c5-4582-881e-b12182061f7f"))
+INet : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetID,put=PutID))
+    long ID;
+    __declspec(property(get=GetName,put=PutName))
+    _bstr_t Name;
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+    __declspec(property(get=GetLinks))
+    ILinksPtr Links;
+    __declspec(property(get=GetNodes))
+    INodesPtr Nodes;
+    __declspec(property(get=GetPaths))
+    IPathsPtr Paths;
+    __declspec(property(get=GetVehicles))
+    IVehiclesPtr Vehicles;
+    __declspec(property(get=GetSignalControllers))
+    ISignalControllersPtr SignalControllers;
+    __declspec(property(get=GetDataCollections))
+    IDataCollectionsPtr DataCollections;
+    __declspec(property(get=GetQueueCounters))
+    IQueueCountersPtr QueueCounters;
+    __declspec(property(get=GetVehicleInputs))
+    IVehicleInputsPtr VehicleInputs;
+    __declspec(property(get=GetRoutingDecisions))
+    IRoutingDecisionsPtr RoutingDecisions;
+    __declspec(property(get=GetTravelTimes))
+    ITravelTimesPtr TravelTimes;
+    __declspec(property(get=GetDelays))
+    IDelaysPtr Delays;
+    __declspec(property(get=GetTrafficCompositions))
+    ITrafficCompositionsPtr TrafficCompositions;
+    __declspec(property(get=GetParkingLots))
+    IParkingLotsPtr ParkingLots;
+    __declspec(property(get=GetPTCallingPoints))
+    IPTCallingPointsPtr PTCallingPoints;
+    __declspec(property(get=GetStopSigns))
+    IStopSignsPtr StopSigns;
+    __declspec(property(get=GetStaticObjects))
+    IStaticObjectsPtr StaticObjects;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    long GetID ( );
+    void PutID (
+        long pID );
+    _bstr_t GetName ( );
+    void PutName (
+        _bstr_t pName );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+    ILinksPtr GetLinks ( );
+    INodesPtr GetNodes ( );
+    IPathsPtr GetPaths ( );
+    IVehiclesPtr GetVehicles ( );
+    ISignalControllersPtr GetSignalControllers ( );
+    IDataCollectionsPtr GetDataCollections ( );
+    IQueueCountersPtr GetQueueCounters ( );
+    IVehicleInputsPtr GetVehicleInputs ( );
+    IRoutingDecisionsPtr GetRoutingDecisions ( );
+    ITravelTimesPtr GetTravelTimes ( );
+    IDelaysPtr GetDelays ( );
+    ITrafficCompositionsPtr GetTrafficCompositions ( );
+    IParkingLotsPtr GetParkingLots ( );
+    IPTCallingPointsPtr GetPTCallingPoints ( );
+    IStopSignsPtr GetStopSigns ( );
+    IStaticObjectsPtr GetStaticObjects ( );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall get_ID (
+        long * pID ) = 0;
+    virtual HRESULT __stdcall put_ID (
+        long pID ) = 0;
+    virtual HRESULT __stdcall get_Name (
+        BSTR * pName ) = 0;
+    virtual HRESULT __stdcall put_Name (
+        BSTR pName ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall get_Links (
+        struct ILinks * * ppLinks ) = 0;
+    virtual HRESULT __stdcall get_Nodes (
+        struct INodes * * ppNodes ) = 0;
+    virtual HRESULT __stdcall get_Paths (
+        struct IPaths * * ppPaths ) = 0;
+    virtual HRESULT __stdcall get_Vehicles (
+        struct IVehicles * * ppVehicles ) = 0;
+    virtual HRESULT __stdcall get_SignalControllers (
+        struct ISignalControllers * * ppSignalControllers ) = 0;
+    virtual HRESULT __stdcall get_DataCollections (
+        struct IDataCollections * * ppDataCollections ) = 0;
+    virtual HRESULT __stdcall get_QueueCounters (
+        struct IQueueCounters * * ppQueueCounters ) = 0;
+    virtual HRESULT __stdcall get_VehicleInputs (
+        struct IVehicleInputs * * ppVehicleInputs ) = 0;
+    virtual HRESULT __stdcall get_RoutingDecisions (
+        struct IRoutingDecisions * * ppRoutingDecisions ) = 0;
+    virtual HRESULT __stdcall get_TravelTimes (
+        struct ITravelTimes * * ppTravelTimes ) = 0;
+    virtual HRESULT __stdcall get_Delays (
+        struct IDelays * * ppDelays ) = 0;
+    virtual HRESULT __stdcall get_TrafficCompositions (
+        struct ITrafficCompositions * * ppTrafficCompositions ) = 0;
+    virtual HRESULT __stdcall get_ParkingLots (
+        struct IParkingLots * * ppParkingLots ) = 0;
+    virtual HRESULT __stdcall get_PTCallingPoints (
+        struct IPTCallingPoints * * ppPTCallingPoints ) = 0;
+    virtual HRESULT __stdcall get_StopSigns (
+        struct IStopSigns * * ppStopSigns ) = 0;
+    virtual HRESULT __stdcall get_StaticObjects (
+        struct IStaticObjects * * ppStaticObjects ) = 0;
+};
+
+struct __declspec(uuid("6cff911e-e5ed-4689-9cba-3741423fd63b"))
+IVissim : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetAttValue,put=PutAttValue))
+    _variant_t AttValue[];
+    __declspec(property(get=GetNet))
+    INetPtr Net;
+    __declspec(property(get=GetSimulation))
+    ISimulationPtr Simulation;
+    __declspec(property(get=GetDynamicAssignment))
+    IDynamicAssignmentPtr DynamicAssignment;
+    __declspec(property(get=GetGraphics))
+    IGraphicsPtr Graphics;
+    __declspec(property(get=GetEvaluation))
+    IEvaluationPtr Evaluation;
+    __declspec(property(get=GetOnline))
+    IOnlinePtr Online;
+    __declspec(property(get=GetAnimation))
+    IAnimationPtr Animation;
+    __declspec(property(get=GetPresentation))
+    IPresentationPtr Presentation;
+    __declspec(property(get=GetNewWorldPoint))
+    IWorldPointPtr NewWorldPoint[][][];
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    HRESULT New ( );
+    HRESULT LoadNet (
+        _bstr_t NetPath,
+        unsigned char Additive );
+    HRESULT SaveNet ( );
+    HRESULT SaveNetAs (
+        _bstr_t NetPath );
+    HRESULT LoadLayout (
+        _bstr_t LayoutPath );
+    HRESULT SaveLayout (
+        _bstr_t LayoutPath );
+    HRESULT Exit ( );
+    _variant_t GetAttValue (
+        _bstr_t Attribute );
+    void PutAttValue (
+        _bstr_t Attribute,
+        const _variant_t & pValue );
+    INetPtr GetNet ( );
+    ISimulationPtr GetSimulation ( );
+    IDynamicAssignmentPtr GetDynamicAssignment ( );
+    IGraphicsPtr GetGraphics ( );
+    IEvaluationPtr GetEvaluation ( );
+    IOnlinePtr GetOnline ( );
+    IAnimationPtr GetAnimation ( );
+    IPresentationPtr GetPresentation ( );
+    HRESULT ShowMaximized ( );
+    HRESULT ShowMinimized ( );
+    HRESULT ShowNormal ( );
+    HRESULT GetWindow (
+        VARIANT * Top,
+        VARIANT * Left,
+        VARIANT * Bottom,
+        VARIANT * Right );
+    HRESULT SetWindow (
+        const _variant_t & Top,
+        const _variant_t & Left,
+        const _variant_t & Bottom,
+        const _variant_t & Right );
+    IWorldPointPtr GetNewWorldPoint (
+        double X,
+        double Y,
+        double Z );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall raw_New ( ) = 0;
+    virtual HRESULT __stdcall raw_LoadNet (
+        BSTR NetPath,
+        unsigned char Additive ) = 0;
+    virtual HRESULT __stdcall raw_SaveNet ( ) = 0;
+    virtual HRESULT __stdcall raw_SaveNetAs (
+        BSTR NetPath ) = 0;
+    virtual HRESULT __stdcall raw_LoadLayout (
+        BSTR LayoutPath ) = 0;
+    virtual HRESULT __stdcall raw_SaveLayout (
+        BSTR LayoutPath ) = 0;
+    virtual HRESULT __stdcall raw_Exit ( ) = 0;
+    virtual HRESULT __stdcall get_AttValue (
+        BSTR Attribute,
+        VARIANT * pValue ) = 0;
+    virtual HRESULT __stdcall put_AttValue (
+        BSTR Attribute,
+        VARIANT pValue ) = 0;
+    virtual HRESULT __stdcall get_Net (
+        struct INet * * ppNet ) = 0;
+    virtual HRESULT __stdcall get_Simulation (
+        struct ISimulation * * ppSimulation ) = 0;
+    virtual HRESULT __stdcall get_DynamicAssignment (
+        struct IDynamicAssignment * * ppDynAssig ) = 0;
+    virtual HRESULT __stdcall get_Graphics (
+        struct IGraphics * * ppGraphics ) = 0;
+    virtual HRESULT __stdcall get_Evaluation (
+        struct IEvaluation * * ppEvaluation ) = 0;
+    virtual HRESULT __stdcall get_Online (
+        struct IOnline * * ppOnline ) = 0;
+    virtual HRESULT __stdcall get_Animation (
+        struct IAnimation * * ppAnimation ) = 0;
+    virtual HRESULT __stdcall get_Presentation (
+        struct IPresentation * * ppPresentation ) = 0;
+    virtual HRESULT __stdcall raw_ShowMaximized ( ) = 0;
+    virtual HRESULT __stdcall raw_ShowMinimized ( ) = 0;
+    virtual HRESULT __stdcall raw_ShowNormal ( ) = 0;
+    virtual HRESULT __stdcall raw_GetWindow (
+        VARIANT * Top,
+        VARIANT * Left,
+        VARIANT * Bottom,
+        VARIANT * Right ) = 0;
+    virtual HRESULT __stdcall raw_SetWindow (
+        VARIANT Top,
+        VARIANT Left,
+        VARIANT Bottom,
+        VARIANT Right ) = 0;
+    virtual HRESULT __stdcall get_NewWorldPoint (
+        double X,
+        double Y,
+        double Z,
+        struct IWorldPoint * * ppWorldPoint ) = 0;
+};
+
+struct __declspec(uuid("49f05bc5-e42d-4eca-b596-1cc1d732d398"))
+IAnimation : IDispatch
+{
+    //
+    // Wrapper methods for error-handling
+    //
+
+    HRESULT SetVehicles (
+        double Time,
+        unsigned short CountVehicles,
+        struct VisualVehicle * pVehicles );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall raw_SetVehicles (
+        double Time,
+        unsigned short CountVehicles,
+        struct VisualVehicle * pVehicles ) = 0;
+};
+
+struct VisualVehicle
+{
+    long ID;
+    short Type;
+    double X;
+    double Y;
+};
+
+struct __declspec(uuid("b97a593d-2a95-40f4-ba82-614a7c7c8902"))
+Vissim;
+    // [ default ] interface IVissim
+
+struct __declspec(uuid("f2e51bb9-5a6a-4c69-81c2-db33e3ca79e5"))
+Simulation;
+    // [ default ] interface ISimulation
+
+struct __declspec(uuid("3067a50b-d305-4a53-927e-a14ec97c4eed"))
+DynamicAssignment;
+    // [ default ] interface IDynamicAssignment
+    // [ default, source ] interface IDynamicAssignmentEvents
+
+struct __declspec(uuid("2ee37c5f-75d7-4e4e-a00f-4ee3ce20181c"))
+Net;
+    // [ default ] interface INet
+
+struct __declspec(uuid("9dd82759-27cb-4f66-9343-2fa5c97d82d9"))
+Graphics;
+    // [ default ] interface IGraphics
+
+struct __declspec(uuid("34138243-434a-43fd-aec3-75b18773e4ae"))
+Presentation;
+    // [ default ] interface IPresentation
+
+struct __declspec(uuid("e169a4df-84d8-403b-b196-b0adc3c36b46"))
+Evaluation;
+    // [ default ] interface IEvaluation
+
+struct __declspec(uuid("56adbc2f-3f54-454c-ae95-27a29e51da0b"))
+Links;
+    // [ default ] interface ILinks
+
+struct __declspec(uuid("fe080b9e-a6d3-4774-a86b-4172f2adc66c"))
+Link;
+    // [ default ] interface ILink
+
+struct __declspec(uuid("581644a5-ada9-49ee-82fe-d51344ed790b"))
+StopSigns;
+    // [ default ] interface IStopSigns
+
+struct __declspec(uuid("b21b5bd2-a9be-48f6-acd9-449e69441b2a"))
+StopSign;
+    // [ default ] interface IStopSign
+
+struct __declspec(uuid("c7beeba2-7b79-4550-be6c-43462d13b7f9"))
+Nodes;
+    // [ default ] interface INodes
+
+struct __declspec(uuid("eb733f73-16d6-43ca-bc67-06d7ddbd5d3f"))
+Node;
+    // [ default ] interface INode
+
+struct __declspec(uuid("9e05074f-3ffe-4e5d-a642-8d04be259562"))
+ParkingLots;
+    // [ default ] interface IParkingLots
+
+struct __declspec(uuid("7b064029-90d8-41cf-9286-252b8ac232d3"))
+ParkingLot;
+    // [ default ] interface IParkingLot
+
+struct __declspec(uuid("a8367329-aa18-4417-abf8-447ff53b6578"))
+Paths;
+    // [ default ] interface IPaths
+
+struct __declspec(uuid("958e0071-3d29-4848-938f-104868f94f50"))
+Path;
+    // [ default ] interface IPath
+
+struct __declspec(uuid("40b37694-ca35-4e80-81df-726ce20e4ee1"))
+Vehicles;
+    // [ default ] interface IVehicles
+
+struct __declspec(uuid("780b2653-a2f4-4368-a8da-f3456c2c2ecc"))
+Vehicle;
+    // [ default ] interface IVehicle
+
+struct __declspec(uuid("732a9b30-a33d-4008-b957-07a070490806"))
+TrafficCompositions;
+    // [ default ] interface ITrafficCompositions
+
+struct __declspec(uuid("f05e6049-5661-4651-a504-7155f44fb35d"))
+TrafficComposition;
+    // [ default ] interface ITrafficComposition
+
+struct __declspec(uuid("fb93437f-7e2a-46d8-a12d-ebd5821d172a"))
+VehicleInputs;
+    // [ default ] interface IVehicleInputs
+
+struct __declspec(uuid("6944b1c9-f728-4370-ba14-70340e1b826d"))
+VehicleInput;
+    // [ default ] interface IVehicleInput
+
+struct __declspec(uuid("36f96085-49da-4144-9158-0d01c3ddbe56"))
+RoutingDecisions;
+    // [ default ] interface IRoutingDecisions
+
+struct __declspec(uuid("ab2c611b-1f93-427f-b85d-a7f5a235717f"))
+RoutingDecision;
+    // [ default ] interface IRoutingDecision
+
+struct __declspec(uuid("4ba1a341-c693-49c7-8820-6c3379762f04"))
+Routes;
+    // [ default ] interface IRoutes
+
+struct __declspec(uuid("df356b2f-efc5-4d5c-a80a-314d4686f07d"))
+Route;
+    // [ default ] interface IRoute
+
+struct __declspec(uuid("8643c4b8-06f0-4231-a8fd-2b089d2839dc"))
+SignalControllers;
+    // [ default ] interface ISignalControllers
+
+struct __declspec(uuid("8e231a5d-fe1b-410c-8988-747ef8128bf2"))
+SignalController;
+    // [ default ] interface ISignalController
+
+struct __declspec(uuid("5639c7e3-a60c-43ac-b923-c4c172e7fc89"))
+SignalGroups;
+    // [ default ] interface ISignalGroups
+
+struct __declspec(uuid("5276734a-3592-4345-b7c8-fa9122923f7d"))
+SignalGroup;
+    // [ default ] interface ISignalGroup
+
+struct __declspec(uuid("185724a3-cf5f-4515-8470-1043b0d02ae3"))
+SignalHeads;
+    // [ default ] interface ISignalHeads
+
+struct __declspec(uuid("67025ec8-0ee6-42a0-9ad3-95451e340cec"))
+SignalHead;
+    // [ default ] interface ISignalHead
+
+struct __declspec(uuid("108a9969-3493-488b-8d48-9056811e4ece"))
+DataCollections;
+    // [ default ] interface IDataCollections
+
+struct __declspec(uuid("552e5c9e-1f7d-4735-b427-d8200fa18bf6"))
+DataCollection;
+    // [ default ] interface IDataCollection
+
+struct __declspec(uuid("a2b45c1e-a61f-4aa3-a988-8b3b6af5253b"))
+QueueCounters;
+    // [ default ] interface IQueueCounters
+
+struct __declspec(uuid("fc08f13c-6aa6-4670-a1bb-9d5393cdfe0a"))
+QueueCounter;
+    // [ default ] interface IQueueCounter
+
+struct __declspec(uuid("1f4290bc-0e16-4e43-b61f-b1d0aca81d39"))
+Detectors;
+    // [ default ] interface IDetectors
+
+struct __declspec(uuid("dbf7e7a6-675c-422e-a0d2-fc6f159c9620"))
+Detector;
+    // [ default ] interface IDetector
+
+struct __declspec(uuid("353425e7-e410-4177-9513-d24728c4b2c3"))
+TravelTimes;
+    // [ default ] interface ITravelTimes
+
+struct __declspec(uuid("a487f404-0c1c-4b2c-9c33-24d8504a6a85"))
+TravelTime;
+    // [ default ] interface ITravelTime
+
+struct __declspec(uuid("67620a02-8e6a-47cc-9cc9-e20132cfcc3b"))
+Delays;
+    // [ default ] interface IDelays
+
+struct __declspec(uuid("c2e0de0e-70f9-4fdb-a493-e7e056198bb4"))
+Delay;
+    // [ default ] interface IDelay
+
+struct __declspec(uuid("cab66cc1-e98b-45e6-971b-4d8414f594b4"))
+PTCallingPoints;
+    // [ default ] interface IPTCallingPoints
+
+struct __declspec(uuid("84c25512-9290-4526-b54b-573fb8c8786e"))
+StaticObjects;
+    // [ default ] interface IStaticObjects
+
+struct __declspec(uuid("6c53b92c-add9-4137-b8d7-70b82b40db1e"))
+StaticObject;
+    // [ default ] interface IStaticObject
+
+struct __declspec(uuid("4687d4ce-3470-4756-aee7-790e69935b0c"))
+WorldPoint;
+    // [ default ] interface IWorldPoint
+
+struct __declspec(uuid("11e1beb7-9c77-460b-9546-56e2e16617f1"))
+LinkEvaluation;
+    // [ default ] interface ILinkEvaluation
+
+struct __declspec(uuid("515dae09-aa8a-45d9-b76a-32d84459f4cf"))
+DataCollectionEvaluation;
+    // [ default ] interface IDataCollectionEvaluation
+
+struct __declspec(uuid("e6d81d6a-6a64-4453-b807-c16bf7e3117f"))
+QueueCounterEvaluation;
+    // [ default ] interface IQueueCounterEvaluation
+
+struct __declspec(uuid("57e11174-14c3-401c-9d08-503ae5f4b49b"))
+TravelTimeEvaluation;
+    // [ default ] interface ITravelTimeEvaluation
+
+struct __declspec(uuid("9c1b4a74-34cb-4a53-8d4d-48fd14c3ef6c"))
+DelayEvaluation;
+    // [ default ] interface IDelayEvaluation
+
+struct __declspec(uuid("6d214907-8e8e-4944-ac6c-6156d4f6d0a4"))
+NodeEvaluation;
+    // [ default ] interface INodeEvaluation
+
+struct __declspec(uuid("5d38b359-0ffa-478c-9f7e-a6ece0c3a026"))
+Online;
+    // [ default ] interface IOnline
+
+struct __declspec(uuid("4e1f8862-2f29-41ee-af62-42f0335cda09"))
+Animation;
+    // [ default ] interface IAnimation
+
+//
+// Wrapper method implementations
+//
+
+#include "vissim.tli"
+
+} // namespace VISSIM_COMSERVERLib
+
+#pragma pack(pop)

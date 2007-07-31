@@ -1,0 +1,415 @@
+<ui version="4.0" >
+ <class>ParametersDialog</class>
+ <widget class="QDialog" name="ParametersDialog" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>612</width>
+    <height>489</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Parameters</string>
+  </property>
+  <property name="sizeGripEnabled" >
+   <bool>true</bool>
+  </property>
+  <layout class="QVBoxLayout" >
+   <property name="margin" >
+    <number>11</number>
+   </property>
+   <property name="spacing" >
+    <number>6</number>
+   </property>
+   <item>
+    <widget class="QTabWidget" name="tabWidget" >
+     <property name="enabled" >
+      <bool>true</bool>
+     </property>
+     <property name="currentIndex" >
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="Widget8" >
+      <attribute name="title" >
+       <string>Display</string>
+      </attribute>
+      <widget class="QLabel" name="textLabel3" >
+       <property name="geometry" >
+        <rect>
+         <x>300</x>
+         <y>10</y>
+         <width>66</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>&lt;b>Thickness&lt;/b></string>
+       </property>
+       <property name="wordWrap" >
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="textLabel3_2" >
+       <property name="geometry" >
+        <rect>
+         <x>370</x>
+         <y>10</y>
+         <width>66</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>&lt;b>Radius&lt;/b></string>
+       </property>
+       <property name="wordWrap" >
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="textLabel1_3" >
+       <property name="geometry" >
+        <rect>
+         <x>10</x>
+         <y>70</y>
+         <width>61</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>&lt;b>&lt;i>Node&lt;/i>&lt;/b></string>
+       </property>
+       <property name="wordWrap" >
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="textLabel1_3_2" >
+       <property name="geometry" >
+        <rect>
+         <x>10</x>
+         <y>100</y>
+         <width>61</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>&lt;b>&lt;i>Queue&lt;/i>&lt;/b></string>
+       </property>
+       <property name="wordWrap" >
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="textLabel1_2" >
+       <property name="geometry" >
+        <rect>
+         <x>10</x>
+         <y>40</y>
+         <width>61</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>&lt;i>&lt;b>Link&lt;/b>&lt;/i></string>
+       </property>
+       <property name="wordWrap" >
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="textLabel1" >
+       <property name="geometry" >
+        <rect>
+         <x>110</x>
+         <y>10</y>
+         <width>61</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>&lt;b>Show&lt;/b></string>
+       </property>
+       <property name="wordWrap" >
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="textLabel1_3_2_2" >
+       <property name="geometry" >
+        <rect>
+         <x>10</x>
+         <y>190</y>
+         <width>76</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>&lt;b>&lt;i>Background&lt;/i>&lt;/b></string>
+       </property>
+       <property name="wordWrap" >
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="LinkColorButton" >
+       <property name="geometry" >
+        <rect>
+         <x>190</x>
+         <y>40</y>
+         <width>82</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>Link Color...</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="NodeColorButton" >
+       <property name="geometry" >
+        <rect>
+         <x>190</x>
+         <y>70</y>
+         <width>82</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>Node Color...</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="QueueColorButton" >
+       <property name="geometry" >
+        <rect>
+         <x>190</x>
+         <y>100</y>
+         <width>82</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>Queue Color...</string>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="LinkThickness" >
+       <property name="geometry" >
+        <rect>
+         <x>310</x>
+         <y>40</y>
+         <width>29</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="value" >
+        <number>1</number>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="NodeThickness" >
+       <property name="geometry" >
+        <rect>
+         <x>310</x>
+         <y>70</y>
+         <width>29</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="value" >
+        <number>1</number>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="QueueThickness" >
+       <property name="geometry" >
+        <rect>
+         <x>310</x>
+         <y>100</y>
+         <width>29</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="value" >
+        <number>6</number>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="NodeRadius" >
+       <property name="geometry" >
+        <rect>
+         <x>370</x>
+         <y>70</y>
+         <width>29</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="minimum" >
+        <number>1</number>
+       </property>
+       <property name="value" >
+        <number>4</number>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="ShowBgImage" >
+       <property name="geometry" >
+        <rect>
+         <x>100</x>
+         <y>190</y>
+         <width>79</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>Image</string>
+       </property>
+       <property name="checked" >
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="BgColorButton" >
+       <property name="geometry" >
+        <rect>
+         <x>190</x>
+         <y>190</y>
+         <width>82</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>Bg Color...</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="LinkIds" >
+       <property name="geometry" >
+        <rect>
+         <x>100</x>
+         <y>40</y>
+         <width>79</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>Link IDs</string>
+       </property>
+      </widget>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="buttonHelp" >
+       <property name="text" >
+        <string>&amp;Help</string>
+       </property>
+       <property name="shortcut" >
+        <string>F1</string>
+       </property>
+       <property name="autoDefault" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType" >
+        <enum>QSizePolicy::Expanding</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonOk" >
+       <property name="text" >
+        <string>&amp;OK</string>
+       </property>
+       <property name="shortcut" >
+        <string/>
+       </property>
+       <property name="autoDefault" >
+        <bool>true</bool>
+       </property>
+       <property name="default" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonCancel" >
+       <property name="text" >
+        <string>&amp;Cancel</string>
+       </property>
+       <property name="shortcut" >
+        <string/>
+       </property>
+       <property name="autoDefault" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11" />
+ <pixmapfunction>qPixmapFromMimeSource</pixmapfunction>
+ <includes>
+  <include location="global" >qcolordialog.h</include>
+  <include location="global" >qmatrix.h</include>
+ </includes>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonOk</sender>
+   <signal>clicked()</signal>
+   <receiver>ParametersDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonCancel</sender>
+   <signal>clicked()</signal>
+   <receiver>ParametersDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ShowBgImage</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ParametersDialog</receiver>
+   <slot>ShowBgImage_toggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
