@@ -194,7 +194,7 @@ void ODCheckerDlg::checkOD(bool check_)
 				QList<QStandardItem*> *onerowptr= new QList<QStandardItem*>();
 			
 				// add the item of view
-				QStandardItem* cell1=new QStandardItem();
+				QStandardItem* cell1=new QStandardItem(QString("None"));
 				onerowptr->append(cell1);
 				//itemmodel_->itemChanged(cell1); 
 
