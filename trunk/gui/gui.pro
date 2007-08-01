@@ -2,7 +2,6 @@
 
 TEMPLATE = app
 TARGET = mezzo_gui
-#DEPENDPATH += . tmp/rcc/debug_shared tmp/rcc/release_shared
 INCLUDEPATH += $(QTDIR)/include $(QTDIR)/include/QtCore $(QTDIR)/include/QtGui $(QTDIR)/include/QtDesigner $(QTDIR)/include/QtNetwork $(QTDIR)/include/ActiveQt $(QTDIR)/include/Qt3Support
 
 CONFIG(debug, debug|release) {

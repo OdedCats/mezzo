@@ -47,6 +47,7 @@ void ODTableViewDelegate::setEditorData(QWidget *editor, const QModelIndex &inde
 	if(index.column()==viewcol_){
 		QComboBox *comboBox = static_cast<QComboBox*>(editor);
 		comboBox->setCurrentIndex(0);
+		comboBox->show();
 	}
 	else{
 		QItemDelegate::setEditorData(editor, index);

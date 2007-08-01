@@ -44,6 +44,7 @@ class ODCheckerDlg : public QDialog, public Ui::ODCheckerDlg
    
  private:
     void loadInitOD();
+	void clearTableView();
 
 	//properties 
 	QStandardItemModel* itemmodel_; // model to the tableview 

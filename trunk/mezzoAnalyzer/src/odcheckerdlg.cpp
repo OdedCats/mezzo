@@ -27,20 +27,22 @@ ODCheckerDlg::ODCheckerDlg(QWidget* parent):QDialog(parent)
 
    // create the model for the tableview
    itemmodel_=new QStandardItemModel(0,5);
-   itemmodel_->setHeaderData(0, Qt::Horizontal, tr("Route"));
-   itemmodel_->setHeaderData(1, Qt::Horizontal, tr("Proportion"));
-   itemmodel_->setHeaderData(2, Qt::Horizontal, tr("Travel time"));
-   itemmodel_->setHeaderData(3, Qt::Horizontal, tr("Distance"));
-   itemmodel_->setHeaderData(4, Qt::Horizontal, tr("View"));
+   itemmodel_->setHeaderData(0, Qt::Horizontal, tr("View"));
+   itemmodel_->setHeaderData(1, Qt::Horizontal, tr("Route"));
+   itemmodel_->setHeaderData(2, Qt::Horizontal, tr("Proportion (%)"));
+   itemmodel_->setHeaderData(3, Qt::Horizontal, tr("Travel time (sec)"));
+   itemmodel_->setHeaderData(4, Qt::Horizontal, tr("Distance (m)"));
+   
 
    // create new tableview delegate
-   ODTableViewDelegate* tbdlgt=new ODTableViewDelegate(4, this);
+   ODTableViewDelegate* tbdlgt=new ODTableViewDelegate(0, this);
    ODTableView->setItemDelegate(tbdlgt);
    ODTableView->setModel(itemmodel_);
    ODTableView->hide();
    
    // lay out the size of the dialog
    layout()->setSizeConstraint(QLayout::SetFixedSize);
+   //layout()->setSizeConstraint(QLayout::SetDefaultConstraint);
    
 }
 
@@ -59,6 +61,7 @@ void ODCheckerDlg::reject()
 	//trigger the checkbutton
 	CheckButton->setChecked(false);
 	loadInitOD();
+	clearTableView();
 	// call the virtual function of the base class
 	QDialog::reject();
 }
@@ -80,6 +83,9 @@ void ODCheckerDlg::setNetwork(Network* mezzonet)
 */
 void ODCheckerDlg::loadDestCombwithO(const QString& curtext)
 {
+	// clear table contents previously shown
+	clearTableView();
+
 	if (curtext=="None"){
 		loadInitOD();
 	}
@@ -111,6 +117,9 @@ void ODCheckerDlg::loadDestCombwithO(const QString& curtext)
 */
 void ODCheckerDlg::loadOrigCombwithD(const QString& curtext)
 {
+	// clear table contents previously shown
+	clearTableView();
+
 	if (curtext=="None"){
 		loadInitOD();
 	}
@@ -173,33 +182,44 @@ void ODCheckerDlg::checkOD(bool check_)
 			findroutes=true;
 			vector<Route*>& allroutes=(*odlocation)->get_allroutes();
 			
+			// compute the summation of utility across all routes
+			double utilsum=0;
+			double currenttime=mezzonet_->get_currenttime();
+			for(unsigned i=0; i<allroutes.size();i++)
+				utilsum+=allroutes[i]->utility(currenttime);
+
 			// add the information as a row in the table
 			for(unsigned i=0; i<allroutes.size(); i++)
 			{
 				QList<QStandardItem*> *onerowptr= new QList<QStandardItem*>();
 			
+				// add the item of view
+				QStandardItem* cell1=new QStandardItem();
+				onerowptr->append(cell1);
+				//itemmodel_->itemChanged(cell1); 
+
 				// add the route ID item
 				QString routeid=QString::number(allroutes[i]->get_id());
-				QStandardItem* cell1=new QStandardItem(routeid);
-				onerowptr->append(cell1);
-
-				// add the item of travel time at the current time
-				double currenttime=mezzonet_->get_currenttime();
-				QString routecost=QString::number(allroutes[i]->cost(currenttime));
-				QStandardItem* cell2=new QStandardItem(routecost);
+				QStandardItem* cell2=new QStandardItem(routeid);
+				cell2->setEditable(false);
 				onerowptr->append(cell2);
-			
-				// add the item of route utility at the current time
-				QString routeutil=QString::number(allroutes[i]->utility(currenttime));
-				QStandardItem* cell3=new QStandardItem(routeutil);
-				onerowptr->append(cell3);
 
-				// add the item of distances
-				QStandardItem* cell4=new QStandardItem(QString("100"));
+				// add the item of utility proportion at the current time
+				double prop=allroutes[i]->utility(currenttime)/utilsum;
+				QStandardItem* cell3=new QStandardItem(QString::number(prop));
+				cell3->setEditable(false);
+				onerowptr->append(cell3);
+			
+				// add the item of travel time at the current time
+				QString routecost=QString::number(allroutes[i]->cost(currenttime));
+				QStandardItem* cell4=new QStandardItem(routecost);
+				cell4->setEditable(false);
 				onerowptr->append(cell4);
 
-				// add the item of view
-				QStandardItem* cell5=new QStandardItem();
+				// add the item of distances
+				int dist=allroutes[i]->computeRouteLength();
+				QStandardItem* cell5=new QStandardItem(QString::number(dist));
+				cell5->setEditable(false);
 				onerowptr->append(cell5);
 
 				// add the row to the tableview model
@@ -209,18 +229,22 @@ void ODCheckerDlg::checkOD(bool check_)
 			// set the information label
 			infolabel->setText(QString("Routes corresponding to the OD are listed!"));
 
-		} // end if routes are founded
+		} // endif - routes are founded or not
 	}
-	else
+	else // check_==false
 	{
+		clearTableView();
+		loadInitOD();
 		infolabel->setText(QString("Please choose an OD pair"));
 	}
+
+	// OD Tableview will be shown only if check_ and routes are found
 	ODTableView->setVisible(check_&&findroutes);
 }
 
-/*
-* load initial OD list in the comboboxes
-*/
+/**
+ * load initial OD list in the comboboxes
+ */
 void ODCheckerDlg::loadInitOD()
 {
 	origcomb->clear();
@@ -239,4 +263,15 @@ void ODCheckerDlg::loadInitOD()
 		destcomb->addItem(QString::number(dests[i]->get_id()));
 }
 
-
+/**
+ * clear the table view if table is not empty
+ */
+void ODCheckerDlg::clearTableView()
+{
+	int rowcount=itemmodel_->rowCount();
+	if (rowcount>0){
+		itemmodel_->removeRows(0,rowcount);
+		ODTableView->setVisible(false);
+		CheckButton->setChecked(false);
+	}
+}

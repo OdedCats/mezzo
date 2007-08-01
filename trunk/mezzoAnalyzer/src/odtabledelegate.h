@@ -1,6 +1,7 @@
 /**
 * definition of the custom delegate for the 
 * tableview of routes of a given OD pair
+* as a child of QItemDelegate
 *
 * Xiaoliang Ma
 * last update: 2007-07-30
@@ -28,6 +29,7 @@ class ODTableViewDelegate : public QItemDelegate
 
      QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                            const QModelIndex &index) const;
+	 
 
      void setEditorData(QWidget *editor, const QModelIndex &index) const;
      void setModelData(QWidget *editor, QAbstractItemModel *model,

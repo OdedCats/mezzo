@@ -176,6 +176,16 @@ double Route::utility (double time)
 #endif
 }
 
+/**
+* compute the length of the route
+**/
+int Route::computeRouteLength()
+{	
+	int routelength=0;
+	for(unsigned i=0; i<links.size();i++)
+		routelength+=links[i]->get_length();
+	return routelength;
+}
 
 void Route::write(ostream& out)
 {

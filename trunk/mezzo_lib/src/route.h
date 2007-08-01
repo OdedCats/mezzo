@@ -1,10 +1,20 @@
-
+/**
+ * modification:
+ *   add a function to compute route length
+ * Xiaoliang Ma 
+ * last change: 2007-08-01 
+ */
 #ifndef ROUTE_HH
 #define ROUTE_HH
+
 #include "link.h"
 #include "node.h"
 #include <vector>
 #include "linktimes.h"
+
+#ifndef _NO_GUI
+	#include <QColor>
+#endif
 
 //#define _DEBUG_ROUTE
 //#define _DISTANCE_BASED
@@ -38,6 +48,7 @@ class Route
 	bool has_link_after(int lid, int curr_lid);
 	void write(ostream& out);
 	double utility (double time);
+	int computeRouteLength();
   protected:
 	int id;
 	Origin* origin;
