@@ -44,6 +44,7 @@ class ODCheckerDlg : public QDialog, public Ui::ODCheckerDlg
 
  signals:
     void paintRequest();
+
  private:
     void loadInitOD();
 	void clearTableView();
