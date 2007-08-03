@@ -52,9 +52,8 @@ ODCheckerDlg::ODCheckerDlg(QWidget* parent):QDialog(parent)
 					this, SLOT(drawRoute(const QString&, const int&)) );
 
    // lay out the size of the dialog
-   layout()->setSizeConstraint(QLayout::SetFixedSize);
-   //layout()->setSizeConstraint(QLayout::SetDefaultConstraint);
-   
+   //layout()->setSizeConstraint(QLayout::SetFixedSize);
+   //layout()->setSizeConstraint(QLayout::SetDefaultConstraint);  
 }
 
 /**
