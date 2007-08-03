@@ -47,11 +47,10 @@ private slots:
 	
 	void loop();
 	void paintEvent(QPaintEvent *event );
-	
+	void copyPixmap();
+
 private:
 //FUNCTIONS
-	void copyPixmap();
-	
 	void displaytime(double time);
 	
 	

@@ -18,11 +18,10 @@
 
 // use the generated ui form header  
 #include "../mezzoAnalyzer/ui_odcheckdlg.h"
-
 // use the mainwindow and network definitions 
 #include "../mezzo_lib/src/network.h"
-
-//class Network;
+// include custom item delegate
+#include "odtabledelegate.h"
 
 class ODCheckerDlg : public QDialog, public Ui::ODCheckerDlg
 {
@@ -41,22 +40,25 @@ class ODCheckerDlg : public QDialog, public Ui::ODCheckerDlg
 	void checkOD(bool check_);
 	void loadDestCombwithO(const QString& curtext);
 	void loadOrigCombwithD(const QString& curtext);
-   
+	void drawRoute(const QString& colortext, const int& index);
+
+ signals:
+    void paintRequest();
  private:
     void loadInitOD();
 	void clearTableView();
 
 	//properties 
-	QStandardItemModel* itemmodel_; // model to the tableview 
 	int orgId_;
 	int destId_;
-
-	//internal state
 	bool networkset_;
 
 	// references 
+	QStandardItemModel* itemmodel_; // model to the tableview
+	ODTableViewDelegate* itemdelegate_; // table item control delegate
 	Network* mezzonet_;
-	  
+	ODpair* odsel_;  
+
 };
 
 #endif

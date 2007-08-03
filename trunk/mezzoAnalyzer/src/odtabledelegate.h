@@ -12,6 +12,7 @@
 #define ODTABLEDELEGATE_H
 
 #include <QObject>
+#include <QString>
 #include <QItemDelegate>
 #include <QModelIndex>
 #include <QWidget>
@@ -37,6 +38,9 @@ class ODTableViewDelegate : public QItemDelegate
 
      void updateEditorGeometry(QWidget *editor,
          const QStyleOptionViewItem &option, const QModelIndex &index) const;
+
+ signals:
+	 void activateAColor(const QString&, const int&) const;
 
  private:
 

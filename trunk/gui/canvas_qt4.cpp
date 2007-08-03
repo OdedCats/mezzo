@@ -36,8 +36,8 @@ MainForm::MainForm(QWidget *parent)
 	
 	// construction of the MezzoAnalyzer dialog 
 	od_analyser_=new ODCheckerDlg(this);
-	//QObject::connect(inspectdialog, SIGNAL(triggered()), 
-	//				 this, SLOT(on_inspectdialog_activated()));
+	QObject::connect(od_analyser_, SIGNAL(paintRequest()), 
+					 this, SLOT(copyPixmap()));
 }
 
 // AUTOCONNECTED SLOTS

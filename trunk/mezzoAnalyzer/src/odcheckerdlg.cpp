@@ -2,7 +2,7 @@
 #include <algorithm>
 #include "odcheckerdlg.h"
 #include "assist.h"
-#include "odtabledelegate.h"
+
 
 /**
  *  constructor of OD check dialog
@@ -11,19 +11,10 @@ ODCheckerDlg::ODCheckerDlg(QWidget* parent):QDialog(parent)
 {
    setupUi(this);
    mezzonet_=0;
+   odsel_=0;
    orgId_=-1;
    destId_=-1;
    networkset_=false;
-
-   // connect check button with "checkOD" function
-   QObject::connect(CheckButton, SIGNAL(toggled(bool)), 
-		   	        this, SLOT(checkOD(bool)));
-
-   // connect combbox with two functions
-   QObject::connect(origcomb, SIGNAL(activated(const QString&)),
-					this, SLOT(loadDestCombwithO(const QString&)));
-   QObject::connect(destcomb, SIGNAL(activated(const QString)),
-	                this, SLOT(loadOrigCombwithD(const QString)));
 
    // create the model for the tableview
    itemmodel_=new QStandardItemModel(0,5);
@@ -33,13 +24,33 @@ ODCheckerDlg::ODCheckerDlg(QWidget* parent):QDialog(parent)
    itemmodel_->setHeaderData(3, Qt::Horizontal, tr("Travel time (sec)"));
    itemmodel_->setHeaderData(4, Qt::Horizontal, tr("Distance (m)"));
    
+   // set column width
+   QHeaderView *headerview=ODTableView->horizontalHeader();
+   headerview->resizeSection(0,12);
+   headerview->resizeSection(1,12);
+   headerview->resizeSection(2,20);
+   headerview->resizeSection(3,20);
+   headerview->resizeSection(4,20);
 
    // create new tableview delegate
-   ODTableViewDelegate* tbdlgt=new ODTableViewDelegate(0, this);
-   ODTableView->setItemDelegate(tbdlgt);
+   itemdelegate_=new ODTableViewDelegate(0, this);
+   ODTableView->setItemDelegate(itemdelegate_);
    ODTableView->setModel(itemmodel_);
    ODTableView->hide();
-   
+
+   // connect check button with "checkOD" function
+   QObject::connect(CheckButton, SIGNAL(toggled(bool)), 
+		   	        this, SLOT(checkOD(bool)));
+   // connect combbox with two functions
+   QObject::connect(origcomb, SIGNAL(activated(const QString&)),
+					this, SLOT(loadDestCombwithO(const QString&)));
+   QObject::connect(destcomb, SIGNAL(activated(const QString&)),
+	                this, SLOT(loadOrigCombwithD(const QString&)));
+
+   //connect the activated color signal with draw route slots
+   QObject::connect(itemdelegate_, SIGNAL(activateAColor(const QString&, const int&)),
+					this, SLOT(drawRoute(const QString&, const int&)) );
+
    // lay out the size of the dialog
    layout()->setSizeConstraint(QLayout::SetFixedSize);
    //layout()->setSizeConstraint(QLayout::SetDefaultConstraint);
@@ -180,7 +191,8 @@ void ODCheckerDlg::checkOD(bool check_)
 		else
 		{
 			findroutes=true;
-			vector<Route*>& allroutes=(*odlocation)->get_allroutes();
+			odsel_=*odlocation;
+			vector<Route*>& allroutes=odsel_->get_allroutes();
 			
 			// compute the summation of utility across all routes
 			double utilsum=0;
@@ -194,7 +206,7 @@ void ODCheckerDlg::checkOD(bool check_)
 				QList<QStandardItem*> *onerowptr= new QList<QStandardItem*>();
 			
 				// add the item of view
-				QStandardItem* cell1=new QStandardItem(QString("None"));
+				QStandardItem* cell1=new QStandardItem(QString("none"));
 				onerowptr->append(cell1);
 				//itemmodel_->itemChanged(cell1); 
 
@@ -272,6 +284,46 @@ void ODCheckerDlg::clearTableView()
 	if (rowcount>0){
 		itemmodel_->removeRows(0,rowcount);
 		ODTableView->setVisible(false);
-		CheckButton->setChecked(false);
 	}
+	CheckButton->setChecked(false);
+}
+
+/**
+ * draw the indexed route with a color 
+ */
+void ODCheckerDlg::drawRoute(const QString& colortext, const int& index) 
+{
+	if (odsel_){
+		vector<Route*>& allroutes=odsel_->get_allroutes();
+		allroutes[index]->set_selected(true);
+		QColor routecolor;
+		if(colortext=="red"){
+			routecolor=QColor(255,0,0);
+			allroutes[index]->set_selected_color(routecolor);
+		}
+		else if (colortext=="blue"){
+			routecolor=QColor(0,0,255);
+			allroutes[index]->set_selected_color(routecolor);
+		}
+		else if (colortext=="green"){
+			routecolor=QColor(0,255,0);
+			allroutes[index]->set_selected_color(routecolor);
+		}
+		else if (colortext=="cyan"){
+			routecolor=QColor(0,255,255);
+			allroutes[index]->set_selected_color(routecolor);
+		}
+		else if (colortext=="magenta"){
+			routecolor=QColor(255,0,255);
+			allroutes[index]->set_selected_color(routecolor);
+		}
+		else{
+			allroutes[index]->set_selected(false);
+			// set the color to the original
+
+		}
+		mezzonet_->redraw();
+		emit paintRequest();
+	}
+	
 }

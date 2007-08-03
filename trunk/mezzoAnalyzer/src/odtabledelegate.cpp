@@ -3,7 +3,7 @@
 * tableview of routes of a given OD pair
 *
 * Xiaoliang Ma
-* last update: 2007-07-30
+* last update: 2007-08-02
 *
 */
 
@@ -23,12 +23,13 @@ QWidget* ODTableViewDelegate::createEditor(QWidget *parent,
                                         const QModelIndex &index) const
 {
 	if(index.column()==viewcol_){
-		QComboBox *comboboxeditor = new QComboBox(parent);
-		comboboxeditor->addItem("none");
+		QComboBox* comboboxeditor = new QComboBox(parent);
+		comboboxeditor->addItem("none"); 
 		comboboxeditor->addItem("red");
 		comboboxeditor->addItem("blue");
 		comboboxeditor->addItem("green");
-		comboboxeditor->addItem("pink");
+		comboboxeditor->addItem("cyan");
+		comboboxeditor->addItem("magenta");
 
 		// add an event handler to the item delegate
 		comboboxeditor->installEventFilter(const_cast<ODTableViewDelegate*>(this));
@@ -46,8 +47,8 @@ void ODTableViewDelegate::setEditorData(QWidget *editor, const QModelIndex &inde
 	
 	if(index.column()==viewcol_){
 		QComboBox *comboBox = static_cast<QComboBox*>(editor);
-		comboBox->setCurrentIndex(0);
-		comboBox->show();
+		//comboBox->setCurrentIndex(0);
+		//comboBox->show();
 	}
 	else{
 		QItemDelegate::setEditorData(editor, index);
@@ -60,8 +61,12 @@ void ODTableViewDelegate::setModelData(QWidget *editor,
 {
 	if(index.column()==viewcol_){
 		QComboBox *comboBox = static_cast<QComboBox*>(editor);
-		QString text= comboBox->currentText();
-		model->setData(index, text);
+		QString colortext= comboBox->currentText();
+		model->setData(index, colortext);
+		if (colortext!="none"){
+			int rowcount=index.row();
+			emit activateAColor(colortext,rowcount);
+		}
 	}else{
 		QItemDelegate::setModelData(editor,model,index);
 	}
