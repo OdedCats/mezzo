@@ -2587,59 +2587,59 @@ bool Network::readmaster(string name)
 	inputfile >> temp;
 	if (temp!="#input_files")
 		return false;
-  inputfile >> temp;
-   if (temp!="network=")
+	inputfile >> temp;
+	if (temp!="network=")
 		return false;
-  inputfile >> temp;
-   filenames.push_back(temp); // #0
-  inputfile >> temp;
-   if (temp!="turnings=")
+	inputfile >> temp;
+	filenames.push_back(workingdir+temp); // #0
+	inputfile >> temp;
+	if (temp!="turnings=")
 		return false;
-  inputfile >> temp;
-   filenames.push_back(temp); // #1
+	inputfile >> temp;
+	filenames.push_back(workingdir+temp); // #1
 
-// INSERT SIGNALS HERE 
-  inputfile >> temp;
-   if (temp!="signals=")
+	// INSERT SIGNALS HERE 
+	inputfile >> temp;
+	if (temp!="signals=")
 		return false;
-  inputfile >> temp;
-   filenames.push_back(temp); // -> #2
+	inputfile >> temp;
+	filenames.push_back(workingdir+temp); // #2
 
-  inputfile >> temp;
+	inputfile >> temp;
 	if (temp!="histtimes=")
 		return false;
-  inputfile >> temp;
-   filenames.push_back(temp); // #2 -> #3
-  inputfile >> temp;
+	inputfile >> temp;
+	filenames.push_back(workingdir+temp); // #3
+	inputfile >> temp;
 	if (temp!="routes=")
 		return false;
 	inputfile >> temp;
-	filenames.push_back(temp); // #3 -> #4
+	filenames.push_back(workingdir+temp); // #4
 	inputfile >> temp;
- 	if (temp!="demand=")
+	if (temp!="demand=")
 		return false;
 	inputfile >> temp;
-	filenames.push_back(temp); // #4  -> #5
+	filenames.push_back(workingdir+temp); //  #5
 	inputfile >> temp;
- 	if (temp!="incident=")
+	if (temp!="incident=")
 		return false;
 	inputfile >> temp;
-	filenames.push_back(temp); // #5 -> #6
+	filenames.push_back(workingdir+temp); // #6
 	inputfile >> temp;
- 	if (temp!="vehicletypes=")
-		return false;
-	inputfile >> temp;	
-	filenames.push_back(temp); // #6 -> #7	
-	inputfile >> temp;
- 	if (temp!="virtuallinks=")
+	if (temp!="vehicletypes=")
 		return false;
 	inputfile >> temp;	
-	filenames.push_back(temp); // #7 ->#8		
+	filenames.push_back(workingdir+temp); // #7	
 	inputfile >> temp;
- 	if (temp!="serverrates=")
+	if (temp!="virtuallinks=")
 		return false;
 	inputfile >> temp;	
-	filenames.push_back(temp); // #8 -> #9			
+	filenames.push_back(workingdir+temp); // #8		
+	inputfile >> temp;
+	if (temp!="serverrates=")
+		return false;
+	inputfile >> temp;	
+	filenames.push_back(workingdir+temp); // #9			
 	inputfile >> temp;
 	if (temp!="#output_files")
 		return false;
@@ -2647,50 +2647,50 @@ bool Network::readmaster(string name)
 	if (temp!="linktimes=")
 		return false;
 	inputfile >> temp;
-	filenames.push_back(temp); // #9  -> #10
+	filenames.push_back(workingdir+temp); // #10
 	inputfile >> temp;
 	if (temp!="output=")
 		return false;
 	inputfile >> temp;
-	filenames.push_back(temp); // #10  -> #11
+	filenames.push_back(workingdir+temp); // #11
 	inputfile >> temp;
 	if (temp!="summary=")
 		return false;
 	inputfile >> temp;
-	filenames.push_back(temp); // #11  -> #12
-	
+	filenames.push_back(workingdir+temp); //  #12
+
 	inputfile >> temp;
 	if (temp!="speeds=")
 		return false;
 	inputfile >> temp;
-	filenames.push_back(temp); // #12 -> #13
-	
+	filenames.push_back(workingdir+temp); // #13
+
 	inputfile >> temp;
 	if (temp!="inflows=")
 		return false;
 	inputfile >> temp;
-	filenames.push_back(temp); // #13 -> #14
+	filenames.push_back(workingdir+temp); // #14
 	inputfile >> temp;
 	if (temp!="outflows=")
 		return false;
 	inputfile >> temp;
-	filenames.push_back(temp); // #14 -> #15
+	filenames.push_back(workingdir+temp); //  #15
 	inputfile >> temp;
 	if (temp!="queuelengths=")
 		return false;
 	inputfile >> temp;
-	filenames.push_back(temp); // #15  -> #16
+	filenames.push_back(workingdir+temp); // #16
 	inputfile >> temp;
 	if (temp!="densities=")
 		return false;
 	inputfile >> temp;
-	filenames.push_back(temp); // #16  -> #17
-	
-	
+	filenames.push_back(workingdir+temp); // #17
+
+
 	inputfile >> temp;
 	if (temp!="#scenario")
 		return false;
-// insert Start time here
+	// insert Start time here
 	inputfile >> temp;
 	if (temp!="starttime=")
 		return false;
@@ -2700,15 +2700,15 @@ bool Network::readmaster(string name)
 	if (temp!="stoptime=") // stoptime==runtime
 		return false;
 	inputfile >> runtime;
-  inputfile >> temp;
+	inputfile >> temp;
 	if (temp!="calc_paths=")
 	{
-    calc_paths=false;
+		calc_paths=false;
 		return true;
-  }
+	}
 	else
 	{
-    inputfile >> calc_paths;
+		inputfile >> calc_paths;
 	}
 	inputfile >> temp;
 	if (temp!="traveltime_alpha=")
@@ -2716,10 +2716,10 @@ bool Network::readmaster(string name)
 	inputfile >> time_alpha;
 
 	inputfile >> temp;
-   if (temp!="parameters=")
+	if (temp!="parameters=")
 		return false;
-  inputfile >> temp;
-   filenames.push_back(temp);		                //  -> #18 Parameters
+	inputfile >> temp;
+	filenames.push_back(workingdir+temp);   //  #18 Parameters
 
 #ifdef _VISSIMCOM	
 	inputfile >> temp;
@@ -2730,7 +2730,8 @@ bool Network::readmaster(string name)
 	}
 	else
 	{	
-	inputfile >> vissimfile; // read in separate var, because this part is only used with VISSIMCOM
+		// NOTE: here the full path is specified! (since it may be somewhere else)
+		inputfile >> vissimfile; // read in separate var, because this part is only used with VISSIMCOM
 	}
 #endif //_VISSIMCOM
 	inputfile >> temp;
@@ -2738,10 +2739,10 @@ bool Network::readmaster(string name)
 	{
 		//cout << "No background specified in masterfile" << endl;
 		return true;
-	
-		}
+
+	}
 	if (inputfile >> temp)
-		filenames.push_back(temp); // #17 -> #19	
+		filenames.push_back(workingdir+temp); //  #19	
 	return true;
 }
 
@@ -2814,8 +2815,8 @@ double Network::executemaster(QPixmap * pm_,QMatrix * wm_)
 // NEW 2007_03_08
 #ifdef _BUSES
 	// read the busroutes & Lines
-	this->readbusroutes ("busroutes.dat");
-	this->readbuslines ("buslines.dat");
+	this->readbusroutes (workingdir + "busroutes.dat"); //FIX IN THE MAIN READ & WRITE
+	this->readbuslines (workingdir + "buslines.dat"); //FIX IN THE MAIN READ & WRITE
 #endif // _BUSES
 	if (!init())
 		cout << "Problem initialising " << endl;
@@ -2825,7 +2826,7 @@ double Network::executemaster(QPixmap * pm_,QMatrix * wm_)
 		drawing->set_background(filenames[19].c_str());	
 	if (theParameters->use_ass_matrix) 
 	{
-		this->readassignmentlinksfile ("assign_links.dat");
+		this->readassignmentlinksfile (workingdir + "assign_links.dat"); //FIX IN THE MAIN READ & WRITE
 	}
    
 	return runtime;
@@ -2896,8 +2897,8 @@ double Network::executemaster()
 #ifdef _BUSES
 	// NEW 2007_03_08
 	// read the busroutes & Lines
-	this->readbusroutes ("busroutes.dat");
-	this->readbuslines ("buslines.dat");
+	this->readbusroutes (workingdir +"busroutes.dat");//FIX IN THE MAIN READ & WRITE
+	this->readbuslines (workingdir +"buslines.dat");//FIX IN THE MAIN READ & WRITE
 #endif //_BUSES
 
 	if (!init())
@@ -2906,7 +2907,7 @@ double Network::executemaster()
 		cout << "Problem reading incident file " << filenames [5] << endl; // reads the incident file   and makes all the alternative routes at all  links
 	if (theParameters->use_ass_matrix) 
 	{
-		this->readassignmentlinksfile ("assign_links.dat");
+		this->readassignmentlinksfile (workingdir + "assign_links.dat"); // !!! WE NEED TO FIX THIS INTO THE MAIN READ& WRITE
 	}
 	
 	return runtime;

@@ -163,7 +163,7 @@ class Network
   void recenter_image();   // sets the image in the center and adapts zoom to fit window
   void redraw(); // redraws the image
 
- // access ports 
+ // GET's
   double get_currenttime(){return time;}
   Parameters* get_parameters () {return theParameters;} 
   vector <ODpair*>& get_odpairs () {return odpairs;}
@@ -172,6 +172,9 @@ class Network
   
   double calc_diff_input_output_linktimes (); // calculates the sum of the differences in output-input link travel times
   double calc_sumsq_input_output_linktimes (); // calculates the sum square of the differences in output-input link travel times
+// SET's
+  void set_workingdir (const string dir) {workingdir = dir;}
+
 
 // Public transport
   bool readbusroutes(string name); // reads the busroutes, similar to readroutes
@@ -261,6 +264,7 @@ class Network
   bool readparameters(string name);
   // end of read functions
    vector <string> filenames; // filenames for input/output as read in the master file
+   string workingdir;
    int runtime; // == stoptime
    int starttime;
    bool calc_paths; // if true new shortest paths are calculated and new paths added to the route file

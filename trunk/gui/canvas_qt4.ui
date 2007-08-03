@@ -1144,7 +1144,6 @@
   <include location="global" >qpainter.h</include>
   <include location="global" >qpixmap.h</include>
   <include location="global" >qtimer.h</include>
-  <include location="global" >q3filedialog.h</include>
   <include location="global" >qpen.h</include>
   <include location="global" >string</include>
   <include location="global" >qstatusbar.h</include>

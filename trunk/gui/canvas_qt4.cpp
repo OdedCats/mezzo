@@ -50,10 +50,17 @@ void MainForm::on_quit_activated()
 void MainForm::on_openmasterfile_activated()
 {
 	QString fn = "";
-	fn = (Q3FileDialog::getOpenFileName(QString::null,"mezzo and MiMe Files (*.mime *.mezzo)", this ) );
+	//fn = (Q3FileDialog::getOpenFileName(QString::null,"mezzo and MiMe Files (*.mime *.mezzo)", this ) );
+	// move to QT4 equivalent:
+	fn = (QFileDialog::getOpenFileName(this, "Select a MEZZO master file", QString::null,"Mezzo Files (*.mime *.mezzo)") );
 	// Open master file
 	if ( !fn.isEmpty() ) 
 	{
+		// strip the dir from the filename and give to the Network
+		int pos = fn.lastIndexOf ('/');
+		QString workingdir = fn.left(pos+1);
+		theNetwork.set_workingdir (workingdir.latin1());
+		// make a STL compatible string
 		string name=fn.latin1();
 		if (theNetwork.readmaster(name))
 			runtime=theNetwork.executemaster(&pm2,&wm);
@@ -98,7 +105,7 @@ void MainForm::on_zoomout_activated()
 
 void MainForm::on_savescreenshot_activated()
 {
-    QString fn = QFileDialog::getSaveFileName("", "PNG Files (*.png)", this );
+	QString fn = QFileDialog::getSaveFileName(this, "Save Image", QString::null, "PNG Files (*.png)" );
     if ( !fn.isEmpty() )
     {
             pm1.save(fn,"PNG");
@@ -107,7 +114,7 @@ void MainForm::on_savescreenshot_activated()
 
 void MainForm::on_loadbackground_activated()
 {
-	QString fn( QFileDialog::getOpenFileName(QString::null,"PNG Files (*.png)", this ) );
+	QString fn( QFileDialog::getOpenFileName(this, "Open background image",QString::null,"PNG Files (*.png)" ) );
     if (!fn.isEmpty())
     {
 	string haha=fn.latin1();

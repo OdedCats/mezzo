@@ -8,6 +8,8 @@
 #define MAINFORM
 
 #include <Qt3Support>
+//#include <q3filedialog.h> // taken out, replaced by Qfiledialog
+#include <Qfiledialog>
 #include "ui_canvas_qt4.h"
 #include "parametersdialog_qt4.h"
 #include "../mezzo_lib/src/parameters.h"
