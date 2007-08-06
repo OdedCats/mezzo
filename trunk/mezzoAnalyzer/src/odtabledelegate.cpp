@@ -63,10 +63,10 @@ void ODTableViewDelegate::setModelData(QWidget *editor,
 		QComboBox *comboBox = static_cast<QComboBox*>(editor);
 		QString colortext= comboBox->currentText();
 		model->setData(index, colortext);
-		if (colortext!="none"){
+		//if (colortext!="none"){
 			int rowcount=index.row();
 			emit activateAColor(colortext,rowcount);
-		}
+		//}
 	}else{
 		QItemDelegate::setModelData(editor,model,index);
 	}
