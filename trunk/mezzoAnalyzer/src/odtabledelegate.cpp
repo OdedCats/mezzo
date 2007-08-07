@@ -25,10 +25,10 @@ QWidget* ODTableViewDelegate::createEditor(QWidget *parent,
 	if(index.column()==viewcol_){
 		QComboBox* comboboxeditor = new QComboBox(parent);
 		comboboxeditor->addItem("none"); 
-		comboboxeditor->addItem("red");
+		comboboxeditor->addItem("black");
 		comboboxeditor->addItem("blue");
 		comboboxeditor->addItem("green");
-		comboboxeditor->addItem("cyan");
+		comboboxeditor->addItem("red");
 		comboboxeditor->addItem("magenta");
 
 		// add an event handler to the item delegate
@@ -63,7 +63,11 @@ void ODTableViewDelegate::setModelData(QWidget *editor,
 		QComboBox *comboBox = static_cast<QComboBox*>(editor);
 		QString colortext= comboBox->currentText();
 		model->setData(index, colortext);
+<<<<<<< .mine
+		if (colortext!=""){
+=======
 		//if (colortext!="none"){
+>>>>>>> .r27
 			int rowcount=index.row();
 			emit activateAColor(colortext,rowcount);
 		//}
