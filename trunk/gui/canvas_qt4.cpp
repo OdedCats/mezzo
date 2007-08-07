@@ -35,7 +35,7 @@ MainForm::MainForm(QWidget *parent)
 	pmdlg = new ParametersDialog (this);
 	
 	// construction of the MezzoAnalyzer dialog 
-	od_analyser_=new ODCheckerDlg(this);
+	od_analyser_=new ODCheckerDlg();
 	QObject::connect(od_analyser_, SIGNAL(paintRequest()), 
 					 this, SLOT(copyPixmap()));
 }

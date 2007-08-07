@@ -15,7 +15,8 @@ ODCheckerDlg::ODCheckerDlg(QWidget* parent):QDialog(parent)
    orgId_=-1;
    destId_=-1;
    networkset_=false;
-
+   paintrouteseq_=new vector<std::pair<int,QString>>(0);
+  
    // create the model for the tableview
    itemmodel_=new QStandardItemModel(0,5);
    itemmodel_->setHeaderData(0, Qt::Horizontal, tr("View"));
@@ -52,7 +53,7 @@ ODCheckerDlg::ODCheckerDlg(QWidget* parent):QDialog(parent)
 					this, SLOT(drawRoute(const QString&, const int&)) );
 
    // lay out the size of the dialog
-   //layout()->setSizeConstraint(QLayout::SetFixedSize);
+   layout()->setSizeConstraint(QLayout::SetFixedSize);
    //layout()->setSizeConstraint(QLayout::SetDefaultConstraint);  
 }
 
@@ -62,6 +63,7 @@ ODCheckerDlg::ODCheckerDlg(QWidget* parent):QDialog(parent)
 ODCheckerDlg::~ODCheckerDlg()
 {
 	// only release the properties of this dialog
+	delete paintrouteseq_;
 	delete itemmodel_;
 }
 
@@ -281,8 +283,10 @@ void ODCheckerDlg::clearTableView()
 {
 	int rowcount=itemmodel_->rowCount();
 	if (rowcount>0){
-		itemmodel_->removeRows(0,rowcount);
 		ODTableView->setVisible(false);
+		itemmodel_->removeRows(0,rowcount);
+		// clear routes drawn previously
+		unselectRoutes();
 	}
 	CheckButton->setChecked(false);
 }
@@ -293,36 +297,86 @@ void ODCheckerDlg::clearTableView()
 void ODCheckerDlg::drawRoute(const QString& colortext, const int& index) 
 {
 	if (odsel_){
+
+		// get all routes from od pair
 		vector<Route*>& allroutes=odsel_->get_allroutes();
 		allroutes[index]->set_selected(true);
-		QColor routecolor;
-		if(colortext=="red"){
-			routecolor=QColor(255,0,0);
-			allroutes[index]->set_selected_color(routecolor);
-		}
-		else if (colortext=="blue"){
-			routecolor=QColor(0,0,255);
-			allroutes[index]->set_selected_color(routecolor);
-		}
-		else if (colortext=="green"){
-			routecolor=QColor(0,255,0);
-			allroutes[index]->set_selected_color(routecolor);
-		}
-		else if (colortext=="cyan"){
-			routecolor=QColor(0,255,255);
-			allroutes[index]->set_selected_color(routecolor);
-		}
-		else if (colortext=="magenta"){
-			routecolor=QColor(255,0,255);
-			allroutes[index]->set_selected_color(routecolor);
-		}
-		else{
-			allroutes[index]->set_selected(false);
-			// set the color to the original
 
+		QColor routecolor;
+
+		if(colortext=="none"){
+			
+			// remove the current index from the paint list
+			vector<std::pair<int,QString>>::iterator iter;
+			for(iter=paintrouteseq_->begin();iter!=paintrouteseq_->end();iter++){
+				if((*iter).first==index){
+					paintrouteseq_->erase(iter);
+					allroutes[index]->set_selected(false);
+					break;
+				}
+			}
+			//redraw the left painted routes in the stored sequence
+			for(iter=paintrouteseq_->begin();iter!=paintrouteseq_->end();iter++){
+				routecolor=txt2Color((*iter).second);
+				allroutes[(*iter).first]->set_selected_color(routecolor);
+				allroutes[(*iter).first]->set_selected(true);
+			}
+		}
+		else{ // if a color is selected
+			routecolor=txt2Color(colortext);
+			allroutes[index]->set_selected(true);
+			allroutes[index]->set_selected_color(routecolor);
+			QString tempstr(colortext);
+			paintrouteseq_->push_back(std::pair<int,QString>(index,tempstr));
 		}
 		mezzonet_->redraw();
 		emit paintRequest();
 	}
-	
+
+}
+
+/**
+ * deselect all the routes 
+ */
+void ODCheckerDlg::unselectRoutes()
+{
+	int tempN=paintrouteseq_->size();
+	if(tempN>0){
+		vector<Route*>& allroutes=odsel_->get_allroutes();
+		vector<std::pair<int,QString>>::const_iterator eroute;
+		for( eroute=paintrouteseq_->begin(); 
+			 eroute!= paintrouteseq_->end(); eroute++){
+				 allroutes[(*eroute).first]->set_selected(false);
+		}
+		paintrouteseq_->clear();
+		mezzonet_->redraw();
+		emit paintRequest();
+	}
+}
+
+/**
+ * text change to color 
+ */
+QColor ODCheckerDlg::txt2Color(const QString& colortext)
+{
+	QColor routecolor;
+	if(colortext=="black"){
+		routecolor=QColor(0,0,0);
+	}
+	else if (colortext=="blue"){
+		routecolor=QColor(0,0,255);
+	}
+	else if (colortext=="green"){
+		routecolor=QColor(0,255,0);
+	}
+	else if (colortext=="red"){
+		routecolor=QColor(255,0,0);
+	}
+	else if (colortext=="magenta"){
+		routecolor=QColor(255,0,255);
+	}
+	else{
+		// to throw an exception
+	}
+	return routecolor;
 }

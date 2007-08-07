@@ -1,7 +1,15 @@
 /*
  * this is the definition of the dialog to 
  * check the OD information in the Mezzo network
+ *
+ * note: code here assume route list of an odpair 
+ * will not be changed during the operation 
+ *
+ * Xiaoliang Ma
+ * Last modification: 2007-08-05
+ *
  */
+
 #ifndef  ODCHECKERDLG_H
 #define  ODCHECKERDLG_H
 
@@ -11,10 +19,11 @@
 #include <QStandardItemModel>
 #include <QStandardItem>
 #include <QComboBox>
-
+#include <QColor>
 #include <QString>
 #include <Qt3Support>
 #include <vector>
+
 
 // use the generated ui form header  
 #include "../mezzoAnalyzer/ui_odcheckdlg.h"
@@ -27,7 +36,7 @@ class ODCheckerDlg : public QDialog, public Ui::ODCheckerDlg
 {
 	Q_OBJECT
  public:
-	ODCheckerDlg(QWidget* parent);
+	ODCheckerDlg(QWidget* parent=0);
 	~ODCheckerDlg();
 	void setNetwork(Network* mezzonet);
 	bool getNetworkState(){return networkset_;}
@@ -48,6 +57,8 @@ class ODCheckerDlg : public QDialog, public Ui::ODCheckerDlg
  private:
     void loadInitOD();
 	void clearTableView();
+	void unselectRoutes();
+	QColor txt2Color(const QString& colortext);
 
 	//properties 
 	int orgId_;
@@ -58,7 +69,8 @@ class ODCheckerDlg : public QDialog, public Ui::ODCheckerDlg
 	QStandardItemModel* itemmodel_; // model to the tableview
 	ODTableViewDelegate* itemdelegate_; // table item control delegate
 	Network* mezzonet_;
-	ODpair* odsel_;  
+	ODpair* odsel_;
+	vector<std::pair<int, QString>>* paintrouteseq_;  // record of the painted routes
 
 };
 
