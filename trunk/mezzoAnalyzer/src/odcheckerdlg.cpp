@@ -16,7 +16,11 @@ ODCheckerDlg::ODCheckerDlg(QWidget* parent):QDialog(parent)
    destId_=-1;
    networkset_=false;
    paintrouteseq_=new vector<std::pair<int,QString>>(0);
-  
+   
+   // lay out the size of the dialog
+   layout()->setSizeConstraint(QLayout::SetFixedSize);
+   //layout()->setSizeConstraint(QLayout::SetDefaultConstraint);	
+
    // create the model for the tableview
    itemmodel_=new QStandardItemModel(0,5);
    itemmodel_->setHeaderData(0, Qt::Horizontal, tr("View"));
@@ -37,7 +41,8 @@ ODCheckerDlg::ODCheckerDlg(QWidget* parent):QDialog(parent)
    itemdelegate_=new ODTableViewDelegate(0, this);
    ODTableView->setItemDelegate(itemdelegate_);
    ODTableView->setModel(itemmodel_);
-   ODTableView->hide();
+   ODTableView->installEventFilter(this);
+     
 
    // connect check button with "checkOD" function
    QObject::connect(CheckButton, SIGNAL(toggled(bool)), 
@@ -47,14 +52,28 @@ ODCheckerDlg::ODCheckerDlg(QWidget* parent):QDialog(parent)
 					this, SLOT(loadDestCombwithO(const QString&)));
    QObject::connect(destcomb, SIGNAL(activated(const QString&)),
 	                this, SLOT(loadOrigCombwithD(const QString&)));
-
-   //connect the activated color signal with draw route slots
+   // connect the activated color signal with draw route slots
    QObject::connect(itemdelegate_, SIGNAL(activateAColor(const QString&, const int&)),
 					this, SLOT(drawRoute(const QString&, const int&)) );
+   // using single click to activate the item editor
+   QObject::connect(ODTableView, SIGNAL(clicked(const QModelIndex &)), ODTableView,
+								SLOT(edit(const QModelIndex &)));
+   
+   //QObject::connect(ODTableView, SIGNAL(clicked(const QModelIndex &)), this,
+	//							SLOT(selectionHandle(const QModelIndex &)));
 
-   // lay out the size of the dialog
-   layout()->setSizeConstraint(QLayout::SetFixedSize);
-   //layout()->setSizeConstraint(QLayout::SetDefaultConstraint);  
+   // get the selection model
+   //QItemSelectionModel* selmodel = ODTableView->selectionModel();
+   //ODTableView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+   // connect the selected changed signal with selection handle slot function
+   //QObject::connect(ODTableView, SIGNAL(selectionChanged(const QItemSelection &, 
+   //				                                      const QItemSelection &)),
+   //	                    this, SLOT(slectionHandle(const QItemSelection &, 
+   //							                      const QItemSelection &)) );
+   
+   // hide the table view
+   ODTableView->setVisible(false);
 }
 
 /**
@@ -65,6 +84,33 @@ ODCheckerDlg::~ODCheckerDlg()
 	// only release the properties of this dialog
 	delete paintrouteseq_;
 	delete itemmodel_;
+}
+
+/**
+* event filter for the OD check dlg
+*/
+bool ODCheckerDlg::eventFilter(QObject *obj, QEvent *evt)
+{
+	// handling event for table view
+	if (obj == ODTableView) {
+		if (evt->type() == QEvent::KeyPress) {
+		  QKeyEvent* kevt = static_cast<QKeyEvent*>(evt);
+		  // if Control + A is pressed
+		  if ((kevt->key ()==Qt::Key_A)&&(kevt->modifiers()&Qt::ControlModifier)){
+			// clear routes drawn previously
+			unselectRoutes();
+			drawAllRoutes();
+		  }
+		  return true;
+		} 
+		else {
+            return false;
+        }
+    } 
+	else {
+         // pass the event on to the parent class
+         return QDialog::eventFilter(obj, evt);
+    }
 }
 
 // implement the virtual public slot "reject" function
@@ -256,6 +302,132 @@ void ODCheckerDlg::checkOD(bool check_)
 }
 
 /**
+ * handle selection behavior in the table view
+ */
+void ODCheckerDlg::selectionHandle(	const QItemSelection & sel, 
+								    const QItemSelection & unsel)
+{
+	QMessageBox::warning(this, "Notice", "selection handling!", 
+			QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
+	/* selection model and parent
+	//QItemSelectionModel* selmodel = ODTableView->selectionModel();
+	QModelIndex parent=QModelIndex();
+
+	// initialize a row and column counter for the selection area
+	int rowCnt, colCnt;
+	rowCnt=itemmodel_->rowCount();
+	colCnt=itemmodel_->columnCount();
+	vector<int> sizecounter=vector<int>(0);
+	for(int i=0; i<rowCnt; i++){
+		sizecounter.push_back(0);
+	}
+	
+	// get the index list of selected area
+	QModelIndexList inds=sel.indexes(); 
+	QModelIndex ind;
+	foreach(ind, inds) {
+		sizecounter[ind.row()]++;	
+    }
+
+	// determine the truth of selecting all
+	bool allselected=true;
+	for(int i=0; i<rowCnt ; i++){
+		if(sizecounter[i]!=colCnt){
+			allselected=false;
+			break;
+		}
+	}
+
+	if (allselected){ 
+		QMessageBox::warning(this, "Notice", "all items selected!", 
+			QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
+	}
+	else {
+		
+	}*/
+}
+
+/**
+ * draw the indexed route with a color 
+ */
+void ODCheckerDlg::drawRoute(const QString& colortext, const int& index) 
+{
+	if (odsel_){
+
+		// get all routes from od pair
+		vector<Route*>& allroutes=odsel_->get_allroutes();
+		
+		//handling the drawing-route request
+		QColor routecolor;
+		if(colortext=="none"||colortext=="None"){
+			
+			// remove the current index from the paint list
+			vector<std::pair<int,QString>>::iterator iter;
+			for(iter=paintrouteseq_->begin();iter!=paintrouteseq_->end();iter++){
+				if((*iter).first==index){
+					paintrouteseq_->erase(iter);
+					allroutes[index]->set_selected(false);
+					break;
+				}
+			}
+			//redraw the left painted routes in the stored sequence
+			for(iter=paintrouteseq_->begin();iter!=paintrouteseq_->end();iter++){
+				routecolor=txt2Color((*iter).second);
+				allroutes[(*iter).first]->set_selected_color(routecolor);
+				allroutes[(*iter).first]->set_selected(true);
+			}
+		}
+		else{ // if a color is selected
+			routecolor=txt2Color(colortext);
+			allroutes[index]->set_selected(true);
+			allroutes[index]->set_selected_color(routecolor);
+			QString tempstr(colortext);
+			paintrouteseq_->push_back(std::pair<int,QString>(index,tempstr));
+		}
+		mezzonet_->redraw();
+		emit paintRequest();
+	}
+
+}
+
+/***
+ * drawing all routes between an odpair
+ **/
+void ODCheckerDlg::drawAllRoutes()
+{	
+	vector<Route*>& allroutes=odsel_->get_allroutes();
+	QStringList rutcolortexts; 
+    rutcolortexts<<"black"<<"blue"<<"green"<<"red"<<"magenta";
+	for(unsigned i=0;i<allroutes.size();i++){
+		QString tempstr=rutcolortexts[i%5];
+		allroutes[i]->set_selected_color(txt2Color(tempstr)); 
+		allroutes[i]->set_selected(true);
+		paintrouteseq_->push_back(std::pair<int,QString>(i,tempstr));
+	}
+	mezzonet_->redraw();
+	emit paintRequest();
+}
+
+/**
+ * deselect all the routes 
+ */
+void ODCheckerDlg::unselectRoutes()
+{
+	int tempN=paintrouteseq_->size();
+	if(tempN>0){
+		vector<Route*>& allroutes=odsel_->get_allroutes();
+		vector<std::pair<int,QString>>::const_iterator eroute;
+		for( eroute=paintrouteseq_->begin(); 
+			 eroute!= paintrouteseq_->end(); eroute++){
+				 allroutes[(*eroute).first]->set_selected(false);
+		}
+		paintrouteseq_->clear();
+		mezzonet_->redraw();
+		emit paintRequest();
+	}
+}
+
+/**
  * load initial OD list in the comboboxes
  */
 void ODCheckerDlg::loadInitOD()
@@ -289,69 +461,6 @@ void ODCheckerDlg::clearTableView()
 		unselectRoutes();
 	}
 	CheckButton->setChecked(false);
-}
-
-/**
- * draw the indexed route with a color 
- */
-void ODCheckerDlg::drawRoute(const QString& colortext, const int& index) 
-{
-	if (odsel_){
-
-		// get all routes from od pair
-		vector<Route*>& allroutes=odsel_->get_allroutes();
-		allroutes[index]->set_selected(true);
-
-		QColor routecolor;
-
-		if(colortext=="none"){
-			
-			// remove the current index from the paint list
-			vector<std::pair<int,QString>>::iterator iter;
-			for(iter=paintrouteseq_->begin();iter!=paintrouteseq_->end();iter++){
-				if((*iter).first==index){
-					paintrouteseq_->erase(iter);
-					allroutes[index]->set_selected(false);
-					break;
-				}
-			}
-			//redraw the left painted routes in the stored sequence
-			for(iter=paintrouteseq_->begin();iter!=paintrouteseq_->end();iter++){
-				routecolor=txt2Color((*iter).second);
-				allroutes[(*iter).first]->set_selected_color(routecolor);
-				allroutes[(*iter).first]->set_selected(true);
-			}
-		}
-		else{ // if a color is selected
-			routecolor=txt2Color(colortext);
-			allroutes[index]->set_selected(true);
-			allroutes[index]->set_selected_color(routecolor);
-			QString tempstr(colortext);
-			paintrouteseq_->push_back(std::pair<int,QString>(index,tempstr));
-		}
-		mezzonet_->redraw();
-		emit paintRequest();
-	}
-
-}
-
-/**
- * deselect all the routes 
- */
-void ODCheckerDlg::unselectRoutes()
-{
-	int tempN=paintrouteseq_->size();
-	if(tempN>0){
-		vector<Route*>& allroutes=odsel_->get_allroutes();
-		vector<std::pair<int,QString>>::const_iterator eroute;
-		for( eroute=paintrouteseq_->begin(); 
-			 eroute!= paintrouteseq_->end(); eroute++){
-				 allroutes[(*eroute).first]->set_selected(false);
-		}
-		paintrouteseq_->clear();
-		mezzonet_->redraw();
-		emit paintRequest();
-	}
 }
 
 /**

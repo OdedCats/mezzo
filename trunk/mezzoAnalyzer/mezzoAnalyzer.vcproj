@@ -71,6 +71,10 @@
 				RelativePath=".\src\odtabledelegate.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\odtablemodel.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -87,6 +91,10 @@
 			</File>
 			<File
 				RelativePath=".\src\odtabledelegate.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\odtablemodel.h"
 				>
 			</File>
 		</Filter>

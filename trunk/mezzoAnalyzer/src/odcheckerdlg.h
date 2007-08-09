@@ -18,6 +18,8 @@
 #include <QTableView>
 #include <QStandardItemModel>
 #include <QStandardItem>
+#include <QItemSelectionModel>
+#include <QItemSelection>
 #include <QComboBox>
 #include <QColor>
 #include <QString>
@@ -45,11 +47,16 @@ class ODCheckerDlg : public QDialog, public Ui::ODCheckerDlg
  public slots:
 	virtual void reject(); // virutal function of QDialog
 
+protected:
+	bool eventFilter(QObject *obj, QEvent *evt);
+
  private slots:
 	void checkOD(bool check_);
 	void loadDestCombwithO(const QString& curtext);
 	void loadOrigCombwithD(const QString& curtext);
 	void drawRoute(const QString& colortext, const int& index);
+	void drawAllRoutes();
+	void selectionHandle(const QItemSelection & sel, const QItemSelection & unsel);
 
  signals:
     void paintRequest();

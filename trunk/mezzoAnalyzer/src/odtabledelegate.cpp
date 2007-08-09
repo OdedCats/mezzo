@@ -83,3 +83,6 @@ void ODTableViewDelegate::updateEditorGeometry(QWidget *editor,
 		QItemDelegate::updateEditorGeometry(editor, option, index);
 	}
 }
+
+
+
