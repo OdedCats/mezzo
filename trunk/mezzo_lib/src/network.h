@@ -43,7 +43,7 @@
 #include "vtypes.h"
 #include "linktimes.h"
 #include "eventlist.h"
-#include "signal.h"
+#include "trafficsignal.h"
 #include "busline.h"
 
 // inclusions for the GUI

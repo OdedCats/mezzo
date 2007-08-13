@@ -31,7 +31,7 @@ HEADERS += ../src/busline.h \
            ../src/route.h \
            ../src/sdfunc.h \
            ../src/server.h \
-           ../src/signal.h \
+           ../src/trafficsignal.h \
            ../src/signature.h \
            ../src/turning.h \
            ../src/vehicle.h \
@@ -55,7 +55,7 @@ SOURCES += ../src/busline.cpp \
            ../src/route.cpp \
            ../src/sdfunc.cpp \
            ../src/server.cpp \
-           ../src/signal.cpp \
+           ../src/trafficsignal.cpp \
            ../src/signature.cpp \
            ../src/turning.cpp \
            ../src/vehicle.cpp \
