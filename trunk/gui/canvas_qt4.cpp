@@ -87,6 +87,8 @@ void MainForm::on_zoomin_activated()
 	panfactor=static_cast<int>(0.5+(double)panpixels / wm.m11());
 	QString mesg=QString("Scale: %1 Panfactor: %2 DX: %3 DY: %4").arg(wm.m11()).arg(panfactor).arg(wm.dx()).arg(wm.dy());
 	statusbar->message(mesg );
+	theNetwork.redraw();
+    copyPixmap();
 }
 
 void MainForm::on_zoomout_activated()
@@ -101,6 +103,8 @@ void MainForm::on_zoomout_activated()
 	panfactor=static_cast<int>(0.5+(double)panpixels / wm.m11());
 	QString mesg=QString("Scale: %1 Panfactor: %2 DX: %3 DY: %4").arg(wm.m11()).arg(panfactor).arg(wm.dx()).arg(wm.dy());
 	statusbar->message(mesg );
+	theNetwork.redraw();
+    copyPixmap();
 }
 
 void MainForm::on_savescreenshot_activated()
