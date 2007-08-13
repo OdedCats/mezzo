@@ -20,6 +20,7 @@
 #include <QStandardItem>
 #include <QItemSelectionModel>
 #include <QItemSelection>
+#include <QModelIndex>
 #include <QComboBox>
 #include <QColor>
 #include <QString>
@@ -56,7 +57,7 @@ protected:
 	void loadOrigCombwithD(const QString& curtext);
 	void drawRoute(const QString& colortext, const int& index);
 	void drawAllRoutes();
-	void selectionHandle(const QItemSelection & sel, const QItemSelection & unsel);
+	void selectionHandle(const QModelIndex & sel, const QModelIndex & unsel);
 
  signals:
     void paintRequest();

@@ -58,19 +58,16 @@ ODCheckerDlg::ODCheckerDlg(QWidget* parent):QDialog(parent)
    // using single click to activate the item editor
    QObject::connect(ODTableView, SIGNAL(clicked(const QModelIndex &)), ODTableView,
 								SLOT(edit(const QModelIndex &)));
-   
-   //QObject::connect(ODTableView, SIGNAL(clicked(const QModelIndex &)), this,
-	//							SLOT(selectionHandle(const QModelIndex &)));
 
    // get the selection model
-   //QItemSelectionModel* selmodel = ODTableView->selectionModel();
-   //ODTableView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+   QItemSelectionModel* selmodel = ODTableView->selectionModel();
+   ODTableView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
    // connect the selected changed signal with selection handle slot function
-   //QObject::connect(ODTableView, SIGNAL(selectionChanged(const QItemSelection &, 
-   //				                                      const QItemSelection &)),
-   //	                    this, SLOT(slectionHandle(const QItemSelection &, 
-   //							                      const QItemSelection &)) );
+   QObject::connect(selmodel, SIGNAL(currentChanged ( const QModelIndex &, 
+													  const QModelIndex & )),
+			        this, SLOT(slectionHandle(const QModelIndex &, 
+  							                      const QModelIndex &)) );
    
    // hide the table view
    ODTableView->setVisible(false);
@@ -304,8 +301,8 @@ void ODCheckerDlg::checkOD(bool check_)
 /**
  * handle selection behavior in the table view
  */
-void ODCheckerDlg::selectionHandle(	const QItemSelection & sel, 
-								    const QItemSelection & unsel)
+void ODCheckerDlg::selectionHandle(	const QModelIndex & sel, 
+								    const QModelIndex & unsel)
 {
 	QMessageBox::warning(this, "Notice", "selection handling!", 
 			QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
