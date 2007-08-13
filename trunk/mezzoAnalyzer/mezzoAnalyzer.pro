@@ -17,10 +17,10 @@ CONFIG += uic4 staticlib
 HEADERS += src/assist.h \
            src/odcheckerdlg.h \
            src/odtabledelegate.h \
-           src/odtablemodel.h
+#           src/odtablemodel.h
 FORMS += ui/odcheckdlg.ui
 SOURCES += src/odcheckerdlg.cpp \
            src/odtabledelegate.cpp \
-           src/odtablemodel.cpp
+#           src/odtablemodel.cpp
            
            
