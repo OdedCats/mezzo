@@ -61,6 +61,8 @@ public:
 								// NOTE: this can be a subset of the total nr of stops in the Busline
 };
 
+typedef pair<Busline*,double> stopping_lines;
+
 class Busstop
 {
 public:
@@ -69,15 +71,25 @@ public:
 	int get_id () {return id;} // returns id, used in the compare <..> functions for find and find_if algorithms
 
 	Busstop (int id_, int link_id_, double length_, bool has_bay_, double dwelltime_);
-	double calc_dwelltime () {return dwelltime;} // calculates the dwelltime of each bus serving this stop. 
-											// of course the implementation will be changed
-// variables	
+	double calc_dwelltime (); // calculates the dwelltime of each bus serving this stop
+							// currently includes: standees, out of stop
+							// currently excludes: poisson headways, vehicle refernce, unique boarding and alighting rates									
+	bool check_out_of_stop (); // returns TRUE if there is NO avaliable space for the bus at the stop (meaning the bus is out of the stop)
+	void occupy_length (); // update avaliable length when bus arrives
+	void free_length (); // update avaliable length when bus leaves
+	// variables	
 	int id; // stop id
+	string name; //name of the bus stop "Ziv plaza"
 	int link_id; // link it is on, maybe later a pointer to the respective link if needed
 	double length; // length of the busstop, determines how many buses can be served at the same time
+	double position; // relative position from the upstream node of the link (beteen 0 to 1)
+	double avaliable_length; // length of the busstop minus occupied length
 	bool has_bay; // TRUE if it has a bay, so that vehicles on same lane can pass.
 	int nr_waiting; // number of passengers waiting
 	double dwelltime; // standard dwell time
+	double arrival_rate; // temporal, should be line dependent
+	double ali_fraction; // temporal, should be line dependent
+	vector <stopping_lines> stopping_headways; // contains the arrival time of the last bus from each line that stops at the stop (can result headways)
 };
 
 
