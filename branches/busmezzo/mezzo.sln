@@ -1,46 +1,44 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual C++ Express 2005
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gui", "gui\gui.vcproj", "{60259A8A-DDD3-4036-B4D1-C598A9F0B0E3}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E32F58A9-4DA9-441D-A9F5-057F6A77B1AA} = {E32F58A9-4DA9-441D-A9F5-057F6A77B1AA}
-		{9AC6C523-2B36-463F-99E6-5A6ECE5D3A3B} = {9AC6C523-2B36-463F-99E6-5A6ECE5D3A3B}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mezzo_lib", "..\..\mezzo_qt4\engine\mezzo.vcproj", "{D9C6530C-6FF8-4625-BD63-9EC0EF87BD52}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mezzoAnalyzer", "mezzoAnalyzer\mezzoAnalyzer.vcproj", "{9AC6C523-2B36-463F-99E6-5A6ECE5D3A3B}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E32F58A9-4DA9-441D-A9F5-057F6A77B1AA} = {E32F58A9-4DA9-441D-A9F5-057F6A77B1AA}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mezzo_standalone", "..\..\mezzo_qt4\engine\mezzo_s.vcproj", "{33673D18-024C-4A27-B2CA-2B12E6EB3AB0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mezzo_lib", "mezzo_lib\mezzo_lib.vcproj", "{E32F58A9-4DA9-441D-A9F5-057F6A77B1AA}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mezzo_standalone", "standalone\mezzo_standalone.vcproj", "{7C918209-E7A6-4680-BC6C-E59DD28D5620}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E32F58A9-4DA9-441D-A9F5-057F6A77B1AA} = {E32F58A9-4DA9-441D-A9F5-057F6A77B1AA}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GUI", "..\..\mezzo_qt4\gui\mezzo_win_qt4.vcproj", "{3F550261-88CE-44FC-9A12-6E54DAF33904}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
 		Release|Win32 = Release|Win32
+		VissimCom Debug|Win32 = VissimCom Debug|Win32
+		VissimCom Release|Win32 = VissimCom Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{60259A8A-DDD3-4036-B4D1-C598A9F0B0E3}.Debug|Win32.ActiveCfg = Debug|Win32
-		{60259A8A-DDD3-4036-B4D1-C598A9F0B0E3}.Debug|Win32.Build.0 = Debug|Win32
-		{60259A8A-DDD3-4036-B4D1-C598A9F0B0E3}.Release|Win32.ActiveCfg = Release|Win32
-		{60259A8A-DDD3-4036-B4D1-C598A9F0B0E3}.Release|Win32.Build.0 = Release|Win32
-		{9AC6C523-2B36-463F-99E6-5A6ECE5D3A3B}.Debug|Win32.ActiveCfg = Debug|Win32
-		{9AC6C523-2B36-463F-99E6-5A6ECE5D3A3B}.Debug|Win32.Build.0 = Debug|Win32
-		{9AC6C523-2B36-463F-99E6-5A6ECE5D3A3B}.Release|Win32.ActiveCfg = Release|Win32
-		{9AC6C523-2B36-463F-99E6-5A6ECE5D3A3B}.Release|Win32.Build.0 = Release|Win32
-		{E32F58A9-4DA9-441D-A9F5-057F6A77B1AA}.Debug|Win32.ActiveCfg = Debug|Win32
-		{E32F58A9-4DA9-441D-A9F5-057F6A77B1AA}.Debug|Win32.Build.0 = Debug|Win32
-		{E32F58A9-4DA9-441D-A9F5-057F6A77B1AA}.Release|Win32.ActiveCfg = Release|Win32
-		{E32F58A9-4DA9-441D-A9F5-057F6A77B1AA}.Release|Win32.Build.0 = Release|Win32
-		{7C918209-E7A6-4680-BC6C-E59DD28D5620}.Debug|Win32.ActiveCfg = Debug|Win32
-		{7C918209-E7A6-4680-BC6C-E59DD28D5620}.Debug|Win32.Build.0 = Debug|Win32
-		{7C918209-E7A6-4680-BC6C-E59DD28D5620}.Release|Win32.ActiveCfg = Release|Win32
-		{7C918209-E7A6-4680-BC6C-E59DD28D5620}.Release|Win32.Build.0 = Release|Win32
+		{D9C6530C-6FF8-4625-BD63-9EC0EF87BD52}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D9C6530C-6FF8-4625-BD63-9EC0EF87BD52}.Debug|Win32.Build.0 = Debug|Win32
+		{D9C6530C-6FF8-4625-BD63-9EC0EF87BD52}.Release|Win32.ActiveCfg = Release|Win32
+		{D9C6530C-6FF8-4625-BD63-9EC0EF87BD52}.Release|Win32.Build.0 = Release|Win32
+		{D9C6530C-6FF8-4625-BD63-9EC0EF87BD52}.VissimCom Debug|Win32.ActiveCfg = VissimCom Debug|Win32
+		{D9C6530C-6FF8-4625-BD63-9EC0EF87BD52}.VissimCom Debug|Win32.Build.0 = VissimCom Debug|Win32
+		{D9C6530C-6FF8-4625-BD63-9EC0EF87BD52}.VissimCom Release|Win32.ActiveCfg = VissimCom|Win32
+		{D9C6530C-6FF8-4625-BD63-9EC0EF87BD52}.VissimCom Release|Win32.Build.0 = VissimCom|Win32
+		{33673D18-024C-4A27-B2CA-2B12E6EB3AB0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{33673D18-024C-4A27-B2CA-2B12E6EB3AB0}.Debug|Win32.Build.0 = Debug|Win32
+		{33673D18-024C-4A27-B2CA-2B12E6EB3AB0}.Release|Win32.ActiveCfg = Release|Win32
+		{33673D18-024C-4A27-B2CA-2B12E6EB3AB0}.Release|Win32.Build.0 = Release|Win32
+		{33673D18-024C-4A27-B2CA-2B12E6EB3AB0}.VissimCom Debug|Win32.ActiveCfg = VissimCom Debug|Win32
+		{33673D18-024C-4A27-B2CA-2B12E6EB3AB0}.VissimCom Debug|Win32.Build.0 = VissimCom Debug|Win32
+		{33673D18-024C-4A27-B2CA-2B12E6EB3AB0}.VissimCom Release|Win32.ActiveCfg = VissimCom|Win32
+		{33673D18-024C-4A27-B2CA-2B12E6EB3AB0}.VissimCom Release|Win32.Build.0 = VissimCom|Win32
+		{3F550261-88CE-44FC-9A12-6E54DAF33904}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3F550261-88CE-44FC-9A12-6E54DAF33904}.Debug|Win32.Build.0 = Debug|Win32
+		{3F550261-88CE-44FC-9A12-6E54DAF33904}.Release|Win32.ActiveCfg = Release|Win32
+		{3F550261-88CE-44FC-9A12-6E54DAF33904}.Release|Win32.Build.0 = Release|Win32
+		{3F550261-88CE-44FC-9A12-6E54DAF33904}.VissimCom Debug|Win32.ActiveCfg = VissimCom debug|Win32
+		{3F550261-88CE-44FC-9A12-6E54DAF33904}.VissimCom Debug|Win32.Build.0 = VissimCom debug|Win32
+		{3F550261-88CE-44FC-9A12-6E54DAF33904}.VissimCom Release|Win32.ActiveCfg = VissimCom|Win32
+		{3F550261-88CE-44FC-9A12-6E54DAF33904}.VissimCom Release|Win32.Build.0 = VissimCom|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
