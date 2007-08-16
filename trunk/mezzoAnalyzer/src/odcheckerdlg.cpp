@@ -15,11 +15,7 @@ ODCheckerDlg::ODCheckerDlg(QWidget* parent):QDialog(parent)
    orgId_=-1;
    destId_=-1;
    networkset_=false;
-   paintrouteseq_=new vector<std::pair<int,QString>>(0);
-   
-   // lay out the size of the dialog
-   layout()->setSizeConstraint(QLayout::SetFixedSize);
-   //layout()->setSizeConstraint(QLayout::SetDefaultConstraint);	
+   paintrouteseq_=new vector<std::pair<int,QString>>(0);	
 
    // create the model for the tableview
    itemmodel_=new QStandardItemModel(0,5);
@@ -42,7 +38,6 @@ ODCheckerDlg::ODCheckerDlg(QWidget* parent):QDialog(parent)
    ODTableView->setItemDelegate(itemdelegate_);
    ODTableView->setModel(itemmodel_);
    ODTableView->installEventFilter(this);
-     
 
    // connect check button with "checkOD" function
    QObject::connect(CheckButton, SIGNAL(toggled(bool)), 
@@ -59,19 +54,18 @@ ODCheckerDlg::ODCheckerDlg(QWidget* parent):QDialog(parent)
    QObject::connect(ODTableView, SIGNAL(clicked(const QModelIndex &)), ODTableView,
 								SLOT(edit(const QModelIndex &)));
 
-   // get the selection model
-   QItemSelectionModel* selmodel = ODTableView->selectionModel();
-   ODTableView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+   QItemSelectionModel *selmodel = ODTableView->selectionModel();
+   QObject::connect(selmodel, SIGNAL(selectionChanged(const QItemSelection &, 
+		                                              const QItemSelection & )), 
+   		   	            this, SLOT(selectionHandle(const QItemSelection &, 
+   		   	        		                       const QItemSelection &)) );
 
-   // connect the selected changed signal with selection handle slot function
-   QObject::connect(selmodel, SIGNAL(currentChanged ( const QModelIndex &, 
-													  const QModelIndex & )),
-			        this, SLOT(slectionHandle(const QModelIndex &, 
-  							                      const QModelIndex &)) );
-   
-   // hide the table view
-   ODTableView->setVisible(false);
+   // lay out the size of the dialog
+   layout()->setSizeConstraint(QLayout::SetFixedSize);
+   //layout()->setSizeConstraint(QLayout::SetDefaultConstraint);  
+    ODTableView->hide();
 }
+
 
 /**
  * destructor of OD check dialog 
@@ -97,11 +91,12 @@ bool ODCheckerDlg::eventFilter(QObject *obj, QEvent *evt)
 			// clear routes drawn previously
 			unselectRoutes();
 			drawAllRoutes();
+			updateGraph();
 		  }
 		  return true;
 		} 
 		else {
-            return false;
+            return QDialog::eventFilter(obj, evt);
         }
     } 
 	else {
@@ -252,7 +247,6 @@ void ODCheckerDlg::checkOD(bool check_)
 				// add the item of view
 				QStandardItem* cell1=new QStandardItem(QString("none"));
 				onerowptr->append(cell1);
-				//itemmodel_->itemChanged(cell1); 
 
 				// add the route ID item
 				QString routeid=QString::number(allroutes[i]->get_id());
@@ -301,47 +295,50 @@ void ODCheckerDlg::checkOD(bool check_)
 /**
  * handle selection behavior in the table view
  */
-void ODCheckerDlg::selectionHandle(	const QModelIndex & sel, 
-								    const QModelIndex & unsel)
+void ODCheckerDlg::selectionHandle(	const QItemSelection& sel, 
+								    const QItemSelection& unsel)
 {
-	QMessageBox::warning(this, "Notice", "selection handling!", 
-			QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
-	/* selection model and parent
-	//QItemSelectionModel* selmodel = ODTableView->selectionModel();
-	QModelIndex parent=QModelIndex();
-
 	// initialize a row and column counter for the selection area
-	int rowCnt, colCnt;
-	rowCnt=itemmodel_->rowCount();
-	colCnt=itemmodel_->columnCount();
-	vector<int> sizecounter=vector<int>(0);
+	const int rowCnt=itemmodel_->rowCount();
+	const int colCnt=itemmodel_->columnCount();
+	vector<int> rowcounterlist;
 	for(int i=0; i<rowCnt; i++){
-		sizecounter.push_back(0);
+		rowcounterlist.push_back(0);
 	}
-	
-	// get the index list of selected area
-	QModelIndexList inds=sel.indexes(); 
-	QModelIndex ind;
-	foreach(ind, inds) {
-		sizecounter[ind.row()]++;	
-    }
+
+
+	// there is a bug for using ItemSelection of selected items
+	QItemSelectionModel *selmodel = ODTableView->selectionModel();
+	const QItemSelection selitems= selmodel->selection();
+	for (int rowi=0; rowi<rowCnt; rowi++){
+		for (int colj=0; colj<colCnt; colj++){
+			QModelIndex ind=itemmodel_->index(rowi, colj, QModelIndex());
+			if (selitems.contains(ind)){
+				(rowcounterlist[rowi])++;
+				// debug
+				//QMessageBox::warning(this, "Notice", "one contained!", 
+				//	QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
+			}
+		}
+	}
 
 	// determine the truth of selecting all
 	bool allselected=true;
-	for(int i=0; i<rowCnt ; i++){
-		if(sizecounter[i]!=colCnt){
+	for(unsigned i=0; i<rowcounterlist.size(); i++){
+		//QMessageBox::warning(this, "Notice", QString::number(rowcounterlist[i]), 
+		//	QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
+		if(rowcounterlist[i]!=colCnt){
 			allselected=false;
 			break;
 		}
 	}
 
-	if (allselected){ 
-		QMessageBox::warning(this, "Notice", "all items selected!", 
-			QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
+	if (allselected){
+		if (paintrouteseq_->size()>0)
+			unselectRoutes();	
+		drawAllRoutes();
+		updateGraph();
 	}
-	else {
-		
-	}*/
 }
 
 /**
@@ -400,9 +397,9 @@ void ODCheckerDlg::drawAllRoutes()
 		allroutes[i]->set_selected_color(txt2Color(tempstr)); 
 		allroutes[i]->set_selected(true);
 		paintrouteseq_->push_back(std::pair<int,QString>(i,tempstr));
+		QModelIndex ind=itemmodel_->index(i, 0, QModelIndex());
+		itemmodel_->setData(ind, QVariant(tempstr));
 	}
-	mezzonet_->redraw();
-	emit paintRequest();
 }
 
 /**
@@ -413,14 +410,14 @@ void ODCheckerDlg::unselectRoutes()
 	int tempN=paintrouteseq_->size();
 	if(tempN>0){
 		vector<Route*>& allroutes=odsel_->get_allroutes();
-		vector<std::pair<int,QString>>::const_iterator eroute;
-		for( eroute=paintrouteseq_->begin(); 
-			 eroute!= paintrouteseq_->end(); eroute++){
-				 allroutes[(*eroute).first]->set_selected(false);
+		//vector<std::pair<int,QString>>::const_iterator eroute;
+		for( unsigned i=0; i<paintrouteseq_->size(); i++){
+			QModelIndex ind=itemmodel_->index((*paintrouteseq_)[i].first, 0, QModelIndex());
+			// synchronize the text of route color in the table
+			itemmodel_->setData(ind, QVariant((*paintrouteseq_)[i].second));
+			allroutes[(*paintrouteseq_)[i].first]->set_selected(false);
 		}
 		paintrouteseq_->clear();
-		mezzonet_->redraw();
-		emit paintRequest();
 	}
 }
 
@@ -456,6 +453,7 @@ void ODCheckerDlg::clearTableView()
 		itemmodel_->removeRows(0,rowcount);
 		// clear routes drawn previously
 		unselectRoutes();
+		updateGraph();
 	}
 	CheckButton->setChecked(false);
 }
@@ -485,4 +483,13 @@ QColor ODCheckerDlg::txt2Color(const QString& colortext)
 		// to throw an exception
 	}
 	return routecolor;
+}
+
+/**
+ * update view of mezzo network 
+ **/
+void ODCheckerDlg::updateGraph()
+{
+	mezzonet_->redraw();
+	emit paintRequest();
 }

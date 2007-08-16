@@ -57,7 +57,7 @@ protected:
 	void loadOrigCombwithD(const QString& curtext);
 	void drawRoute(const QString& colortext, const int& index);
 	void drawAllRoutes();
-	void selectionHandle(const QModelIndex & sel, const QModelIndex & unsel);
+	void selectionHandle(const QItemSelection& sel, const QItemSelection& unsel);
 
  signals:
     void paintRequest();
@@ -67,6 +67,7 @@ protected:
 	void clearTableView();
 	void unselectRoutes();
 	QColor txt2Color(const QString& colortext);
+	void updateGraph();
 
 	//properties 
 	int orgId_;

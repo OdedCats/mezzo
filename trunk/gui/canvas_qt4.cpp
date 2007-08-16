@@ -38,6 +38,19 @@ MainForm::MainForm(QWidget *parent)
 	od_analyser_=new ODCheckerDlg();
 	QObject::connect(od_analyser_, SIGNAL(paintRequest()), 
 					 this, SLOT(copyPixmap()));
+
+	// deactive the actions except the open masterfile
+	//QAction *openmasterfile;
+    savescreenshot->setEnabled(false);
+    run->setEnabled(false);
+    breakoff->setEnabled(false);
+    zoomin->setEnabled(false);
+    zoomout->setEnabled(false);
+    viewSet_ParametersAction->setEnabled(false);
+    parametersdialog->setEnabled(false);
+    loadbackground->setEnabled(false);
+    saveresults->setEnabled(false);
+    inspectdialog->setEnabled(false);
 }
 
 // AUTOCONNECTED SLOTS
@@ -70,6 +83,16 @@ void MainForm::on_openmasterfile_activated()
 			close();
 		}
 		initialised=true;
+		savescreenshot->setEnabled(true);
+		run->setEnabled(true);
+		breakoff->setEnabled(true);
+		zoomin->setEnabled(true);
+		zoomout->setEnabled(true);
+		viewSet_ParametersAction->setEnabled(true);
+		parametersdialog->setEnabled(true);
+		loadbackground->setEnabled(true);
+		saveresults->setEnabled(true);
+		inspectdialog->setEnabled(true);
 		theNetwork.redraw();
 		copyPixmap();
 	}	
@@ -171,6 +194,7 @@ void MainForm::on_inspectdialog_activated()
 		
 		// start mezzo analyzer dialog
 		od_analyser_->show();
+		od_analyser_->activateWindow();
 	
 	}else{ 
 		// warn to load the network 
