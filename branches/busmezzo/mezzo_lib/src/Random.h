@@ -81,6 +81,10 @@ public:
 
   int drandom(int n, double cdf[]);
   int drandom(int n, float cdf[]);
+  
+  //poission with parameter lambda
+	
+	int poisson (double lambda);
 
   // randomly permute an array
 

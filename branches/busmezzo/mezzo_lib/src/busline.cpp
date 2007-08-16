@@ -114,8 +114,8 @@ double Busstop::calc_dwelltime ()
 	double crowdedness_coefficient = 0.0078;
 	double out_of_stop_coefficient = 3.0; // Taking in consideration the increasing dwell time when bus stops out of the stop
 	bool out_of_stop = check_out_of_stop();	
-	nr_boarding = (int) arrival_rate;
-	nr_alighting = (int) ali_fraction * curr_occupancy;
+//	nr_boarding = Random.poisson(arrival_rate)
+//	nr_alighting = Random.poisson(ali_fraction * curr_occupancy);
 	
 	if (curr_occupancy > number_seats)	// Calculating alighting standees 
 	{ 
@@ -170,3 +170,11 @@ bool Busstop::check_out_of_stop ()
 
 	}
 }
+
+/*void Busstop::update_last_arrivals (Busline* line)
+{
+	vector<stopping_lines>::iterator last_arrival;
+	last_arrival = find (last_arrivals.begin(), last_arrivals.end(), line);
+	last_arrival->second = time;
+}
+*/

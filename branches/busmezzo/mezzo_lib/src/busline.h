@@ -3,6 +3,7 @@
 
 #include "parameters.h" 
 #include "route.h"
+#include "Random.h"
 
 // ODED: what i am doing here is not correct yet. I made everything public and have no constructor, destructor etc.
 //		 When the structure of the classes is final, I move all the variables to protected: and make constructors,
@@ -77,6 +78,9 @@ public:
 	bool check_out_of_stop (); // returns TRUE if there is NO avaliable space for the bus at the stop (meaning the bus is out of the stop)
 	void occupy_length (); // update avaliable length when bus arrives
 	void free_length (); // update avaliable length when bus leaves
+	void update_last_arrivals (Busline* line); 
+	
+	
 	// variables	
 	int id; // stop id
 	string name; //name of the bus stop "Ziv plaza"
@@ -89,7 +93,7 @@ public:
 	double dwelltime; // standard dwell time
 	double arrival_rate; // temporal, should be line dependent
 	double ali_fraction; // temporal, should be line dependent
-	vector <stopping_lines> stopping_headways; // contains the arrival time of the last bus from each line that stops at the stop (can result headways)
+	vector <stopping_lines> last_arrivals; // contains the arrival time of the last bus from each line that stops at the stop (can result headways)
 };
 
 

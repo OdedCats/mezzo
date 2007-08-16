@@ -225,6 +225,19 @@ Random::drandom(int n, float cdf[])
    return (i);
 }
 
+int
+Random::poisson (double lambda)
+{
+	double sum = 0.0;
+	register int counter = -1;
+	while (sum < 60 ) // Not exactly right yet- should wirte the exact formula
+	{	
+		counter = counter + 1;
+		sum = sum + erandom(lambda);
+	} 
+	return (counter);
+}
+
 
 // Given as input the numbers: 0..N-1 it returns a random permutation
 // of those numbers This is achieved in a single pass
