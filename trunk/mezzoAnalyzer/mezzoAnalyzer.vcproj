@@ -64,10 +64,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\odcheckdlg.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\odcheckerdlg.cpp"
 				>
 			</File>
@@ -87,10 +83,6 @@
 			>
 			<File
 				RelativePath=".\src\assist.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\odcheckdlg.h"
 				>
 			</File>
 			<File
