@@ -78,7 +78,7 @@ public:
 	bool check_out_of_stop (); // returns TRUE if there is NO avaliable space for the bus at the stop (meaning the bus is out of the stop)
 	void occupy_length (); // update avaliable length when bus arrives
 	void free_length (); // update avaliable length when bus leaves
-	void update_last_arrivals (Busline* line); 
+	void update_last_arrivals (stopping_lines line); 
 	
 	
 	// variables	
@@ -96,5 +96,6 @@ public:
 	vector <stopping_lines> last_arrivals; // contains the arrival time of the last bus from each line that stops at the stop (can result headways)
 };
 
+inline bool operator==(stopping_lines s1, stopping_lines s2) { return s1.first == s2.first; }
 
 #endif //_BUSLINE

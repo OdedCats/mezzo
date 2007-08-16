@@ -100,9 +100,9 @@ Busstop::Busstop (int id_, int link_id_, double length_, bool has_bay_, double d
 
 double Busstop::calc_dwelltime ()
 {
-	int loadfactor; // bus crowdedness factor
-	int nr_boarding;// pass. boarding
-	int nr_alighting; // pass alighting
+	int loadfactor=0; // bus crowdedness factor
+	int nr_boarding=0;// pass. boarding
+	int nr_alighting=0; // pass alighting
 	int curr_occupancy = 20; // pass. on the bus when entring the stop, the value will be imported from the bus object
 	int boarding_standees = 0;
 	int alighting_standees = 0;
@@ -171,10 +171,12 @@ bool Busstop::check_out_of_stop ()
 	}
 }
 
-/*void Busstop::update_last_arrivals (Busline* line)
+
+
+void Busstop::update_last_arrivals (stopping_lines line)
 {
+	double time = 0.0;
 	vector<stopping_lines>::iterator last_arrival;
 	last_arrival = find (last_arrivals.begin(), last_arrivals.end(), line);
 	last_arrival->second = time;
 }
-*/
