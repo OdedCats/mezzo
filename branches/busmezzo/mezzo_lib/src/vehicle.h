@@ -8,6 +8,7 @@
 #include <list>
 #include "vtypes.h"
 #include "busline.h"
+#include "Random.h"
 
 class ODpair;
 class Route;
@@ -67,7 +68,10 @@ public:
 
 	const int get_occupancy() {return occupancy;}
 	void set_occupancy (const int occup) {occupancy=occup;}
-	
+
+	int number_seats; // Two added variables for LOS satistics and for dwell time calculations
+	int capacity;
+	bool active; // is true when the bus started to serve trips (called set_curr_trip());
 protected:
 	int occupancy;
 

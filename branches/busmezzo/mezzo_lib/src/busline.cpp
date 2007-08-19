@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "busline.h"
+#include <math.h>
 
 // Busline functions
 
@@ -98,24 +99,24 @@ Busstop::Busstop (int id_, int link_id_, double length_, bool has_bay_, double d
 
 }
 
-double Busstop::calc_dwelltime ()
+double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dwelltime of each bus serving this stop
 {
-	int loadfactor=0; // bus crowdedness factor
-	int nr_boarding=0;// pass. boarding
-	int nr_alighting=0; // pass alighting
-	int curr_occupancy = 20; // pass. on the bus when entring the stop, the value will be imported from the bus object
+	int loadfactor = 0; // bus crowdedness factor
+	int nr_boarding = 0;// pass. boarding
+	int nr_alighting= 0; // pass alighting
+	int curr_occupancy = trip->busv->get_occupancy(); // pass. on the bus when entring the stop, the value will be imported from the bus object
 	int boarding_standees = 0;
 	int alighting_standees = 0;
-	int number_seats = 36; // will be imported from the bus object
+	int number_seats = trip->busv->number_seats; // will be imported from the bus object
 
 	double dwell_constant = 12.5; // Value of the constant component in the dwell time function. 
 	double boarding_coefficient = 0.55;	// Should be read as an input parameter. Would be different for low floor for example.
 	double alighting_coefficient = 0.23;
 	double crowdedness_coefficient = 0.0078;
 	double out_of_stop_coefficient = 3.0; // Taking in consideration the increasing dwell time when bus stops out of the stop
-	bool out_of_stop = check_out_of_stop();	
-//	nr_boarding = Random.poisson(arrival_rate)
-//	nr_alighting = Random.poisson(ali_fraction * curr_occupancy);
+	bool out_of_stop = check_out_of_stop(trip);
+//	Random.poisson (arrival_rate * get_headway (trip, time)) -> nr_boarding;
+//	nr_alighting = random->poisson(ali_fraction * curr_occupancy);
 	
 	if (curr_occupancy > number_seats)	// Calculating alighting standees 
 	{ 
@@ -123,44 +124,49 @@ double Busstop::calc_dwelltime ()
 	}
 	else	
 	{
-		alighting_standees=0;
+		alighting_standees = 0;
 	}
-	curr_occupancy -= nr_alighting; // Updating the occupancy
+	curr_occupancy -= nr_alighting; 
+
+	if (nr_boarding > (trip->busv->capacity - curr_occupancy)) // The number of boarding passengers is limited by the capacity
+	{
+		nr_waiting = nr_boarding + curr_occupancy - trip->busv->capacity; // The over-capacity will be added to the waiting passengers at the busstop
+		nr_boarding = trip->busv->capacity - curr_occupancy; 
+	}
+
 	curr_occupancy += nr_boarding;
+	trip->busv->set_occupancy(curr_occupancy); // Updating the occupancy. OUTPUT NOTE
 	
 	if (curr_occupancy > number_seats) // Calculating the boarding standess
 	{
-		boarding_standees=curr_occupancy-number_seats;
+		boarding_standees = curr_occupancy - number_seats;
 	}
 	else 
 	{
-		boarding_standees=0;
+		boarding_standees = 0;
 	}
 
 	loadfactor = nr_boarding * alighting_standees + nr_alighting * boarding_standees;
 	dwelltime = dwell_constant + boarding_coefficient*nr_boarding + alighting_coefficient*nr_alighting + crowdedness_coefficient*loadfactor + out_of_stop_coefficient*out_of_stop; // Lin&Wilson (1992) + out of stop effect. 
+		// OUTPUT NOTE
 	return dwelltime;
 }
 
-void Busstop::occupy_length () // a bus arrived- decrease the left space at the stop
+void Busstop::occupy_length (Bustrip* trip) // a bus arrived - decrease the left space at the stop
 {
 	double space_between_buses = 3.0; // the reasonable space between stoping buses, input parameter - IMPLEMENT: shouldn't be for first bus at the stop
-	length = 10.0; // will be imported from the bus object
-	avaliable_length = avaliable_length - length - space_between_buses; 
+	avaliable_length = avaliable_length - trip->busv->get_length() - space_between_buses; 
 } 
 
-void Busstop::free_length () // a bus left- increase the left space at the stop
+void Busstop::free_length (Bustrip* trip) // a bus left - increase the left space at the stop
 {
-	double buffer = 3.0; // the reasonable space between stoping buses
-	length = 10.0; // will be imported from the bus object
-	avaliable_length = avaliable_length + length + buffer;
+	double space_between_buses = 3.0; // the reasonable space between stoping buses
+	avaliable_length = avaliable_length + trip->busv->get_length() + space_between_buses;
 } 
 
-bool Busstop::check_out_of_stop ()
+bool Busstop::check_out_of_stop (Bustrip* trip) // checks if there is any space left for the bus at the stop
 {
-	length = 10.0; // will be imported from the bus object
-	
-	if (length > avaliable_length)
+	if (trip->busv->get_length() > avaliable_length)
 	{
 		return true; // no left space for the bus at the stop. IMPLEMENT: generate incidence (capacity reduction)
 	}
@@ -171,12 +177,25 @@ bool Busstop::check_out_of_stop ()
 	}
 }
 
+void Busstop::update_last_arrivals (Bustrip* trip, double time) // everytime a bus EXITS a stop it should be updated, 
+// in order to keep an updated vector of the last arrivals from each line. ONLY after the dwell time had been calaculated.
+// perhaps should be merges with get_headway
+// time - the current time, according to the simulation clock
+{ 
+	Busline_arrival line1;
+	line1.first = trip->line;
+	vector<Busline_arrival>::iterator last_arrival;
+	last_arrival = find (last_arrivals.begin(), last_arrivals.end(), line1); // find the line that this trip serves at the vector
+	last_arrival->second = time; 
+}
 
-
-void Busstop::update_last_arrivals (stopping_lines line)
-{
-	double time = 0.0;
-	vector<stopping_lines>::iterator last_arrival;
-	last_arrival = find (last_arrivals.begin(), last_arrivals.end(), line);
-	last_arrival->second = time;
+double Busstop::get_headway (Bustrip* trip, double time) // calculates the headway (current time minus the last ariival) 
+{ // time - the current time, according to the simulation clock
+	Busline_arrival line1;
+	line1.first = trip->line;
+	double headway;
+	vector<Busline_arrival>::iterator last_arrival;
+	last_arrival = find (last_arrivals.begin(), last_arrivals.end(), line1);  // find the line that this trip serves at the vector
+	headway = time - last_arrival->second; // OUTPUT NOTE
+	return headway;
 }

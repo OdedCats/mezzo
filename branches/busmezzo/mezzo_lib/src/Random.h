@@ -84,7 +84,7 @@ public:
   
   //poission with parameter lambda
 	
-	int poisson (double lambda);
+  int poisson (double lambda);
 
   // randomly permute an array
 

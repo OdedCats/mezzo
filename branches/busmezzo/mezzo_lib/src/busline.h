@@ -4,6 +4,8 @@
 #include "parameters.h" 
 #include "route.h"
 #include "Random.h"
+#include <algorithm>
+#include "vehicle.h"
 
 // ODED: what i am doing here is not correct yet. I made everything public and have no constructor, destructor etc.
 //		 When the structure of the classes is final, I move all the variables to protected: and make constructors,
@@ -13,6 +15,7 @@ class Busroute;
 class Busstop;
 class Bustrip;
 class ODpair;
+class Bus;
 
 typedef pair<Bustrip*,double> Start_trip;
 
@@ -56,13 +59,15 @@ public:
 	bool activate (double time, Route* route, Vtype* vehtype, ODpair* odpair); // activates the trip. Generates the bus and inserts in net.
 // variables
 	int id; // course nr
+	Bus* busv; // pointer to the bus vehicle
+	Busline* line; // pointer to the line it serves
 	int init_occupancy; // initial occupancy, usually 0
 	double starttime; // when the trip is starting from the origin
 	vector <Visit_stop*> stops; // contains all the busstops and the times that they are supposed to be served.
 								// NOTE: this can be a subset of the total nr of stops in the Busline
 };
 
-typedef pair<Busline*,double> stopping_lines;
+typedef pair<Busline*,double> Busline_arrival;
 
 class Busstop
 {
@@ -72,14 +77,14 @@ public:
 	int get_id () {return id;} // returns id, used in the compare <..> functions for find and find_if algorithms
 
 	Busstop (int id_, int link_id_, double length_, bool has_bay_, double dwelltime_);
-	double calc_dwelltime (); // calculates the dwelltime of each bus serving this stop
-							// currently includes: standees, out of stop
-							// currently excludes: poisson headways, vehicle refernce, unique boarding and alighting rates									
-	bool check_out_of_stop (); // returns TRUE if there is NO avaliable space for the bus at the stop (meaning the bus is out of the stop)
-	void occupy_length (); // update avaliable length when bus arrives
-	void free_length (); // update avaliable length when bus leaves
-	void update_last_arrivals (stopping_lines line); 
-	
+	double calc_dwelltime (Bustrip* trip, double time); // calculates the dwelltime of each bus serving this stop
+							// currently includes: standees, out of stop, vehicle refernce
+							// currently excludes: poisson headways, unique boarding and alighting rates									
+	bool check_out_of_stop (Bustrip* trip); // returns TRUE if there is NO avaliable space for the bus at the stop (meaning the bus is out of the stop)
+	void occupy_length (Bustrip* trip); // update avaliable length when bus arrives
+	void free_length (Bustrip* trip); // update avaliable length when bus leaves
+	void update_last_arrivals (Bustrip* trip, double time); //everytime a bus EXITS it updates the last_arrivlas vector (only AFTER we claculated the dwell time)
+	double get_headway (Bustrip* trip, double time); // calculates the headway (current time minus the last ariival) 
 	
 	// variables	
 	int id; // stop id
@@ -93,9 +98,9 @@ public:
 	double dwelltime; // standard dwell time
 	double arrival_rate; // temporal, should be line dependent
 	double ali_fraction; // temporal, should be line dependent
-	vector <stopping_lines> last_arrivals; // contains the arrival time of the last bus from each line that stops at the stop (can result headways)
+	vector <Busline_arrival> last_arrivals; // contains the arrival time of the last bus from each line that stops at the stop (can result headways)
 };
 
-inline bool operator==(stopping_lines s1, stopping_lines s2) { return s1.first == s2.first; }
+inline bool operator==(Busline_arrival s1, Busline_arrival s2) { return s1.first == s2.first; }
 
 #endif //_BUSLINE
