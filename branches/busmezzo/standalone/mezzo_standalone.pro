@@ -7,7 +7,7 @@ CONFIG -= qt
 TARGET = mezzo_s
 DEPENDPATH += . ../mezzo_lib/src
 QT -= core gui
-DEFINES += _NO_GUI
+DEFINES += _NO_GUI _BUSES
 QMAKE= $(QTDIR)/bin/qmake
 
 # Input
