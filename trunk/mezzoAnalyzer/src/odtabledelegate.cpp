@@ -3,7 +3,7 @@
 * tableview of routes of a given OD pair
 *
 * Xiaoliang Ma
-* last update: 2007-08-02
+* last update: 2007-08-20
 *
 */
 
@@ -42,13 +42,16 @@ QWidget* ODTableViewDelegate::createEditor(QWidget *parent,
 
 void ODTableViewDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
-	//const QAbstractItemModel* itemmodel=index.model();
-	//QString itemText=itemmodel->(index, Qt::DisplayRole).toString();
-	
 	if(index.column()==viewcol_){
+		const QAbstractItemModel* itemmodel=index.model();
+		QString itemText=(itemmodel->data(index, Qt::DisplayRole)).toString();
 		QComboBox *comboBox = static_cast<QComboBox*>(editor);
-		//comboBox->setCurrentIndex(0);
-		//comboBox->show();
+		int currentind=comboBox->findText(itemText); 
+		if (currentind==-1)
+			comboBox->setCurrentIndex(0);
+		else
+			comboBox->setCurrentIndex(currentind);
+		comboBox->show();
 	}
 	else{
 		QItemDelegate::setEditorData(editor, index);
