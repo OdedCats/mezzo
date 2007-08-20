@@ -40,6 +40,9 @@ QWidget* ODTableViewDelegate::createEditor(QWidget *parent,
 	}
 }
 
+/**
+* set the editor data through a delegate with combobox for the first column
+**/
 void ODTableViewDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
 	if(index.column()==viewcol_){
@@ -70,7 +73,8 @@ void ODTableViewDelegate::setModelData(QWidget *editor,
 			int rowcount=index.row();
 			emit activateAColor(colortext,rowcount);
 		}
-	}else{
+	}
+	else{
 		QItemDelegate::setModelData(editor,model,index);
 	}
 }

@@ -57,6 +57,7 @@ MainForm::MainForm(QWidget *parent)
 void MainForm::on_quit_activated()
 {
 	theNetwork.~Network(); 
+	od_analyser_->~ODCheckerDlg();
 	close();
 }
 

@@ -73,6 +73,7 @@ protected:
 	int orgId_;
 	int destId_;
 	bool networkset_;
+	bool allroutesdrawn_;
 
 	// references 
 	QStandardItemModel* itemmodel_; // model to the tableview
