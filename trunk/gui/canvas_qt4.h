@@ -60,6 +60,7 @@ private:
 //VARS
 	int start_x ; // the x coordinate of the upper right corner of the canvas
     int start_y ; // the y coordinate of the upper right corner of the canvas
+	QPoint canvas_center; // the center of the canvas
     int panpixels;
     bool exited;
     double scalefactor;

@@ -17,7 +17,6 @@ MainForm::MainForm(QWidget *parent)
 	pm1.resize(panelx,panely);
 	pm1.fill();
 	pm2=pm1;
-	//Canvas->resize(pm1.width(),pm1.height());
 	timer = new QTimer( this );
 	connect( timer, SIGNAL(timeout()), this, SLOT(loop()) );
 	runtime=1.0; 
@@ -25,8 +24,10 @@ MainForm::MainForm(QWidget *parent)
 	scale=1.0;
 	dx=0;
 	dy=0;
+	// Canvas coordinates
 	start_x = Canvas->x(); // the x coordinate of the upper right corner of the canvas
     start_y = Canvas->y() + 60; // the y coordinate of the upper right corner of the canvas
+	canvas_center = QPoint(start_x + (panelx /2) , start_y + (panely / 2));
 	wm.scale(scale,scale); 
 	statusbar = this->statusBar();
 	statusbar->message("Initialised");
@@ -103,6 +104,7 @@ void MainForm::on_openmasterfile_activated()
 
 void MainForm::on_zoomin_activated()
 {
+	// OLD WAY. Almost right, but it zooms in & out around the Network center, not the view center
 	double w_x= theNetwork.get_width_x();
 	double h_y=theNetwork.get_height_y();
 	dx=static_cast<int>(0.5*(scalefactor-1)*w_x);
@@ -110,7 +112,7 @@ void MainForm::on_zoomin_activated()
 	wm.translate(-dx,-dy);
 	scale=scalefactor;
 	wm.scale(scale,scale);
-	panfactor=static_cast<int>(0.5+(double)panpixels / wm.m11());
+	panfactor=static_cast<int>(0.5+(double)panpixels / wm.m11()); // correction of the panfactor after zoom
 	QString mesg=QString("Scale: %1 Panfactor: %2 DX: %3 DY: %4").arg(wm.m11()).arg(panfactor).arg(wm.dx()).arg(wm.dy());
 	statusbar->message(mesg );
 	theNetwork.redraw();
