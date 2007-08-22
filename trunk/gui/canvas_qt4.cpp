@@ -338,8 +338,11 @@ void MainForm::mousePressEvent ( QMouseEvent * event )
          int x = event->x() - start_x; // adjusted for the coordinates of the Canvas
 		 int y = event->y() - start_y; // adjusted for the coordinates of the Canvas
 		 
-		 //QMatrix inv = wm.inverted();
-         QString mesg=QString("Mouse_X %1, Mouse_Y %2. Object_X %3, Object_Y %4").arg(x).arg(y).arg(x).arg(y);
+		 QMatrix inv = wm.inverted();
+		 QPoint pos = QPoint (x,y);
+		 QPoint t_pos = inv.map(pos);
+         QString mesg=QString("Mouse_X %1, Mouse_Y %2. Object_X %3, Object_Y %4").arg(x).arg(y).arg(t_pos.x()).arg(t_pos.y());
 		 statusbar->message(mesg );
+		 
      }
 }
