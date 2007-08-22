@@ -57,9 +57,13 @@ public:
 
   double urandom(double a, double b);
 
-  // returns 1 with probability p
+  // returns 1 with probability p (Bernoulli generator)
 
   int brandom(double p);
+
+  // binomial generator - n trials with probability p
+
+  int binrandom (int n, double p);
 
   // exponential with parameter r
 
@@ -82,9 +86,9 @@ public:
   int drandom(int n, double cdf[]);
   int drandom(int n, float cdf[]);
   
-  //poission with parameter lambda
+  //poission generator with parameter lambda (rate) and the duration 
 	
-  int poisson (double lambda);
+  int poisson (double lambda, double duration);
 
   // randomly permute an array
 

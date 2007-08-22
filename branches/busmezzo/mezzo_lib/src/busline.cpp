@@ -115,9 +115,12 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 	double crowdedness_coefficient = 0.0078;
 	double out_of_stop_coefficient = 3.0; // Taking in consideration the increasing dwell time when bus stops out of the stop
 	bool out_of_stop = check_out_of_stop(trip);
-//	Random.poisson (arrival_rate * get_headway (trip, time)) -> nr_boarding;
-//	nr_alighting = random->poisson(ali_fraction * curr_occupancy);
 	
+//	Random.poisson (arrival_rate, get_headway (trip, time)) -> nr_boarding; //the boarding process follows a poisson distribution
+					// with arrival time and the headway as the duration
+//	nr_alighting = random->binrandom(curr_occupancy, ali_fraction); // the alighting process follows a binominal distribution 
+					// the number of trials is the number of passengers on board with the probability of the alighting fraction
+															
 	if (curr_occupancy > number_seats)	// Calculating alighting standees 
 	{ 
 		alighting_standees = curr_occupancy - number_seats;	
@@ -199,3 +202,22 @@ double Busstop::get_headway (Bustrip* trip, double time) // calculates the headw
 	headway = time - last_arrival->second; // OUTPUT NOTE
 	return headway;
 }
+
+double Busstop::get_arrival_rates (Bustrip* trip)
+{
+	Busline_arrival line1;
+	line1.first = trip->line;
+	vector<Busline_arrival>::iterator iter1;
+	iter1 = find (arrival_rates.begin(), arrival_rates.end(), line1);
+	return iter1->second;   
+}
+
+double Busstop::get_alighting_rates (Bustrip* trip)
+{
+	Busline_arrival line1;
+	line1.first = trip->line;
+	vector<Busline_arrival>::iterator iter1;
+	iter1 = find (alighting_rates.begin(), alighting_rates.end(), line1);
+	return iter1->second;
+}
+

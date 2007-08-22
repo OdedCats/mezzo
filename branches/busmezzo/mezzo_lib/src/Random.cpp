@@ -177,6 +177,18 @@ Random::brandom(double prob)
    else return 0;
 }
 
+// Binomial generator - n trials with probability p
+
+int 
+Random::binrandom (int n, double p)
+{
+	int sum = 0;
+	for (int i=1; i<=n; i++)
+	{
+		sum += brandom(p);
+	}
+	return sum;
+}
 
 // Generates a random number uniformly distributed between (a, b].
 
@@ -225,12 +237,15 @@ Random::drandom(int n, float cdf[])
    return (i);
 }
 
+//poission generator with parameter lambda (rate) and the duration
+//IMPLEMENT: doing it by summing up the cdf function
+
 int
-Random::poisson (double lambda)
+Random::poisson (double lambda, double duration)
 {
 	double sum = 0.0;
 	register int counter = -1;
-	while (sum < 60 ) // Not exactly right yet- should wirte the exact formula
+	while (sum < duration )
 	{	
 		counter = counter + 1;
 		sum = sum + erandom(lambda);

@@ -85,6 +85,8 @@ public:
 	void free_length (Bustrip* trip); // update avaliable length when bus leaves
 	void update_last_arrivals (Bustrip* trip, double time); //everytime a bus EXITS it updates the last_arrivlas vector (only AFTER we claculated the dwell time)
 	double get_headway (Bustrip* trip, double time); // calculates the headway (current time minus the last ariival) 
+	double get_arrival_rates (Bustrip* trip);
+	double get_alighting_rates (Bustrip* trip);
 	
 	// variables	
 	int id; // stop id
@@ -96,9 +98,11 @@ public:
 	bool has_bay; // TRUE if it has a bay, so that vehicles on same lane can pass.
 	int nr_waiting; // number of passengers waiting
 	double dwelltime; // standard dwell time
-	double arrival_rate; // temporal, should be line dependent
-	double ali_fraction; // temporal, should be line dependent
 	vector <Busline_arrival> last_arrivals; // contains the arrival time of the last bus from each line that stops at the stop (can result headways)
+	
+	vector <Busline_arrival> arrival_rates; // parameter lambda that defines the poission proccess of passengers arriving at the stop
+	vector <Busline_arrival> alighting_rates; // parameter that defines the poission process of the alighting passengers (second contains the alighting fraction)
+	// Maybe in the future, these three vectors could be integrated into a single matrix ( a map with busline as the key)
 };
 
 inline bool operator==(Busline_arrival s1, Busline_arrival s2) { return s1.first == s2.first; }
