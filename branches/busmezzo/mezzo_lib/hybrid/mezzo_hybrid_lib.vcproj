@@ -25,7 +25,7 @@
 				BuildCommandLine="qmake&#x0D;&#x0A;nmake debug"
 				ReBuildCommandLine="qmake&#x0D;&#x0A;nmake clean&#x0D;&#x0A;nmake debug"
 				CleanCommandLine="nmake clean"
-				Output="Debug\mezzo_lib.lib"
+				Output="Debug\mezzo_hybrid_lib.lib"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""
@@ -45,7 +45,7 @@
 				BuildCommandLine="qmake&#x0D;&#x0A;nmake release"
 				ReBuildCommandLine="qmake&#x0D;&#x0A;nmake clean&#x0D;&#x0A;nmake release"
 				CleanCommandLine="nmake clean"
-				Output="Release\mezzo_lib.lib"
+				Output="Release\mezzo_hybrid_lib.lib"
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""
@@ -64,99 +64,99 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\busline.cpp"
+				RelativePath="..\src\busline.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\eventlist.cpp"
+				RelativePath="..\src\eventlist.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Graph.cpp"
+				RelativePath="..\src\Graph.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\grid.cpp"
+				RelativePath="..\src\grid.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\icons.cpp"
+				RelativePath="..\src\icons.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\link.cpp"
+				RelativePath="..\src\link.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\linktimes.cpp"
+				RelativePath="..\src\linktimes.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\main.cpp"
+				RelativePath="..\src\main.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\network.cpp"
+				RelativePath="..\src\network.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\node.cpp"
+				RelativePath="..\src\node.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\od.cpp"
+				RelativePath="..\src\od.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\parameters.cpp"
+				RelativePath="..\src\parameters.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\pvm.cpp"
+				RelativePath="..\src\pvm.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\q.cpp"
+				RelativePath="..\src\q.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Random.cpp"
+				RelativePath="..\src\Random.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\route.cpp"
+				RelativePath="..\src\route.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\sdfunc.cpp"
+				RelativePath="..\src\sdfunc.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\server.cpp"
+				RelativePath="..\src\server.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\signature.cpp"
+				RelativePath="..\src\signature.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\trafficsignal.cpp"
+				RelativePath="..\src\trafficsignal.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\turning.cpp"
+				RelativePath="..\src\turning.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\vehicle.cpp"
+				RelativePath="..\src\vehicle.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\vissimcom.cpp"
+				RelativePath="..\src\vissimcom.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\vtypes.cpp"
+				RelativePath="..\src\vtypes.cpp"
 				>
 			</File>
 		</Filter>
@@ -166,103 +166,103 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\src\busline.h"
+				RelativePath="..\src\busline.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\eventlist.h"
+				RelativePath="..\src\eventlist.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\gettime.h"
+				RelativePath="..\src\gettime.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Graph.h"
+				RelativePath="..\src\Graph.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\grid.h"
+				RelativePath="..\src\grid.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\icons.h"
+				RelativePath="..\src\icons.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\link.h"
+				RelativePath="..\src\link.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\linktimes.h"
+				RelativePath="..\src\linktimes.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\MMath.h"
+				RelativePath="..\src\MMath.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\network.h"
+				RelativePath="..\src\network.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\node.h"
+				RelativePath="..\src\node.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\od.h"
+				RelativePath="..\src\od.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\parameters.h"
+				RelativePath="..\src\parameters.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\pvm.h"
+				RelativePath="..\src\pvm.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\q.h"
+				RelativePath="..\src\q.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Random.h"
+				RelativePath="..\src\Random.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\route.h"
+				RelativePath="..\src\route.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\sdfunc.h"
+				RelativePath="..\src\sdfunc.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\server.h"
+				RelativePath="..\src\server.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\signature.h"
+				RelativePath="..\src\signature.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\trafficsignal.h"
+				RelativePath="..\src\trafficsignal.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\turning.h"
+				RelativePath="..\src\turning.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\vehicle.h"
+				RelativePath="..\src\vehicle.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\vissimcom.h"
+				RelativePath="..\src\vissimcom.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\vtypes.h"
+				RelativePath="..\src\vtypes.h"
 				>
 			</File>
 		</Filter>
@@ -276,7 +276,7 @@
 			Name="Makefiles"
 			>
 			<File
-				RelativePath=".\mezzo_lib.pro"
+				RelativePath=".\mezzo_hybrid_lib.pro"
 				>
 			</File>
 		</Filter>

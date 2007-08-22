@@ -30,7 +30,7 @@ HEADERS += ../mezzo_lib/src/busline.h \
            ../mezzo_lib/src/route.h \
            ../mezzo_lib/src/sdfunc.h \
            ../mezzo_lib/src/server.h \
-           ../mezzo_lib/src/signal.h \
+           ../mezzo_lib/src/trafficsignal.h \
            ../mezzo_lib/src/signature.h \
            ../mezzo_lib/src/turning.h \
            ../mezzo_lib/src/vehicle.h \
@@ -54,7 +54,7 @@ SOURCES += ../mezzo_lib/src/busline.cpp \
            ../mezzo_lib/src/route.cpp \
            ../mezzo_lib/src/sdfunc.cpp \
            ../mezzo_lib/src/server.cpp \
-           ../mezzo_lib/src/signal.cpp \
+           ../mezzo_lib/src/trafficsignal.cpp \
            ../mezzo_lib/src/signature.cpp \
            ../mezzo_lib/src/turning.cpp \
            ../mezzo_lib/src/vehicle.cpp \

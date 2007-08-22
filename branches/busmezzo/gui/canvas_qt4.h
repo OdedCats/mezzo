@@ -8,6 +8,8 @@
 #define MAINFORM
 
 #include <Qt3Support>
+//#include <q3filedialog.h> // taken out, replaced by Qfiledialog
+#include <Qfiledialog>
 #include "ui_canvas_qt4.h"
 #include "parametersdialog_qt4.h"
 #include "../mezzo_lib/src/parameters.h"
@@ -44,19 +46,21 @@ private slots:
 		
 	// other slots	
 	void keyPressEvent( QKeyEvent *e );
+	void mousePressEvent ( QMouseEvent * event );
 	
 	void loop();
 	void paintEvent(QPaintEvent *event );
-	
+	void copyPixmap();
+
 private:
 //FUNCTIONS
-	void copyPixmap();
-	
 	void displaytime(double time);
 	
 	
 //VARS
-	
+	int start_x ; // the x coordinate of the upper right corner of the canvas
+    int start_y ; // the y coordinate of the upper right corner of the canvas
+	QPoint canvas_center; // the center of the canvas
     int panpixels;
     bool exited;
     double scalefactor;

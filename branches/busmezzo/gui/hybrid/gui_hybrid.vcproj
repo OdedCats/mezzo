@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
-	Name="mezzoAnalyzer"
-	ProjectGUID="{9AC6C523-2B36-463F-99E6-5A6ECE5D3A3B}"
+	Version="8.00"
+	Name="gui"
+	ProjectGUID="{60259A8A-DDD3-4036-B4D1-C598A9F0B0E3}"
+	RootNamespace="gui"
 	Keyword="MakeFileProj"
 	>
 	<Platforms>
@@ -23,9 +24,9 @@
 			<Tool
 				Name="VCNMakeTool"
 				BuildCommandLine="qmake&#x0D;&#x0A;nmake debug"
-				ReBuildCommandLine="qmake&#x0D;&#x0A;nmake clean&#x0D;&#x0A;nmake debug"
+				ReBuildCommandLine="qmake&#x0D;&#x0A;nmake clean&#x0D;&#x0A;nmake debug&#x0D;&#x0A;"
 				CleanCommandLine="nmake clean"
-				Output="debug\mezzoAnalyzer.a"
+				Output=".\debug\mezzo_gui_hybrid.exe"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""
@@ -42,10 +43,10 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="qmake&#x0D;&#x0A;nmake release "
+				BuildCommandLine="qmake&#x0D;&#x0A;nmake release"
 				ReBuildCommandLine="qmake &#x0D;&#x0A;nmake clean&#x0D;&#x0A;nmake release"
 				CleanCommandLine="nmake clean"
-				Output="release\mezzoAnalyzer.lib"
+				Output=".\release\mezzo_gui_hybrid.exe"
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""
@@ -64,15 +65,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\odcheckerdlg.cpp"
+				RelativePath="..\canvas_qt4.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\odtabledelegate.cpp"
+				RelativePath="..\main.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\odtablemodel.cpp"
+				RelativePath="..\parametersdialog_qt4.cpp"
 				>
 			</File>
 		</Filter>
@@ -82,19 +83,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\src\assist.h"
+				RelativePath="..\canvas_qt4.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\odcheckerdlg.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\odtabledelegate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\odtablemodel.h"
+				RelativePath="..\parametersdialog_qt4.h"
 				>
 			</File>
 		</Filter>
@@ -105,18 +98,22 @@
 			>
 		</Filter>
 		<Filter
-			Name="Forms"
+			Name="Makefile"
 			>
 			<File
-				RelativePath=".\ui\odcheckdlg.ui"
+				RelativePath=".\gui_hybrid.pro"
 				>
 			</File>
 		</Filter>
 		<Filter
-			Name="Makefile"
+			Name="Forms"
 			>
 			<File
-				RelativePath=".\mezzoAnalyzer.pro"
+				RelativePath="..\canvas_qt4.ui"
+				>
+			</File>
+			<File
+				RelativePath="..\parametersdialog_qt4.ui"
 				>
 			</File>
 		</Filter>
@@ -124,12 +121,16 @@
 			Name="Generated"
 			>
 			<File
-				RelativePath=".\ui_odcheckdlg.h"
+				RelativePath="..\ui_canvas_qt4.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ui_parametersdialog_qt4.h"
 				>
 			</File>
 		</Filter>
 		<File
-			RelativePath=".\readme.txt"
+			RelativePath="..\readme.txt"
 			>
 		</File>
 	</Files>

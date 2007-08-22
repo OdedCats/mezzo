@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="mezzoAnalyzer"
 	ProjectGUID="{9AC6C523-2B36-463F-99E6-5A6ECE5D3A3B}"
 	Keyword="MakeFileProj"
@@ -25,7 +25,7 @@
 				BuildCommandLine="qmake&#x0D;&#x0A;nmake debug"
 				ReBuildCommandLine="qmake&#x0D;&#x0A;nmake clean&#x0D;&#x0A;nmake debug"
 				CleanCommandLine="nmake clean"
-				Output="debug\mezzoAnalyzer.a"
+				Output="debug\mezzoAnalyzer.lib"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""
@@ -64,15 +64,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\odcheckerdlg.cpp"
+				RelativePath="..\src\odcheckerdlg.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\odtabledelegate.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\odtablemodel.cpp"
+				RelativePath="..\src\odtabledelegate.cpp"
 				>
 			</File>
 		</Filter>
@@ -82,19 +78,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\src\assist.h"
+				RelativePath="..\src\assist.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\odcheckerdlg.h"
+				RelativePath="..\src\odcheckerdlg.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\odtabledelegate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\odtablemodel.h"
+				RelativePath="..\src\odtabledelegate.h"
 				>
 			</File>
 		</Filter>
@@ -108,7 +100,7 @@
 			Name="Forms"
 			>
 			<File
-				RelativePath=".\ui\odcheckdlg.ui"
+				RelativePath="..\ui\odcheckdlg.ui"
 				>
 			</File>
 		</Filter>
@@ -116,7 +108,7 @@
 			Name="Makefile"
 			>
 			<File
-				RelativePath=".\mezzoAnalyzer.pro"
+				RelativePath=".\mezzoAnalyzer_hybrid.pro"
 				>
 			</File>
 		</Filter>
@@ -124,12 +116,12 @@
 			Name="Generated"
 			>
 			<File
-				RelativePath=".\ui_odcheckdlg.h"
+				RelativePath="..\ui_odcheckdlg.h"
 				>
 			</File>
 		</Filter>
 		<File
-			RelativePath=".\readme.txt"
+			RelativePath="..\readme.txt"
 			>
 		</File>
 	</Files>

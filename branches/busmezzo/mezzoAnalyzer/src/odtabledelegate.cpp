@@ -3,7 +3,7 @@
 * tableview of routes of a given OD pair
 *
 * Xiaoliang Ma
-* last update: 2007-07-30
+* last update: 2007-08-20
 *
 */
 
@@ -23,12 +23,13 @@ QWidget* ODTableViewDelegate::createEditor(QWidget *parent,
                                         const QModelIndex &index) const
 {
 	if(index.column()==viewcol_){
-		QComboBox *comboboxeditor = new QComboBox(parent);
-		comboboxeditor->addItem("none");
-		comboboxeditor->addItem("red");
+		QComboBox* comboboxeditor = new QComboBox(parent);
+		comboboxeditor->addItem("none"); 
+		comboboxeditor->addItem("black");
 		comboboxeditor->addItem("blue");
 		comboboxeditor->addItem("green");
-		comboboxeditor->addItem("pink");
+		comboboxeditor->addItem("red");
+		comboboxeditor->addItem("magenta");
 
 		// add an event handler to the item delegate
 		comboboxeditor->installEventFilter(const_cast<ODTableViewDelegate*>(this));
@@ -39,14 +40,20 @@ QWidget* ODTableViewDelegate::createEditor(QWidget *parent,
 	}
 }
 
+/**
+* set the editor data through a delegate with combobox for the first column
+**/
 void ODTableViewDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
-	//const QAbstractItemModel* itemmodel=index.model();
-	//QString itemText=itemmodel->(index, Qt::DisplayRole).toString();
-	
 	if(index.column()==viewcol_){
+		const QAbstractItemModel* itemmodel=index.model();
+		QString itemText=(itemmodel->data(index, Qt::DisplayRole)).toString();
 		QComboBox *comboBox = static_cast<QComboBox*>(editor);
-		comboBox->setCurrentIndex(0);
+		int currentind=comboBox->findText(itemText); 
+		if (currentind==-1)
+			comboBox->setCurrentIndex(0);
+		else
+			comboBox->setCurrentIndex(currentind);
 		comboBox->show();
 	}
 	else{
@@ -60,9 +67,14 @@ void ODTableViewDelegate::setModelData(QWidget *editor,
 {
 	if(index.column()==viewcol_){
 		QComboBox *comboBox = static_cast<QComboBox*>(editor);
-		QString text= comboBox->currentText();
-		model->setData(index, text);
-	}else{
+		QString colortext= comboBox->currentText();
+		model->setData(index, colortext);
+		if (colortext!=""){
+			int rowcount=index.row();
+			emit activateAColor(colortext,rowcount);
+		}
+	}
+	else{
 		QItemDelegate::setModelData(editor,model,index);
 	}
 }
@@ -78,3 +90,6 @@ void ODTableViewDelegate::updateEditorGeometry(QWidget *editor,
 		QItemDelegate::updateEditorGeometry(editor, option, index);
 	}
 }
+
+
+

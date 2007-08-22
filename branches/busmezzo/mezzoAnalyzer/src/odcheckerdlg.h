@@ -1,7 +1,15 @@
 /*
  * this is the definition of the dialog to 
  * check the OD information in the Mezzo network
+ *
+ * note: code here assume route list of an odpair 
+ * will not be changed during the operation 
+ *
+ * Xiaoliang Ma
+ * Last modification: 2007-08-05
+ *
  */
+
 #ifndef  ODCHECKERDLG_H
 #define  ODCHECKERDLG_H
 
@@ -10,25 +18,28 @@
 #include <QTableView>
 #include <QStandardItemModel>
 #include <QStandardItem>
+#include <QItemSelectionModel>
+#include <QItemSelection>
+#include <QModelIndex>
 #include <QComboBox>
-
+#include <QColor>
 #include <QString>
 #include <Qt3Support>
 #include <vector>
 
+
 // use the generated ui form header  
 #include "../mezzoAnalyzer/ui_odcheckdlg.h"
-
 // use the mainwindow and network definitions 
 #include "../mezzo_lib/src/network.h"
-
-//class Network;
+// include custom item delegate
+#include "odtabledelegate.h"
 
 class ODCheckerDlg : public QDialog, public Ui::ODCheckerDlg
 {
 	Q_OBJECT
  public:
-	ODCheckerDlg(QWidget* parent);
+	ODCheckerDlg(QWidget* parent=0);
 	~ODCheckerDlg();
 	void setNetwork(Network* mezzonet);
 	bool getNetworkState(){return networkset_;}
@@ -37,26 +48,40 @@ class ODCheckerDlg : public QDialog, public Ui::ODCheckerDlg
  public slots:
 	virtual void reject(); // virutal function of QDialog
 
+protected:
+	bool eventFilter(QObject *obj, QEvent *evt);
+
  private slots:
 	void checkOD(bool check_);
 	void loadDestCombwithO(const QString& curtext);
 	void loadOrigCombwithD(const QString& curtext);
-   
+	void drawRoute(const QString& colortext, const int& index);
+	void drawAllRoutes();
+	void selectionHandle(const QItemSelection& sel, const QItemSelection& unsel);
+
+ signals:
+    void paintRequest();
+
  private:
     void loadInitOD();
 	void clearTableView();
+	void unselectRoutes();
+	QColor txt2Color(const QString& colortext);
+	void updateGraph();
 
 	//properties 
-	QStandardItemModel* itemmodel_; // model to the tableview 
 	int orgId_;
 	int destId_;
-
-	//internal state
 	bool networkset_;
+	bool allroutesdrawn_;
 
 	// references 
+	QStandardItemModel* itemmodel_; // model to the tableview
+	ODTableViewDelegate* itemdelegate_; // table item control delegate
 	Network* mezzonet_;
-	  
+	ODpair* odsel_;
+	vector<std::pair<int, QString>>* paintrouteseq_;  // record of the painted routes
+
 };
 
 #endif

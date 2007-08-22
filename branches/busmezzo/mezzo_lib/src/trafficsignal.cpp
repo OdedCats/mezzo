@@ -1,4 +1,4 @@
-#include "signal.h"
+#include "trafficsignal.h"
 
 bool SignalControl::execute(Eventlist* eventlist, double time)
 {
