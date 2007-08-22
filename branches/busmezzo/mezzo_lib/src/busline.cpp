@@ -96,7 +96,20 @@ bool Bustrip::activate (double time, Route* route, Vtype* vehtype, ODpair* odpai
 Busstop::Busstop (int id_, int link_id_, double length_, bool has_bay_, double dwelltime_):
 	id(id_), link_id(link_id_), length(length_), has_bay(has_bay_), dwelltime(dwelltime_)
 {
+	random = new (Random);
+	if (randseed != 0)
+		{
+		random->seed(randseed);
+		}
+	else
+	{
+		random->randomize();
+	}
+}
 
+Busstop::~Busstop ()
+{
+	delete random;
 }
 
 double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dwelltime of each bus serving this stop
@@ -116,9 +129,9 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 	double out_of_stop_coefficient = 3.0; // Taking in consideration the increasing dwell time when bus stops out of the stop
 	bool out_of_stop = check_out_of_stop(trip);
 	
-//	Random.poisson (arrival_rate, get_headway (trip, time)) -> nr_boarding; //the boarding process follows a poisson distribution
+	nr_boarding = random->poisson (get_arrival_rates (trip) , get_headway (trip, time)); //the boarding process follows a poisson distribution
 					// with arrival time and the headway as the duration
-//	nr_alighting = random->binrandom(curr_occupancy, ali_fraction); // the alighting process follows a binominal distribution 
+	nr_alighting = random->binrandom (curr_occupancy, get_alighting_rates (trip)); // the alighting process follows a binominal distribution 
 					// the number of trials is the number of passengers on board with the probability of the alighting fraction
 															
 	if (curr_occupancy > number_seats)	// Calculating alighting standees 

@@ -72,8 +72,8 @@ typedef pair<Busline*,double> Busline_arrival;
 class Busstop
 {
 public:
-	Busstop () {}
-	~Busstop () {}
+	Busstop ();
+	~Busstop ();
 	int get_id () {return id;} // returns id, used in the compare <..> functions for find and find_if algorithms
 
 	Busstop (int id_, int link_id_, double length_, bool has_bay_, double dwelltime_);
@@ -98,6 +98,7 @@ public:
 	bool has_bay; // TRUE if it has a bay, so that vehicles on same lane can pass.
 	int nr_waiting; // number of passengers waiting
 	double dwelltime; // standard dwell time
+	Random* random;
 	vector <Busline_arrival> last_arrivals; // contains the arrival time of the last bus from each line that stops at the stop (can result headways)
 	
 	vector <Busline_arrival> arrival_rates; // parameter lambda that defines the poission proccess of passengers arriving at the stop
