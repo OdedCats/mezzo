@@ -46,6 +46,7 @@ private slots:
 		
 	// other slots	
 	void keyPressEvent( QKeyEvent *e );
+	void mousePressEvent ( QMouseEvent * event );
 	
 	void loop();
 	void paintEvent(QPaintEvent *event );
@@ -57,7 +58,8 @@ private:
 	
 	
 //VARS
-	
+	int start_x ; // the x coordinate of the upper right corner of the canvas
+    int start_y ; // the y coordinate of the upper right corner of the canvas
     int panpixels;
     bool exited;
     double scalefactor;

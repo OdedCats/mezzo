@@ -25,6 +25,8 @@ MainForm::MainForm(QWidget *parent)
 	scale=1.0;
 	dx=0;
 	dy=0;
+	start_x = Canvas->x(); // the x coordinate of the upper right corner of the canvas
+    start_y = Canvas->y() + 60; // the y coordinate of the upper right corner of the canvas
 	wm.scale(scale,scale); 
 	statusbar = this->statusBar();
 	statusbar->message("Initialised");
@@ -327,4 +329,17 @@ void MainForm::keyPressEvent( QKeyEvent *e )
 	}
 }
 
+void MainForm::mousePressEvent ( QMouseEvent * event )
+{
 
+	// playing around with mouse press events, we will change all this later on
+	if (event->button() == Qt::LeftButton) // left button pressed
+	{
+         int x = event->x() - start_x; // adjusted for the coordinates of the Canvas
+		 int y = event->y() - start_y; // adjusted for the coordinates of the Canvas
+		 
+		 //QMatrix inv = wm.inverted();
+         QString mesg=QString("Mouse_X %1, Mouse_Y %2. Object_X %3, Object_Y %4").arg(x).arg(y).arg(x).arg(y);
+		 statusbar->message(mesg );
+     }
+}
