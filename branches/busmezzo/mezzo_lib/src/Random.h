@@ -61,9 +61,10 @@ public:
 
   int brandom(double p);
 
-  // binomial generator - n trials with probability p
+  // binomial generator - n trials with probability p 
 
-  int binrandom (int n, double p);
+  int binrandom (int n, double p); // using a cdf inverse
+  int binrandom1 (int n, double p); // using calls to Bernoulli
 
   // exponential with parameter r
 
@@ -86,9 +87,10 @@ public:
   int drandom(int n, double cdf[]);
   int drandom(int n, float cdf[]);
   
-  //poission generator with parameter lambda (rate) and the duration 
+  //poission generator with parameter lambda (rate)
 	
-  int poisson (double lambda, double duration);
+  int poisson (double relative_lambda); // using a cdf inverse. The duration is externally calculated into relative_lambda.
+  int poisson1 (double lambda, double duration); // using calls to erandom() according to a given duration
 
   // randomly permute an array
 

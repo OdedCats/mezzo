@@ -107,6 +107,16 @@ inline int Greater(T a, T b, double epsilon = AproxEpsilon)
    return (a > b + epsilon);
 }
 
+template <class T>
+inline int factorial (T a)
+{
+	int result = 1;
+	for (int i = 1; i = a; i++)
+	{
+		result = result * a;
+	}
+	return result;
+}
 
 // Ceil finds the smallest number which is not less than d and rounded
 // at step.  For example:

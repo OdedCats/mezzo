@@ -177,15 +177,30 @@ Random::brandom(double prob)
    else return 0;
 }
 
-// Binomial generator - n trials with probability p
+// Binomial generator - n trials with probability p 
 
 int 
-Random::binrandom (int n, double p)
+Random::binrandom (int n, double p) // using a cdf inverse
+{
+	double sum = 0;
+	int counter = 0;
+	double cdf_value = urandom();
+	do
+	{
+		counter++;
+		sum += (factorial(n) * pow(p,counter) * pow(1-p,n-counter)) / (factorial(counter) * factorial(n-counter));
+	}
+	while (sum < cdf_value);
+	return counter;
+}
+
+int 
+Random::binrandom1 (int n, double p) // using calls to Bernoulli
 {
 	int sum = 0;
-	for (int i=1; i<=n; i++)
+	for (int i = 0; i = n ; i++)
 	{
-		sum += brandom(p);
+		sum += brandom (p);
 	}
 	return sum;
 }
@@ -237,11 +252,25 @@ Random::drandom(int n, float cdf[])
    return (i);
 }
 
-//poission generator with parameter lambda (rate) and the duration
-//IMPLEMENT: doing it by summing up the cdf function
+//poission generator with parameter lambda (rate) 
+
+int 
+Random::poisson (double relative_lambda) // using a cdf inverse. The duration is externally calculated into relative_lambda
+{	
+	double sum = 0;
+	int counter = 0;
+	double cdf_value = urandom();
+	do
+	{
+		counter++;
+		sum += (exp(-relative_lambda) * pow(relative_lambda, counter)) / factorial (counter);
+	}
+	while (sum < cdf_value);
+	return counter;
+}
 
 int
-Random::poisson (double lambda, double duration)
+Random::poisson1 (double lambda, double duration) // using calls to erandom() according to a given duration
 {
 	double sum = 0.0;
 	register int counter = -1;

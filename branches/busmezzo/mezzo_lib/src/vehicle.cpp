@@ -1,4 +1,5 @@
 #include "vehicle.h"
+#include "MMath.h"
 
 Vehicle::Vehicle()
 {
@@ -106,3 +107,41 @@ VehicleRecycler::	~VehicleRecycler()
 
 // Special Bus Functions
 
+double Bus::calc_departure_time (double time) // calculates departure time from origin according to arrival time and schedule (including layover effect)
+{
+	double min_layover = 2.00; 
+	double mean_error_layover = 2.00;
+	double std_error_layover = 1.00;
+	// These three parameters should be used from the parameters input file
+
+	double error_layover = random->lnrandom (mean_error_layover, std_error_layover); // error factor following log normal distribution
+	double curr_departure = curr_trip->second;
+
+	double departure_time = Max(curr_departure, time + min_layover);
+	// If the scheduled time is after arrival+layover, it determines departure time. 
+	// Otherwise (bus arrived behind schedule) - delay at origin.
+
+	departure_time += error_layover; // Allways add the error factor
+	return departure_time;// output note: departure time
+}
+
+bool Bus::set_curr_trip () 
+{
+	if (active = false) // first time this function is called
+	{
+		curr_trip = driving_roster.begin();
+		active = true;
+	}
+	else
+	{
+		if (curr_trip != driving_roster.end())
+		{
+			curr_trip++; // a trip was completed - points to the next trip on the schedule
+		}
+		else
+		{
+			active = false; // no more trips on the schedule for this bus
+		}
+	}
+	return active;
+}

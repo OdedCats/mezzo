@@ -60,13 +60,26 @@ class Vehicle
 };
 #ifdef _BUSES
 class Bustrip;
+typedef pair<Bustrip*,double> Start_trip;
 
 class Bus : public Vehicle
 {
 public:
 	Bus():Vehicle(), trip(NULL) {occupancy=0;}
 	Bus(int id_, int type_, double length_,Route* route_, ODpair* odpair_, double time_) :
-	Vehicle(id_, type_,length_,route_,odpair_,time_), trip(NULL) {}
+	Vehicle(id_, type_,length_,route_,odpair_,time_), trip(NULL)
+	{	occupancy = 0;
+		active = false;
+		random = new (Random);
+		if (randseed != 0)
+		{
+				random->seed(randseed);
+		}
+		else
+		{
+				random->randomize();
+		}		
+	};
 // GETS and SETS
 	const int get_occupancy() {return occupancy;}
 	void set_occupancy (const int occup) {occupancy=occup;}
@@ -74,12 +87,19 @@ public:
 	Bustrip* get_bustrip () {return trip;}
 	void set_bustrip ( Bustrip* trip_) {trip=trip_;}
 
-//
+	double calc_departure_time (double time); // calculates departure time from origin according to arrival time and schedule (including layover effect)
+	bool set_curr_trip (); // Returns true if progressed trip-pointer and false if the roster is done.
+
+	//
 	int number_seats; // Two added variables for LOS satistics and for dwell time calculations
-	int capacity;
-	bool active; // is true when the bus started to serve trips (called set_curr_trip());
+	int capacity; // In the future will be determined according to the bus type
+	bool active; // istrue when the bus started to serve trips (called set_curr_trip());
+	Random* random;
+	vector <Start_trip> driving_roster; // trips assignment for each bus vehicle.	
+	vector <Start_trip>::iterator curr_trip; // pointer to the current trip served by the bus vehicle
 protected:
 	int occupancy;
+	int type_id;
 	Bustrip* trip;
 
 };
