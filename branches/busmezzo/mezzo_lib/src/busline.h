@@ -22,8 +22,8 @@ typedef pair<Bustrip*,double> Start_trip;
 class Busline: public Action
 {
 public:
-	Busline (); // constructor
-	Busline (int id_, string name_, Busroute* busroute_, Vtype* vtype_, ODpair* odpair_);
+	Busline (); // simple constructor
+	Busline (int id_, string name_, Busroute* busroute_, Vtype* vtype_, ODpair* odpair_); // Initialising constructor
 	virtual ~Busline(); // destructor
 	bool execute(Eventlist* eventlist, double time); // re-implemented from virtual function in Action
 													 // this function does the real work. It initiates 

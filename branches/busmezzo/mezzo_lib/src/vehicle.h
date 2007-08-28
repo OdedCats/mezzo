@@ -58,25 +58,32 @@ class Vehicle
 	int switched;
 	int meters;
 };
+#ifdef _BUSES
+class Bustrip;
 
 class Bus : public Vehicle
 {
 public:
-	Bus():Vehicle() {occupancy=0;}
+	Bus():Vehicle(), trip(NULL) {occupancy=0;}
 	Bus(int id_, int type_, double length_,Route* route_, ODpair* odpair_, double time_) :
-	Vehicle(id_, type_,length_,route_,odpair_,time_) {}
-
+	Vehicle(id_, type_,length_,route_,odpair_,time_), trip(NULL) {}
+// GETS and SETS
 	const int get_occupancy() {return occupancy;}
 	void set_occupancy (const int occup) {occupancy=occup;}
+	
+	Bustrip* get_bustrip () {return trip;}
+	void set_bustrip ( Bustrip* trip_) {trip=trip_;}
 
+//
 	int number_seats; // Two added variables for LOS satistics and for dwell time calculations
 	int capacity;
 	bool active; // is true when the bus started to serve trips (called set_curr_trip());
 protected:
 	int occupancy;
+	Bustrip* trip;
 
 };
-
+#endif// BUSES
 
 class VehicleRecycler
 {
@@ -93,6 +100,7 @@ class VehicleRecycler
      						}
 							
      void addVehicle(Vehicle* veh){recycled.push_back( veh);}
+#ifdef _BUSES	 
 	 Bus* newBus() {	 	if (recycled_busses.empty())
      								return new Bus();
      							else
@@ -104,10 +112,12 @@ class VehicleRecycler
      						}
 							
      void addBus(Bus* bus){recycled_busses.push_back( bus);}
-
+#endif
  private:
 	list <Vehicle*> recycled;
+#ifdef _BUSES
 	list <Bus*> recycled_busses;
+#endif
 };
 
 //static VehicleRecycler recycler;

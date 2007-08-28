@@ -3,6 +3,7 @@
 #include <list>
 #include <string>
 #include "grid.h"
+#include <typeinfo> // for comparing different classes (Bus ans Vehicle)
 
 Link::Link(int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* sdfunc_): id(id_), in_node (in_),
 		out_node(out_), length(length_), nr_lanes(nr_lanes_), sdfunc(sdfunc_)
@@ -259,6 +260,7 @@ double Link::speed_density(double density_)
 {
     return sdfunc->speed(density_);
 }
+
 bool Link::enter_veh(Vehicle* veh, double time)
 {
    double ro=0.0;
@@ -266,7 +268,7 @@ bool Link::enter_veh(Vehicle* veh, double time)
 	ro=density_running(time);
 #else
 	#ifdef _RUNNING_ONLY
-      ro=density_running_only(time);
+		ro=density_running_only(time);
 	#else	
 		ro=density();
 	#endif	//_RUNNING_ONLY
@@ -328,6 +330,23 @@ bool Link::enter_veh(Vehicle* veh, double time)
 			ass_matrix [cur_l_period] [od_pair] [od_period] ++;
 		}
 	}
+// add here the BUSSTOP FUNCTIONS
+#ifdef _BUSES
+	if (typeid (veh) == typeid (Bus))
+	{
+		// Calc time to stop
+		Bus* bus =  (Bus*)(veh); // so we can do Bus operations
+
+		// book time to stop
+	}
+// test for type ID and if bus:
+	// Calc time to stop
+	// book time to stop
+
+#endif
+
+// END BUSSTOP FUNCTIONS
+
 	return queue->enter_veh(veh);
 }
 

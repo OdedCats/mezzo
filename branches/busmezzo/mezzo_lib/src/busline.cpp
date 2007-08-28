@@ -81,6 +81,7 @@ bool Bustrip::activate (double time, Route* route, Vtype* vehtype, ODpair* odpai
 	Bus* bus=recycler.newBus(); // get a bus vehicle
 	// !!! init should be modified to reflect the extra vars of the bus !!!
 	bus->init(vid,vehtype->id, vehtype->length,route,odpair,time);  // initialise the variables of the bus
+	bus->set_bustrip (this);
 	if ( (odpair->get_origin())->insert_veh(bus,time)) // insert the bus at the origin.
   		ok=true;
 	else // if insert returned false
