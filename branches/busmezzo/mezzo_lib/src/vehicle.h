@@ -83,25 +83,26 @@ public:
 // GETS and SETS
 	const int get_occupancy() {return occupancy;}
 	void set_occupancy (const int occup) {occupancy=occup;}
-	
 	Bustrip* get_bustrip () {return trip;}
 	void set_bustrip ( Bustrip* trip_) {trip=trip_;}
+	int get_number_seats () {return number_seats;}
+	int get_capacity () {return capacity;}
+	int get_active () {return active;}
+	void set_active (bool active_) {active=active_;}
 
 	double calc_departure_time (double time); // calculates departure time from origin according to arrival time and schedule (including layover effect)
-	bool set_curr_trip (); // Returns true if progressed trip-pointer and false if the roster is done.
+	void set_curr_trip (); // Returns true if progressed trip-pointer and false if the roster is done.
 
-	//
+protected:
+	Random* random;
 	int number_seats; // Two added variables for LOS satistics and for dwell time calculations
 	int capacity; // In the future will be determined according to the bus type
-	bool active; // istrue when the bus started to serve trips (called set_curr_trip());
-	Random* random;
-	vector <Start_trip> driving_roster; // trips assignment for each bus vehicle.	
-	vector <Start_trip>::iterator curr_trip; // pointer to the current trip served by the bus vehicle
-protected:
 	int occupancy;
 	int type_id;
 	Bustrip* trip;
-
+	bool active; // istrue when the bus started to serve trips (called set_curr_trip());
+	vector <Start_trip> driving_roster; // trips assignment for each bus vehicle.	
+	vector <Start_trip>::iterator curr_trip; // pointer to the current trip served by the bus vehicle
 };
 #endif// BUSES
 

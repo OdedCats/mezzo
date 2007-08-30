@@ -125,12 +125,12 @@ double Bus::calc_departure_time (double time) // calculates departure time from 
 	return departure_time;// output note: departure time
 }
 
-bool Bus::set_curr_trip () 
+void Bus::set_curr_trip () 
 {
-	if (active = false) // first time this function is called
+	if (get_active() == false) // first time this function is called
 	{
 		curr_trip = driving_roster.begin();
-		active = true;
+		set_active (true);
 	}
 	else
 	{
@@ -140,8 +140,7 @@ bool Bus::set_curr_trip ()
 		}
 		else
 		{
-			active = false; // no more trips on the schedule for this bus
+			set_active (false); // no more trips on the schedule for this bus
 		}
 	}
-	return active;
 }
