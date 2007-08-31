@@ -6,16 +6,16 @@ TEMPLATE = lib
 TARGET = mezzoAnalyzer
 DEPENDPATH += . src ui
 INCLUDEPATH += . $(QTDIR)/include $(QTDIR)/include/QtCore $(QTDIR)/include/QtGui $(QTDIR)/include/QtDesigner $(QTDIR)/include/QtNetwork $(QTDIR)/include/ActiveQt $(QTDIR)/include/Qt3Support 
-LIBS+= $(SUBLIBS) -L../mezzo_lib/Debug -lmezzo_lib -L$(QTDIR)/lib -lQtCore -lQtGui  -lQt3Support 
-QT+= core gui qt3support 
+LIBS += $(SUBLIBS) -L../mezzo_lib/Debug -lmezzo_lib -L$(QTDIR)/lib -lQtCore -lQtGui  -lQt3Support 
+QT += core gui qt3support 
 CONFIG += uic4 staticlib
 
 # Input
 FORMS += ./ui/odcheckdlg.ui
 HEADERS += src/assist.h \
            src/odcheckerdlg.h \
-           src/odtabledelegate.h \
+           src/odtabledelegate.h 
 SOURCES += src/odcheckerdlg.cpp \
-           src/odtabledelegate.cpp \
+           src/odtabledelegate.cpp 
            
            
