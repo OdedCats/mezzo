@@ -63,8 +63,9 @@ public:
 	int get_id () {return id;} // returns id, used in the compare <..> functions for find and find_if algorithms
 	Bus* get_busv () {return busv;}
 	Busline* get_line () {return line;}
-
-	void add_stops (vector <Visit_stop*>  st)  {stops = st;}
+	Visit_stop* get_next_stop() {return *next_stop;} // returns pointer to next stop
+	bool advance_next_stop (); // advances the pointer to the next stop (checking bounds)
+	void add_stops (vector <Visit_stop*>  st) {stops = st; next_stop = stops.begin();}
 	bool activate (double time, Route* route, Vtype* vehtype, ODpair* odpair); // activates the trip. Generates the bus and inserts in net.
 	bool timepoint_checker (Busstop* stop); // checks if a busstop is a time point for this trip
 
@@ -76,6 +77,7 @@ protected:
 	double starttime; // when the trip is starting from the origin
 	vector <Visit_stop*> stops; // contains all the busstops and the times that they are supposed to be served.
 								// NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
+	vector <Visit_stop*> :: iterator next_stop;
 	vector <Timepoint*> trips_timepoint; // binary vector with time point indicatons for candidate stops only (according to the schedule input file) 
 };
 

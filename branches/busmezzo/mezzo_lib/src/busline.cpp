@@ -71,7 +71,21 @@ Bustrip::Bustrip (int id_, double start_time_): id(id_), starttime(start_time_)
 Bustrip::~Bustrip ()
 {}
 
-
+bool Bustrip::advance_next_stop ()
+{
+	if (next_stop < stops.end())
+	{
+		next_stop++;
+	}
+	if (next_stop != stops.end())
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
 
 bool Bustrip::activate (double time, Route* route, Vtype* vehtype, ODpair* odpair)
 {
@@ -131,6 +145,8 @@ Busstop::Busstop (int id_, int link_id_, double position_, double length_, bool 
 		random->randomize();
 	}
 }
+
+
 
 Busstop::~Busstop ()
 {

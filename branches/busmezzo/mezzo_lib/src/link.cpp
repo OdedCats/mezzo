@@ -331,12 +331,13 @@ bool Link::enter_veh(Vehicle* veh, double time)
 		}
 	}
 // add here the BUSSTOP FUNCTIONS
+	
 #ifdef _BUSES
 	if (typeid (veh) == typeid (Bus))
 	{
 		// Calc time to stop
 		Bus* bus =  (Bus*)(veh); // so we can do Bus operations
-
+		Visit_stop* next_stop = (bus->get_bustrip())->get_next_stop();
 		// book time to stop
 	}
 // test for type ID and if bus:
