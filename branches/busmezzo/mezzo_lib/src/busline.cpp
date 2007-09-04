@@ -42,7 +42,7 @@ bool Busline::execute(Eventlist* eventlist, double time)
 	}
 	else // if the Busline is active
 	{
-		bool ok=next_trip->first->activate(time, busroute, vtype, odpair); // activates the trip, generates bus etc.
+		bool ok=next_trip->first->activate(time, busroute, vtype, odpair, eventlist); // activates the trip, generates bus etc.
 		next_trip++; // now points to next trip
 		if (next_trip < trips.end()) // if there exists a next trip
 		{
@@ -87,8 +87,9 @@ bool Bustrip::advance_next_stop ()
 	}
 }
 
-bool Bustrip::activate (double time, Route* route, Vtype* vehtype, ODpair* odpair)
+bool Bustrip::activate (double time, Route* route, Vtype* vehtype, ODpair* odpair, Eventlist* eventlist_)
 {
+	eventlist = eventlist_;
 	bool ok = false; // flag to check if all goes ok
 	// generate the Bus vehicle
 	vid++; // increment the veh id counter, buses are vehicles too
@@ -106,6 +107,10 @@ bool Bustrip::activate (double time, Route* route, Vtype* vehtype, ODpair* odpai
 	return ok;
 }
 
+void Bustrip::book_stop_visit (double time, Bus* bus)
+{ 
+	((*next_stop)->first)->book_bus_arrival(eventlist,time,bus);
+}
  /*bool Bustrip::timepoint_checker (Busstop* stop) // checks if a busstop is a time point for this trip
 {
 	Timepoint tp;

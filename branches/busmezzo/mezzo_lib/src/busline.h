@@ -67,10 +67,10 @@ public:
 	Visit_stop* get_next_stop() {return *next_stop;} // returns pointer to next stop
 	bool advance_next_stop (); // advances the pointer to the next stop (checking bounds)
 	void add_stops (vector <Visit_stop*>  st) {stops = st; next_stop = stops.begin();}
-	bool activate (double time, Route* route, Vtype* vehtype, ODpair* odpair); // activates the trip. Generates the bus and inserts in net.
+	bool activate (double time, Route* route, Vtype* vehtype, ODpair* odpair, Eventlist* eventlist_); // activates the trip. Generates the bus and inserts in net.
 	bool timepoint_checker (Busstop* stop); // checks if a busstop is a time point for this trip
 
-	
+	void book_stop_visit (double time, Bus* bus); // books a visit to the stop
 protected:
 	int id; // course nr
 	Bus* busv; // pointer to the bus vehicle
@@ -81,7 +81,7 @@ protected:
 								// NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
 	vector <Visit_stop*> :: iterator next_stop;
 	vector <Timepoint*> trips_timepoint; // binary vector with time point indicatons for candidate stops only (according to the schedule input file) 
-
+	Eventlist* eventlist; // for use by busstops etc to book themselves.
 	
 };
 
