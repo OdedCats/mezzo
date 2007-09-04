@@ -98,7 +98,8 @@ public:
 	bool get_bay () {return has_bay;}
 	void set_nr_waiting (int nr_waiting_) {nr_waiting = nr_waiting_;}
 	void set_dwelltime (double dwelltime_) {dwelltime = dwelltime_;}
-	
+	const double get_position () { return position;}
+	void set_position (double position_ ) {position = position_;}
 	
 	double calc_dwelltime (Bustrip* trip, double time); // calculates the dwelltime of each bus serving this stop
 							// currently includes: standees, out of stop, bay/lane,  vehicle refernce, poisson headways, unique boarding and alighting rates									
