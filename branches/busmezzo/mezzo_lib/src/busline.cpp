@@ -118,8 +118,8 @@ bool Bustrip::activate (double time, Route* route, Vtype* vehtype, ODpair* odpai
 
 
 // Busstop functions
-Busstop::Busstop (int id_, int link_id_, double length_, bool has_bay_, double dwelltime_):
-	id(id_), link_id(link_id_), length(length_), has_bay(has_bay_), dwelltime(dwelltime_)
+Busstop::Busstop (int id_, int link_id_, double position_, double length_, bool has_bay_, double dwelltime_):
+	id(id_), link_id(link_id_), position (position_), length(length_), has_bay(has_bay_), dwelltime(dwelltime_)
 {
 	random = new (Random);
 	if (randseed != 0)

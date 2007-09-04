@@ -86,7 +86,7 @@ class Busstop
 public:
 	Busstop ();
 	~Busstop ();
-	Busstop (int id_, int link_id_, double length_, bool has_bay_, double dwelltime_);
+	Busstop (int id_, int link_id_, double length_, double position_, bool has_bay_, double dwelltime_);
 	// GETS & SETS:
 	int get_id () {return id;} // returns id, used in the compare <..> functions for find and find_if algorithms
 	double get_headway (Bustrip* trip, double time); // calculates the headway (current time minus the last ariival) 

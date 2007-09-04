@@ -1126,7 +1126,7 @@ bool Network::readbusstop (istream& in) // reads a busstop
 //{ stop_id	link_id	length	has_bay	dwelltime }
   char bracket;
   int stop_id, link_id;
-  double length, dwelltime;
+  double position, length, dwelltime;
   bool has_bay ;
   bool ok= true;
   in >> bracket;
@@ -1135,8 +1135,8 @@ bool Network::readbusstop (istream& in) // reads a busstop
   	cout << "readfile::readsbusstop scanner jammed at " << bracket;
   	return false;
   }
-  in >> stop_id >> link_id >> length >> has_bay >> dwelltime;
-  Busstop* st= new Busstop (stop_id, link_id, length, has_bay, dwelltime);
+  in >> stop_id >> link_id >> position >> length >> has_bay >> dwelltime;
+  Busstop* st= new Busstop (stop_id, link_id, position, length, has_bay, dwelltime);
   in >> bracket;
   if (bracket != '}')
   {
