@@ -52,7 +52,8 @@ protected:
 typedef pair<Busstop*,double> Visit_stop;
 typedef pair<Busstop*,bool> Timepoint;
 
-class Bustrip
+
+class Bustrip 
 {
 public:
 	Bustrip ();
@@ -69,6 +70,7 @@ public:
 	bool activate (double time, Route* route, Vtype* vehtype, ODpair* odpair); // activates the trip. Generates the bus and inserts in net.
 	bool timepoint_checker (Busstop* stop); // checks if a busstop is a time point for this trip
 
+	
 protected:
 	int id; // course nr
 	Bus* busv; // pointer to the bus vehicle
@@ -79,11 +81,13 @@ protected:
 								// NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
 	vector <Visit_stop*> :: iterator next_stop;
 	vector <Timepoint*> trips_timepoint; // binary vector with time point indicatons for candidate stops only (according to the schedule input file) 
+
+	
 };
 
 typedef pair<Busline*,double> Busline_arrival;
 
-class Busstop
+class Busstop : public Action
 {
 public:
 	Busstop ();
@@ -110,6 +114,10 @@ public:
 	void free_length (Bustrip* trip); // update avaliable length when bus leaves
 	void update_last_arrivals (Bustrip* trip, double time); //everytime a bus EXITS it updates the last_arrivlas vector (only AFTER we claculated the dwell time)
 
+// Action for visits to stop
+	void book_bus_arrival(Eventlist* eventlist, double time, Bus* bus);  // add to expected arrivals
+	bool execute(Eventlist* eventlist, double time); // is executed by the eventlist and means a bus needs to be processed
+
 protected:
 	int id; // stop id
 	string name; //name of the bus stop "Ziv plaza"
@@ -124,6 +132,7 @@ protected:
 	vector <Busline_arrival> alighting_rates; // parameter that defines the poission process of the alighting passengers (second contains the alighting fraction)
 	vector <Busline_arrival> arrival_rates; // parameter lambda that defines the poission proccess of passengers arriving at the stop
 	vector <Busline_arrival> last_arrivals; // contains the arrival time of the last bus from each line that stops at the stop (can result headways)
+	map <double,Bus*> expected_arrivals; // booked arrivals of buses on the link on their way to the stop
 	// Maybe in the future, these three vectors could be integrated into a single matrix ( a map with busline as the key)
 };
 

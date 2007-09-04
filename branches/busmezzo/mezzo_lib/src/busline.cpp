@@ -153,6 +153,22 @@ Busstop::~Busstop ()
 	delete random;
 }
 
+void Busstop::book_bus_arrival(Eventlist* eventlist, double time, Bus* bus)
+{
+	expected_arrivals [time] = bus; // not sure if we really want to index them by time? maybe simply by bus id?
+	eventlist->add_event(time,this);
+
+} // add to expected arrivals
+
+bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the eventlist and means a bus needs to be processed
+{
+	Bus* bus = expected_arrivals [time];
+
+	// do your stuff
+
+
+	return true;
+}
 double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dwelltime of each bus serving this stop
 {
 	int loadfactor = 0; // bus crowdedness factor
