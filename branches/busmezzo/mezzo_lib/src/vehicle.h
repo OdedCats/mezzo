@@ -91,7 +91,7 @@ public:
 	void set_active (bool active_) {active=active_;}
 
 	double calc_departure_time (double time); // calculates departure time from origin according to arrival time and schedule (including layover effect)
-	void set_curr_trip (); // Returns true if progressed trip-pointer and false if the roster is done.
+	void advance_curr_trip (); // Returns true if progressed trip-pointer and false if the roster is done.
 
 protected:
 	Random* random;

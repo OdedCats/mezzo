@@ -4,6 +4,7 @@
 
 #include "busline.h"
 #include <math.h>
+#include "MMath.h"
 
 // Busline functions
 
@@ -140,6 +141,7 @@ void Bustrip::book_stop_visit (double time, Bus* bus)
 Busstop::Busstop (int id_, int link_id_, double position_, double length_, bool has_bay_, double dwelltime_):
 	id(id_), link_id(link_id_), position (position_), length(length_), has_bay(has_bay_), dwelltime(dwelltime_)
 {
+	nr_waiting = 0;
 	random = new (Random);
 	if (randseed != 0)
 		{
@@ -162,26 +164,36 @@ void Busstop::book_bus_arrival(Eventlist* eventlist, double time, Bus* bus)
 {
 	expected_arrivals [time] = bus; // not sure if we really want to index them by time? maybe simply by bus id?
 	eventlist->add_event(time,this);
-
+	
 } // add to expected arrivals
 
 bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the eventlist and means a bus needs to be processed
 {
+	bool rest_of_trip;
 	Bus* bus = expected_arrivals [time];
 
-	// do your stuff
-
+	occupy_length (bus);
+	eventlist->add_event (time + calc_dwelltime(bus->get_bustrip(), time), this); // book an event for the time it exits the stop
+	// When time point will work - call calc_exiting_time()
+	free_length (bus);
+	update_last_arrivals (bus->get_bustrip(), time); // in order to follow the headways
+	rest_of_trip = bus->get_bustrip()->advance_next_stop(); // advance the pointer to the next bus stop
+	if (rest_of_trip == false) // If the bus reached it last stop - move the pointer to the next trip
+	{
+		bus->advance_curr_trip();
+		eventlist->add_event (time + bus->calc_departure_time(time), this);
+	}
 
 	return true;
 }
 double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dwelltime of each bus serving this stop
 {
-	int loadfactor = 0; // bus crowdedness factor
-	int nr_boarding = 0;// pass. boarding
-	int nr_alighting= 0; // pass alighting
+	int loadfactor; // bus crowdedness factor
+	int nr_boarding;// pass. boarding
+	int nr_alighting; // pass alighting
 	int curr_occupancy = trip->get_busv()->get_occupancy(); // pass. on the bus when entring the stop, the value will be imported from the bus object
-	int boarding_standees = 0;
-	int alighting_standees = 0;
+	int boarding_standees;
+	int alighting_standees;
 	int number_seats = trip->get_busv()->get_number_seats(); // will be imported from the bus object
 
 	double dwell_constant = 12.5; // Value of the constant component in the dwell time function. 
@@ -189,10 +201,11 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 	double alighting_coefficient = 0.23;
 	double crowdedness_coefficient = 0.0078;
 	double out_of_stop_coefficient = 3.0; // Taking in consideration the increasing dwell time when bus stops out of the stop
-	bool out_of_stop = check_out_of_stop(trip);
+	bool out_of_stop = check_out_of_stop(trip->get_busv());
 	
 	nr_boarding = random -> poisson ((get_arrival_rates (trip) * get_headway (trip, time)) / 60 ); //the boarding process follows a poisson distribution and the lambda is relative to the headway
 					// with arrival time and the headway as the duration
+	set_nr_waiting (get_nr_waiting() + nr_boarding); // the new comers are added to the waiting passengers
 	nr_alighting = random -> binrandom (curr_occupancy, get_alighting_rates (trip)); // the alighting process follows a binominal distribution 
 					// the number of trials is the number of passengers on board with the probability of the alighting fraction
 															
@@ -208,10 +221,11 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 
 	if (nr_boarding > (trip->get_busv()->get_capacity() - curr_occupancy)) // The number of boarding passengers is limited by the capacity
 	{
-		set_nr_waiting (nr_boarding + curr_occupancy - trip->get_busv()->get_capacity()); // The over-capacity will be added to the waiting passengers at the busstop
 		nr_boarding = trip->get_busv()->get_capacity() - curr_occupancy; 
 	}
-
+	
+	set_nr_waiting (Max(get_nr_waiting() - nr_boarding, 0)); // the number of waiting passenger is decreased by the number of pass. that went on the bus. 
+	// OUTPUT NOTE
 	curr_occupancy += nr_boarding;
 	trip->get_busv()->set_occupancy(curr_occupancy); // Updating the occupancy. OUTPUT NOTE
 	
@@ -231,28 +245,27 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 	return dwelltime;
 }
 
-void Busstop::occupy_length (Bustrip* trip) // a bus arrived - decrease the left space at the stop
+void Busstop::occupy_length (Bus* bus) // a bus arrived - decrease the left space at the stop
 {
 	double space_between_buses = 3.0; // the reasonable space between stoping buses, input parameter - IMPLEMENT: shouldn't be for first bus at the stop
-	set_avaliable_length (get_avaliable_length() - trip->get_busv()->get_length() - space_between_buses); 
+	set_avaliable_length (get_avaliable_length() - bus->get_length() - space_between_buses); 
 } 
 
-void Busstop::free_length (Bustrip* trip) // a bus left - increase the left space at the stop
+void Busstop::free_length (Bus* bus) // a bus left - increase the left space at the stop
 {
 	double space_between_buses = 3.0; // the reasonable space between stoping buses
-	set_avaliable_length  (get_avaliable_length() + trip->get_busv()->get_length() + space_between_buses);
+	set_avaliable_length  (get_avaliable_length() + bus->get_length() + space_between_buses);
 } 
 
-bool Busstop::check_out_of_stop (Bustrip* trip) // checks if there is any space left for the bus at the stop
+bool Busstop::check_out_of_stop (Bus* bus) // checks if there is any space left for the bus at the stop
 {
-	if (trip->get_busv()->get_length() > get_avaliable_length())
+	if (bus->get_length() > get_avaliable_length())
 	{
 		return true; // no left space for the bus at the stop. IMPLEMENT: generate incidence (capacity reduction)
 	}
 	else
 	{
 		return false; // there is left space for the bus at the stop
-
 	}
 }
 

@@ -125,7 +125,7 @@ double Bus::calc_departure_time (double time) // calculates departure time from 
 	return departure_time;// output note: departure time
 }
 
-void Bus::set_curr_trip () 
+void Bus::advance_curr_trip () 
 {
 	if (get_active() == false) // first time this function is called
 	{
