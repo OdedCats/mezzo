@@ -6,6 +6,8 @@
 #include "Random.h"
 #include <algorithm>
 #include "vehicle.h"
+#include <fstream>
+#include <string>
 
 // ODED: what i am doing here is not correct yet. I made everything public and have no constructor, destructor etc.
 //		 When the structure of the classes is final, I move all the variables to protected: and make constructors,
@@ -65,24 +67,26 @@ public:
 	Bus* get_busv () {return busv;}
 	Busline* get_line () {return line;}
 	Visit_stop* get_next_stop() {return *next_stop;} // returns pointer to next stop
+
 	bool advance_next_stop (); // advances the pointer to the next stop (checking bounds)
 	void add_stops (vector <Visit_stop*>  st) {stops = st; next_stop = stops.begin();}
 	bool activate (double time, Route* route, Vtype* vehtype, ODpair* odpair, Eventlist* eventlist_); // activates the trip. Generates the bus and inserts in net.
 	bool timepoint_checker (Busstop* stop); // checks if a busstop is a time point for this trip
-
+	double scheduled_arrival_time (Busstop* stop); // finds the scheduled arrival time for a given bus stop
 	void book_stop_visit (double time, Bus* bus); // books a visit to the stop
+	void write_trips (string name, double time); // documents bus-created times in a log file
+
+	vector <Visit_stop*> stops; // contains all the busstops and the times that they are supposed to be served.
+								// NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
 protected:
 	int id; // course nr
 	Bus* busv; // pointer to the bus vehicle
 	Busline* line; // pointer to the line it serves
 	int init_occupancy; // initial occupancy, usually 0
 	double starttime; // when the trip is starting from the origin
-	vector <Visit_stop*> stops; // contains all the busstops and the times that they are supposed to be served.
-								// NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
 	vector <Visit_stop*> :: iterator next_stop;
 	vector <Timepoint*> trips_timepoint; // binary vector with time point indicatons for candidate stops only (according to the schedule input file) 
 	Eventlist* eventlist; // for use by busstops etc to book themselves.
-	
 };
 
 typedef pair<Busline*,double> Busline_arrival;
@@ -104,6 +108,7 @@ public:
 	int get_nr_waiting () {return nr_waiting;}
 	void set_nr_waiting (int nr_waiting_) {nr_waiting = nr_waiting_;}
 	void set_dwelltime (double dwelltime_) {dwelltime = dwelltime_;}
+	double get_dwelltime () {return dwelltime;}
 	const double get_position () { return position;}
 	void set_position (double position_ ) {position = position_;}
 	
@@ -115,6 +120,8 @@ public:
 	void free_length (Bus* bus); // update avaliable length when bus leaves
 	void update_last_arrivals (Bustrip* trip, double time); //everytime a bus EXITS it updates the last_arrivlas vector (only AFTER we claculated the dwell time)
 	double get_headway (Bustrip* trip, double time); // calculates the headway (current time minus the last ariival) 
+
+	void write_busstop_visit (string name, Bustrip* trip, double time); // creates a log-file for stop-related info
 
 // Action for visits to stop
 	void book_bus_arrival(Eventlist* eventlist, double time, Bus* bus);  // add to expected arrivals

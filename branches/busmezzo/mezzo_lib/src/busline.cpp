@@ -5,6 +5,7 @@
 #include "busline.h"
 #include <math.h>
 #include "MMath.h"
+#include <sstream>
 
 // Busline functions
 
@@ -44,6 +45,7 @@ bool Busline::execute(Eventlist* eventlist, double time)
 	else // if the Busline is active
 	{
 		bool ok=next_trip->first->activate(time, busroute, vtype, odpair, eventlist); // activates the trip, generates bus etc.
+		next_trip->first->write_trips ("Bustrips.dat", time); // document it 
 		next_trip++; // now points to next trip
 		if (next_trip < trips.end()) // if there exists a next trip
 		{
@@ -95,6 +97,7 @@ bool Bustrip::activate (double time, Route* route, Vtype* vehtype, ODpair* odpai
 	// generate the Bus vehicle
 	vid++; // increment the veh id counter, buses are vehicles too
 	Bus* bus=recycler.newBus(); // get a bus vehicle
+	bus->write_buses_generation ("Bus_vehicles_generation.dat");
 	// !!! init should be modified to reflect the extra vars of the bus !!!
 	bus->init(vid,vehtype->id, vehtype->length,route,odpair,time);  // initialise the variables of the bus
 	bus->set_bustrip (this);
@@ -112,7 +115,28 @@ void Bustrip::book_stop_visit (double time, Bus* bus)
 { 
 	((*next_stop)->first)->book_bus_arrival(eventlist,time,bus);
 }
- /*bool Bustrip::timepoint_checker (Busstop* stop) // checks if a busstop is a time point for this trip
+
+void Bustrip::write_trips (string name, double time) // documents bus-created times in a log file
+{
+	ofstream out(name.c_str());
+	assert(out);
+	out << "Bustrip " << get_id() << " was created at: " << time << endl;  
+}
+
+double Bustrip::scheduled_arrival_time (Busstop* stop) // finds the scheduled arrival time for a given bus stop
+{
+	for (vector<Visit_stop*>::iterator scheduled_time = stops.begin();scheduled_time < stops.end(); scheduled_time++)
+	{
+		if ((*scheduled_time)->first == stop)
+		{	
+			return (*scheduled_time)->second;
+		}
+	} 
+	return 0; // if bus stop isn't on the trip's route
+}
+
+/*
+ bool Bustrip::timepoint_checker (Busstop* stop) // checks if a busstop is a time point for this trip
 {
 	Timepoint tp;
 	tp.first = stop;
@@ -176,6 +200,8 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 	eventlist->add_event (time + calc_dwelltime(bus->get_bustrip(), time), this); // book an event for the time it exits the stop
 	// When time point will work - call calc_exiting_time()
 	free_length (bus);
+	write_busstop_visit ("Busstop_visit.dat", bus->get_bustrip(), time); // document stop-related info
+							// done BEFORE update_last_arrivals in order to calc the headway
 	update_last_arrivals (bus->get_bustrip(), time); // in order to follow the headways
 	rest_of_trip = bus->get_bustrip()->advance_next_stop(); // advance the pointer to the next bus stop
 	if (rest_of_trip == false) // If the bus reached it last stop - move the pointer to the next trip
@@ -183,7 +209,6 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 		bus->advance_curr_trip();
 		eventlist->add_event (time + bus->calc_departure_time(time), this);
 	}
-
 	return true;
 }
 double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dwelltime of each bus serving this stop
@@ -309,4 +334,26 @@ double Busstop::get_alighting_rates (Bustrip* trip)
 	iter1 = find (alighting_rates.begin(), alighting_rates.end(), line1);
 	return iter1->second;
 }
+
+void Busstop::write_busstop_visit (string name, Bustrip* trip, double time)  // creates a log-file for stop-related info
+{
+	ofstream out(name.c_str());
+	assert(out);
+	out << "Busline ID: " << trip->get_line() << ", Bustrip ID: " << trip->get_id() << " , Busstop ID: " << get_id() << endl;
+	out << "Scheduled Arrival time: " << trip->scheduled_arrival_time (this) << endl;
+	out << "Arrival time: " << time << endl;
+	if (trip->scheduled_arrival_time (this) == 0)
+	{
+		out << "Error : Busstop ID: " << get_id() << " is not on Bustrip ID: " << trip->get_id() << " route." << endl;
+	}
+	else
+	{
+		out << "Delay: " << time - trip->scheduled_arrival_time (this) << endl; // positive for dealy, negative for early arrival
+	}
+	out << "Headway: " << get_headway (trip , time) << endl;
+	out << "Dwell time: " << get_dwelltime() << endl;
+	out << "Exit time: " << time + get_dwelltime() << endl;
+}
+
+
 
