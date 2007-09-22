@@ -1,7 +1,8 @@
 /** 
  * change: add the mezzo analyzer dialog
+ * solve the zooming problems 
  * last modified: Xiaoliang Ma 
- * 2007-07-13
+ * 2007-09-06
  */
 
 #ifndef MAINFORM
@@ -10,6 +11,7 @@
 #include <Qt3Support>
 //#include <q3filedialog.h> // taken out, replaced by Qfiledialog
 #include <Qfiledialog>
+#include <QWMatrix>
 #include "ui_canvas_qt4.h"
 #include "parametersdialog_qt4.h"
 #include "../mezzo_lib/src/parameters.h"
@@ -46,7 +48,8 @@ private slots:
 		
 	// other slots	
 	void keyPressEvent( QKeyEvent *e );
-	void mousePressEvent ( QMouseEvent * event );
+	void mousePressEvent(QMouseEvent *event );
+	void mouseMoveEvent(QMouseEvent *event );  
 	
 	void loop();
 	void paintEvent(QPaintEvent *event );
@@ -61,25 +64,32 @@ private:
 	int start_x ; // the x coordinate of the upper right corner of the canvas
     int start_y ; // the y coordinate of the upper right corner of the canvas
 	QPoint canvas_center; // the center of the canvas
-    int panpixels;
+	int panelx, panely;
+    int dx,dy;
+	int panpixels;
     bool exited;
     double scalefactor;
-    int panelx, panely;
-    int dx,dy;
     double scale;
-    double runtime, currtime;
+	QWMatrix wm;
+    int panfactor;
+
+	// xiaoliang work variables on zooming
+    QWMatrix mod2stdViewMat_;
+	QWMatrix std2curViewMat_;
+	QSize viewSize_;
+	QPixmap pm1, pm2; //shared
+
+	double runtime, currtime;
     QTimer* timer;
-    QPixmap pm1, pm2;
     Network theNetwork;
 	Parameters* theParameters;
     QStringList files;
     QString filename;
-    QWMatrix wm;
-    int panfactor;
     bool breaknow;
     QStatusBar* statusbar;
     bool initialised;
 	
+	// sub dialogs
 	ParametersDialog* pmdlg;
 	ODCheckerDlg* od_analyser_;
 

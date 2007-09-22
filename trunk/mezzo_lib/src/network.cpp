@@ -251,12 +251,6 @@ bool Network::readnode(istream& in)
 	optr->set_icon(niptr);
 	drawing->add_icon(niptr);
 	#endif // _NO_GUI
-
-
-
-
-
-
   	nodes.insert(nodes.begin(),optr);
   	origins.insert(origins.begin(),optr);
 #ifdef _DEBUG_NETWORK
@@ -3260,12 +3254,10 @@ void Network::recenter_image()
    double scale_y = (pm->height()) / height_y;
 
    scale = _MIN (scale_x,scale_y);
-  // cout << "scales. x: " << scale_x << " y: " << scale_y <<" scale: " << scale <<  endl;
+   // cout << "scales. x: " << scale_x << " y: " << scale_y <<" scale: " << scale <<  endl;
    wm->translate(boundaries[0],boundaries[1]); // so that (minx,miny)=(0,0)
    
    // center the image
-   
-   
    if (scale_x > scale_y)// if the Y dimension determines the scale
    {	
 	   double move_x = (pm->width() - (width_x*scale_y))/2; //
@@ -3276,11 +3268,56 @@ void Network::recenter_image()
 	   double move_y = (pm->height() - (height_y*scale_x))/2; //
 	   wm->translate (0,move_y);	
    }
+   wm->scale(scale,scale);   
+}
 
-   wm->scale(scale,scale);
+/**
+*	initialize to fit the network boundaries into 
+*   the standard graphic view:  
+*	a) transform from model coordinate (O')  
+*      to standar view coordinate (O) 
+*		X=sxy*(X'-Xmin')
+*		Y=sxy*(Y'-Ymin')
+*	b) move the overscaled dimension to centre
+*   IMPORTANT: the order of operation is
+*   step 1: translate the overscaled dimension
+*   step 2: scale the coordinate with a factor=min{view_X/model_X', view_Y/model_Y'}
+*	step 3: translate (-Xmin', -Ymin')
+*   PROOF BY M=M3*M2*M1
+*/
+QWMatrix Network::netgraphview_init()
+{	
+   // initial worldmatrix 
+   initview_wm.reset(); 
    
-   	
+   vector <int> boundaries = drawing->get_boundaries();
+   //initview_wm.translate(boundaries[0],boundaries[1]); 
    
+   //scale the image and then centralize the image along
+   //the overscaled dimension 
+   width_x = (double)(boundaries[2]-boundaries[0]);
+   height_y = (double)(boundaries[3]-boundaries[1]);
+   double scale_x = (pm->width())/width_x;
+   double scale_y = (pm->height())/height_y;
+ 
+   if (scale_x > scale_y){	
+	   scale=scale_y;	
+	   // the x dimension is overscaled
+	   double x_adjust =pm->width()/2-width_x*scale/2;
+	   initview_wm.translate(x_adjust,0);
+	   initview_wm.scale(scale,scale);
+   }
+   else{
+	   scale=scale_x;
+	   double y_adjust = pm->height()/2-height_y*scale/2;
+	   initview_wm.translate(0,y_adjust);
+	   initview_wm.scale(scale,scale);
+   }
+   initview_wm.translate(-boundaries[0],-boundaries[1]);
+   // make a copy to "wm"
+   (*wm)=initview_wm;
+   // return the information to the canvas 
+   return initview_wm;
 }
 
 

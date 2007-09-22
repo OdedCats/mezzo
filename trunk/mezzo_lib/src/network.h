@@ -50,8 +50,9 @@
 #ifndef _NO_GUI
 //Added by qt3to4:
 #include <QPixmap>
-#include <qt3support> // new in QT4 to port from QT3
+#include <Qt3Support> // new in QT4 to port from QT3
 #include <qpixmap.h>
+#include <QWMatrix>
 #endif // _NO_GUI
 
 //include the PVM communicator
@@ -159,11 +160,14 @@ class Network
   bool readserverrates(string name); // reads in new rates for specified servers. This way server capacity can be variable over time for instance for exits.
   bool readsignalcontrols(string name); // reads the signal control settings
   void seed (long int seed_) {randseed=seed_; vehtypes.set_seed(seed_);}          // sets the random seed
-  
-  void recenter_image();   // sets the image in the center and adapts zoom to fit window
-  void redraw(); // redraws the image
 
- // GET's
+#ifndef _NO_GUI
+  void recenter_image();   // sets the image in the center and adapts zoom to fit window
+  QWMatrix netgraphview_init(); // scale the network graph to the view initialized by pixmaps
+  void redraw(); // redraws the image
+#endif //_NO_GUI
+
+  // GET's
   double get_currenttime(){return time;}
   Parameters* get_parameters () {return theParameters;} 
   vector <ODpair*>& get_odpairs () {return odpairs;}
@@ -186,10 +190,10 @@ class Network
 #ifndef _NO_GUI
   double get_width_x() {return width_x;} // returns image width in original coordinate system
   double get_height_y() {return height_y;} // ... height ...
-   void set_background (string name) {if (drawing) drawing->set_background(name.c_str());}
+  void set_background (string name) {if (drawing) drawing->set_background(name.c_str());}
 #endif // _NO_GUI 
-  protected:
-
+  
+protected:
   vector <Node*> nodes;
   vector <Origin*> origins;
   vector <Destination*> destinations;
@@ -221,11 +225,13 @@ class Network
 #endif
   // Random stream
   Random* random;
+
 //GUI
 #ifndef _NO_GUI
  Drawing* drawing; // the place where all the Icons live
  QPixmap* pm; // the place where the drawing is drawn
- QMatrix * wm; // worldmatrix that contains all the transformations of the drawing (scaling, translation, rotation, &c)
+ QWMatrix* wm; // worldmatrix that contains all the transformations of the drawing (scaling, translation, rotation, &c)
+ QWMatrix initview_wm; // world matrix that transform the drawing to the inital view
  double scale; // contains the scale of the drawing
  double width_x; // width of boundaries of drawing in original coordinate system
  double height_y; // height of boundaries of drawing in org. coord. sys.
