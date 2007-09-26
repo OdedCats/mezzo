@@ -1,8 +1,9 @@
 /** 
- * change: add the mezzo analyzer dialog
- * solve the zooming problems 
+ * changes: 
+ * 1)add the mezzo analyzer dialog
+ * 2)solve the zooming problems 
  * last modified: Xiaoliang Ma 
- * 2007-09-06
+ * 2007-09-26
  */
 
 #ifndef MAINFORM
@@ -66,18 +67,18 @@ private:
 	QPoint canvas_center; // the center of the canvas
 	int panelx, panely;
     int dx,dy;
-	int panpixels;
     bool exited;
-    double scalefactor;
-    double scale;
-	QWMatrix wm;
-    int panfactor;
 
 	// xiaoliang work variables on zooming
-    QWMatrix mod2stdViewMat_;
-	QWMatrix std2curViewMat_;
+	QWMatrix wm;			  // general world matrix for painting	
+    QWMatrix mod2stdViewMat_; //define transition from basic model to standard view
+	QWMatrix viewMat_;		  //define transition from standard view to current view
 	QSize viewSize_;
 	QPixmap pm1, pm2; //shared
+	double scalefactor;
+    double scale;
+    int panfactor;
+	int panpixels;
 
 	double runtime, currtime;
     QTimer* timer;

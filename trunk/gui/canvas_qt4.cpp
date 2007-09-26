@@ -1,3 +1,16 @@
+/*
+* implementation of the graphic interface
+*
+* last modification: Xiaoliang Ma 2007-09-26
+*	
+* solve the zooming problem by reimplementation through matrix operations
+*	(It is necessary to create a document to explain the principle later since
+*    the implementation is quite tricky and the code needs to be further clean 
+*    up as while!)
+* 
+*/
+
+
 #include <qmessagebox.h>
 #include "canvas_qt4.h"
 
@@ -6,42 +19,42 @@ MainForm::MainForm(QWidget *parent)
 {
 	setupUi(this);
 	
-	// INIT
+	// INITIALIZATION
 	initialised=false;
 	panelx=800;
 	panely=600;
 	scalefactor=1.50;
 	panfactor=20;
 	panpixels=20;
-	breaknow=false;
-	//pm1.resize(panelx,panely);
-	//pm1.fill();
-	//pm2=pm1;
-
-	
-	timer = new QTimer( this );
-	connect( timer, SIGNAL(timeout()), this, SLOT(loop()) );
-	runtime=1.0; 
-	currtime=0.0;
 	scale=1.0;
 	dx=0;
 	dy=0;
 
-	// Coordinate of the upper left corner of the canvas
-	start_x = Canvas->x(); 
-    start_y = Canvas->y() + 60; 
+	//pm1.resize(panelx,panely);
+	//pm1.fill();
+	//pm2=pm1;
 
 	// implementation of view zooming and panning
 	//xiaoliang
 	mod2stdViewMat_=QWMatrix(1,0,0,1,0,0);
-	std2curViewMat_=mod2stdViewMat_;
+	viewMat_=QWMatrix(1,0,0,1,0,0);
 	viewSize_=QSize(800,600);
 	pm1=QPixmap(viewSize_);
 	pm2=pm1;
 	//xiaoliang
 	
-	canvas_center = QPoint(start_x + (panelx /2) , start_y + (panely / 2));
-	wm.scale(scale,scale); 
+	timer = new QTimer( this );
+	breaknow=false;
+	connect( timer, SIGNAL(timeout()), this, SLOT(loop()) );
+	runtime=1.0; 
+	currtime=0.0;
+
+	// Coordinate of the upper left corner of the canvas
+	start_x = Canvas->x(); 
+    start_y = Canvas->y() + 60; 
+	
+	//canvas_center = QPoint(start_x + (panelx /2) , start_y + (panely / 2));
+	//wm.scale(scale,scale); 
 	statusbar = this->statusBar();
 	statusbar->showMessage("Load a master file");
 	exited = false;
@@ -117,6 +130,7 @@ void MainForm::on_openmasterfile_activated()
 
 		// initialize the network graphic
 		mod2stdViewMat_=theNetwork.netgraphview_init();
+		wm=mod2stdViewMat_;
 		theNetwork.redraw();
 		copyPixmap();
 		statusbar->message("Initialised");
@@ -125,8 +139,7 @@ void MainForm::on_openmasterfile_activated()
 
 void MainForm::on_zoomin_activated()
 {
-	// OLD WAY. Almost right, but it zooms in & out around the Network center, 
-	// not the view center
+	/*
 	double w_x= theNetwork.get_width_x();
 	double h_y=theNetwork.get_height_y();
 	dx=static_cast<int>(0.5*(scalefactor-1)*w_x);
@@ -137,16 +150,28 @@ void MainForm::on_zoomin_activated()
 	panfactor=static_cast<int>(0.5+(double)panpixels / wm.m11()); // correction of the panfactor after zoom
 	QString mesg=QString("Scale: %1 Panfactor: %2 DX: %3 DY: %4").arg(wm.m11()).arg(panfactor).arg(wm.dx()).arg(wm.dy());
 	statusbar->message(mesg);
-	
-	// xiaoliang's implementation
-	
+	*/
 
+	// xiaoliang's implementation
+	int xviewcenter=viewSize_.width()/2;
+	int yviewcenter=viewSize_.height()/2;
+	QWMatrix tempMat;
+
+	scale*=scalefactor;
+	tempMat.reset();
+	tempMat.translate(xviewcenter, yviewcenter);
+	tempMat.scale(scalefactor, scalefactor);
+	tempMat.translate(-xviewcenter,-yviewcenter);
+	viewMat_=viewMat_*tempMat;
+	wm=mod2stdViewMat_*viewMat_;
+	panfactor=static_cast<int>(0.5+(double)panpixels/scale);
 	theNetwork.redraw();
     copyPixmap();
 }
 
 void MainForm::on_zoomout_activated()
 {
+	/*
 	scale=1/scalefactor;
 	double w_x= theNetwork.get_width_x();
 	double h_y=theNetwork.get_height_y();
@@ -157,6 +182,22 @@ void MainForm::on_zoomout_activated()
 	panfactor=static_cast<int>(0.5+(double)panpixels / wm.m11());
 	QString mesg=QString("Scale: %1 Panfactor: %2 DX: %3 DY: %4").arg(wm.m11()).arg(panfactor).arg(wm.dx()).arg(wm.dy());
 	statusbar->message(mesg );
+	*/
+	
+	// xiaoliang's implementation
+	int xviewcenter=viewSize_.width()/2;
+	int yviewcenter=viewSize_.height()/2;
+	QWMatrix tempMat;
+
+	scale/=scalefactor;
+	tempMat.reset();
+	tempMat.translate(xviewcenter, yviewcenter);
+	tempMat.scale(1/scalefactor, 1/scalefactor);
+	tempMat.translate(-xviewcenter,-yviewcenter);
+	viewMat_=viewMat_*tempMat;
+	wm=mod2stdViewMat_*viewMat_;
+	panfactor=static_cast<int>(0.5+(double)panpixels/scale);
+
 	theNetwork.redraw();
     copyPixmap();
 }
@@ -325,32 +366,38 @@ void MainForm::keyPressEvent( QKeyEvent *e )
 			  on_zoomout_activated();	 
 			  break;
 			case (Qt::Key_Up):                               // pan up
-			  dy=-panfactor;
-			  wm.translate(0,dy);	
+			  dy=panfactor;
+			  wm.translate(0,dy);
+			  viewMat_=mod2stdViewMat_.invert()*wm;
 			  break;   
 			case (Qt::Key_Down):                               // pan up
-			  dy=panfactor;
+			  dy=-panfactor;
 			  wm.translate(0,dy);	
+			  viewMat_=mod2stdViewMat_.invert()*wm;
 			  break;       
 			case (Qt::Key_Left):                               // pan left
-			  dx=-panfactor;
-			  wm.translate(dx,0);	  
+			  dx=panfactor;
+			  wm.translate(dx,0);
+			  viewMat_=mod2stdViewMat_.invert()*wm;
 			  break; 
 			case (Qt::Key_Right):                               // pan right
-			  dx=panfactor;
-			  wm.translate(dx,0);	    
+			  dx=-panfactor;
+			  wm.translate(dx,0);
+			  viewMat_=mod2stdViewMat_.invert()*wm;
 			  break;
-			case (Qt::Key_C):                               // center image
-			  theNetwork.recenter_image();	
+			case (Qt::Key_C):  // return to initial view with a central image
+			  wm=mod2stdViewMat_;
+			  viewMat_.reset();
+			  scale=1;
+			  panfactor=panpixels;
 			  break;
-			case(Qt::Key_D):
-			  panfactor=static_cast<int>(0.5+(double)panpixels / wm.m11());
-			   
+			//case(Qt::Key_D):
+			  //panfactor=static_cast<int>(0.5+(double)panpixels / scale);
 		}
 	  
 		QString mesg=QString("Scale: %1 Panfactor: %2 DX: %3 DY: %4"
 			   ).arg(wm.m11()).arg(panfactor).arg(wm.dx()).arg(wm.dy());
-		statusbar->message(mesg );
+		statusbar->message(mesg);
 		theNetwork.redraw();
 		copyPixmap();
 	}

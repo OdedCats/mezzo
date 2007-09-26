@@ -3280,14 +3280,14 @@ void Network::recenter_image()
 *		Y=sxy*(Y'-Ymin')
 *	b) move the overscaled dimension to centre
 *   IMPORTANT: the order of operation is
-*   step 1: translate the overscaled dimension
+*	step 1: translate (-Xmin', -Ymin')
 *   step 2: scale the coordinate with a factor=min{view_X/model_X', view_Y/model_Y'}
-*	step 3: translate (-Xmin', -Ymin')
-*   PROOF BY M=M3*M2*M1
+*   step 3: translate the overscaled dimension
+*   PROOF BY M=M1*M2*M3
 */
 QWMatrix Network::netgraphview_init()
 {	
-   // initial worldmatrix 
+   // make sure initial worldmatrix is a unit matrix 
    initview_wm.reset(); 
    
    vector <int> boundaries = drawing->get_boundaries();
