@@ -89,6 +89,8 @@ public:
 	int get_capacity () {return capacity;}
 	int get_active () {return active;}
 	void set_active (bool active_) {active=active_;}
+	int get_at_stop() { return at_stop; }
+	void set_at_stop ( bool val) { at_stop = val;}
 
 	double calc_departure_time (double time); // calculates departure time from origin according to arrival time and schedule (including layover effect)
 	void advance_curr_trip (); // Returns true if progressed trip-pointer and false if the roster is done.
@@ -104,6 +106,7 @@ protected:
 	bool active; // istrue when the bus started to serve trips (called set_curr_trip());
 	vector <Start_trip> driving_roster; // trips assignment for each bus vehicle.	
 	vector <Start_trip>::iterator curr_trip; // pointer to the current trip served by the bus vehicle
+	bool at_stop;
 };
 #endif// BUSES
 

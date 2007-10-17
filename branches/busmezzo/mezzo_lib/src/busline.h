@@ -100,6 +100,7 @@ public:
 	Busstop (int id_, int link_id_, double length_, double position_, bool has_bay_, double dwelltime_);
 // GETS & SETS:
 	int get_id () {return id;} // returns id, used in the compare <..> functions for find and find_if algorithms
+	int get_link_id() {return link_id;}
 	double get_arrival_rates (Bustrip* trip);
 	double get_alighting_rates (Bustrip* trip);
 	double get_length () {return length;}
@@ -151,6 +152,7 @@ protected:
 	vector <Busline_arrival> arrival_rates; // parameter lambda that defines the poission proccess of passengers arriving at the stop
 	vector <Busline_arrival> last_arrivals; // contains the arrival time of the last bus from each line that stops at the stop (can result headways)
 	map <double,Bus*> expected_arrivals; // booked arrivals of buses on the link on their way to the stop
+	map <double,Bus*> buses_at_stop; // buses currently visiting stop
 	// Maybe in the future, these three vectors could be integrated into a single matrix ( a map with busline as the key)
 };
 
