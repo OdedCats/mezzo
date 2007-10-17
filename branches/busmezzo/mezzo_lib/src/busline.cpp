@@ -200,8 +200,8 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 		Bus* bus = expected_arrivals [time];
 		occupy_length (bus);
 		dwelltime = calc_dwelltime(bus->get_bustrip(), time);
-		buses_at_stop [time + dwelltime()] = bus; 	// When time point will work - call calc_exiting_time()
-		eventlist->add_event (time + dwelltime(), this); // book an event for the time it exits the stop
+		buses_at_stop [time + dwelltime] = bus; 	// When time point will work - call calc_exiting_time()
+		eventlist->add_event (time + dwelltime, this); // book an event for the time it exits the stop
 		write_busstop_visit ("buslog_out.dat", bus->get_bustrip(), time); // document stop-related info
 								// done BEFORE update_last_arrivals in order to calc the headway
 		update_last_arrivals (bus->get_bustrip(), time); // in order to follow the headways
@@ -272,7 +272,7 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 	}
 	trip->get_busv()->set_occupancy(curr_occupancy);
 	loadfactor = get_nr_boarding() * alighting_standees + get_nr_alighting() * boarding_standees;
-	set_dwelltime (dwell_constant + boarding_coefficient*get_nr_boarding() + alighting_coefficient*get_nr_alighting() + crowdedness_coefficient*loadfactor + get_bay() * 4 + out_of_stop_coefficient*out_of_stop); // Lin&Wilson (1992) + out of stop effect. 
+	dwelltime = (dwell_constant + boarding_coefficient*get_nr_boarding() + alighting_coefficient*get_nr_alighting() + crowdedness_coefficient*loadfactor + get_bay() * 4 + out_of_stop_coefficient*out_of_stop); // Lin&Wilson (1992) + out of stop effect. 
 																			// IMPLEMENT: for articulated buses should be has_bay * 7
 		// OUTPUT NOTE
 	return dwelltime;
@@ -354,8 +354,8 @@ void Busstop::write_busstop_visit (string name, Bustrip* trip, double time)  // 
 	}
 	else
 	{
-		out << trip->scheduled_arrival_time (this) << time - trip->scheduled_arrival_time (this) << get_dwelltime() << 
-		time + get_dwelltime() << get_headway (trip , time) << get_nr_alighting() << get_nr_boarding() << trip->get_busv()->get_occupancy() << endl; 
+		out << trip->scheduled_arrival_time (this) << time - trip->scheduled_arrival_time (this) << dwelltime << 
+		time + dwelltime << get_headway (trip , time) << get_nr_alighting() << get_nr_boarding() << trip->get_busv()->get_occupancy() << endl; 
 	}
 	out.close();
 }
