@@ -19,6 +19,7 @@ Busline::Busline (int id_, string name_, Busroute* busroute_, Vtype* vtype_, ODp
 
 {
 	active=false;
+
 }
 
 
@@ -116,11 +117,11 @@ void Bustrip::book_stop_visit (double time, Bus* bus)
 	((*next_stop)->first)->book_bus_arrival(eventlist,time,bus);
 }
 
-void Bustrip::write_trips (string name, double time) // documents bus-created times in a log file
+void Bustrip::write_trips (string name) // adding information to the log file
 {
 	ofstream out(name.c_str());
 	assert(out);
-	out << "Bustrip " << get_id() << " was created at: " << time << endl;  
+	out << get_line() << get_id() << get_busv() << << endl;  
 }
 
 double Bustrip::scheduled_arrival_time (Busstop* stop) // finds the scheduled arrival time for a given bus stop
@@ -200,8 +201,9 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 	eventlist->add_event (time + calc_dwelltime(bus->get_bustrip(), time), this); // book an event for the time it exits the stop
 	// When time point will work - call calc_exiting_time()
 	free_length (bus);
-	write_busstop_visit ("Busstop_visit.dat", bus->get_bustrip(), time); // document stop-related info
+	write_busstop_visit ("buslog_out.dat", bus->get_bustrip(), time); // document stop-related info
 							// done BEFORE update_last_arrivals in order to calc the headway
+	
 	update_last_arrivals (bus->get_bustrip(), time); // in order to follow the headways
 	rest_of_trip = bus->get_bustrip()->advance_next_stop(); // advance the pointer to the next bus stop
 	if (rest_of_trip == false) // If the bus reached it last stop - move the pointer to the next trip
@@ -214,8 +216,7 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dwelltime of each bus serving this stop
 {
 	int loadfactor; // bus crowdedness factor
-	int nr_boarding;// pass. boarding
-	int nr_alighting; // pass alighting
+
 	int curr_occupancy = trip->get_busv()->get_occupancy(); // pass. on the bus when entring the stop, the value will be imported from the bus object
 	int boarding_standees;
 	int alighting_standees;
@@ -244,6 +245,7 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 	}
 	curr_occupancy -= nr_alighting; 
 
+
 	if (nr_boarding > (trip->get_busv()->get_capacity() - curr_occupancy)) // The number of boarding passengers is limited by the capacity
 	{
 		nr_boarding = trip->get_busv()->get_capacity() - curr_occupancy; 
@@ -252,6 +254,7 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 	set_nr_waiting (Max(get_nr_waiting() - nr_boarding, 0)); // the number of waiting passenger is decreased by the number of pass. that went on the bus. 
 	// OUTPUT NOTE
 	curr_occupancy += nr_boarding;
+
 	trip->get_busv()->set_occupancy(curr_occupancy); // Updating the occupancy. OUTPUT NOTE
 	
 	if (curr_occupancy > trip->get_busv()->get_number_seats()) // Calculating the boarding standess
@@ -339,20 +342,16 @@ void Busstop::write_busstop_visit (string name, Bustrip* trip, double time)  // 
 {
 	ofstream out(name.c_str());
 	assert(out);
-	out << "Busline ID: " << trip->get_line() << ", Bustrip ID: " << trip->get_id() << " , Busstop ID: " << get_id() << endl;
-	out << "Scheduled Arrival time: " << trip->scheduled_arrival_time (this) << endl;
-	out << "Arrival time: " << time << endl;
+	out << trip->get_line()->get_id << << trip->get_id() << trip->get_busv()->get_id() << get_id() << time;
 	if (trip->scheduled_arrival_time (this) == 0)
 	{
 		out << "Error : Busstop ID: " << get_id() << " is not on Bustrip ID: " << trip->get_id() << " route." << endl;
 	}
 	else
 	{
-		out << "Delay: " << time - trip->scheduled_arrival_time (this) << endl; // positive for dealy, negative for early arrival
+		out << trip->scheduled_arrival_time (this) << time - trip->scheduled_arrival_time (this) << get_dwelltime() << 
+		time + get_dwelltime() << get_headway (trip , time) << << << trip->get_busv()->get_occupancy() << endl; 
 	}
-	out << "Headway: " << get_headway (trip , time) << endl;
-	out << "Dwell time: " << get_dwelltime() << endl;
-	out << "Exit time: " << time + get_dwelltime() << endl;
 }
 
 

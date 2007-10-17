@@ -145,9 +145,10 @@ void Bus::advance_curr_trip ()
 	}
 }
 
-void Bus::write_buses_generation (string name)
+// not needed anymore
+/*void Bus::write_buses_generation (string name)
 {
 	ofstream out(name.c_str());
 	assert(out);
 	out << "Bus ID: " << get_id() << " was created at: " << start_time << endl;  
-}
+}*/

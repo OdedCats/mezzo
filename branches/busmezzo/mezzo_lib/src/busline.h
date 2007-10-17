@@ -49,6 +49,7 @@ protected:
 	ODpair* odpair; 
 	bool active; // is true when the busline has started generating trips
 	vector <Start_trip>::iterator next_trip; // indicates the next trip
+	
 };
 
 typedef pair<Busstop*,double> Visit_stop;
@@ -61,7 +62,7 @@ public:
 	Bustrip ();
 	~Bustrip ();
 	Bustrip (int id_, double start_time_);
-
+	void set_log_out(ostream& out_) {} //out=out_;}
 	// GETS & SETS
 	int get_id () {return id;} // returns id, used in the compare <..> functions for find and find_if algorithms
 	Bus* get_busv () {return busv;}
@@ -74,11 +75,12 @@ public:
 	bool timepoint_checker (Busstop* stop); // checks if a busstop is a time point for this trip
 	double scheduled_arrival_time (Busstop* stop); // finds the scheduled arrival time for a given bus stop
 	void book_stop_visit (double time, Bus* bus); // books a visit to the stop
-	void write_trips (string name, double time); // documents bus-created times in a log file
+	void write_trips (string name); // adding information to the log file
 
 	vector <Visit_stop*> stops; // contains all the busstops and the times that they are supposed to be served.
 								// NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
 protected:
+	
 	int id; // course nr
 	Bus* busv; // pointer to the bus vehicle
 	Busline* line; // pointer to the line it serves
@@ -87,6 +89,7 @@ protected:
 	vector <Visit_stop*> :: iterator next_stop;
 	vector <Timepoint*> trips_timepoint; // binary vector with time point indicatons for candidate stops only (according to the schedule input file) 
 	Eventlist* eventlist; // for use by busstops etc to book themselves.
+	ostream out; // output file stream for logging generated bustrips, visits to stops etc
 };
 
 typedef pair<Busline*,double> Busline_arrival;
@@ -109,6 +112,7 @@ public:
 	void set_nr_waiting (int nr_waiting_) {nr_waiting = nr_waiting_;}
 	void set_dwelltime (double dwelltime_) {dwelltime = dwelltime_;}
 	double get_dwelltime () {return dwelltime;}
+	int get_nr_boarding (
 	const double get_position () { return position;}
 	void set_position (double position_ ) {position = position_;}
 	
@@ -137,6 +141,8 @@ protected:
 	double position; // relative position from the upstream node of the link (beteen 0 to 1)
 	double avaliable_length; // length of the busstop minus occupied length
 	double dwelltime; // standard dwell time
+	int nr_boarding;// pass. boarding
+	int nr_alighting; // pass alighting
 	Random* random;
 	vector <Busline_arrival> alighting_rates; // parameter that defines the poission process of the alighting passengers (second contains the alighting fraction)
 	vector <Busline_arrival> arrival_rates; // parameter lambda that defines the poission proccess of passengers arriving at the stop

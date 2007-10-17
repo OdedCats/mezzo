@@ -188,6 +188,11 @@ class Network
   double get_height_y() {return height_y;} // ... height ...
    void set_background (string name) {if (drawing) drawing->set_background(name.c_str());}
 #endif // _NO_GUI 
+
+   //TRY
+
+     ofstream buslog_out; // output file stream for logging generated bustrips
+
   protected:
 
   vector <Node*> nodes;
@@ -213,6 +218,7 @@ class Network
   vector <Bustrip*> bustrips;  // the trips list of all buses
   vector <Busstop*> busstops; // stops on the buslines
   vector <Busroute*> busroutes; // the routes that buses follow
+
   //Shortest path graph
 #ifndef _USE_VAR_TIMES
   Graph<double, GraphNoInfo<double> > * graph;

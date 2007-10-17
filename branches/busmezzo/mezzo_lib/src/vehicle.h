@@ -92,7 +92,7 @@ public:
 
 	double calc_departure_time (double time); // calculates departure time from origin according to arrival time and schedule (including layover effect)
 	void advance_curr_trip (); // Returns true if progressed trip-pointer and false if the roster is done.
-	void write_buses_generation (string name);
+//	void write_buses_generation (string name); // Not needed anymore
 
 protected:
 	Random* random;
