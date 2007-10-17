@@ -200,8 +200,10 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 		Bus* bus = expected_arrivals [time];
 		occupy_length (bus);
 		dwelltime = calc_dwelltime(bus->get_bustrip(), time);
+
 		buses_at_stop [time + dwelltime] = bus; 	// When time point will work - call calc_exiting_time()
 		eventlist->add_event (time + dwelltime, this); // book an event for the time it exits the stop
+
 		write_busstop_visit ("buslog_out.dat", bus->get_bustrip(), time); // document stop-related info
 								// done BEFORE update_last_arrivals in order to calc the headway
 		update_last_arrivals (bus->get_bustrip(), time); // in order to follow the headways
