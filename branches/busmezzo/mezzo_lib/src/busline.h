@@ -62,7 +62,7 @@ public:
 	Bustrip ();
 	~Bustrip ();
 	Bustrip (int id_, double start_time_);
-	void set_log_out(ostream& out_) {} //out=out_;}
+
 	// GETS & SETS
 	int get_id () {return id;} // returns id, used in the compare <..> functions for find and find_if algorithms
 	Bus* get_busv () {return busv;}
@@ -89,7 +89,6 @@ protected:
 	vector <Visit_stop*> :: iterator next_stop;
 	vector <Timepoint*> trips_timepoint; // binary vector with time point indicatons for candidate stops only (according to the schedule input file) 
 	Eventlist* eventlist; // for use by busstops etc to book themselves.
-	ostream out; // output file stream for logging generated bustrips, visits to stops etc
 };
 
 typedef pair<Busline*,double> Busline_arrival;
@@ -112,7 +111,10 @@ public:
 	void set_nr_waiting (int nr_waiting_) {nr_waiting = nr_waiting_;}
 	void set_dwelltime (double dwelltime_) {dwelltime = dwelltime_;}
 	double get_dwelltime () {return dwelltime;}
-	int get_nr_boarding (
+	int get_nr_boarding () {return nr_boarding;}
+	int set_nr_boarding (int nr_boarding_) {nr_boarding = nr_boarding_;}
+	int set_nr_alighting (int nr_alighting_) {nr_alighting = nr_alighting_;}	
+	int get_nr_alighting () {return nr_alighting;}
 	const double get_position () { return position;}
 	void set_position (double position_ ) {position = position_;}
 	
@@ -130,6 +132,7 @@ public:
 // Action for visits to stop
 	void book_bus_arrival(Eventlist* eventlist, double time, Bus* bus);  // add to expected arrivals
 	bool execute(Eventlist* eventlist, double time); // is executed by the eventlist and means a bus needs to be processed
+	void set_log_out(ostream& out_) {} //out=out_;}
 
 protected:
 	int id; // stop id
@@ -144,6 +147,7 @@ protected:
 	int nr_boarding;// pass. boarding
 	int nr_alighting; // pass alighting
 	Random* random;
+	ostream out; // output file stream for logging generated bustrips, visits to stops etc
 	vector <Busline_arrival> alighting_rates; // parameter that defines the poission process of the alighting passengers (second contains the alighting fraction)
 	vector <Busline_arrival> arrival_rates; // parameter lambda that defines the poission proccess of passengers arriving at the stop
 	vector <Busline_arrival> last_arrivals; // contains the arrival time of the last bus from each line that stops at the stop (can result headways)
