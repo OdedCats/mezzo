@@ -109,8 +109,6 @@ public:
 	bool get_bay () {return has_bay;}
 	int get_nr_waiting () {return nr_waiting;}
 	void set_nr_waiting (int nr_waiting_) {nr_waiting = nr_waiting_;}
-	void set_dwelltime (double dwelltime_) {dwelltime = dwelltime_;}
-	double get_dwelltime () {return dwelltime;}
 	int get_nr_boarding () {return nr_boarding;}
 	void set_nr_boarding (int nr_boarding_) {nr_boarding = nr_boarding_;}
 	void set_nr_alighting (int nr_alighting_) {nr_alighting = nr_alighting_;}	
