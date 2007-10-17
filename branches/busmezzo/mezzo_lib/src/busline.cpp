@@ -191,32 +191,30 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 	{
 		//BUS exiting stop
 		Bus* bus = buses_at_stop [time];
+		free_length (bus);
 		buses_at_stop.erase(time);
 	}
 	else if (expected_arrivals.count(time) > 0) // Search if this is for a bus entering the stop
 	{		
 		// BUS entering stop
 		Bus* bus = expected_arrivals [time];
-		
-		buses_at_stop [time + calc_dwelltime(bus->get_bustrip(), time)] = bus;
+		occupy_length (bus);
+		set_dwelltime (calc_dwelltime(bus->get_bustrip(), time));
+		buses_at_stop [time + get_dwelltime()] = bus; 	// When time point will work - call calc_exiting_time()
+		eventlist->add_event (time + get_dwelltime(), this); // book an event for the time it exits the stop
+		write_busstop_visit ("buslog_out.dat", bus->get_bustrip(), time); // document stop-related info
+								// done BEFORE update_last_arrivals in order to calc the headway
+		update_last_arrivals (bus->get_bustrip(), time); // in order to follow the headways
 		expected_arrivals.erase(time);
 
 		bool rest_of_trip;
-		
-		occupy_length (bus);
-		eventlist->add_event (time + calc_dwelltime(bus->get_bustrip(), time), this); // book an event for the time it exits the stop
-		// When time point will work - call calc_exiting_time()
-		free_length (bus);
-		write_busstop_visit ("buslog_out.dat", bus->get_bustrip(), time); // document stop-related info
-								// done BEFORE update_last_arrivals in order to calc the headway
-		
-		update_last_arrivals (bus->get_bustrip(), time); // in order to follow the headways
 		rest_of_trip = bus->get_bustrip()->advance_next_stop(); // advance the pointer to the next bus stop
 		if (rest_of_trip == false) // If the bus reached it last stop - move the pointer to the next trip
 		{
 			bus->advance_curr_trip();
 			eventlist->add_event (time + bus->calc_departure_time(time), this);
 		}
+		
 	}
 	return true;
 }
