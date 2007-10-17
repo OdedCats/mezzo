@@ -75,7 +75,6 @@ public:
 	bool timepoint_checker (Busstop* stop); // checks if a busstop is a time point for this trip
 	double scheduled_arrival_time (Busstop* stop); // finds the scheduled arrival time for a given bus stop
 	void book_stop_visit (double time, Bus* bus); // books a visit to the stop
-	void write_trips (string name); // adding information to the log file
 
 	vector <Visit_stop*> stops; // contains all the busstops and the times that they are supposed to be served.
 								// NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
@@ -112,8 +111,8 @@ public:
 	void set_dwelltime (double dwelltime_) {dwelltime = dwelltime_;}
 	double get_dwelltime () {return dwelltime;}
 	int get_nr_boarding () {return nr_boarding;}
-	int set_nr_boarding (int nr_boarding_) {nr_boarding = nr_boarding_;}
-	int set_nr_alighting (int nr_alighting_) {nr_alighting = nr_alighting_;}	
+	void set_nr_boarding (int nr_boarding_) {nr_boarding = nr_boarding_;}
+	void set_nr_alighting (int nr_alighting_) {nr_alighting = nr_alighting_;}	
 	int get_nr_alighting () {return nr_alighting;}
 	const double get_position () { return position;}
 	void set_position (double position_ ) {position = position_;}
@@ -132,7 +131,7 @@ public:
 // Action for visits to stop
 	void book_bus_arrival(Eventlist* eventlist, double time, Bus* bus);  // add to expected arrivals
 	bool execute(Eventlist* eventlist, double time); // is executed by the eventlist and means a bus needs to be processed
-	void set_log_out(ostream& out_) {} //out=out_;}
+	
 
 protected:
 	int id; // stop id
@@ -147,7 +146,7 @@ protected:
 	int nr_boarding;// pass. boarding
 	int nr_alighting; // pass alighting
 	Random* random;
-	ostream out; // output file stream for logging generated bustrips, visits to stops etc
+	
 	vector <Busline_arrival> alighting_rates; // parameter that defines the poission process of the alighting passengers (second contains the alighting fraction)
 	vector <Busline_arrival> arrival_rates; // parameter lambda that defines the poission proccess of passengers arriving at the stop
 	vector <Busline_arrival> last_arrivals; // contains the arrival time of the last bus from each line that stops at the stop (can result headways)

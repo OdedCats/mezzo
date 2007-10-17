@@ -1052,10 +1052,6 @@ bool Network::readbusroute(istream& in)
 
 bool Network::readbuslines(string name) // reads the busstops, buslines, and trips
 {
-	string logname ("Bus_log.dat"); //all trips, visits to stops etc are logged here
-	buslog_out.open(logname.c_str());
-	assert(buslog_out);
-	
 	ifstream in(name.c_str()); // open input file
 	assert (in);
 	string keyword;
@@ -1262,8 +1258,7 @@ bool Network::readbustrip(istream& in) // reads a trip
   Bustrip* trip= new Bustrip (trip_id, start_time );
   trip->add_stops(stops);
   bl->add_trip(trip,start_time);
-  // add the output stream for the log file
- // trip->set_log_out(buslog_out);
+
 
   in >> bracket;
   if (bracket != '}')

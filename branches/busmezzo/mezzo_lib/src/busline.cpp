@@ -46,7 +46,6 @@ bool Busline::execute(Eventlist* eventlist, double time)
 	else // if the Busline is active
 	{
 		bool ok=next_trip->first->activate(time, busroute, vtype, odpair, eventlist); // activates the trip, generates bus etc.
-		next_trip->first->write_trips ("Bustrips.dat", time); // document it 
 		next_trip++; // now points to next trip
 		if (next_trip < trips.end()) // if there exists a next trip
 		{
@@ -98,7 +97,6 @@ bool Bustrip::activate (double time, Route* route, Vtype* vehtype, ODpair* odpai
 	// generate the Bus vehicle
 	vid++; // increment the veh id counter, buses are vehicles too
 	Bus* bus=recycler.newBus(); // get a bus vehicle
-	bus->write_buses_generation ("Bus_vehicles_generation.dat");
 	// !!! init should be modified to reflect the extra vars of the bus !!!
 	bus->init(vid,vehtype->id, vehtype->length,route,odpair,time);  // initialise the variables of the bus
 	bus->set_bustrip (this);
@@ -117,12 +115,6 @@ void Bustrip::book_stop_visit (double time, Bus* bus)
 	((*next_stop)->first)->book_bus_arrival(eventlist,time,bus);
 }
 
-void Bustrip::write_trips (string name) // adding information to the log file
-{
-	ofstream out(name.c_str());
-	assert(out);
-	out << get_line() << get_id() << get_busv() << << endl;  
-}
 
 double Bustrip::scheduled_arrival_time (Busstop* stop) // finds the scheduled arrival time for a given bus stop
 {
@@ -264,7 +256,7 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 	{
 		boarding_standees = 0;
 	}
-	trip->busv->set_occupancy(curr_occupancy);
+	trip->get_busv()->set_occupancy(curr_occupancy);
 	loadfactor = get_nr_boarding() * alighting_standees + get_nr_alighting() * boarding_standees;
 	set_dwelltime (dwell_constant + boarding_coefficient*get_nr_boarding() + alighting_coefficient*get_nr_alighting() + crowdedness_coefficient*loadfactor + get_bay() * 4 + out_of_stop_coefficient*out_of_stop); // Lin&Wilson (1992) + out of stop effect. 
 																			// IMPLEMENT: for articulated buses should be has_bay * 7
@@ -339,9 +331,9 @@ double Busstop::get_alighting_rates (Bustrip* trip)
 
 void Busstop::write_busstop_visit (string name, Bustrip* trip, double time)  // creates a log-file for stop-related info
 {
-	ofstream out(name.c_str());
+	ofstream out(name.c_str(),ios_base::app);
 	assert(out);
-	out << trip->get_line()->get_id << << trip->get_id() << trip->get_busv()->get_id() << get_id() << time;
+	out << trip->get_line()->get_id() <<  trip->get_id() << trip->get_busv()->get_id() << get_id() << time;
 	if (trip->scheduled_arrival_time (this) == 0)
 	{
 		out << "Error : Busstop ID: " << get_id() << " is not on Bustrip ID: " << trip->get_id() << " route." << endl;
@@ -351,6 +343,7 @@ void Busstop::write_busstop_visit (string name, Bustrip* trip, double time)  // 
 		out << trip->scheduled_arrival_time (this) << time - trip->scheduled_arrival_time (this) << get_dwelltime() << 
 		time + get_dwelltime() << get_headway (trip , time) << get_nr_alighting() << get_nr_boarding() << trip->get_busv()->get_occupancy() << endl; 
 	}
+	out.close();
 }
 
 

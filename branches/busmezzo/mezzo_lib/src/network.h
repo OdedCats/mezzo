@@ -189,10 +189,6 @@ class Network
    void set_background (string name) {if (drawing) drawing->set_background(name.c_str());}
 #endif // _NO_GUI 
 
-   //TRY
-
-     ofstream buslog_out; // output file stream for logging generated bustrips
-
   protected:
 
   vector <Node*> nodes;
