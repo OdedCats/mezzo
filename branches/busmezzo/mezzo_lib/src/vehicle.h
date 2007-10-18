@@ -65,11 +65,28 @@ typedef pair<Bustrip*,double> Start_trip;
 class Bus : public Vehicle
 {
 public:
-	Bus():Vehicle(), trip(NULL) {occupancy=0;}
+	Bus():Vehicle(), trip(NULL) 
+	{
+		occupancy=0;
+		active = false;
+		number_seats = 50;
+		capacity = 80;
+		random = new (Random);
+		if (randseed != 0)
+		{
+				random->seed(randseed);
+		}
+		else
+		{
+				random->randomize();
+		}		
+	}
 	Bus(int id_, int type_, double length_,Route* route_, ODpair* odpair_, double time_) :
 	Vehicle(id_, type_,length_,route_,odpair_,time_), trip(NULL)
 	{	occupancy = 0;
 		active = false;
+		number_seats = 50;
+		capacity = 80;
 		random = new (Random);
 		if (randseed != 0)
 		{
@@ -101,7 +118,6 @@ protected:
 	int number_seats; // Two added variables for LOS satistics and for dwell time calculations
 	int capacity; // In the future will be determined according to the bus type
 	int occupancy;
-	int type_id;
 	Bustrip* trip;
 	bool active; // istrue when the bus started to serve trips (called set_curr_trip());
 	vector <Start_trip> driving_roster; // trips assignment for each bus vehicle.	

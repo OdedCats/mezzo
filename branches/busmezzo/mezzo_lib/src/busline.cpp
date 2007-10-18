@@ -68,6 +68,10 @@ Bustrip::Bustrip ()
 Bustrip::Bustrip (int id_, double start_time_): id(id_), starttime(start_time_)
 {
 	init_occupancy=0;
+	for (vector<Timepoint*>::iterator tp = trips_timepoint.begin(); tp < trips_timepoint.end(); tp++)
+	{
+		(*tp)->second = false;
+	}
 }
 
 
@@ -101,7 +105,10 @@ bool Bustrip::activate (double time, Route* route, Vtype* vehtype, ODpair* odpai
 	bus->init(vid,vehtype->id, vehtype->length,route,odpair,time);  // initialise the variables of the bus
 	bus->set_bustrip (this);
 	if ( (odpair->get_origin())->insert_veh(bus,time)) // insert the bus at the origin.
-  		ok=true;
+	{
+  		busv = bus;
+		ok=true;
+	}
 	else // if insert returned false
   	{
   		ok=false; 
@@ -128,37 +135,45 @@ double Bustrip::scheduled_arrival_time (Busstop* stop) // finds the scheduled ar
 	return 0; // if bus stop isn't on the trip's route
 }
 
-/*
- bool Bustrip::timepoint_checker (Busstop* stop) // checks if a busstop is a time point for this trip
+bool Bustrip::timepoint_checker (Busstop* stop) // checks if a busstop is a time point for this trip
 {
+	return true;
+	/*
 	Timepoint tp;
 	tp.first = stop;
-	vector<Timepoint*>::iterator iter;
-	iter = find (trips_timepoint.begin(), trips_timepoint.end(), tp);
+	vector<Timepoint*>::iterator iter1;
+	iter1 = find (trips_timepoint.begin(), trips_timepoint.end(), tp);
 	if ( iter1 == trips_timepoint.end() ) 
 	{ 
-		return 0; // Meaning that busstop isn't a time point for this line
+		return 0; // Meaning that busstop isn't a time point for this bus line
 	}
 	else
 	{
-		if (iter->second == 0)
+		if ((*iter1)->second == false)
 		{
-			return 0; // Meaning that busstop is a timepoint for this busline, but not for this bus trip
+			return false; // Meaning that busstop is a timepoint for this busline, but not for this bus trip
 		}
 		else
 		{
-			return 1; // Meaning this busstop is a time point for this trip
+			return true; // Meaning this busstop is a time point for this trip
 		}
 	}
+	*/
 }
-*/
+
 
 
 // Busstop functions
 Busstop::Busstop (int id_, int link_id_, double position_, double length_, bool has_bay_, double dwelltime_):
 	id(id_), link_id(link_id_), position (position_), length(length_), has_bay(has_bay_), dwelltime(dwelltime_)
 {
-	nr_waiting = 0;
+	length = 20;
+	position = 0;
+	avaliable_length = length;
+	nr_boarding = 0;
+	nr_alighting = 0;
+	has_bay = false;
+	dwelltime = 12.5;
 	random = new (Random);
 	if (randseed != 0)
 		{
@@ -199,7 +214,7 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 		// BUS entering stop
 		Bus* bus = expected_arrivals [time];
 		occupy_length (bus);
-		dwelltime = calc_dwelltime(bus->get_bustrip(), time);
+		dwelltime = calc_dwelltime(bus->get_bustrip(), time); 
 
 		buses_at_stop [time + dwelltime] = bus; 	// When time point will work - call calc_exiting_time()
 		eventlist->add_event (time + dwelltime, this); // book an event for the time it exits the stop
@@ -235,10 +250,16 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 	double crowdedness_coefficient = 0.0078;
 	double out_of_stop_coefficient = 3.0; // Taking in consideration the increasing dwell time when bus stops out of the stop
 	bool out_of_stop = check_out_of_stop(trip->get_busv());
+
+	Waiting_passengers wait_current_line;
+	wait_current_line.first = trip->get_line();
+	vector<Waiting_passengers>::iterator wait1 = find (nr_waiting.begin(), nr_waiting.end(), wait_current_line);
+				// find the relevant line in the vector of waiting passengers
+
+	wait1->second += random -> poisson ((get_arrival_rates (trip) * get_headway (trip, time)) / 60 ); 
+				//the arrival process follows a poisson distribution and the lambda is relative to the headway
+				// with arrival time and the headway as the duration
 	
-	set_nr_boarding (random -> poisson ((get_arrival_rates (trip) * get_headway (trip, time)) / 60 )); //the boarding process follows a poisson distribution and the lambda is relative to the headway
-					// with arrival time and the headway as the duration
-	set_nr_waiting (get_nr_waiting() + get_nr_boarding()); // the new comers are added to the waiting passengers
 	set_nr_alighting (random -> binrandom (curr_occupancy, get_alighting_rates (trip))); // the alighting process follows a binominal distribution 
 					// the number of trials is the number of passengers on board with the probability of the alighting fraction
 															
@@ -252,13 +273,8 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 	}
 	curr_occupancy -= get_nr_alighting(); 
 
-
-	if (nr_boarding > (trip->get_busv()->get_capacity() - curr_occupancy)) // The number of boarding passengers is limited by the capacity
-	{
-		set_nr_boarding (trip->get_busv()->get_capacity() - curr_occupancy); 
-	}
-	
-	set_nr_waiting (Max(get_nr_waiting() - get_nr_boarding(), 0)); // the number of waiting passenger is decreased by the number of pass. that went on the bus. 
+	set_nr_boarding (Min(wait1->second, trip->get_busv()->get_capacity() - curr_occupancy));  // The number of boarding passengers is limited by the capacity
+	wait1->second = Max(wait1->second - get_nr_boarding(), 0); // the number of waiting passenger is decreased by the number of passengers that went on the bus. 
 	// OUTPUT NOTE
 	curr_occupancy += get_nr_boarding();
 
@@ -282,13 +298,13 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 
 void Busstop::occupy_length (Bus* bus) // a bus arrived - decrease the left space at the stop
 {
-	double space_between_buses = 3.0; // the reasonable space between stoping buses, input parameter - IMPLEMENT: shouldn't be for first bus at the stop
+	double space_between_buses = 1.0; // the reasonable space between stoping buses, input parameter - IMPLEMENT: shouldn't be for first bus at the stop
 	set_avaliable_length (get_avaliable_length() - bus->get_length() - space_between_buses); 
 } 
 
 void Busstop::free_length (Bus* bus) // a bus left - increase the left space at the stop
 {
-	double space_between_buses = 3.0; // the reasonable space between stoping buses
+	double space_between_buses = 1.0; // the reasonable space between stoping buses
 	set_avaliable_length  (get_avaliable_length() + bus->get_length() + space_between_buses);
 } 
 
@@ -344,6 +360,20 @@ double Busstop::get_alighting_rates (Bustrip* trip)
 	iter1 = find (alighting_rates.begin(), alighting_rates.end(), line1);
 	return iter1->second;
 }
+
+
+double Busstop::calc_exiting_time (Bustrip* trip, double time)
+{
+	if (trip->timepoint_checker(this) == true)
+	{
+		return Max(trip->scheduled_arrival_time(this), time + dwelltime) ; // since it is a time-point stop, it will wait if neccesary till the scheduled time
+	}
+	else 
+	{
+		return time + dwelltime; // since it isn't a time-point stop, it will simply exit after dwell time
+	}
+}
+
 
 void Busstop::write_busstop_visit (string name, Bustrip* trip, double time)  // creates a log-file for stop-related info
 {
