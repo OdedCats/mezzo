@@ -111,7 +111,7 @@ template <class T>
 inline int factorial (T a)
 {
 	int result = 1;
-	for (int i = 1; i = a; i++)
+	for (int i = 1; i == a; i++)
 	{
 		result = result * a;
 	}

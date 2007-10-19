@@ -1115,6 +1115,8 @@ bool Network::readbuslines(string name) // reads the busstops, buslines, and tri
 			cout << " readbuslines: readbustrip returned false for line nr " << (i+1) << endl;
    			return false;
 		} 
+		// set busline to trip
+
 	}
 
 	return true;
@@ -1144,6 +1146,7 @@ bool Network::readbusstop (istream& in) // reads a busstop
     return false;
   }
   busstops.push_back (st);
+
 #ifdef _DEBUG_NETWORK
   cout << " read busstop"<< stop_id <<endl;
 #endif //_DEBUG_NETWORK
@@ -1180,7 +1183,6 @@ bool Network::readbusline(istream& in) // reads a busline
 
   for (int i=0; i < nr_stops; i++)
   {
-	  
 	  in >> stop_id;
 	  stop = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (stop_id) ))); // find the stop 
 	  stops.push_back(stop); // and add it
@@ -1200,6 +1202,10 @@ bool Network::readbusline(istream& in) // reads a busline
   Vtype* vt= (*(find_if(vehtypes.vtypes.begin(), vehtypes.vtypes.end(), compare <Vtype> (vehtype) )));
   Busline* bl= new Busline (busline_id, name,br,vt,odptr );
   bl->add_stops(stops);
+  stop->add_lines(bl);
+  stop->add_line_nr_waiting(bl, 0);
+  stop->add_line_nr_boarding(bl, 0);
+  stop->add_line_nr_alighting(bl, 0);
 
   in >> bracket;
   if (bracket != '}')
@@ -1240,6 +1246,8 @@ bool Network::readbustrip(istream& in) // reads a trip
 	  in >> stop_id >> pass_time;
 	  // create the Visit_stop
 	  // find the stop in the list
+	
+
 	  Busstop* bs = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (stop_id) )));
 	  Visit_stop* vs = new Visit_stop (bs, pass_time);
 	  stops.push_back(vs);
@@ -1258,7 +1266,7 @@ bool Network::readbustrip(istream& in) // reads a trip
   Bustrip* trip= new Bustrip (trip_id, start_time );
   trip->add_stops(stops);
   bl->add_trip(trip,start_time);
-
+  trip->set_line(bl);
 
   in >> bracket;
   if (bracket != '}')
