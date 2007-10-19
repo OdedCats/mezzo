@@ -1050,7 +1050,7 @@ bool Network::readbusroute(istream& in)
   return true;
 }
 
-bool Network::readbuslines(string name) // reads the busstops, buslines, and trips
+bool Network::readbuslines(string name) // reads the busstops, buslines, trips and passengers rates
 {
 	ifstream in(name.c_str()); // open input file
 	assert (in);
@@ -1118,8 +1118,26 @@ bool Network::readbuslines(string name) // reads the busstops, buslines, and tri
 		// set busline to trip
 
 	}
-
-	return true;
+	// Forth read the passengers rates
+	in >> keyword;
+#ifdef _DEBUG_NETWORK
+	cout << keyword << endl;
+#endif //_DEBUG_NETWORK
+	if (keyword!="passenger_rates:")
+	{
+		cout << " readbuslines: no << passenger_rates: >> keyword " << endl;
+		return false;
+	}
+	in >> nr;
+	limit = i + nr;
+	for (i; i<limit;i++)
+	{
+ 		if (!read_passenger_rates(in))
+		{
+			cout << " readbuslines: read_passenger_rates returned false for line nr " << (i+1) << endl;
+   			return false;
+		} 
+	}
 }
 
 bool Network::readbusstop (istream& in) // reads a busstop
@@ -1283,10 +1301,37 @@ bool Network::readbustrip(istream& in) // reads a trip
 	return true;
 }
 
+bool Network::read_passenger_rates (istream& in) // reads a busstop
+{
 
+//{ stop_id	busline_id	arrival_rate alighting_fraction}
+  char bracket;
+  int stop_id, busline_id;
+  double arrival_rate, alighting_fraction;
+  bool ok= true;
+  in >> bracket;
+  if (bracket != '{')
+  {
+  	cout << "readfile::readsbusstop scanner jammed at " << bracket;
+  	return false;
+  }
+  in >> stop_id >> busline_id >> arrival_rate >> alighting_fraction ;
+  Busstop* bs=(*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (stop_id) ))); 
+  Busline* bl=(*(find_if(buslines.begin(), buslines.end(), compare <Busline> (busline_id) )));
+  bs->add_line_nr_boarding (bl, arrival_rate);
+  bs->add_line_nr_alighting (bl, alighting_fraction);
+  in >> bracket;
+  if (bracket != '}')
+  {
+    cout << "readfile::readbusstop scanner jammed at " << bracket;
+    return false;
+  }
 
-
-
+#ifdef _DEBUG_NETWORK
+  cout << " read busstop"<< stop_id <<endl;
+#endif //_DEBUG_NETWORK
+  return ok;
+}
 
 
  

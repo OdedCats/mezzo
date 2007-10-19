@@ -115,9 +115,9 @@ public:
 	
 // functions aimed to init. lines-specific vectors at the busstop level
 	void add_lines (Busline*  line) {lines.push_back(line);}
-	void add_line_nr_waiting(Busline* line, int init_value){nr_waiting[line] = init_value;}
-	void add_line_nr_boarding(Busline* line, double init_value){alighting_rates[line] = init_value;}
-	void add_line_nr_alighting(Busline* line, double init_value){arrival_rates[line]= init_value;}
+	void add_line_nr_waiting(Busline* line, int value){nr_waiting[line] = value;}
+	void add_line_nr_boarding(Busline* line, double value){alighting_rates[line] = value;}
+	void add_line_nr_alighting(Busline* line, double value){arrival_rates[line]= value;}
 
 //	
 	double calc_dwelltime (Bustrip* trip, double time); // calculates the dwelltime of each bus serving this stop

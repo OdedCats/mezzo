@@ -183,6 +183,7 @@ class Network
   bool readbusstop (istream& in); // reads a busstop
   bool readbusline(istream& in); // reads a busline
   bool readbustrip(istream& in); // reads a trip
+  bool read_passenger_rates (istream& in); // reads the passenger rates for a specific line and stop
 #ifndef _NO_GUI
   double get_width_x() {return width_x;} // returns image width in original coordinate system
   double get_height_y() {return height_y;} // ... height ...
