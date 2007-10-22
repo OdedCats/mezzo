@@ -1138,6 +1138,7 @@ bool Network::readbuslines(string name) // reads the busstops, buslines, trips a
    			return false;
 		} 
 	}
+	return true;
 }
 
 bool Network::readbusstop (istream& in) // reads a busstop
