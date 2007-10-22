@@ -81,9 +81,9 @@ Bustrip::Bustrip ()
 Bustrip::Bustrip (int id_, double start_time_): id(id_), starttime(start_time_)
 {
 	init_occupancy=0;
-	for (vector<Timepoint*>::iterator tp = trips_timepoint.begin(); tp < trips_timepoint.end(); tp++)
+	for (map<Busstop*,bool>::iterator tp = trips_timepoint.begin(); tp != trips_timepoint.end(); tp++)
 	{
-		(*tp)->second = false;
+		tp->second = false;
 	}
 }
 
@@ -93,17 +93,19 @@ Bustrip::~Bustrip ()
 
 bool Bustrip::advance_next_stop ()
 {
-	if (next_stop < stops.end())
-	{
-		next_stop++;
-	}
-	if (next_stop != stops.end())
-	{
-		return true;
-	}
+	if (next_stop == stops.end())
+		return false;
 	else
 	{
-		return false;
+		next_stop++;
+		if (next_stop != stops.end())
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }
 
@@ -135,7 +137,7 @@ void Bustrip::book_stop_visit (double time, Bus* bus)
 	((*next_stop)->first)->book_bus_arrival(eventlist,time,bus);
 }
 
-/*
+
 bool Bustrip::check_end_trip ()
 {
 	if (next_stop == stops.end())
@@ -147,7 +149,7 @@ bool Bustrip::check_end_trip ()
 		return false;
 	}
 }
-*/
+
 
 double Bustrip::scheduled_arrival_time (Busstop* stop) // finds the scheduled arrival time for a given bus stop
 {
@@ -161,46 +163,33 @@ double Bustrip::scheduled_arrival_time (Busstop* stop) // finds the scheduled ar
 	return 0; // if bus stop isn't on the trip's route
 }
 
-bool Bustrip::timepoint_checker (Busstop* stop) // checks if a busstop is a time point for this trip
-{
-	return true;
-	/*
-	Timepoint tp;
-	tp.first = stop;
-	vector<Timepoint*>::iterator iter1;
-	iter1 = find (trips_timepoint.begin(), trips_timepoint.end(), tp);
-	if ( iter1 == trips_timepoint.end() ) 
-	{ 
-		return 0; // Meaning that busstop isn't a time point for this bus line
-	}
-	else
-	{
-		if ((*iter1)->second == false)
-		{
-			return false; // Meaning that busstop is a timepoint for this busline, but not for this bus trip
-		}
-		else
-		{
-			return true; // Meaning this busstop is a time point for this trip
-		}
-	}
-	*/
+int Bustrip::is_timepoint (Busstop* stop)
+ {
+	 if (trips_timepoint.count(stop) > 0)
+		return (int)trips_timepoint[stop];
+	 else 
+		return -1;
 }
 
 
 
 // Busstop functions
-Busstop::Busstop (int id_, int link_id_, double position_, double length_, bool has_bay_, double dwelltime_):
-	id(id_), link_id(link_id_), position (position_), length(length_), has_bay(has_bay_), dwelltime(dwelltime_)
+
+Busstop::Busstop()
 {
 	length = 20;
 	position = 0;
+	has_bay = false;
+	dwelltime = 12.5;
+}
+
+Busstop::Busstop (int id_, int link_id_, double position_, double length_, bool has_bay_, double dwelltime_):
+	id(id_), link_id(link_id_), position (position_), length(length_), has_bay(has_bay_), dwelltime(dwelltime_)
+{
+	
 	avaliable_length = length;
 	nr_boarding = 0;
 	nr_alighting = 0;
-	has_bay = false;
-	dwelltime = 12.5;
-
 	random = new (Random);
 	if (randseed != 0)
 		{
@@ -248,8 +237,8 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 
 		write_busstop_visit ("buslog_out.dat", bus->get_bustrip(), time); // document stop-related info
 								// done BEFORE update_last_arrivals in order to calc the headway
+		bool val = bus->get_bustrip()->advance_next_stop();
 		update_last_arrivals (bus->get_bustrip(), time); // in order to follow the headways
-		bus->get_bustrip()->advance_next_stop();
 		expected_arrivals.erase(time);
 		
 		/*
@@ -278,17 +267,18 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 	double crowdedness_coefficient = 0.0078;
 	double out_of_stop_coefficient = 3.0; // Taking in consideration the increasing dwell time when bus stops out of the stop
 	bool out_of_stop = check_out_of_stop(trip->get_busv());
-
-	nr_waiting [trip->get_line()] += random -> poisson (((get_arrival_rates (trip)+10) * get_headway (trip, time)) / 60 );
+	
+	nr_waiting [trip->get_line()] += random -> poisson (((get_arrival_rates (trip)) * get_headway (trip, time)) / 3600.0 );
 				//the arrival process follows a poisson distribution and the lambda is relative to the headway
 				// with arrival time and the headway as the duration
-	if (curr_occupancy == 0) 
+
+	if (curr_occupancy == 0 || get_alighting_fractions (trip) == 0) 
 	{
 		set_nr_alighting (0);
 	}
 	else
 	{
-	set_nr_alighting (random -> binrandom (curr_occupancy, get_alighting_rates (trip)+10)); // the alighting process follows a binominal distribution 
+	set_nr_alighting (random -> binrandom (curr_occupancy, get_alighting_fractions (trip))); // the alighting process follows a binominal distribution 
 					// the number of trials is the number of passengers on board with the probability of the alighting fraction
 	}
 
@@ -363,7 +353,7 @@ double Busstop::get_headway (Bustrip* trip, double time) // calculates the headw
 
 double Busstop::calc_exiting_time (Bustrip* trip, double time)
 {
-	if (trip->timepoint_checker(this) == true)
+	if (trip->is_timepoint(this) > 0)
 	{
 		return Max(trip->scheduled_arrival_time(this), time + dwelltime) ; // since it is a time-point stop, it will wait if neccesary till the scheduled time
 	}
@@ -378,15 +368,15 @@ void Busstop::write_busstop_visit (string name, Bustrip* trip, double time)  // 
 {
 	ofstream out(name.c_str(),ios_base::app);
 	assert(out);
-	out << trip->get_line()->get_id() <<  trip->get_id() << trip->get_busv()->get_id() << get_id() << time;
+	out << trip->get_line()->get_id() << '\t' <<  trip->get_id() << '\t' << trip->get_busv()->get_id() << '\t' << get_id() << '\t' << time  << '\t'; 
 	if (trip->scheduled_arrival_time (this) == 0)
 	{
 		out << "Error : Busstop ID: " << get_id() << " is not on Bustrip ID: " << trip->get_id() << " route." << endl;
 	}
 	else
 	{
-		out << trip->scheduled_arrival_time (this) << time - trip->scheduled_arrival_time (this) << dwelltime << 
-		time + dwelltime << get_headway (trip , time) << get_nr_alighting() << get_nr_boarding() << trip->get_busv()->get_occupancy() << endl; 
+		out << trip->scheduled_arrival_time (this) << '\t' << time - trip->scheduled_arrival_time (this) << '\t' << dwelltime << '\t' <<
+		time + dwelltime << '\t' << get_headway (trip , time) << '\t' << get_nr_alighting() << '\t' << get_nr_boarding() << '\t' << trip->get_busv()->get_occupancy() << '\t' << get_nr_waiting(trip)<< endl; 
 	}
 	out.close();
 }

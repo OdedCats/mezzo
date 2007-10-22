@@ -53,8 +53,6 @@ protected:
 };
 
 typedef pair<Busstop*,double> Visit_stop;
-typedef pair<Busstop*,bool> Timepoint;
-
 
 class Bustrip 
 {
@@ -68,17 +66,17 @@ public:
 	Bus* get_busv () {return busv;}
 	void set_line (Busline* line_) {line = line_;}
 	Busline* get_line () {return line;}
-	vector <Visit_stop*> :: iterator get_next_stop() {return next_stop;} // returns pointer to next stop
-
+	vector <Visit_stop*> :: iterator& get_next_stop() {return next_stop;} // returns pointer to next stop
+	int is_timepoint(Busstop* stop); // returns 1 if true, 0 if false, -1 if busstop not found
 	bool advance_next_stop (); // advances the pointer to the next stop (checking bounds)
 	void add_stops (vector <Visit_stop*>  st) {stops = st; next_stop = stops.begin();}
 	bool activate (double time, Route* route, Vtype* vehtype, ODpair* odpair, Eventlist* eventlist_); // activates the trip. Generates the bus and inserts in net.
-	bool timepoint_checker (Busstop* stop); // checks if a busstop is a time point for this trip
 	double scheduled_arrival_time (Busstop* stop); // finds the scheduled arrival time for a given bus stop
 	void book_stop_visit (double time, Bus* bus); // books a visit to the stop
-//	bool check_end_trip ();
+	bool check_end_trip (); // returns 1 if true, 0 if false
 	vector <Visit_stop*> stops; // contains all the busstops and the times that they are supposed to be served.
 								// NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
+//	map <Busstop*,double> Visit_stop;
 protected:
 	
 	int id; // course nr
@@ -87,7 +85,8 @@ protected:
 	int init_occupancy; // initial occupancy, usually 0
 	double starttime; // when the trip is starting from the origin
 	vector <Visit_stop*> :: iterator next_stop;
-	vector <Timepoint*> trips_timepoint; // binary vector with time point indicatons for stops on route only (according to the schedule input file) 
+	 
+	map <Busstop*,bool> trips_timepoint; // binary map with time point indicatons for stops on route only (according to the schedule input file)  
 	Eventlist* eventlist; // for use by busstops etc to book themselves.
 };
 
@@ -96,12 +95,12 @@ class Busstop : public Action
 public:
 	Busstop ();
 	~Busstop ();
-	Busstop (int id_, int link_id_, double length_, double position_, bool has_bay_, double dwelltime_);
+	Busstop (int id_, int link_id_, double position_, double length_, bool has_bay_, double dwelltime_);
 // GETS & SETS:
 	int get_id () {return id;} // returns id, used in the compare <..> functions for find and find_if algorithms
 	int get_link_id() {return link_id;}
 	double get_arrival_rates (Bustrip* trip) {return arrival_rates[trip->get_line()];}
-	double get_alighting_rates (Bustrip* trip) {return alighting_rates[trip->get_line()];}
+	double get_alighting_fractions (Bustrip* trip) {return alighting_fractions[trip->get_line()];}
 	double get_length () {return length;}
 	double get_avaliable_length () {return avaliable_length;}
 	void set_avaliable_length (double avaliable_length_) {avaliable_length = avaliable_length_;}
@@ -110,14 +109,15 @@ public:
 	void set_nr_boarding (int nr_boarding_) {nr_boarding = nr_boarding_;}
 	void set_nr_alighting (int nr_alighting_) {nr_alighting = nr_alighting_;}	
 	int get_nr_alighting () {return nr_alighting;}
+	int get_nr_waiting (Bustrip* trip) {return nr_waiting[trip->get_line()];}
 	const double get_position () { return position;}
 	void set_position (double position_ ) {position = position_;}
 	
 // functions aimed to init. lines-specific vectors at the busstop level
 	void add_lines (Busline*  line) {lines.push_back(line);}
 	void add_line_nr_waiting(Busline* line, int value){nr_waiting[line] = value;}
-	void add_line_nr_boarding(Busline* line, double value){alighting_rates[line] = value;}
-	void add_line_nr_alighting(Busline* line, double value){arrival_rates[line]= value;}
+	void add_line_nr_boarding(Busline* line, double value){arrival_rates[line] = value;}
+	void add_line_nr_alighting(Busline* line, double value){alighting_fractions[line]= value;}
 
 //	
 	double calc_dwelltime (Bustrip* trip, double time); // calculates the dwelltime of each bus serving this stop
@@ -152,13 +152,11 @@ protected:
 	vector <Busline*> lines;
 	map <Busline*, int> nr_waiting; // number of waiting passengers for each of the bus lines that stops at the stop
 	map <Busline*, double> arrival_rates; // parameter lambda that defines the poission proccess of passengers arriving at the stop
-	map <Busline*, double> alighting_rates; // parameter that defines the poission process of the alighting passengers (second contains the alighting fraction)
+	map <Busline*, double> alighting_fractions; // parameter that defines the poission process of the alighting passengers (second contains the alighting fraction)
 	map <Busline*, double> last_arrivals; // contains the arrival time of the last bus from each line that stops at the stop (can result headways)
 	map <double,Bus*> expected_arrivals; // booked arrivals of buses on the link on their way to the stop
 	map <double,Bus*> buses_at_stop; // buses currently visiting stop
 	// Maybe in the future, these three vectors could be integrated into a single matrix ( a map with busline as the key)
 };
-
-inline bool operator==(Timepoint b1, Timepoint b2) { return b1.first == b2.first; }
 
 #endif //_BUSLINE

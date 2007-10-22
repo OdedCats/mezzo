@@ -182,15 +182,22 @@ Random::brandom(double prob)
 int 
 Random::binrandom (int n, double p) // using a cdf inverse
 {
+	double sum_p;
 	double sum = 0;
 	int counter = 0;
 	double cdf_value = urandom();
 	do
 	{
-		counter++;
+		sum_p = sum;
 		sum += (factorial(n) * pow(p,counter) * pow(1-p,n-counter)) / (factorial(counter) * factorial(n-counter));
+		counter++;
 	}
-	while (sum < cdf_value);
+	while (sum <= cdf_value);
+	
+	if ((sum-cdf_value)/(sum-sum_p) <= urandom())
+	{
+		return counter-1;
+	}
 	return counter;
 }
 
@@ -198,7 +205,7 @@ int
 Random::binrandom1 (int n, double p) // using calls to Bernoulli
 {
 	int sum = 0;
-	for (int i = 0; i = n ; i++)
+	for (int i = 1; i == n ; i++)
 	{
 		sum += brandom (p);
 	}
@@ -257,15 +264,22 @@ Random::drandom(int n, float cdf[])
 int 
 Random::poisson (double relative_lambda) // using a cdf inverse. The duration is externally calculated into relative_lambda
 {	
+	double sum_p;
 	double sum = 0;
 	int counter = 0;
 	double cdf_value = urandom();
 	do
 	{
+		sum_p = sum;
+		sum += ((exp(-relative_lambda) * pow(relative_lambda, counter)) / factorial (counter)) ;
 		counter++;
-		sum += (exp(-relative_lambda) * pow(relative_lambda, counter)) / factorial (counter);
 	}
-	while (sum < cdf_value);
+	while (sum <= cdf_value);
+	
+	if ((sum-cdf_value)/(sum-sum_p) <= urandom())
+	{
+		return counter-1;
+	}
 	return counter;
 }
 

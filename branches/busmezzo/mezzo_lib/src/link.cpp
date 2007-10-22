@@ -339,12 +339,12 @@ bool Link::enter_veh(Vehicle* veh, double time)
 		// Calc time to stop
 		Bus* bus =  (Bus*)(veh); // so we can do Bus operations
 		Bustrip* trip = bus->get_bustrip();
-		if (trip->advance_next_stop() == false)
+		if (trip->check_end_trip() == false)
 		{
-			Visit_stop* next_stop = *(bus->get_bustrip())->get_next_stop();
-			if (id == (next_stop->first->get_link_id()))
+			Visit_stop* next_stop1 = *((bus->get_bustrip())->get_next_stop());
+			if (id == (next_stop1->first->get_link_id()))
 			{
-				double stop_position = (next_stop->first)->get_position();
+				double stop_position = (next_stop1->first)->get_position();
 				double time_to_stop = time + ((exit_time - time) * (stop_position / length)); 
 				// book  stop visit
 				trip->book_stop_visit (time_to_stop, bus);
