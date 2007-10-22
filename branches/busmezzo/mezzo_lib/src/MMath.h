@@ -110,15 +110,15 @@ inline int Greater(T a, T b, double epsilon = AproxEpsilon)
 template <class T>
 inline int factorial (T a)
 {
-	int i = 1; 
+	int i = 2; 
 	int result = 1;
-	if (a == 0)
+	if (a < 2)
 	{
 		return result;
 	}
-	while (i < a)
+	while (i <= a)
 	{
-		result = result * a;
+		result = result * i;
 		i++;
 	}
 	return result;

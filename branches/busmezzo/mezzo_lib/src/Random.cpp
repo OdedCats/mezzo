@@ -189,7 +189,7 @@ Random::binrandom (int n, double p) // using a cdf inverse
 	do
 	{
 		sum_p = sum;
-		sum += (factorial(n) * pow(p,counter) * pow(1-p,n-counter)) / (factorial(counter) * factorial(n-counter));
+		sum += (factorial(n) * pow(p,counter) * pow(1-p,n-counter)) / ((factorial(counter) * factorial(n-counter)));
 		counter++;
 	}
 	while (sum <= cdf_value);
