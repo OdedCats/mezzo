@@ -1181,10 +1181,11 @@ bool Network::readbusline(istream& in) // reads a busline
 //}
 	
   char bracket;
-  int busline_id, ori_id, dest_id, route_id, vehtype, nr_stops, stop_id;
+  int busline_id, ori_id, dest_id, route_id, vehtype, nr_stops, stop_id, nr_tp, tp_id;
   string name;
-  vector <Busstop*> stops;
+  vector <Busstop*> stops, line_timepoint;
   Busstop* stop;
+  Busstop* tp;
   bool ok= true;
   in >> bracket;
   if (bracket != '{')
@@ -1204,6 +1205,7 @@ bool Network::readbusline(istream& in) // reads a busline
   {
 	  in >> stop_id;
 	  stop = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (stop_id) ))); // find the stop 
+	//  assert (stop !=  *(stops.end())); // assure tp exists
 	  stops.push_back(stop); // and add it
   }
   in >> bracket;
@@ -1226,10 +1228,33 @@ bool Network::readbusline(istream& in) // reads a busline
   stop->add_line_nr_boarding(bl, 0);
   stop->add_line_nr_alighting(bl, 0);
 
+// reading time point stops
+  in >> nr_tp;
+  in >> bracket;
+  if (bracket != '{')
+  {
+	cout << "readfile::readsbusline scanner jammed at " << bracket;
+	return false;
+  }
+  for (int i=0; i < nr_tp; i++)
+  {
+	  in >> tp_id;
+	  tp = (*(find_if(stops.begin(), stops.end(), compare <Busstop> (tp_id) ))); 
+	  // search for it in the stops route of the line - 'line_timepoint' is a subset of 'stops' 
+//	  assert (tp != *(stops.end())); // assure tp exists
+	  line_timepoint.push_back(tp); // and add it
+  }
   in >> bracket;
   if (bracket != '}')
   {
-    cout << "readfile::readbusstop scanner jammed at " << bracket;
+	cout << "readfile::readsbusline scanner jammed at " << bracket;
+	return false;
+  }
+  bl->add_timepoint(line_timepoint);
+  in >> bracket;
+  if (bracket != '}')
+  {
+    cout << "readfile::readbusline scanner jammed at " << bracket;
     return false;
   }
   // add to buslines vector
