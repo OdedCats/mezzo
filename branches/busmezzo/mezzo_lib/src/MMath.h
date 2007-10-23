@@ -107,19 +107,16 @@ inline int Greater(T a, T b, double epsilon = AproxEpsilon)
    return (a > b + epsilon);
 }
 
-template <class T>
-inline int factorial (T a)
+inline long unsigned int factorial (long unsigned int a)
 {
-	int i = 2; 
-	int result = 1;
+	long unsigned int result = 1;
 	if (a < 2)
 	{
 		return result;
 	}
-	while (i <= a)
+	for (long unsigned int i=1; i<=a; i++)
 	{
 		result = result * i;
-		i++;
 	}
 	return result;
 }

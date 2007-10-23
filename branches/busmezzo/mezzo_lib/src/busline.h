@@ -36,13 +36,14 @@ public:
 													//	the current Bustrip and books the next one
 	void add_stops (vector <Busstop*>  st) {stops = st;}
 	void add_trip(Bustrip* trip, double starttime){trips.push_back(Start_trip(trip,starttime));}
+	bool is_line_timepoint (Busstop* stop); // returns true if stops is a time point for this busline, otherwise it returns false
 
 protected:
 	int id; // line ID
 	string name; // name of the busline "46 Sofia"
 //	int vtype; // vehicle type. There are usually multiple types of Busses
 	vector <Busstop*>  stops; // contains all the stops on this line
-//	vector <Busstop*> line_timepoint; // a subset of the stops in the line which might be a time point stop
+	vector <Busstop*> line_timepoint;
 	vector <Start_trip> trips; // the trips that are to be made
 	Busroute* busroute; // the route (in terms of links) that the busses follow
 	Vtype* vtype; // the type of vehicle for the buses to be generated.
@@ -67,7 +68,7 @@ public:
 	void set_line (Busline* line_) {line = line_;}
 	Busline* get_line () {return line;}
 	vector <Visit_stop*> :: iterator& get_next_stop() {return next_stop;} // returns pointer to next stop
-	int is_timepoint(Busstop* stop); // returns 1 if true, 0 if false, -1 if busstop not found
+//	bool is_trip_timepoint(Busstop* stop); // returns 1 if true, 0 if false, -1 if busstop not found
 	bool advance_next_stop (); // advances the pointer to the next stop (checking bounds)
 	void add_stops (vector <Visit_stop*>  st) {stops = st; next_stop = stops.begin();}
 	bool activate (double time, Route* route, Vtype* vehtype, ODpair* odpair, Eventlist* eventlist_); // activates the trip. Generates the bus and inserts in net.
@@ -76,7 +77,6 @@ public:
 	bool check_end_trip (); // returns 1 if true, 0 if false
 	vector <Visit_stop*> stops; // contains all the busstops and the times that they are supposed to be served.
 								// NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
-//	map <Busstop*,double> Visit_stop;
 protected:
 	
 	int id; // course nr
@@ -86,7 +86,7 @@ protected:
 	double starttime; // when the trip is starting from the origin
 	vector <Visit_stop*> :: iterator next_stop;
 	 
-	map <Busstop*,bool> trips_timepoint; // binary map with time point indicatons for stops on route only (according to the schedule input file)  
+//	map <Busstop*,bool> trips_timepoint; // will be relevant only when time points are trip-specific. binary map with time point indicatons for stops on route only (according to the schedule input file)  
 	Eventlist* eventlist; // for use by busstops etc to book themselves.
 };
 

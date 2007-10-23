@@ -182,10 +182,15 @@ Random::brandom(double prob)
 int 
 Random::binrandom (int n, double p) // using a cdf inverse
 {
-	double sum_p;
-	double sum = 0;
+	long double sum_p, sum = 0;
 	int counter = 0;
-	double cdf_value = urandom();
+	long double cdf_value = urandom();
+
+	if ((n*p>5 && n*(1-p)>5)|| n>12)
+	{
+		return Round(nrandom_trunc(n*p, n*p*(1-p),0.0));
+	}
+
 	do
 	{
 		sum_p = sum;
@@ -196,9 +201,9 @@ Random::binrandom (int n, double p) // using a cdf inverse
 	
 	if ((sum-cdf_value)/(sum-sum_p) <= urandom())
 	{
-		return counter-1;
+		return Min(counter-1,n);
 	}
-	return counter;
+	return Min(counter,n);
 }
 
 int 
@@ -264,10 +269,14 @@ Random::drandom(int n, float cdf[])
 int 
 Random::poisson (double relative_lambda) // using a cdf inverse. The duration is externally calculated into relative_lambda
 {	
-	double sum_p;
-	double sum = 0;
+	long double sum_p, sum = 0.0;
 	int counter = 0;
-	double cdf_value = urandom();
+	long double cdf_value = urandom();
+	if (relative_lambda > 12)
+	{
+		return Round(nrandom_trunc(relative_lambda,relative_lambda,0.0));
+	}
+
 	do
 	{
 		sum_p = sum;

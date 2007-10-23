@@ -70,6 +70,18 @@ bool Busline::execute(Eventlist* eventlist, double time)
 	return true;
 }
 
+bool Busline::is_line_timepoint (Busstop* stop)
+{
+	for (vector <Busstop*>::iterator tp = line_timepoint.begin(); tp < line_timepoint.end(); tp++ )
+	{
+		if (stop == *(tp))
+		{
+			return true;
+		}
+	}
+return false;
+}
+
 // Bustrip Functions
 
 Bustrip::Bustrip ()
@@ -81,10 +93,10 @@ Bustrip::Bustrip ()
 Bustrip::Bustrip (int id_, double start_time_): id(id_), starttime(start_time_)
 {
 	init_occupancy=0;
-	for (map<Busstop*,bool>::iterator tp = trips_timepoint.begin(); tp != trips_timepoint.end(); tp++)
-	{
-		tp->second = false;
-	}
+//	for (map<Busstop*,bool>::iterator tp = trips_timepoint.begin(); tp != trips_timepoint.end(); tp++)
+//	{
+//		tp->second = false;
+//	} // will be relevant only when time points will be trip-specific
 }
 
 
@@ -163,14 +175,17 @@ double Bustrip::scheduled_arrival_time (Busstop* stop) // finds the scheduled ar
 	return 0; // if bus stop isn't on the trip's route
 }
 
-int Bustrip::is_timepoint (Busstop* stop)
- {
+
+
+/*
+bool Bustrip::is_trip_timepoint (Busstop* stop)
+{
 	 if (trips_timepoint.count(stop) > 0)
 		return (int)trips_timepoint[stop];
 	 else 
 		return -1;
 }
-
+*/
 
 
 // Busstop functions
@@ -353,7 +368,7 @@ double Busstop::get_headway (Bustrip* trip, double time) // calculates the headw
 
 double Busstop::calc_exiting_time (Bustrip* trip, double time)
 {
-	if (trip->is_timepoint(this) > 0)
+	if (trip->get_line()->is_line_timepoint(this) == true)
 	{
 		return Max(trip->scheduled_arrival_time(this), time + dwelltime) ; // since it is a time-point stop, it will wait if neccesary till the scheduled time
 	}
