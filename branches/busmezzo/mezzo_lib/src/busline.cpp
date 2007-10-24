@@ -245,10 +245,11 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 		// BUS entering stop
 		Bus* bus = expected_arrivals [time];
 		occupy_length (bus);
-		dwelltime = calc_dwelltime(bus->get_bustrip(), time); 
+		exit_time = calc_exiting_time(bus->get_bustrip(), time); 
+		// get the expected exit time according to dwell time calculations and time point considerations
 
-		buses_at_stop [time + dwelltime] = bus; 	// When time point will work - call calc_exiting_time()
-		eventlist->add_event (time + dwelltime, this); // book an event for the time it exits the stop
+		buses_at_stop [time + exit_time] = bus; 	
+		eventlist->add_event (time + exit_time, this); // book an event for the time it exits the stop
 
 		write_busstop_visit ("buslog_out.dat", bus->get_bustrip(), time); // document stop-related info
 								// done BEFORE update_last_arrivals in order to calc the headway
@@ -368,6 +369,7 @@ double Busstop::get_headway (Bustrip* trip, double time) // calculates the headw
 
 double Busstop::calc_exiting_time (Bustrip* trip, double time)
 {
+	double dwelltime = calc_dwelltime (trip,time);
 	if (trip->get_line()->is_line_timepoint(this) == true)
 	{
 		return Max(trip->scheduled_arrival_time(this), time + dwelltime) ; // since it is a time-point stop, it will wait if neccesary till the scheduled time
@@ -391,7 +393,7 @@ void Busstop::write_busstop_visit (string name, Bustrip* trip, double time)  // 
 	else
 	{
 		out << trip->scheduled_arrival_time (this) << '\t' << time - trip->scheduled_arrival_time (this) << '\t' << dwelltime << '\t' <<
-		time + dwelltime << '\t' << get_headway (trip , time) << '\t' << get_nr_alighting() << '\t' << get_nr_boarding() << '\t' << trip->get_busv()->get_occupancy() << '\t' << get_nr_waiting(trip)<< endl; 
+		exit_time << '\t' << get_headway (trip , time) << '\t' << get_nr_alighting() << '\t' << get_nr_boarding() << '\t' << trip->get_busv()->get_occupancy() << '\t' << get_nr_waiting(trip)<< endl; 
 	}
 	out.close();
 }

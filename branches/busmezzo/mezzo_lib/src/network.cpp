@@ -1250,7 +1250,7 @@ bool Network::readbusline(istream& in) // reads a busline
 	cout << "readfile::readsbusline scanner jammed at " << bracket;
 	return false;
   }
-  bl->add_timepoint(line_timepoint);
+  bl->add_timepoints(line_timepoint);
   in >> bracket;
   if (bracket != '}')
   {

@@ -35,7 +35,7 @@ public:
 													 // this function does the real work. It initiates 
 													//	the current Bustrip and books the next one
 	void add_stops (vector <Busstop*>  st) {stops = st;}
-	void add_timepoint (vector <Busstop*> tp) {line_timepoint = tp;}
+	void add_timepoints (vector <Busstop*> tp) {line_timepoint = tp;}
 	void add_trip(Bustrip* trip, double starttime){trips.push_back(Start_trip(trip,starttime));}
 	bool is_line_timepoint (Busstop* stop); // returns true if stops is a time point for this busline, otherwise it returns false
 
@@ -145,6 +145,7 @@ protected:
 	double length; // length of the busstop, determines how many buses can be served at the same time
 	double position; // relative position from the upstream node of the link (beteen 0 to 1)
 	double avaliable_length; // length of the busstop minus occupied length
+	double exit_time;
 	double dwelltime; // standard dwell time
 	int nr_boarding;// pass. boarding
 	int nr_alighting; // pass alighting
