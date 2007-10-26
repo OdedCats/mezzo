@@ -682,7 +682,7 @@ bool Network::readserver(istream& in)
 {
   char bracket;
   int sid, stype;
-  double mu, sd, delay, delay_std, min_delay;
+  double mu, sd, delay, delay_std;
   in >> bracket;
   if (bracket != '{')
   {
@@ -691,7 +691,7 @@ bool Network::readserver(istream& in)
   }
    in  >> sid >> stype >> mu >> sd >> delay;
    assert  ( (find_if (servers.begin(),servers.end(), compare <Server> (sid))) == servers.end() );   // no server with sid exists
-	assert ( (stype > -1) && (stype<3) && (mu>0.0) && (sd>=0.0) && (delay>=0.0)); // to be updated when more server types are added
+	assert ( (stype > -1) && (stype < 4) && (mu>0.0) && (sd>=0.0) && (delay>=0.0)); // to be updated when more server types are added
    // check id, vmax, vmin, romax;
    in >> bracket;
    if (bracket != '}')
@@ -702,6 +702,7 @@ bool Network::readserver(istream& in)
 	// type 0= dummy server: Const server
 	// type 1=standard N(mu,sd) sever
    // type 2=deterministic (mu) server
+    // type 3=stochastic delay server LN(delay, std_delay)
 	// type -1 (internal) = OD server
 	// type -2 (internal)= Destination server
 	if (stype==0)
@@ -712,9 +713,9 @@ bool Network::readserver(istream& in)
   		servers.insert(servers.begin(),new DetServer(sid,stype,mu,sd,delay));
 	if (stype==3)
 	{
-		in >> delay_std >> min_delay;
-		assert ( (min_delay <= delay) && (delay_std >=0.0)); 
-		servers.insert(servers.begin(),new StochasticDelayServer(sid,stype,mu,sd,delay,delay_std,min_delay));
+		in >> delay_std;
+		assert (delay_std >=0.0); 
+		servers.insert(servers.begin(),new StochasticDelayServer(sid,stype,mu,sd,delay,delay_std));
 	}
 #ifdef _DEBUG_NETWORK
   cout << " read a server"<<endl;

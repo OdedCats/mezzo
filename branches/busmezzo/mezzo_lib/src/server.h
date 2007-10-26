@@ -115,17 +115,15 @@ class StochasticDelayServer : public Server
   */
 {
 public:
-	StochasticDelayServer (const int id_, const int type_, const double mu_, const double sd_, const double delay_mean, const double std_delay, const double min_delay) :
+	StochasticDelayServer (const int id_, const int type_, const double mu_, const double sd_, const double delay_mean, const double std_delay) :
 		Server (id_,type_,mu_,sd_,delay_mean) {}
 	const double get_delay ();
 	double get_delay_mean () {return delay_mean;}
 	double get_delay_std () {return delay_std;}
-	double get_min_delay () {return min_delay;}
 
 protected:
 	double delay_mean;
 	double delay_std;
-	double min_delay;
 };
 
 class ChangeRateAction: public Action

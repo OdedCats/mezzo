@@ -105,7 +105,7 @@ double OServer::next(const double time)
 
 const double StochasticDelayServer::get_delay ()
 {
-	return _MAX(get_min_delay(), random->lnrandom(get_delay_mean(), get_delay_std()));
+	return random->lnrandom(get_delay_mean(), get_delay_std());
 }
 
 ChangeRateAction::ChangeRateAction (Eventlist* eventlist, double time, Server* server_, double mu_, double sd_)
