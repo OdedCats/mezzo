@@ -38,10 +38,10 @@ class Server  // standard n(mu,sd2) server  type: 1
   const int get_id() const;
   virtual  double next(const double time);
   const double get_mu() const;
-	void set_mu(const double mu_);
-	const double get_sd() const;
-	void set_sd(const double sd_);
-	const double get_delay () {return delay;}
+  void set_mu(const double mu_);
+  const double get_sd() const;
+  void set_sd(const double sd_);
+  virtual const double get_delay () {return delay;}
   protected:
   Random* random;
   
@@ -108,6 +108,24 @@ class OServer : public Server
 		double mu_unbound; // mu for the unbound traffic, calculated from (mu-alpha*cf_hdway)/(1-alpha)
 		double lanes;
 
+};
+
+class StochasticDelayServer : public Server
+/* Delivers stochastic (delay + service) time
+  */
+{
+public:
+	StochasticDelayServer (const int id_, const int type_, const double mu_, const double sd_, const double delay_mean, const double std_delay, const double min_delay) :
+		Server (id_,type_,mu_,sd_,delay_mean) {}
+	const double get_delay ();
+	double get_delay_mean () {return delay_mean;}
+	double get_delay_std () {return delay_std;}
+	double get_min_delay () {return min_delay;}
+
+protected:
+	double delay_mean;
+	double delay_std;
+	double min_delay;
 };
 
 class ChangeRateAction: public Action
