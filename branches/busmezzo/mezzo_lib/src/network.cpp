@@ -682,7 +682,7 @@ bool Network::readserver(istream& in)
 {
   char bracket;
   int sid, stype;
-  double mu, sd, delay;
+  double mu, sd, delay, delay_std, min_delay;
   in >> bracket;
   if (bracket != '{')
   {
@@ -710,6 +710,12 @@ bool Network::readserver(istream& in)
   		servers.insert(servers.begin(),new Server(sid,stype,mu,sd,delay));
 	if (stype==2)
   		servers.insert(servers.begin(),new DetServer(sid,stype,mu,sd,delay));
+	if (stype==3)
+	{
+		in >> delay_std >> min_delay;
+		assert ( (min_delay <= delay) && (delay_std >=0.0)); 
+		servers.insert(servers.begin(),new StochasticDelayServer(sid,stype,mu,sd,delay,delay_std,min_delay));
+	}
 #ifdef _DEBUG_NETWORK
   cout << " read a server"<<endl;
 #endif //_DEBUG_NETWORK
