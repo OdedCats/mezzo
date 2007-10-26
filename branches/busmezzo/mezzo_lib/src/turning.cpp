@@ -104,6 +104,7 @@ bool Turning::process_veh(double time)
 		Vehicle* veh=inlink->exit_veh(time, outlink, size);
 		if (inlink->exit_ok())
 		{
+			delay=server->get_delay(); // get new delay, may be stochastic (2007-10-26)
 			ok=outlink->enter_veh(veh, time+delay);	
            if (ok)
              return true;
