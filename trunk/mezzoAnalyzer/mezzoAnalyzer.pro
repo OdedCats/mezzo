@@ -16,7 +16,7 @@ CONFIG += uic4 staticlib
 # Input
 HEADERS += src/assist.h \
            src/odcheckerdlg.h \
-           src/odtabledelegate.h \
+           src/odtabledelegate.h 
 #           src/odtablemodel.h
 FORMS += ui/odcheckdlg.ui
 SOURCES += src/odcheckerdlg.cpp \
