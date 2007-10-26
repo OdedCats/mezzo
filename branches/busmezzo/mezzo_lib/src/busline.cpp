@@ -252,9 +252,9 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 		eventlist->add_event (time + exit_time, this); // book an event for the time it exits the stop
 
 		write_busstop_visit ("buslog_out.dat", bus->get_bustrip(), time); // document stop-related info
-								// done BEFORE update_last_arrivals in order to calc the headway
+								// done BEFORE update_last_departures in order to calc the headway
 		bool val = bus->get_bustrip()->advance_next_stop();
-		update_last_arrivals (bus->get_bustrip(), time); // in order to follow the headways
+		update_last_departures (bus->get_bustrip(), exit_time); // in order to follow the headways
 		expected_arrivals.erase(time);
 		
 		/*
@@ -283,7 +283,7 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 	double crowdedness_coefficient = 0.0078;
 	double out_of_stop_coefficient = 3.0; // Taking in consideration the increasing dwell time when bus stops out of the stop
 	bool out_of_stop = check_out_of_stop(trip->get_busv());
-	
+
 	nr_waiting [trip->get_line()] += random -> poisson (((get_arrival_rates (trip)) * get_headway (trip, time)) / 3600.0 );
 				//the arrival process follows a poisson distribution and the lambda is relative to the headway
 				// with arrival time and the headway as the duration
@@ -354,17 +354,26 @@ bool Busstop::check_out_of_stop (Bus* bus) // checks if there is any space left 
 	}
 }
 
-void Busstop::update_last_arrivals (Bustrip* trip, double time) // everytime a bus EXITS a stop it should be updated, 
+void Busstop::update_last_departures (Bustrip* trip, double time) // everytime a bus EXITS a stop it should be updated, 
 // in order to keep an updated vector of the last arrivals from each line. ONLY after the dwell time had been calaculated.
-// perhaps should be merges with get_headway
-// time - the current time, according to the simulation clock
+// the time paramater which is sent is the exit_time, cause headways are defined as the differnece in time between sequential departures
 { 
-	last_arrivals [trip->get_line()] = time;
+	last_departures [trip->get_line()] = time;
 }
 
-double Busstop::get_headway (Bustrip* trip, double time) // calculates the headway (current time minus the last ariival) 
+double Busstop::get_headway (Bustrip* trip, double time) // calculates the headway 
 { // time - the current time, according to the simulation clock
-	return time - last_arrivals[trip->get_line()];
+	double expected_dwelltime = 20.0; // an estimated average value of the dwell time
+	double headway = time + expected_dwelltime - last_departures[trip->get_line()];
+	// the headway is defined as the differnece in time between sequential departures
+	
+	if (trip->get_line()->is_line_timepoint(this) == true)
+	{
+		headway = Max (headway ,trip->scheduled_arrival_time(this)-last_departures[trip->get_line()]);
+	}
+	// if stop is a time point then the headway might be determined b the scheduled time
+
+	return headway;
 }
 
 double Busstop::calc_exiting_time (Bustrip* trip, double time)
