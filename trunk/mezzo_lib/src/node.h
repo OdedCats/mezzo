@@ -63,30 +63,30 @@ class Coord
 class Node
 {
   public:
-   Node(int id_);
-   virtual ~Node();
-   virtual const int get_id();
-   void setxy(double x, double y);
-   const Coord getxy();
+	Node(int id_);
+	virtual ~Node();
+	virtual const int get_id();
+	void setxy(double x, double y);
+	const Coord getxy();
 #ifndef _NO_GUI
-   Icon* get_icon(){return icon;}
-   void set_icon(NodeIcon* icon_);
-   virtual bool inbound(double x, double y, double scale);
+	Icon* get_icon(){return icon;}
+	void set_icon(NodeIcon* icon_);
+	virtual bool inbound(double x, double y, int rad, double scale);
 #endif // _NO_GUI   
-  virtual bool  process_veh(Vehicle* veh, double time);
+	virtual bool  process_veh(Vehicle* veh, double time);
  protected:
-  int id;
-  Coord position;
+	int id;
+	Coord position;
 #ifndef _NO_GUI  
-  NodeIcon* icon;
+	NodeIcon* icon;
 #endif // _NO_GUI  
 };
 
 class Origin : public Node
 {
-	public:
-	 Origin (int id_);
-	 virtual ~Origin();
+public:
+	Origin (int id_);
+	virtual ~Origin();
 	virtual bool transfer_veh(Link* link, double time); // transfers the vehicle from InputQueue to one of the
 																				//outgoing links
 	virtual bool insert_veh(Vehicle* veh, double time); // inserts the vehicle into the InputQueue

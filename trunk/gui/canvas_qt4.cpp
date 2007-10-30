@@ -512,15 +512,16 @@ void MainForm::mouseReleaseEvent(QMouseEvent *mev)
 void MainForm::selectNodes(QPoint pos)
 {
 	vector<Node*> allnodes=theNetwork.get_nodes();
+	int rad=theParameters->node_radius;
+
 	for( unsigned i=0; i<allnodes.size(); i++){
-		if (allnodes[i]->inbound(pos.x(), pos.y(), scale))
+		if (allnodes[i]->inbound(pos.x(),pos.y(),rad,scale))
 		{
 			nodes_sel_.push_back(allnodes[i]);
 			break;
 		}
 	}
 	if(nodes_sel_.size()>0){
-		
 		nodes_sel_[0]->get_icon()->set_selected_color(QColor(255,0,0));
 		nodes_sel_[0]->get_icon()->set_selected(true);
 		QString mesg=QString("Selected node: %1").arg(nodes_sel_[0]->get_id());

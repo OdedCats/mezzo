@@ -47,10 +47,10 @@ void Node::set_icon(NodeIcon* icon_)
 	icon=icon_;
 }
 
-bool Node::inbound(double x, double y, double scale)
+bool Node::inbound(double x, double y, int rad, double scale)
 {
-	if (x<=position.x+2*scale && x>=position.x-2*scale)
-		if(y<=position.y+2*scale && y>=position.y-2*scale)
+	if (x<=position.x+rad*scale && x>=position.x-rad*scale)
+		if(y<=position.y+rad*scale && y>=position.y-rad*scale)
 			return true;
 	return false;
 }
