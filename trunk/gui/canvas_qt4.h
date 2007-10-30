@@ -1,9 +1,10 @@
 /** 
  * changes: 
  * 1)add the mezzo analyzer dialog
- * 2)solve the zooming problems 
+ * 2)solve the zooming problems
+ * 3)GUI changes
  * last modified: Xiaoliang Ma 
- * 2007-09-26
+ * 2007-10-22
  */
 
 #ifndef MAINFORM
@@ -36,21 +37,23 @@ private slots:
 	void on_openmasterfile_activated();
 	void on_zoomin_activated();
 	void on_zoomout_activated();
+	void on_zoombywin_triggered(bool);
 	void on_savescreenshot_activated();
 	void on_loadbackground_activated();
 	void on_breakoff_activated ();
 	void on_run_activated();	
 	void on_parametersdialog_activated();
 	void on_inspectdialog_activated();
-	void on_simspeed_valueChanged( int  value);
-	void on_zoomfactor_valueChanged( int value);
-	void on_panfactor_valueChanged( int value );
+	void on_simspeed_valueChanged(int value);
+	void on_zoomfactor_valueChanged(int value);
+	void on_panfactor_valueChanged(int value );
 	void on_saveresults_activated();
 		
 	// other slots	
-	void keyPressEvent( QKeyEvent *e );
+	void keyPressEvent(QKeyEvent *e);
+	void keyReleaseEvent(QKeyEvent *kev);
 	void mousePressEvent(QMouseEvent *event );
-	void mouseMoveEvent(QMouseEvent *event );  
+	void mouseReleaseEvent(QMouseEvent *mev);  
 	
 	void loop();
 	void paintEvent(QPaintEvent *event );
@@ -58,12 +61,15 @@ private slots:
 
 private:
 //FUNCTIONS
+	void activateToolbars(bool activated);
 	void displaytime(double time);
-	
+	void showCanvasinfo();
+	void selectNodes(QPoint pos);
 	
 //VARS
 	int start_x ; // the x coordinate of the upper right corner of the canvas
     int start_y ; // the y coordinate of the upper right corner of the canvas
+	int yadjust_;  // the height of menu and tool bars
 	QPoint canvas_center; // the center of the canvas
 	int panelx, panely;
     int dx,dy;
@@ -80,15 +86,26 @@ private:
     int panfactor;
 	int panpixels;
 
+	// states
+	bool initialised;
+	bool zoombywin_triggered_;
+	//key and mouse states
+	bool lmouse_pressed_;
+	bool keyN_pressed_;   //node selection
+	bool keyL_pressed_;   //link selection
+
+	// network 
+	Network theNetwork;
+	vector<Node*> nodes_sel_;
+
+	// simulation
 	double runtime, currtime;
     QTimer* timer;
-    Network theNetwork;
 	Parameters* theParameters;
     QStringList files;
     QString filename;
     bool breaknow;
     QStatusBar* statusbar;
-    bool initialised;
 	
 	// sub dialogs
 	ParametersDialog* pmdlg;

@@ -41,12 +41,20 @@ const Coord Node::getxy()
 {
 	return position;
 }
-
 #ifndef _NO_GUI
 void Node::set_icon(NodeIcon* icon_)
 {
 	icon=icon_;
 }
+
+bool Node::inbound(double x, double y, double scale)
+{
+	if (x<=position.x+2*scale && x>=position.x-2*scale)
+		if(y<=position.y+2*scale && y>=position.y-2*scale)
+			return true;
+	return false;
+}
+
 #endif // _NO_GUI
 
 bool  Node::process_veh(Vehicle* , double )       //unused Vehicle* veh, double time

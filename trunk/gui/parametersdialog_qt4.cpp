@@ -3,6 +3,12 @@
 ParametersDialog::ParametersDialog(QWidget *parent): QDialog(parent)
 {
 	setupUi(this);
+	QObject::connect(zoomfactor, SIGNAL(valueChanged(int)), 
+					       this, SIGNAL(activateZoomFactor(int)));
+    QObject::connect(panfactor, SIGNAL(valueChanged(int)), 
+					      this, SIGNAL(activatePanFactor(int)));
+    QObject::connect(simspeed, SIGNAL(valueChanged(int)), 
+					     this, SIGNAL(activateSimSpeed(int)));
 }
 
 // Auto connect slots

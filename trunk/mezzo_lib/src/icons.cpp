@@ -245,7 +245,7 @@ void VirtualLinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pix
 
 // NodeIcon functions
 
-NodeIcon::NodeIcon( int x, int y)  : Icon(x,y)
+NodeIcon::NodeIcon( int x, int y): Icon(x,y)
 {
  	//startx=x;
  	//starty=y;

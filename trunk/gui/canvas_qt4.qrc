@@ -12,5 +12,6 @@
         <file>images/player_pause.png</file>
         <file>images/viewmag-.png</file>
         <file>images/zoomin.png</file>
+        <file>images/zoominbywin.png</file>
     </qresource>
 </RCC>

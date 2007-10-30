@@ -77,16 +77,16 @@ class VirtualLinkIcon: public LinkIcon
 {
  public:
 	VirtualLinkIcon(int x, int y, int tox, int toy) : LinkIcon(x,y,tox,toy) {}
-  virtual ~VirtualLinkIcon();
-   virtual void draw(QPixmap * pm,QMatrix * wm);
+	virtual ~VirtualLinkIcon();
+	virtual void draw(QPixmap * pm,QMatrix * wm);
  private:
 };
 
 class NodeIcon : public Icon
 {
   public:
-  		NodeIcon(int x, int y) ;       
-      virtual ~NodeIcon();
+  	NodeIcon(int x, int y) ;       
+    virtual ~NodeIcon();
     virtual void draw(QPixmap * pm,QMatrix * wm);
     
   private:

@@ -173,6 +173,7 @@ class Network
   vector <ODpair*>& get_odpairs () {return odpairs;}
   vector <Origin*>& get_origins(){return origins;}
   vector <Destination*>& get_destinations(){return destinations;}
+  vector <Node*>& get_nodes(){return nodes;}
   
   double calc_diff_input_output_linktimes (); // calculates the sum of the differences in output-input link travel times
   double calc_sumsq_input_output_linktimes (); // calculates the sum square of the differences in output-input link travel times
@@ -295,7 +296,8 @@ protected:
 #endif // _VISSIMCOM
    // ODMATRIX
    ODMatrix odmatrix;
-};
+}; 
+//end of network definition
 
 class Incident: public Action
 {

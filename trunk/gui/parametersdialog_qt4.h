@@ -5,7 +5,7 @@
 #include "../mezzo_lib/src/parameters.h"
 #include <Qt3Support>
 
-class ParametersDialog : public QDialog, private Ui::ParametersDialog
+class ParametersDialog : public QDialog, public Ui::ParametersDialog
 {
 	Q_OBJECT
 
@@ -25,6 +25,11 @@ private slots:
 	void on_QueueThickness_valueChanged(int value);
 	void on_NodeRadius_valueChanged(int  value);
 	void on_ShowBgImage_toggled( bool value);
+
+signals:
+	void activateZoomFactor(int) const;
+	void activatePanFactor(int) const;
+	void activateSimSpeed(int) const;
 
 private:
 	

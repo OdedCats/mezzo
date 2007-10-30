@@ -1,3 +1,10 @@
+/**
+ * modification:
+ *   add bounding box to the node object
+ *
+ * Xiaoliang Ma 
+ * last change: 2007-10-20 
+ */
 
 #ifndef NODE_HH
 #define NODE_HH
@@ -62,10 +69,12 @@ class Node
    void setxy(double x, double y);
    const Coord getxy();
 #ifndef _NO_GUI
+   Icon* get_icon(){return icon;}
    void set_icon(NodeIcon* icon_);
+   virtual bool inbound(double x, double y, double scale);
 #endif // _NO_GUI   
   virtual bool  process_veh(Vehicle* veh, double time);
-  protected:
+ protected:
   int id;
   Coord position;
 #ifndef _NO_GUI  
