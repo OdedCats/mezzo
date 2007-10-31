@@ -1,7 +1,7 @@
 /*
 * implementation of the graphic interface
 *
-* last modification: Xiaoliang Ma 2007-10-22
+* last modification: Xiaoliang Ma 2007-10-31
 *	
 * solve the zooming problem by reimplementation through matrix operations
 *	(It is necessary to create a document to explain the principle later since
@@ -9,7 +9,8 @@
 *    up as while!)
 *
 * change the GUI: move the paramter setting to the parameter dialog
-* 
+* coding the object selection functions
+*
 */
 
 #include <qmessagebox.h>
@@ -40,6 +41,7 @@ MainForm::MainForm(QWidget *parent)
 	keyN_pressed_=false;
 	keyL_pressed_=false;
 	nodes_sel_=vector<Node*>();
+	links_sel_=vector<Link*>();
 
 	// implementation of view zooming and panning
 	//xiaoliang
@@ -478,16 +480,27 @@ void MainForm::mousePressEvent ( QMouseEvent * event )
 		}
 		else if(keyL_pressed_) //link selecting mode
 		{
+			QPoint pos_view = QPoint (x_current,y_current);
+			QString mesg=QString("Mouse_X %1, Mouse_Y %2").arg(x_current).arg(y_current);
+			mouse_label->setText(mesg);
+
+			QMatrix inv = wm.inverted();
+			QPoint pos_model = inv.map(pos_view);
+			selectLinks(pos_model);
 		}
 		else // none selection
 		{   
-			// clear the selected nodes 
-			if(nodes_sel_.size()>0) nodes_sel_.clear();
+			// clear the selected nodes and links 
+			unselectNodes();
+			unselectLinks();
+
 			// show the current mouse position 
 			QPoint pos_view = QPoint (x_current,y_current);
 			QString mesg=QString("Mouse: X %1, Y %2").arg(x_current).arg(y_current);
 			mouse_label->setText(mesg);
 		}
+		theNetwork.redraw();
+		copyPixmap();
     }
 	else if(event->button()==Qt::RightButton)
 	{
@@ -508,14 +521,14 @@ void MainForm::mouseReleaseEvent(QMouseEvent *mev)
 	}
 }
 
-// select the node by coordinate 
+// select nodes by mouse pointer 
 void MainForm::selectNodes(QPoint pos)
 {
 	vector<Node*> allnodes=theNetwork.get_nodes();
 	int rad=theParameters->node_radius;
 
 	for( unsigned i=0; i<allnodes.size(); i++){
-		if (allnodes[i]->inbound(pos.x(),pos.y(),rad,scale))
+		if (allnodes[i]->get_icon()->inbound(pos.x(),pos.y(),rad))
 		{
 			nodes_sel_.push_back(allnodes[i]);
 			break;
@@ -526,8 +539,41 @@ void MainForm::selectNodes(QPoint pos)
 		nodes_sel_[0]->get_icon()->set_selected(true);
 		QString mesg=QString("Selected node: %1").arg(nodes_sel_[0]->get_id());
 		mouse_label->setText(mesg);
-		theNetwork.redraw();
-		copyPixmap();
 	}	
+}
 
+// selct links by mouse pointer 
+void MainForm::selectLinks(QPoint pos)
+{
+	vector<Link*> alllinks=theNetwork.get_links();
+	int rad=5;
+
+	for( unsigned i=0; i<alllinks.size(); i++){
+		if (alllinks[i]->get_icon()->inbound(pos.x(),pos.y(),rad))
+		{
+			links_sel_.push_back(alllinks[i]);
+			break;
+		}
+	}
+	if(links_sel_.size()>0){
+		links_sel_[0]->set_selected(true);
+		links_sel_[0]->set_selected_color(QColor(255,0,0));
+		QString mesg=QString("Selected link: %1").arg(links_sel_[0]->get_id());
+		mouse_label->setText(mesg);
+	}	
+}
+
+void MainForm::unselectNodes()
+{
+	for( unsigned i=0; i<nodes_sel_.size(); i++){
+		nodes_sel_[i]->get_icon()->set_selected(false);
+	}
+	nodes_sel_.clear();		
+}
+void MainForm::unselectLinks()
+{
+	for( unsigned i=0; i<links_sel_.size(); i++){
+		links_sel_[i]->set_selected(false);
+	} 
+	links_sel_.clear();
 }

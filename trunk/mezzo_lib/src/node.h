@@ -71,7 +71,6 @@ class Node
 #ifndef _NO_GUI
 	Icon* get_icon(){return icon;}
 	void set_icon(NodeIcon* icon_);
-	virtual bool inbound(double x, double y, int rad, double scale);
 #endif // _NO_GUI   
 	virtual bool  process_veh(Vehicle* veh, double time);
  protected:

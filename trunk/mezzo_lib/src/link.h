@@ -110,6 +110,7 @@ public:
 	const bool exit_ok() {	return ok;}
 	const double next_action (double time);
 #ifndef _NO_GUI   
+	Icon* get_icon(){return icon;}
 	void set_icon(LinkIcon* icon_) {icon=icon_; icon->set_pointers(&queue_percentage, &running_percentage);}
 	void set_selected_color(QColor selcolor) {icon->set_selected_color(selcolor);}
 	const QColor get_selected_color () {return (icon->get_selected_color());}
@@ -235,18 +236,15 @@ class VirtualLink : public Link
     VirtualLink(int id_, Node* in_, Node* out_, int length_=1000, int nr_lanes_=1, Sdfunc* sdfunc_=NULL);
     bool enter_veh(Vehicle* veh, double time); // overloaded from link. Places vehicle on sendlist.
     bool exit_veh(Vehicle* veh, double time);   // overloaded from link. Reports travel time for virtual link.
-	void block (int code) {	if (code<0)
-													blocked=true;
-											else
-													blocked=false;}
-  void set_density(const double density_) {linkdensity=density_;}
-  void set_speed(const double speed_) {linkspeed=speed_;}
-  const double density() {return linkdensity;}
-  const bool full();
-  const bool full(double time);
-  double speed_density(double density_);
-  void write_in_headways(ostream & out);
-  void write_out_headways(ostream & out);
+	void block (int code){ blocked=(code<0 ? true:false);}
+	void set_density(const double density_) {linkdensity=density_;}
+	void set_speed(const double speed_) {linkspeed=speed_;}
+	const double density() {return linkdensity;}
+	const bool full();
+	const bool full(double time);
+	double speed_density(double density_);
+	void write_in_headways(ostream & out);
+	void write_out_headways(ostream & out);
 	~VirtualLink();
 
 #ifdef _VISSIMCOM

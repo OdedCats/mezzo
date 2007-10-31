@@ -7,7 +7,11 @@
 #include <qimage.h>
 #include <QPixmap>
 #include <iostream>
+
+/////////////////////////////////////////
 // Drawing functions
+/////////////////////////////////////////
+
 Drawing::Drawing() {bg_set=false;bpm=NULL;}
 
 Drawing::~Drawing()
@@ -67,18 +71,27 @@ void Drawing::draw(QPixmap* pm,QMatrix * wm)
     result.push_back(max_y);
     
     return result;
- }
+ }         
 
-
+////////////////////////////////////////
 // Icon functions
-void Icon::draw (QPixmap * ,QMatrix *) {}          // unused QPixmap * pm,QWMatrix * wm
+////////////////////////////////////////
+bool Icon::inbound(double x, double y, int rad)
+{
+	if (x<=startx+rad && x>=startx-rad)
+		if(y<=starty+rad && y>=starty-rad)
+			return true;
+	return false;
+}
 
-Icon::~Icon()
-{}
 
+////////////////////////////////////////
 // LinkIcon functions
+////////////////////////////////////////
+
 LinkIcon::LinkIcon(int x, int y, int tox, int toy ): Icon (x, y), stopx(tox), stopy(toy)
 {
+	handler_on_=true;
 	int vx=stopx-startx;
 	int vy=stopy-starty;
 	double q=((theParameters->queue_thickness/2.0)+1.0);
@@ -131,8 +144,6 @@ LinkIcon::LinkIcon(int x, int y, int tox, int toy ): Icon (x, y), stopx(tox), st
   
 }
 
-LinkIcon::~LinkIcon() {}
-
 void LinkIcon::set_pointers(double * q, double * r)
 {
 	 queuepercentage=q;
@@ -142,87 +153,112 @@ void LinkIcon::set_pointers(double * q, double * r)
 void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 
 {
-   // init the painter
-   QPainter paint(pm); // automatic paint.begin()
-   paint.setRenderHint(QPainter::Antialiasing);
-    // set the world matrix that controls zoom and translation of  the drawn image
-    paint.setWorldMatrix(*wm);
+	// init the painter
+	QPainter paint(pm); // automatic paint.begin()
+	paint.setRenderHint(QPainter::Antialiasing);
+    
+	// set the world matrix that controls zoom and translation of  the drawn image
+	paint.setWorldMatrix(*wm);
 	QPen pen1;
 	if (!selected)
 		pen1 =QPen( theParameters->linkcolor , theParameters->link_thickness); // pen for the link base
 	else
 		pen1 =QPen( selected_color , theParameters->selected_thickness); // pen for the link base
 	
-   QPen pen2 ( theParameters->queuecolor , theParameters->queue_thickness); // pen for queue
+	QPen pen2 ( theParameters->queuecolor , theParameters->queue_thickness); // pen for queue
 #ifdef FIXED_RUNNING
-   int r,g,b;
-   g=0;
-   b=0;
-   /*** TEMPORARY TO COMPLY WITH SThlms Stad
-   double perc_density=(*runningpercentage) / (1.0-(*queuepercentage));
-   if (perc_density > 0.50)
-   {
+	int r,g,b;
+	g=0;
+	b=0;
+	/*** TEMPORARY TO COMPLY WITH SThlms Stad
+	double perc_density=(*runningpercentage) / (1.0-(*queuepercentage));
+	if (perc_density > 0.50)
+	{
         r=255;
     	b=255 - static_cast<int>(((perc_density-0.50)/0.50)*255);
-   }
-   else
-
-   {
+	}
+	else
+	{
       r=static_cast<int>(((perc_density)/0.50)*255);
       b=255;
-   }
-   */
-   double perc_density=(*runningpercentage) / (1.0-(*queuepercentage));
-   if (perc_density > 80)
+	}
+	*/
+	double perc_density=(*runningpercentage) / (1.0-(*queuepercentage));
+	if (perc_density > 80)
 	   b=255;
-   r=255;
-   int width=static_cast<int>((theParameters->link_thickness+theParameters->queue_thickness)*perc_density) ;
-   QPen pen3 (QColor(r,g,b),width); // pen for variable (density)
+	r=255;
+	int width=static_cast<int>((theParameters->link_thickness+theParameters->queue_thickness)*perc_density) ;
+	QPen pen3 (QColor(r,g,b),width); // pen for variable (density)
 #else
-   QPen pen3 ( Qt::blue , theParameters->queue_thickness);
+	QPen pen3 ( Qt::blue , theParameters->queue_thickness);
 #endif // FIXED_RUNNING
-   paint.setPen(pen1);
-   paint.drawLine( startx+shiftx,starty+shifty, stopx+shiftx,stopy+shifty ); // draw the center line
-   // draw an arrow to show the direction of the link
- //  paint.drawLine( stopx+shiftx,stopy+shifty, x2,y2 );
- //  paint.drawLine( stopx+shiftx,stopy+shifty, x3,y3 );
- //  paint.drawLine( x3,y3, x2,y2 );
 
-   // draw the queue part
+	// draw the center line
+	paint.setPen(pen1);
+	paint.drawLine( startx+shiftx,starty+shifty, stopx+shiftx,stopy+shifty ); 
+	
+	// draw an arrow to show the direction of the link
+	//  paint.drawLine( stopx+shiftx,stopy+shifty, x2,y2 );
+	//  paint.drawLine( stopx+shiftx,stopy+shifty, x3,y3 );
+	//  paint.drawLine( x3,y3, x2,y2 );
+	
+	// drawing the handler 
+	if(handler_on_)
+	{
+		QPen pen_h(theParameters->linkcolor, 1.5*(theParameters->link_thickness));
+		int handlex=(2*startx+stopx)/3+shiftx;
+		int handley=(2*starty+stopy)/3+shifty;
+		paint.setPen(pen_h);
+		paint.drawLine(handlex-shiftx/2,handley-shifty/2,
+					   handlex+shiftx/2,handley+shifty/2);
+	}
+
+	// draw the queue part
    	int x_1=static_cast <int> ((1.0-(*queuepercentage))*(stopx-startx)+startx);   // x and y for queue-end
    	int y_1=static_cast <int> ((1.0-(*queuepercentage))*(stopy-starty)+starty);
     paint.setPen(pen2);
-   paint.drawLine( x_1+shiftx,y_1+shifty, stopx+shiftx,stopy+shifty ); // draw the queue
+	paint.drawLine( x_1+shiftx,y_1+shifty, stopx+shiftx,stopy+shifty ); // draw the queue
 
-   //draw the running part
-   paint.setPen(pen3);
+	//draw the running part
+	paint.setPen(pen3);
 #ifdef FIXED_RUNNING
-  if (width>1)
-  {	
-  //	int sx=static_cast <int> (0.5+shiftx*perc_density);
-  //	int sy=static_cast <int> (0.5+shifty*perc_density);
-      int sx=shiftx;
-      int sy=shifty;
-	  paint.drawLine(startx+sx,starty+sy, x_1+sx,y_1+sy ); // draw the running segment
+	if (width>1)
+	{	
+		//	int sx=static_cast <int> (0.5+shiftx*perc_density);
+		//	int sy=static_cast <int> (0.5+shifty*perc_density);
+		int sx=shiftx;
+		int sy=shifty;
+		paint.drawLine(startx+sx,starty+sy, x_1+sx,y_1+sy ); // draw the running segment
 	}
 #else
-  int x_2=static_cast <int> ((1.0-((*queuepercentage)+(*runningpercentage)))*(stopx-startx)+startx);   // x and y for running-part-end
-  int y_2=static_cast <int> ((1.0-((*queuepercentage)+(*runningpercentage)))*(stopy-starty)+starty);
-  paint.drawLine(x_2+shiftx,y_2+shifty, x_1+shiftx,y_1+shifty ); // draw the running segment
+	int x_2=static_cast <int> ((1.0-((*queuepercentage)+(*runningpercentage)))*(stopx-startx)+startx);   // x and y for running-part-end
+	int y_2=static_cast <int> ((1.0-((*queuepercentage)+(*runningpercentage)))*(stopy-starty)+starty);
+	paint.drawLine(x_2+shiftx,y_2+shifty, x_1+shiftx,y_1+shifty ); // draw the running segment
 #endif //FIXED_RUNNING
-  if (theParameters->draw_link_ids)
-  {
-	paint.setFont(QFont ("Helvetica", theParameters->text_size));
-	QPen pen4 ( Qt::red , 1);
-	paint.setPen(pen4);
-	paint.drawText (((startx+stopx)/2)+shiftx*theParameters->text_size - 2*theParameters->text_size,((starty+stopy)/2)+shifty*theParameters->text_size, text);
-  }
-   paint.end();	
+	if (theParameters->draw_link_ids)
+	{
+		paint.setFont(QFont ("Helvetica", theParameters->text_size));
+		QPen pen4 ( Qt::red , 1);
+		paint.setPen(pen4);
+		paint.drawText (((startx+stopx)/2)+shiftx*theParameters->text_size - 2*theParameters->text_size,((starty+stopy)/2)+shifty*theParameters->text_size, text);
+	}
+	paint.end();	
 }
 
-// VirtualLinkIcon functions
+bool LinkIcon::inbound(double x, double y, int rad)
+{
+	int handlex=(2*startx+stopx)/3+shiftx;
+	int handley=(2*starty+stopy)/3+shifty;
+	rad=(shiftx>shifty ? shiftx:shifty);
+	if (x<=handlex+rad && x>=handlex-rad)
+		if(y<=handley+rad && y>=handley-rad)
+			return true;
+	return false;
+}
 
-VirtualLinkIcon::~VirtualLinkIcon() {}
+//////////////////////////////////////////////
+// VirtualLinkIcon functions
+//////////////////////////////////////////////
 
 void VirtualLinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 {
@@ -242,8 +278,9 @@ void VirtualLinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pix
    paint.end();	
 }
 
-
+///////////////////////////////////////////////
 // NodeIcon functions
+///////////////////////////////////////////////
 
 NodeIcon::NodeIcon( int x, int y): Icon(x,y)
 {
@@ -253,8 +290,6 @@ NodeIcon::NodeIcon( int x, int y): Icon(x,y)
  	height=2*theParameters->node_radius;
 	text="";
 }
-
-NodeIcon::~NodeIcon() {}
 
 void NodeIcon::draw(QPixmap * pm,QMatrix * wm)
 {

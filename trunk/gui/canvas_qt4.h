@@ -65,7 +65,10 @@ private:
 	void displaytime(double time);
 	void showCanvasinfo();
 	void selectNodes(QPoint pos);
-	
+	void unselectNodes();
+	void selectLinks(QPoint pos);
+	void unselectLinks();
+
 //VARS
 	int start_x ; // the x coordinate of the upper right corner of the canvas
     int start_y ; // the y coordinate of the upper right corner of the canvas
@@ -97,6 +100,7 @@ private:
 	// network 
 	Network theNetwork;
 	vector<Node*> nodes_sel_;
+	vector<Link*> links_sel_;
 
 	// simulation
 	double runtime, currtime;

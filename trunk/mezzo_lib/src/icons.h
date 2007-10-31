@@ -1,4 +1,10 @@
-
+/**
+ * modification:
+ *   add a handler to the linkicon
+ *
+ * Xiaoliang Ma 
+ * last change: 2007-10-30 
+ */
  #ifndef ICONS_HH
 #define ICONS_HH
 
@@ -43,8 +49,9 @@ class Icon
 	  Icon() {selected = false;}
 	  Icon( int startx_, int starty_) : startx(startx_), starty(starty_) 
 			{selected = false; selected_color = theParameters->selectedcolor;}
-	  virtual ~Icon();
-	  virtual void draw(QPixmap * pm,QMatrix * wm);
+	  virtual ~Icon(){};
+	  virtual void draw(QPixmap * pm,QMatrix * wm){};
+	  virtual bool inbound(double x, double y, int rad);
 	  void settext(const string st) {text=QString(st.c_str());}
 	  const int get_x()  { return startx;}
 	  const int get_y()  { return starty;}
@@ -62,22 +69,26 @@ class Icon
 class LinkIcon : public Icon
 {
   public:
-  		LinkIcon(int x, int y, int tox, int toy );
-      virtual ~LinkIcon();
-  		void set_pointers(double * q, double * r);
-  		virtual void draw(QPixmap * pm,QMatrix * wm);
+  	LinkIcon(int x, int y, int tox, int toy );
+	virtual ~LinkIcon(){};
+	void set_pointers(double * q, double * r);
+	void setHandler(bool handle){handler_on_=handle;}
+	bool getHandler(){return handler_on_;}
+	virtual bool inbound(double x, double y, int rad);
+  	virtual void draw(QPixmap * pm,QMatrix * wm);
   protected:
   	int  stopx, stopy, shiftx, shifty;
-      int x2,x3,y2,y3; // points for the arrowhead
+    int x2,x3,y2,y3; // points for the arrowhead
   	double * queuepercentage;
   	double * runningpercentage;
+	bool handler_on_;
 };
 
 class VirtualLinkIcon: public LinkIcon
 {
  public:
 	VirtualLinkIcon(int x, int y, int tox, int toy) : LinkIcon(x,y,tox,toy) {}
-	virtual ~VirtualLinkIcon();
+	virtual ~VirtualLinkIcon(){};
 	virtual void draw(QPixmap * pm,QMatrix * wm);
  private:
 };
@@ -86,7 +97,7 @@ class NodeIcon : public Icon
 {
   public:
   	NodeIcon(int x, int y) ;       
-    virtual ~NodeIcon();
+	virtual ~NodeIcon(){};
     virtual void draw(QPixmap * pm,QMatrix * wm);
     
   private:

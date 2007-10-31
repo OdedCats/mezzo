@@ -46,15 +46,6 @@ void Node::set_icon(NodeIcon* icon_)
 {
 	icon=icon_;
 }
-
-bool Node::inbound(double x, double y, int rad, double scale)
-{
-	if (x<=position.x+rad*scale && x>=position.x-rad*scale)
-		if(y<=position.y+rad*scale && y>=position.y-rad*scale)
-			return true;
-	return false;
-}
-
 #endif // _NO_GUI
 
 bool  Node::process_veh(Vehicle* , double )       //unused Vehicle* veh, double time

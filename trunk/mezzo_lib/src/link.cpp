@@ -28,8 +28,8 @@ Link::Link(int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* s
 #endif //_COLLECT_ALL	
 	avg_time=0.0;
 	avgtimes=new LinkTime();
-   histtimes=NULL;
-  nr_passed=0;
+	histtimes=NULL;
+	nr_passed=0;
 	running_percentage=0.0;
 	queue_percentage=0.0;
 	blocked=false;
@@ -157,7 +157,8 @@ void Link::add_alternative(int dest, vector<Link*> route)
 	{queue->add_alternative(dest, route);}	
 
 void Link::set_selected (const bool sel) 
-{	selected = sel;
+{	
+	selected = sel;
 #ifndef _NO_GUI	
 	icon->set_selected(selected);
 #endif // _NO_GUI	
