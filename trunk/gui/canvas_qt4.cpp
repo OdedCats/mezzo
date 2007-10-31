@@ -525,17 +525,17 @@ void MainForm::mouseReleaseEvent(QMouseEvent *mev)
 void MainForm::selectNodes(QPoint pos)
 {
 	vector<Node*> allnodes=theNetwork.get_nodes();
-	int rad=theParameters->node_radius;
+	int rad=theParameters->node_radius/mod2stdViewMat_.m11();
 
 	for( unsigned i=0; i<allnodes.size(); i++){
-		if (allnodes[i]->get_icon()->inbound(pos.x(),pos.y(),rad))
+		if (allnodes[i]->get_icon()->within_boundary(pos.x(),pos.y(),rad))
 		{
 			nodes_sel_.push_back(allnodes[i]);
 			break;
 		}
 	}
 	if(nodes_sel_.size()>0){
-		nodes_sel_[0]->get_icon()->set_selected_color(QColor(255,0,0));
+		nodes_sel_[0]->get_icon()->set_selected_color(Qt::blue);
 		nodes_sel_[0]->get_icon()->set_selected(true);
 		QString mesg=QString("Selected node: %1").arg(nodes_sel_[0]->get_id());
 		mouse_label->setText(mesg);
@@ -549,7 +549,7 @@ void MainForm::selectLinks(QPoint pos)
 	int rad=5;
 
 	for( unsigned i=0; i<alllinks.size(); i++){
-		if (alllinks[i]->get_icon()->inbound(pos.x(),pos.y(),rad))
+		if (alllinks[i]->get_icon()->within_boundary(pos.x(),pos.y(),rad))
 		{
 			links_sel_.push_back(alllinks[i]);
 			break;
@@ -557,7 +557,7 @@ void MainForm::selectLinks(QPoint pos)
 	}
 	if(links_sel_.size()>0){
 		links_sel_[0]->set_selected(true);
-		links_sel_[0]->set_selected_color(QColor(255,0,0));
+		links_sel_[0]->set_selected_color(Qt::blue);
 		QString mesg=QString("Selected link: %1").arg(links_sel_[0]->get_id());
 		mouse_label->setText(mesg);
 	}	

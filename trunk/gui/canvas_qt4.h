@@ -79,7 +79,7 @@ private:
     bool exited;
 
 	// xiaoliang work variables on zooming
-	QWMatrix wm;			  // general world matrix for painting	
+	QWMatrix wm;			  // general world matrix from model to current view	
     QWMatrix mod2stdViewMat_; //define transition from basic model to standard view
 	QWMatrix viewMat_;		  //define transition from standard view to current view
 	QSize viewSize_;

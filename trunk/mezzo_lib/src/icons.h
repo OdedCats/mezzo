@@ -51,7 +51,7 @@ class Icon
 			{selected = false; selected_color = theParameters->selectedcolor;}
 	  virtual ~Icon(){};
 	  virtual void draw(QPixmap * pm,QMatrix * wm){};
-	  virtual bool inbound(double x, double y, int rad);
+	  virtual bool within_boundary(double x, double y, int rad);
 	  void settext(const string st) {text=QString(st.c_str());}
 	  const int get_x()  { return startx;}
 	  const int get_y()  { return starty;}
@@ -74,14 +74,18 @@ class LinkIcon : public Icon
 	void set_pointers(double * q, double * r);
 	void setHandler(bool handle){handler_on_=handle;}
 	bool getHandler(){return handler_on_;}
-	virtual bool inbound(double x, double y, int rad);
+	int getLinkicon_leng(){return linkicon_leng_;}
+	virtual bool within_boundary(double x, double y, int rad);
   	virtual void draw(QPixmap * pm,QMatrix * wm);
   protected:
-  	int  stopx, stopy, shiftx, shifty;
+  	int stopx, stopy;
+	int shiftx, shifty;
+	int handlex, handley;
     int x2,x3,y2,y3; // points for the arrowhead
   	double * queuepercentage;
   	double * runningpercentage;
 	bool handler_on_;
+	int linkicon_leng_;
 };
 
 class VirtualLinkIcon: public LinkIcon
@@ -99,9 +103,8 @@ class NodeIcon : public Icon
   	NodeIcon(int x, int y) ;       
 	virtual ~NodeIcon(){};
     virtual void draw(QPixmap * pm,QMatrix * wm);
-    
   private:
-  		int width, height;
+  	int width, height;
       
 };
 

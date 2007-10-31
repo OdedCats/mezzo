@@ -76,7 +76,7 @@ void Drawing::draw(QPixmap* pm,QMatrix * wm)
 ////////////////////////////////////////
 // Icon functions
 ////////////////////////////////////////
-bool Icon::inbound(double x, double y, int rad)
+bool Icon::within_boundary(double x, double y, int rad)
 {
 	if (x<=startx+rad && x>=startx-rad)
 		if(y<=starty+rad && y>=starty-rad)
@@ -91,11 +91,15 @@ bool Icon::inbound(double x, double y, int rad)
 
 LinkIcon::LinkIcon(int x, int y, int tox, int toy ): Icon (x, y), stopx(tox), stopy(toy)
 {
-	handler_on_=true;
+	// link icon handler
+
 	int vx=stopx-startx;
 	int vy=stopy-starty;
+	linkicon_leng_=sqrt(double(vx*vx+vy*vy));
+
 	double q=((theParameters->queue_thickness/2.0)+1.0);
-  // calculating the shift to make the links excentric (start & end at the side of nodes)
+	// calculating the shift to make the links excentric 
+	// (start & end at the side of nodes)
 	if (vx==0)
 	{
 		shifty=static_cast<int>(0.0);
@@ -119,12 +123,9 @@ LinkIcon::LinkIcon(int x, int y, int tox, int toy ): Icon (x, y), stopx(tox), st
 		p=p/vx;
 		double move=(sqrt( (q*q)/(1+(p*p)) ) );
 		int tempy=abs(static_cast<int>  (move));
-
-
-
 		int tempx=abs(static_cast<int> (move*(p)));
-    //shift is the orhogonal vector to the link, used to shift the block
-	// take care of the sign for righthandtraffic
+		//shift is the orhogonal vector to the link, used to shift the block
+		// take care of the sign for righthandtraffic
 		if (vx<0)
 			shifty=-tempy;
 		else
@@ -135,12 +136,15 @@ LinkIcon::LinkIcon(int x, int y, int tox, int toy ): Icon (x, y), stopx(tox), st
 			shiftx=tempx;
 	}
 
+	handler_on_=true;
+	handlex=(2*startx+stopx)/3+shiftx;
+	handley=(2*starty+stopy)/3+shifty;
 
-   // Setting the points for the arrowhead
-  x2=static_cast <int> ( 0.96 *vx+startx);
-  x3= static_cast <int> (0.96 *vx+startx+2*shiftx);
-  y2=static_cast <int> (0.96 *vy+starty);
-  y3= static_cast <int> (0.96 *vy+starty+2*shifty);   
+	// Setting the points for the arrowhead
+	x2=static_cast <int> ( 0.96 *vx+startx);
+	x3= static_cast <int> (0.96 *vx+startx+2*shiftx);
+	y2=static_cast <int> (0.96 *vy+starty);
+	y3= static_cast <int> (0.96 *vy+starty+2*shifty);   
   
 }
 
@@ -206,8 +210,6 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 	if(handler_on_)
 	{
 		QPen pen_h(theParameters->linkcolor, 1.5*(theParameters->link_thickness));
-		int handlex=(2*startx+stopx)/3+shiftx;
-		int handley=(2*starty+stopy)/3+shifty;
 		paint.setPen(pen_h);
 		paint.drawLine(handlex-shiftx/2,handley-shifty/2,
 					   handlex+shiftx/2,handley+shifty/2);
@@ -245,11 +247,9 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 	paint.end();	
 }
 
-bool LinkIcon::inbound(double x, double y, int rad)
+bool LinkIcon::within_boundary(double x, double y, int rad)
 {
-	int handlex=(2*startx+stopx)/3+shiftx;
-	int handley=(2*starty+stopy)/3+shifty;
-	rad=(shiftx>shifty ? shiftx:shifty);
+	rad=linkicon_leng_/12;
 	if (x<=handlex+rad && x>=handlex-rad)
 		if(y<=handley+rad && y>=handley-rad)
 			return true;
@@ -291,21 +291,22 @@ NodeIcon::NodeIcon( int x, int y): Icon(x,y)
 	text="";
 }
 
-void NodeIcon::draw(QPixmap * pm,QMatrix * wm)
+void NodeIcon::draw(QPixmap *pm,QMatrix *wm)
 {
 	width=2*theParameters->node_radius;
 	height=2*theParameters->node_radius;
 	QPainter paint(pm); // automatic paint.begin()
 	paint.setRenderHint(QPainter::Antialiasing); // smooth lines
 	paint.setWorldMatrix(*wm);
-	QPen pen ( theParameters->nodecolor , theParameters->node_thickness);
-	paint.setPen(pen);
+
+	QPen pen1;
+	if (!selected)
+		pen1 =QPen(theParameters->nodecolor, theParameters->node_thickness);
+	else
+		pen1 =QPen(selected_color, 4*(theParameters->node_thickness)); 
+
+	paint.setPen(pen1);
 	paint.drawEllipse (startx,starty, width,height ); // draw a line
-	/*
-	QPen pen2 ( Qt::blue , 1);
-	paint.setPen(pen2);
-	paint.drawText (startx+5,starty, text);
-	*/
 	paint.end();	
 	// draw the stuff on pixmap
 }
