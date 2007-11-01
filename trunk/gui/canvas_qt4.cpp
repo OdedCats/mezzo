@@ -64,7 +64,8 @@ MainForm::MainForm(QWidget *parent)
 	statusbar->showMessage("Load a master file");
 	exited = false;
 	theParameters=theNetwork.get_parameters();
-	// need to figure out
+	
+	// need to figure out if this affect the simulation
 	//simspeed->setValue(static_cast<int> (  theParameters->sim_speed_factor * 100 ));
 	
 	// Parameters dialog
@@ -77,8 +78,13 @@ MainForm::MainForm(QWidget *parent)
 
 	// zoom by window
 	zoombywin_triggered_=false;
+	zoomrect_=0;
 	QObject::connect(zoombywin, SIGNAL(toggled(bool)), this,
-					 SLOT(void on_zoombywin_triggered(bool)));
+					 SLOT(on_zoombywin_triggered(bool)));
+
+	// show link handlers
+	QObject::connect(linkhandlemark, SIGNAL(toggled(bool)), this,
+					 SLOT(on_showhandle_triggered(bool)));
 
 	// connect the signals from parameter dialog
 	QObject::connect(pmdlg, SIGNAL(activateZoomFactor(int)), this,
@@ -105,6 +111,7 @@ void MainForm::activateToolbars(bool activated)
     zoomin->setEnabled(activated);
     zoomout->setEnabled(activated);
 	zoombywin->setEnabled(activated);
+	linkhandlemark->setEnabled(activated);
     viewSet_ParametersAction->setEnabled(activated);
     parametersdialog->setEnabled(activated);
     loadbackground->setEnabled(activated);
@@ -126,6 +133,12 @@ void MainForm::showCanvasinfo()
 	QString mesg=QString("Canvas X:%1, Y:%2, W:%3, H:%4"
 			                 ).arg(start_x).arg(start_y).arg(panelx).arg(panely);
 	mouse_label->setText(mesg);
+}
+
+void MainForm::updateCanvas()
+{
+	theNetwork.redraw();
+	copyPixmap();
 }
 
 // AUTOCONNECTED SLOTS
@@ -166,8 +179,7 @@ void MainForm::on_openmasterfile_activated()
 		// initialize the network graphic
 		mod2stdViewMat_=theNetwork.netgraphview_init();
 		wm=mod2stdViewMat_;
-		theNetwork.redraw();
-		copyPixmap();
+		updateCanvas();
 		statusbar->message("Initialised");
 	}	
 }
@@ -200,8 +212,9 @@ void MainForm::on_zoomin_activated()
 	viewMat_=viewMat_*tempMat;
 	wm=mod2stdViewMat_*viewMat_;
 	panfactor=static_cast<int>(0.5+(double)panpixels/scale);
-	theNetwork.redraw();
-    copyPixmap();
+	//theNetwork.redraw();
+    //copyPixmap();
+	updateCanvas();
 }
 
 void MainForm::on_zoomout_activated()
@@ -233,13 +246,25 @@ void MainForm::on_zoomout_activated()
 	wm=mod2stdViewMat_*viewMat_;
 	panfactor=static_cast<int>(0.5+(double)panpixels/scale);
 
-	theNetwork.redraw();
-    copyPixmap();
+	//theNetwork.redraw();
+    //copyPixmap();
+	updateCanvas();
 }
 
 void MainForm::on_zoombywin_triggered(bool triggered)
 {
 	zoombywin_triggered_=triggered;
+}
+
+void MainForm::on_showhandle_triggered(bool triggered)
+{
+	//update all linkicons property on handler 
+	if(this->initialised){
+		vector<Link*> alllinks=theNetwork.get_links();
+		for( unsigned i=0; i<alllinks.size(); i++)
+			alllinks[i]->get_icon()->setHandler(triggered);
+		updateCanvas();
+	}
 }
 
 void MainForm::on_savescreenshot_activated()
@@ -365,7 +390,6 @@ void MainForm::displaytime(double time)
 void MainForm::copyPixmap()
 {	
 	pm1=pm2;
-	//bitBlt(Canvas,0,0,&pm1);
 	Canvas->setPixmap(pm1);
 	Canvas->repaint();  
 }
@@ -389,6 +413,9 @@ void MainForm::on_simspeed_valueChanged( int  value)
     theParameters->sim_speed_factor =(value/100);
 }
 
+////////////////////////////////////////////////////////
+// key press event handling
+////////////////////////////////////////////////////////
 void MainForm::keyPressEvent( QKeyEvent *e )
 {
 	if (!initialised) return;
@@ -439,10 +466,14 @@ void MainForm::keyPressEvent( QKeyEvent *e )
 	QString mesg=QString("Scale: %1 Panfactor: %2 DX: %3 DY: %4"
 			   ).arg(wm.m11()).arg(panfactor).arg(wm.dx()).arg(wm.dy());
 	statusbar->message(mesg);
-	theNetwork.redraw();
-	copyPixmap();
+	//theNetwork.redraw();
+	//copyPixmap();
+	updateCanvas();
 }
 
+/////////////////////////////////////////////////
+// key release event handling
+/////////////////////////////////////////////////
 void MainForm::keyReleaseEvent(QKeyEvent *kev)
 {
 	if (!initialised) return;
@@ -456,6 +487,9 @@ void MainForm::keyReleaseEvent(QKeyEvent *kev)
 	}
 }
 
+////////////////////////////////////////////////////////
+// mouse press event handling
+////////////////////////////////////////////////////////
 void MainForm::mousePressEvent ( QMouseEvent * event )
 {
 	if (!initialised) return;
@@ -463,14 +497,14 @@ void MainForm::mousePressEvent ( QMouseEvent * event )
 	// left mouse button pressed
 	if (event->button() == Qt::LeftButton) 
 	{
-		// adjusted for the coordinate of the Canvas
+		// mouse position relative to the up-left corner of the Canvas
 		int	x_current = event->x() - start_x; 
 		int	y_current = event->y() - start_y - yadjust_; 
 		lmouse_pressed_=true;
 		
 		if (keyN_pressed_) //node selecting mode
 		{
-			QPoint pos_view = QPoint (x_current,y_current);
+			QPoint pos_view = QPoint(x_current,y_current);
 			QString mesg=QString("Mouse_X %1, Mouse_Y %2").arg(x_current).arg(y_current);
 			mouse_label->setText(mesg);
 
@@ -490,6 +524,12 @@ void MainForm::mousePressEvent ( QMouseEvent * event )
 		}
 		else // none selection
 		{   
+			// when zoombywin button triggered
+			if (zoombywin_triggered_)
+			{
+				zoomrect_=new QRect(x_current, y_current, 0, 0);
+			}
+			
 			// clear the selected nodes and links 
 			unselectNodes();
 			unselectLinks();
@@ -499,23 +539,50 @@ void MainForm::mousePressEvent ( QMouseEvent * event )
 			QString mesg=QString("Mouse: X %1, Y %2").arg(x_current).arg(y_current);
 			mouse_label->setText(mesg);
 		}
-		theNetwork.redraw();
-		copyPixmap();
+		updateCanvas();
     }
 	else if(event->button()==Qt::RightButton)
 	{
-		if (zoombywin_triggered_) // zooming by windows
-		{
-				
-		}	
+		
 	}
 }
 
-// to be implemented 
-void MainForm::mouseReleaseEvent(QMouseEvent *mev) 
+////////////////////////////////////////////////////
+// mouse move event handling
+////////////////////////////////////////////////////
+void MainForm::mouseMoveEvent(QMouseEvent* mev)
 {
-	if (mev->button() == Qt::LeftButton) 
+	if(lmouse_pressed_&&zoombywin_triggered_)
+	{
+		if(zoomrect_!=0)
+		{
+			// mouse position relative to the up-left corner of the Canvas
+			int	x_current = mev->x() - start_x; 
+			int	y_current = mev->y() - start_y - yadjust_;
+			zoomrect_->setRight(x_current);
+			zoomrect_->setBottom(y_current);
+
+			// draw the rect on pm1 but keep pm2 untouched 
+			// so that need not to draw network when updating 
+			drawZoomRect();
+		}
+	}
+}
+
+///////////////////////////////////////////////////
+// mouse release event
+///////////////////////////////////////////////////
+void MainForm::mouseReleaseEvent(QMouseEvent* mev) 
+{
+	if (mev->button() == Qt::LeftButton)
+	{
 		lmouse_pressed_=false;
+		if(zoombywin_triggered_&&zoomrect_!=0)
+		{	
+			delete zoomrect_;
+			updateCanvas();
+		}
+	}
 	else 
 	{
 	}
@@ -576,4 +643,21 @@ void MainForm::unselectLinks()
 		links_sel_[i]->set_selected(false);
 	} 
 	links_sel_.clear();
+}
+
+void MainForm::drawZoomRect()
+{
+	pm1=pm2;
+	// autostart painter
+	QPainter paint(&pm1); 
+	paint.setRenderHint(QPainter::Antialiasing); // smooth lines
+	//paint.setWorldMatrix(*wm);
+
+	QPen pen1(Qt::black, 1);
+	pen1.setStyle(Qt::DashLine);
+	paint.setPen(pen1);
+	paint.drawRect(*zoomrect_); 
+	paint.end();	
+	Canvas->setPixmap(pm1);
+	Canvas->repaint();
 }

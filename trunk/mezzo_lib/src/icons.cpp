@@ -135,7 +135,7 @@ LinkIcon::LinkIcon(int x, int y, int tox, int toy ): Icon (x, y), stopx(tox), st
 			shiftx=tempx;
 	}
 
-	handler_on_=true;
+	handler_on_=false;
 	//handlex=(2*startx+stopx)/3+shiftx;
 	//handley=(2*starty+stopy)/3+shifty;
 	
@@ -159,7 +159,6 @@ void LinkIcon::set_pointers(double * q, double * r)
 }
 
 void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
-
 {
 	// init the painter
 	QPainter paint(pm); // automatic paint.begin()
@@ -295,7 +294,7 @@ void NodeIcon::draw(QPixmap *pm,QMatrix *wm)
 	if (!selected)
 		pen1 =QPen(theParameters->nodecolor, theParameters->node_thickness);
 	else
-		pen1 =QPen(selected_color, 4*(theParameters->node_thickness)); 
+		pen1 =QPen(selected_color, 8*(theParameters->node_thickness)); 
 
 	paint.setPen(pen1);
 	paint.drawEllipse (startx,starty, width,height ); 

@@ -33,7 +33,7 @@ class Drawing
   	void set_background (const char* name) {if (bpm) delete bpm; bpm=new QPixmap(name);bg_set=true;basematrix_set=false;}
   	void add_icon (Icon* icon);
   	virtual void draw(QPixmap * pm,QMatrix * wm);
-   vector <int> get_boundaries();        // returns [min_x,min_y, max_x, max_y]
+	vector <int> get_boundaries();        // returns [min_x,min_y, max_x, max_y]
   private:
   	list <Icon*> icons;
     bool bg_set;

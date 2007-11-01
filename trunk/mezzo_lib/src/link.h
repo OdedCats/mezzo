@@ -110,7 +110,7 @@ public:
 	const bool exit_ok() {	return ok;}
 	const double next_action (double time);
 #ifndef _NO_GUI   
-	Icon* get_icon(){return icon;}
+	LinkIcon* get_icon(){return icon;}
 	void set_icon(LinkIcon* icon_) {icon=icon_; icon->set_pointers(&queue_percentage, &running_percentage);}
 	void set_selected_color(QColor selcolor) {icon->set_selected_color(selcolor);}
 	const QColor get_selected_color () {return (icon->get_selected_color());}

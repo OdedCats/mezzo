@@ -39,6 +39,7 @@ private slots:
 	void on_zoomin_activated();
 	void on_zoomout_activated();
 	void on_zoombywin_triggered(bool);
+	void on_showhandle_triggered(bool);
 	void on_savescreenshot_activated();
 	void on_loadbackground_activated();
 	void on_breakoff_activated ();
@@ -54,6 +55,7 @@ private slots:
 	void keyPressEvent(QKeyEvent *e);
 	void keyReleaseEvent(QKeyEvent *kev);
 	void mousePressEvent(QMouseEvent *event );
+	void mouseMoveEvent(QMouseEvent *mev);
 	void mouseReleaseEvent(QMouseEvent *mev);  
 	
 	void loop();
@@ -65,10 +67,12 @@ private:
 	void activateToolbars(bool activated);
 	void displaytime(double time);
 	void showCanvasinfo();
+	void updateCanvas();
 	void selectNodes(QPoint pos);
 	void unselectNodes();
 	void selectLinks(QPoint pos);
 	void unselectLinks();
+	void drawZoomRect();
 
 //VARS
 	int start_x ; // the x coordinate of the upper right corner of the canvas
@@ -85,6 +89,7 @@ private:
 	QWMatrix viewMat_;		  //define transition from standard view to current view
 	QSize viewSize_;
 	QPixmap pm1, pm2; //shared
+	QRect* zoomrect_;
 	double scalefactor;
     double scale;
     int panfactor;
@@ -93,6 +98,7 @@ private:
 	// states
 	bool initialised;
 	bool zoombywin_triggered_;
+
 	//key and mouse states
 	bool lmouse_pressed_;
 	bool keyN_pressed_;   //node selection
