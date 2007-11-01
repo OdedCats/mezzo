@@ -22,7 +22,6 @@ Drawing::~Drawing()
 void Drawing::add_icon(Icon* icon)
 {
  	icons.push_back(icon);
- 	//cout <<"nr of icons in drawing "<< icons.size() << endl;
 }
 
 void Drawing::draw(QPixmap* pm,QMatrix * wm)
@@ -76,7 +75,7 @@ void Drawing::draw(QPixmap* pm,QMatrix * wm)
 ////////////////////////////////////////
 // Icon functions
 ////////////////////////////////////////
-bool Icon::within_boundary(double x, double y, int rad)
+const bool Icon::within_boundary(const double x, const double y, const int rad)
 {
 	if (x<=startx+rad && x>=startx-rad)
 		if(y<=starty+rad && y>=starty-rad)
@@ -174,19 +173,6 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 	int r,g,b;
 	g=0;
 	b=0;
-	/*** TEMPORARY TO COMPLY WITH SThlms Stad
-	double perc_density=(*runningpercentage) / (1.0-(*queuepercentage));
-	if (perc_density > 0.50)
-	{
-        r=255;
-    	b=255 - static_cast<int>(((perc_density-0.50)/0.50)*255);
-	}
-	else
-	{
-      r=static_cast<int>(((perc_density)/0.50)*255);
-      b=255;
-	}
-	*/
 	double perc_density=(*runningpercentage) / (1.0-(*queuepercentage));
 	if (perc_density > 80)
 	   b=255;
@@ -226,8 +212,6 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 #ifdef FIXED_RUNNING
 	if (width>1)
 	{	
-		//	int sx=static_cast <int> (0.5+shiftx*perc_density);
-		//	int sy=static_cast <int> (0.5+shifty*perc_density);
 		int sx=shiftx;
 		int sy=shifty;
 		paint.drawLine(startx+sx,starty+sy, x_1+sx,y_1+sy ); // draw the running segment
@@ -247,11 +231,13 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 	paint.end();	
 }
 
-bool LinkIcon::within_boundary(double x, double y, int rad)
+const bool LinkIcon::within_boundary(const double x, const double y, const int rad)
 {
-	rad=linkicon_leng_/12;
-	if (x<=handlex+rad && x>=handlex-rad)
-		if(y<=handley+rad && y>=handley-rad)
+	// don't re-use parameters as variables. I suggest we should start coding stricter: make unchangeable parameters const, so we don't mess up
+	// (i agree i haven't been doing that myself most of the time...)
+	int rad2=linkicon_leng_/12;
+	if (x<=handlex+rad2 && x>=handlex-rad2)
+		if(y<=handley+rad2 && y>=handley-rad2)
 			return true;
 	return false;
 }
@@ -306,7 +292,7 @@ void NodeIcon::draw(QPixmap *pm,QMatrix *wm)
 		pen1 =QPen(selected_color, 4*(theParameters->node_thickness)); 
 
 	paint.setPen(pen1);
-	paint.drawEllipse (startx,starty, width,height ); // draw a line
+	paint.drawEllipse (startx,starty, width,height ); 
 	paint.end();	
 	// draw the stuff on pixmap
 }

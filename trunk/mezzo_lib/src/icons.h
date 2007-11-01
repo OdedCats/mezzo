@@ -51,7 +51,7 @@ class Icon
 			{selected = false; selected_color = theParameters->selectedcolor;}
 	  virtual ~Icon(){};
 	  virtual void draw(QPixmap * pm,QMatrix * wm){};
-	  virtual bool within_boundary(double x, double y, int rad);
+	  virtual const bool within_boundary(const double x, const double y, const int rad);
 	  void settext(const string st) {text=QString(st.c_str());}
 	  const int get_x()  { return startx;}
 	  const int get_y()  { return starty;}
@@ -75,7 +75,7 @@ class LinkIcon : public Icon
 	void setHandler(bool handle){handler_on_=handle;}
 	bool getHandler(){return handler_on_;}
 	int getLinkicon_leng(){return linkicon_leng_;}
-	virtual bool within_boundary(double x, double y, int rad);
+	virtual const bool within_boundary(const double x, const double y, const int rad);
   	virtual void draw(QPixmap * pm,QMatrix * wm);
   protected:
   	int stopx, stopy;
