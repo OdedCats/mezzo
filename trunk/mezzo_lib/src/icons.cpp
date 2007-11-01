@@ -136,13 +136,18 @@ LinkIcon::LinkIcon(int x, int y, int tox, int toy ): Icon (x, y), stopx(tox), st
 	}
 
 	handler_on_=true;
-	handlex=(2*startx+stopx)/3+shiftx;
-	handley=(2*starty+stopy)/3+shifty;
+	//handlex=(2*startx+stopx)/3+shiftx;
+	//handley=(2*starty+stopy)/3+shifty;
+	
+	handlex=static_cast <int> ( 0.66 *vx+startx + shiftx);
+	handley=static_cast <int> ( 0.66 *vy+starty + shifty);
+	x2=static_cast <int> ( 0.70 *vx+startx + shiftx);
+	y2=static_cast <int> ( 0.70 *vy+starty + shifty);
 
 	// Setting the points for the arrowhead
-	x2=static_cast <int> ( 0.96 *vx+startx);
+	//x2=static_cast <int> ( 0.66 *vx+startx);
 	x3= static_cast <int> (0.96 *vx+startx+2*shiftx);
-	y2=static_cast <int> (0.96 *vy+starty);
+	//y2=static_cast <int> (0.66 *vy+starty);
 	y3= static_cast <int> (0.96 *vy+starty+2*shifty);   
   
 }
@@ -197,8 +202,9 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 	{
 		QPen pen_h(theParameters->linkcolor, 1.5*(theParameters->link_thickness));
 		paint.setPen(pen_h);
-		paint.drawLine(handlex-shiftx/2,handley-shifty/2,
-					   handlex+shiftx/2,handley+shifty/2);
+	//	paint.drawLine(handlex-shiftx/2,handley-shifty/2,handlex+shiftx/2,handley+shifty/2);
+		paint.drawLine(handlex,handley,handlex+shiftx,handley+shifty);
+		paint.drawLine(handlex+shiftx,handley+shifty, x2, y2); // draws a half-arrow
 	}
 
 	// draw the queue part

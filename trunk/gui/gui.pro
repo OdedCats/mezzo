@@ -6,6 +6,7 @@ INCLUDEPATH += $(QTDIR)/include $(QTDIR)/include/QtCore $(QTDIR)/include/QtGui $
 
 CONFIG(debug, debug|release) {
      LIBS +=  -L../mezzo_lib/Debug -lmezzo_lib -L../mezzoAnalyzer/Debug -lmezzoAnalyzer 
+     DEPENDS += ../mezzo_lib/Debug/mezzo_lib.lib ../mezzoAnalyzer/Debug/mezzoAnalyzer.lib
  } else {
      LIBS +=  -L../mezzo_lib/Release -lmezzo_lib -L../mezzoAnalyzer/Release -lmezzoAnalyzer 
  }
