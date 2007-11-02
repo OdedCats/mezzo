@@ -186,18 +186,6 @@ void MainForm::on_openmasterfile_activated()
 
 void MainForm::on_zoomin_activated()
 {
-	/*
-	double w_x= theNetwork.get_width_x();
-	double h_y=theNetwork.get_height_y();
-	dx=static_cast<int>(0.5*(scalefactor-1)*w_x);
-	dy=static_cast<int>(0.5*(scalefactor-1)*h_y);
-	wm.translate(-dx,-dy);
-	scale=scalefactor;
-	wm.scale(scale,scale);
-	panfactor=static_cast<int>(0.5+(double)panpixels / wm.m11()); // correction of the panfactor after zoom
-	QString mesg=QString("Scale: %1 Panfactor: %2 DX: %3 DY: %4").arg(wm.m11()).arg(panfactor).arg(wm.dx()).arg(wm.dy());
-	statusbar->message(mesg);
-	*/
 
 	// xiaoliang's implementation
 	int xviewcenter=viewSize_.width()/2;
@@ -219,18 +207,6 @@ void MainForm::on_zoomin_activated()
 
 void MainForm::on_zoomout_activated()
 {
-	/*
-	scale=1/scalefactor;
-	double w_x= theNetwork.get_width_x();
-	double h_y=theNetwork.get_height_y();
-	dx=static_cast<int>(0.5*(scale-1)*w_x);
-	dy=static_cast<int>(0.5*(scale-1)*h_y);
-	wm.translate(-dx,-dy);  
-	wm.scale(scale,scale);
-	panfactor=static_cast<int>(0.5+(double)panpixels / wm.m11());
-	QString mesg=QString("Scale: %1 Panfactor: %2 DX: %3 DY: %4").arg(wm.m11()).arg(panfactor).arg(wm.dx()).arg(wm.dy());
-	statusbar->message(mesg );
-	*/
 	
 	// xiaoliang's implementation
 	int xviewcenter=viewSize_.width()/2;
@@ -246,8 +222,6 @@ void MainForm::on_zoomout_activated()
 	wm=mod2stdViewMat_*viewMat_;
 	panfactor=static_cast<int>(0.5+(double)panpixels/scale);
 
-	//theNetwork.redraw();
-    //copyPixmap();
 	updateCanvas();
 }
 
@@ -463,11 +437,6 @@ void MainForm::keyPressEvent( QKeyEvent *e )
 			break;
 	} // end of switch
 	  
-	QString mesg=QString("Scale: %1 Panfactor: %2 DX: %3 DY: %4"
-			   ).arg(wm.m11()).arg(panfactor).arg(wm.dx()).arg(wm.dy());
-	statusbar->message(mesg);
-	//theNetwork.redraw();
-	//copyPixmap();
 	updateCanvas();
 }
 
@@ -526,9 +495,7 @@ void MainForm::mousePressEvent ( QMouseEvent * event )
 		{   
 			// when zoombywin button triggered
 			if (zoombywin_triggered_)
-			{
 				zoomrect_=new QRect(x_current, y_current, 0, 0);
-			}
 			
 			// clear the selected nodes and links 
 			unselectNodes();
@@ -552,16 +519,28 @@ void MainForm::mousePressEvent ( QMouseEvent * event )
 ////////////////////////////////////////////////////
 void MainForm::mouseMoveEvent(QMouseEvent* mev)
 {
-	if(lmouse_pressed_&&zoombywin_triggered_)
+	if(lmouse_pressed_ && zoombywin_triggered_)
 	{
-		if(zoomrect_!=0)
+		if(!zoomrect_) return;
+		
+		// mouse position relative to the up-left corner of the Canvas
+		int	x_current = mev->x() - start_x; 
+		int	y_current = mev->y() - start_y - yadjust_;
+			
+		// neglect the rectangle to the other direction
+		if (x_current<=zoomrect_->left()||y_current<=zoomrect_->top())
 		{
-			// mouse position relative to the up-left corner of the Canvas
-			int	x_current = mev->x() - start_x; 
-			int	y_current = mev->y() - start_y - yadjust_;
+			copyPixmap();
+			return;
+		}
+		else
+		{
 			zoomrect_->setRight(x_current);
 			zoomrect_->setBottom(y_current);
-
+			int rect_width=zoomrect_->width();
+			int rect_height=zoomrect_->height();
+			//QString mesg=QString("Rect W %1, H %2").arg(width).arg(height);
+			//mouse_label->setText(mesg);
 			// draw the rect on pm1 but keep pm2 untouched 
 			// so that need not to draw network when updating 
 			drawZoomRect();
@@ -577,7 +556,7 @@ void MainForm::mouseReleaseEvent(QMouseEvent* mev)
 	if (mev->button() == Qt::LeftButton)
 	{
 		lmouse_pressed_=false;
-		if(zoombywin_triggered_&&zoomrect_!=0)
+		if(zoombywin_triggered_ && zoomrect_)
 		{	
 			delete zoomrect_;
 			updateCanvas();
@@ -645,19 +624,23 @@ void MainForm::unselectLinks()
 	links_sel_.clear();
 }
 
+// draw the rectangle for zooming
 void MainForm::drawZoomRect()
 {
+	// copy pixmap
 	pm1=pm2;
-	// autostart painter
+	
+	//start painter
 	QPainter paint(&pm1); 
 	paint.setRenderHint(QPainter::Antialiasing); // smooth lines
-	//paint.setWorldMatrix(*wm);
-
+	// set the pen
 	QPen pen1(Qt::black, 1);
 	pen1.setStyle(Qt::DashLine);
 	paint.setPen(pen1);
 	paint.drawRect(*zoomrect_); 
-	paint.end();	
+	paint.end();
+	// update the canvas with pm1 and leave pm2 as a copy 
+	// of the network
 	Canvas->setPixmap(pm1);
 	Canvas->repaint();
 }
