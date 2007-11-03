@@ -186,22 +186,24 @@ void MainForm::on_openmasterfile_activated()
 
 void MainForm::on_zoomin_activated()
 {
-
-	// xiaoliang's implementation
+	// compute the view center
 	int xviewcenter=viewSize_.width()/2;
 	int yviewcenter=viewSize_.height()/2;
 	QWMatrix tempMat;
-
 	scale*=scalefactor;
+
+	// transfer matrix
 	tempMat.reset();
 	tempMat.translate(xviewcenter, yviewcenter);
 	tempMat.scale(scalefactor, scalefactor);
 	tempMat.translate(-xviewcenter,-yviewcenter);
+
+	// new transfer matrix from standard view to current view 
 	viewMat_=viewMat_*tempMat;
+	// new general tranfer matrix
 	wm=mod2stdViewMat_*viewMat_;
 	panfactor=static_cast<int>(0.5+(double)panpixels/scale);
-	//theNetwork.redraw();
-    //copyPixmap();
+	//update the canvas
 	updateCanvas();
 }
 
@@ -333,7 +335,8 @@ void MainForm::loop()
 	displaytime(currtime);
 	if (currtime>=runtime)
 	{
-		//on_quit_activated();  // MAYBE TAKE THIS OUT, i don't want it to exit automatically
+		// MAYBE TAKE THIS OUT, i don't want it to exit automatically
+		//on_quit_activated();  
 		breaknow=false;
 	}
 }
@@ -527,9 +530,11 @@ void MainForm::mouseMoveEvent(QMouseEvent* mev)
 		int	x_current = mev->x() - start_x; 
 		int	y_current = mev->y() - start_y - yadjust_;
 			
-		// neglect the rectangle to the other direction
+		// neglect the rectangle extending to the negative direction
 		if (x_current<=zoomrect_->left()||y_current<=zoomrect_->top())
 		{
+			// remove the drawn rectangle by copy the stored
+			// pixelmap
 			copyPixmap();
 			return;
 		}
@@ -537,8 +542,6 @@ void MainForm::mouseMoveEvent(QMouseEvent* mev)
 		{
 			zoomrect_->setRight(x_current);
 			zoomrect_->setBottom(y_current);
-			int rect_width=zoomrect_->width();
-			int rect_height=zoomrect_->height();
 			//QString mesg=QString("Rect W %1, H %2").arg(width).arg(height);
 			//mouse_label->setText(mesg);
 			// draw the rect on pm1 but keep pm2 untouched 
@@ -555,16 +558,16 @@ void MainForm::mouseReleaseEvent(QMouseEvent* mev)
 {
 	if (mev->button() == Qt::LeftButton)
 	{
-		lmouse_pressed_=false;
 		if(zoombywin_triggered_ && zoomrect_)
 		{	
+			zoomRectArea();
 			delete zoomrect_;
-			updateCanvas();
 		}
 	}
 	else 
 	{
 	}
+	lmouse_pressed_=false;
 }
 
 // select nodes by mouse pointer 
@@ -627,6 +630,28 @@ void MainForm::unselectLinks()
 // draw the rectangle for zooming
 void MainForm::drawZoomRect()
 {
+	// compute the rectangle to the current view
+	int rect_w = zoomrect_->width();
+	int rect_h = zoomrect_->height();
+	int view_w = viewSize_.width();
+	int view_h = viewSize_.height();
+
+	// do nothing when rectangle is a point 
+	if (rect_w==0||rect_h==0) return;
+
+	double scale_x = view_w/rect_w;
+    double scale_y = view_h/rect_h;
+	if (scale_x >= scale_y){	
+		double newscale=scale_x;	
+		int newheight=view_h/newscale;
+		zoomrect_->setHeight(newheight);
+   }
+   else{
+		double newscale=scale_y;	
+		int newwidth=view_w/newscale;
+		zoomrect_->setWidth(newwidth);
+   }
+
 	// copy pixmap
 	pm1=pm2;
 	
@@ -643,4 +668,29 @@ void MainForm::drawZoomRect()
 	// of the network
 	Canvas->setPixmap(pm1);
 	Canvas->repaint();
+}
+
+// zoom the window area selected 
+void MainForm::zoomRectArea()
+{
+	// do nothing when rectangle is a point 
+	if (zoomrect_->width()==0||zoomrect_->height()==0) return;
+
+	// compute the scale
+	double rect2view_factor=viewSize_.width()/zoomrect_->width();
+	scale*=rect2view_factor;
+
+	// transfer matrix
+	QWMatrix tempMat;
+	tempMat.reset();
+	tempMat.scale(rect2view_factor, rect2view_factor);
+	tempMat.translate(-zoomrect_->left(),-zoomrect_->top());
+	
+	// new transfer matrix from standard view to current view 
+	viewMat_=viewMat_*tempMat;
+	// new general tranfer matrix
+	wm=mod2stdViewMat_*viewMat_;
+	panfactor=static_cast<int>(0.5+(double)panpixels/scale);
+	//update the canvas
+	updateCanvas();	
 }

@@ -73,6 +73,7 @@ private:
 	void selectLinks(QPoint pos);
 	void unselectLinks();
 	void drawZoomRect();
+	void zoomRectArea();
 
 //VARS
 	int start_x ; // the x coordinate of the upper right corner of the canvas

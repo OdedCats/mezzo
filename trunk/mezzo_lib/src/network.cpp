@@ -3422,10 +3422,7 @@ bool Incident::execute(Eventlist* eventlist, double time)
 
 // ODMATRIX CLASSES
 
-ODMatrix::ODMatrix ()
-{
-}
-
+ODMatrix::ODMatrix (){}
 
 void ODMatrix::add_slice(double time, ODSlice* slice)
 {
