@@ -1334,7 +1334,7 @@ bool Network::readbustrip(istream& in) // reads a trip
 	return true;
 }
 
-bool Network::read_passenger_rates (istream& in) // reads a busstop
+bool Network::read_passenger_rates (istream& in) // reads the passenger rates for stop & line combination
 {
 
 //{ stop_id	busline_id	arrival_rate alighting_fraction}

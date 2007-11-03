@@ -117,6 +117,12 @@ double Bus::calc_departure_time (double time) // calculates departure time from 
 	double error_layover = random->lnrandom (mean_error_layover, std_error_layover); // error factor following log normal distribution
 	double curr_departure = curr_trip->second;
 
+	if (curr_trip == driving_roster.begin()) // if it is the first trip for this bus
+	{
+		return (curr_departure + random->nrandom_trunc (mean_error_layover, std_error_layover, 1.0)
+			// first dispatching is subject to a normal truncated deviation (Vandebona & Richardson, 1986)
+	}
+
 	double departure_time = Max(curr_departure, time + min_layover);
 	// If the scheduled time is after arrival+layover, it determines departure time. 
 	// Otherwise (bus arrived behind schedule) - delay at origin.
