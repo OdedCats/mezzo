@@ -128,6 +128,83 @@ void ODCheckerDlg::setNetwork(Network* mezzonet)
 }
 
 /**
+* load selected OD nodes to the combox 
+*/
+void ODCheckerDlg::loadSelectOD(vector<Node*>& selnodes)
+{
+	int selnodes_size=selnodes.size();
+	
+	if (selnodes_size<1) 
+		return;
+	else
+		loadInitOD();
+
+	// handle the selected nodes
+	if(selnodes_size==1)
+	{
+		QString id1str=QString::number(selnodes[0]->get_id());
+		int origid=origcomb->findText(id1str, Qt::MatchExactly);
+		int destid=destcomb->findText(id1str, Qt::MatchExactly);
+		if (origid==-1 && destid==-1)
+		{
+			//QMessageBox::warning(this, "Not Found", "no OD match!", 
+			//QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
+			return;
+		}
+		else if(origid!=-1)
+		{
+			origcomb->setCurrentIndex(origid);
+			loadDestCombwithO(origcomb->currentText());
+		}
+		else
+		{	
+			destcomb->setCurrentIndex(destid);
+			loadOrigCombwithD(destcomb->currentText());			
+		}
+	}
+	else // if more than one node are selected
+	{
+		QString id1str=QString::number(selnodes[0]->get_id());
+		int origid=origcomb->findText(id1str, Qt::MatchExactly);
+		QString id2str=QString::number(selnodes[1]->get_id());
+		int destid=destcomb->findText(id2str, Qt::MatchExactly);
+
+		if (origid==-1 && destid==-1)
+		{
+			return;
+		}
+		else if(origid!=-1 && destid!=-1)
+		{
+			//QMessageBox::warning(this, "OD input", "no OD match 2!", 
+			//QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
+			origcomb->setCurrentIndex(origid);
+			loadDestCombwithO(origcomb->currentText());
+			// search the dest id in the current list
+			destid=destcomb->findText(id2str, Qt::MatchExactly);
+			if (destid!=-1)
+				destcomb->setCurrentIndex(destid);
+		}
+		else
+		{	
+			if (origid!=-1)
+			{
+				//QMessageBox::warning(this, "OD input", "no OD match case 3!", 
+				//QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
+				origcomb->setCurrentIndex(origid);
+				loadDestCombwithO(origcomb->currentText());
+			}
+			else
+			{
+				//QMessageBox::warning(this, "OD input", "no OD match 4!", 
+				//QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
+				destcomb->setCurrentIndex(destid);
+				loadOrigCombwithD(destcomb->currentText());			
+			}
+		}
+	}
+}
+
+/**
 * A slot function when "origin" combobox is activated
 * when an item in "origin" combobox is selected,
 * load the destination list with a given origin ID
@@ -458,23 +535,6 @@ void ODCheckerDlg::loadInitOD()
 		origcomb->addItem(QString::number(origs[i]->get_id()));
 	for(unsigned i=0; i<dests.size(); i++)
 		destcomb->addItem(QString::number(dests[i]->get_id()));
-}
-
-/**
-* show selected node information 
-*/
-void ODCheckerDlg::loadSelectOD(vector<Node*>& selnodes)
-{
-	int selnodes_size=selnodes.size();
-	if (selnodes_size<1) 
-		return;
-	else if(selnodes_size==1)
-	{
-		
-	}
-	else
-	{
-	}
 }
 
 /**

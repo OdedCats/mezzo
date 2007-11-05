@@ -321,7 +321,10 @@ void MainForm::on_saveresults_activated()
 {
 	 theNetwork.writeall();
 }
+
+////////////////////////////////////////////////
 // NORMAL PRIVATE METHODS
+////////////////////////////////////////////////
 
 void MainForm::loop()
 {
@@ -336,8 +339,6 @@ void MainForm::loop()
 	displaytime(currtime);
 	if (currtime>=runtime)
 	{
-		// MAYBE TAKE THIS OUT, i don't want it to exit automatically
-		//on_quit_activated();  
 		breaknow=false;
 	}
 }

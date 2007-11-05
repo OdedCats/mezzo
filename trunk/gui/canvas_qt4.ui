@@ -806,7 +806,7 @@
   </action>
   <action name="inspectdialog" >
    <property name="checkable" >
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="icon" >
     <iconset resource="canvas_qt4.qrc" >:/images/inspect.png</iconset>
