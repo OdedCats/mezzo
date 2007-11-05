@@ -44,6 +44,7 @@ class ODCheckerDlg : public QDialog, public Ui::ODCheckerDlg
 	void setNetwork(Network* mezzonet);
 	bool getNetworkState(){return networkset_;}
 	void setNetworkState(bool networkset){networkset_=networkset;}
+	void loadSelectOD(vector<Node*>& selnodes);
 
  public slots:
 	virtual void reject(); // virutal function of QDialog
@@ -68,7 +69,7 @@ protected:
 	void unselectRoutes();
 	QColor txt2Color(const QString& colortext);
 	void updateGraph();
-
+	
 	//properties 
 	int orgId_;
 	int destId_;

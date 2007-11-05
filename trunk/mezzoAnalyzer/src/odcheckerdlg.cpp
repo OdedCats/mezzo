@@ -461,6 +461,23 @@ void ODCheckerDlg::loadInitOD()
 }
 
 /**
+* show selected node information 
+*/
+void ODCheckerDlg::loadSelectOD(vector<Node*>& selnodes)
+{
+	int selnodes_size=selnodes.size();
+	if (selnodes_size<1) 
+		return;
+	else if(selnodes_size==1)
+	{
+		
+	}
+	else
+	{
+	}
+}
+
+/**
  * clear the table view if table is not empty
  */
 void ODCheckerDlg::clearTableView()

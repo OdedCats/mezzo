@@ -60,8 +60,8 @@ MainForm::MainForm(QWidget *parent)
 	
 	//canvas_center = QPoint(start_x + (panelx /2) , start_y + (panely / 2));
 	//wm.scale(scale,scale); 
-	statusbar = this->statusBar();
-	statusbar->showMessage("Load a master file");
+	//statusbar = this->statusBar();
+	//statusbar->showMessage("Load a master file");
 	exited = false;
 	theParameters=theNetwork.get_parameters();
 	
@@ -77,8 +77,8 @@ MainForm::MainForm(QWidget *parent)
 					 this, SLOT(copyPixmap()));
 
 	// zoom by window
-	zoombywin_triggered_=false;
 	zoomrect_=0;
+	zoombywin_triggered_=false;
 	QObject::connect(zoombywin, SIGNAL(toggled(bool)), this,
 					 SLOT(on_zoombywin_triggered(bool)));
 
@@ -95,11 +95,10 @@ MainForm::MainForm(QWidget *parent)
 					 SLOT(on_simspeed_valueChanged(int)));
 
 	// deactive the actions except the open masterfile
-	//QAction *openmasterfile;
 	activateToolbars(false);
     
 	// hide the status bar
-	statusbar->hide();
+	statusBar()->hide();
 	simprogress_widget->setVisible(false);
 }
 
@@ -180,13 +179,13 @@ void MainForm::on_openmasterfile_activated()
 		mod2stdViewMat_=theNetwork.netgraphview_init();
 		wm=mod2stdViewMat_;
 		updateCanvas();
-		statusbar->message("Initialised");
+		//statusbar->message("Initialised");
 	}	
 }
 
 void MainForm::on_zoomin_activated()
 {
-	// compute the view center
+	// the view center
 	int xviewcenter=viewSize_.width()/2;
 	int yviewcenter=viewSize_.height()/2;
 	QWMatrix tempMat;
@@ -208,9 +207,8 @@ void MainForm::on_zoomin_activated()
 }
 
 void MainForm::on_zoomout_activated()
-{
-	
-	// xiaoliang's implementation
+{	
+	// the view center
 	int xviewcenter=viewSize_.width()/2;
 	int yviewcenter=viewSize_.height()/2;
 	QWMatrix tempMat;
@@ -289,9 +287,11 @@ void MainForm::on_parametersdialog_activated()
     pmdlg->show();
 	pmdlg->raise();
 	pmdlg->activateWindow();
-}
+} 
 
-// if the mezzoAnalyzer is triggered
+/**
+* if the mezzoAnalyzer is triggered
+*/
 void MainForm::on_inspectdialog_activated()
 {
     // if initialized (network is created)
@@ -304,6 +304,7 @@ void MainForm::on_inspectdialog_activated()
 		}
 		
 		// start mezzo analyzer dialog
+		od_analyser_->loadSelectOD(nodes_sel_);
 		od_analyser_->show();
 		od_analyser_->activateWindow();
 	
@@ -372,13 +373,7 @@ void MainForm::copyPixmap()
 }
 
 void MainForm::paintEvent(QPaintEvent *  event )
-{
-	/*
-	QPainter painter(this);
-	painter.drawPixmap(130,10, pm2);
-	painter.end();
-	*/
-}
+{}
 
 void MainForm::seed(int sd )
 {
@@ -390,9 +385,9 @@ void MainForm::on_simspeed_valueChanged( int  value)
     theParameters->sim_speed_factor =(value/100);
 }
 
-////////////////////////////////////////////////////////
-// key press event handling
-////////////////////////////////////////////////////////
+/**
+* key press event handling
+*/
 void MainForm::keyPressEvent( QKeyEvent *e )
 {
 	if (!initialised) return;
@@ -400,37 +395,42 @@ void MainForm::keyPressEvent( QKeyEvent *e )
 	panfactor=static_cast<int>(0.5+(double)panpixels / wm.m11());
 	switch (e->key() ) 
 	{
-		case (Qt::Key_Plus):                               // zoom in
+		case (Qt::Key_Plus):	// zoom in
 			on_zoomin_activated();
 			break;
-		case (Qt::Key_Minus):                               // zoom out
+		case (Qt::Key_Minus):	// zoom out
 			on_zoomout_activated();	 
 			break;
-		case (Qt::Key_Up):                               // pan up
+		case (Qt::Key_Up):		// pan up
 			dy=panfactor;
 			wm.translate(0,dy);
 			viewMat_=mod2stdViewMat_.invert()*wm;
+			updateCanvas();
 			break;   
-		case (Qt::Key_Down):                               // pan up
+		case (Qt::Key_Down):	// pan down
 			dy=-panfactor;
 			wm.translate(0,dy);	
 			viewMat_=mod2stdViewMat_.invert()*wm;
+			updateCanvas();
 			break;       
-		case (Qt::Key_Left):                               // pan left
+		case (Qt::Key_Left):	// pan left
 			dx=panfactor;
 			wm.translate(dx,0);
 			viewMat_=mod2stdViewMat_.invert()*wm;
+			updateCanvas();
 			break; 
-		case (Qt::Key_Right):                               // pan right
+		case (Qt::Key_Right):	// pan right
 			dx=-panfactor;
 			wm.translate(dx,0);
 			viewMat_=mod2stdViewMat_.invert()*wm;
+			updateCanvas();
 			break;
-		case (Qt::Key_C):  // return to initial view with a central image
+		case (Qt::Key_C):		// return to initial view with a central image
 			wm=mod2stdViewMat_;
 			viewMat_.reset();
 			scale=1;
 			panfactor=panpixels;
+			updateCanvas();
 			break;
 		case(Qt::Key_N):
 			keyN_pressed_=true;
@@ -439,13 +439,11 @@ void MainForm::keyPressEvent( QKeyEvent *e )
 			keyL_pressed_=true;
 			break;
 	} // end of switch
-	  
-	updateCanvas();
 }
 
-/////////////////////////////////////////////////
-// key release event handling
-/////////////////////////////////////////////////
+/*
+* key release event handling
+*/
 void MainForm::keyReleaseEvent(QKeyEvent *kev)
 {
 	if (!initialised) return;
@@ -459,9 +457,9 @@ void MainForm::keyReleaseEvent(QKeyEvent *kev)
 	}
 }
 
-////////////////////////////////////////////////////////
-// mouse press event handling
-////////////////////////////////////////////////////////
+/**
+* mouse press event handling
+*/
 void MainForm::mousePressEvent ( QMouseEvent * event )
 {
 	if (!initialised) return;
@@ -494,7 +492,7 @@ void MainForm::mousePressEvent ( QMouseEvent * event )
 			QPoint pos_model = inv.map(pos_view);
 			selectLinks(pos_model);
 		}
-		else // none selection
+		else // none selection mode
 		{   
 			// when zoombywin button triggered
 			if (zoombywin_triggered_)
@@ -509,6 +507,8 @@ void MainForm::mousePressEvent ( QMouseEvent * event )
 			QString mesg=QString("Mouse: X %1, Y %2").arg(x_current).arg(y_current);
 			mouse_label->setText(mesg);
 		}
+		// redraw network so that selcted or unselected 
+		// nodes or links are redrawn 
 		updateCanvas();
     }
 	else if(event->button()==Qt::RightButton)
@@ -517,13 +517,16 @@ void MainForm::mousePressEvent ( QMouseEvent * event )
 	}
 }
 
-////////////////////////////////////////////////////
-// mouse move event handling
-////////////////////////////////////////////////////
+/**
+* mouse move event handling
+*/
 void MainForm::mouseMoveEvent(QMouseEvent* mev)
 {
-	if(lmouse_pressed_ && zoombywin_triggered_)
+	if (!lmouse_pressed_||keyN_pressed_||keyL_pressed_) return;
+
+	if(zoombywin_triggered_)
 	{
+		// do nothing if no zoom window is drawn
 		if(!zoomrect_) return;
 		
 		// mouse position relative to the up-left corner of the Canvas
@@ -538,12 +541,11 @@ void MainForm::mouseMoveEvent(QMouseEvent* mev)
 			copyPixmap();
 			return;
 		}
-		else
+		else // draw a rectangle
 		{
 			zoomrect_->setRight(x_current);
 			zoomrect_->setBottom(y_current);
-			//QString mesg=QString("Rect W %1, H %2").arg(width).arg(height);
-			//mouse_label->setText(mesg);
+
 			// draw the rect on pm1 but keep pm2 untouched 
 			// so that need not to draw network when updating 
 			drawZoomRect();
@@ -551,28 +553,38 @@ void MainForm::mouseMoveEvent(QMouseEvent* mev)
 	}
 }
 
-///////////////////////////////////////////////////
-// mouse release event
-///////////////////////////////////////////////////
+/**
+* mouse release event
+*/
 void MainForm::mouseReleaseEvent(QMouseEvent* mev) 
 {
 	if (mev->button() == Qt::LeftButton)
 	{
-		if(zoombywin_triggered_ && zoomrect_)
-		{	
+		if(zoombywin_triggered_&&zoomrect_)
 			zoomRectArea();
-			delete zoomrect_;
-		}
 	}
 	else 
 	{
 	}
+	
+	if(zoomrect_)
+	{
+		delete zoomrect_;
+		// it is very important to make sure 
+		// that null pointer value is 0
+		zoomrect_=0; 
+	}
 	lmouse_pressed_=false;
 }
 
-// select nodes by mouse pointer 
+/** 
+* select nodes by mouse pointer
+*/
 void MainForm::selectNodes(QPoint pos)
 {
+	// remove links selected
+	unselectLinks();
+
 	vector<Node*> allnodes=theNetwork.get_nodes();
 	int rad=theParameters->node_radius/mod2stdViewMat_.m11();
 
@@ -583,17 +595,26 @@ void MainForm::selectNodes(QPoint pos)
 			break;
 		}
 	}
-	if(nodes_sel_.size()>0){
-		nodes_sel_[0]->get_icon()->set_selected_color(Qt::blue);
-		nodes_sel_[0]->get_icon()->set_selected(true);
-		QString mesg=QString("Selected node: %1").arg(nodes_sel_[0]->get_id());
-		mouse_label->setText(mesg);
+	QString mesg;
+	for( unsigned i=0; i<nodes_sel_.size();i++){
+		nodes_sel_[i]->get_icon()->set_selected(true);
+		nodes_sel_[i]->get_icon()->set_selected_color(Qt::blue);
+		if (i==0)
+			mesg=QString("Selected node: %1").arg(nodes_sel_[0]->get_id());
+		else
+			mesg+=QString(",%1").arg(nodes_sel_[i]->get_id());		
 	}	
+	mouse_label->setText(mesg);
 }
 
-// selct links by mouse pointer 
+/**
+* selct links by mouse pointer
+*/
 void MainForm::selectLinks(QPoint pos)
 {
+	// remove nodes selected
+	unselectNodes();
+
 	vector<Link*> alllinks=theNetwork.get_links();
 	int rad=5;
 
@@ -604,14 +625,22 @@ void MainForm::selectLinks(QPoint pos)
 			break;
 		}
 	}
-	if(links_sel_.size()>0){
-		links_sel_[0]->set_selected(true);
-		links_sel_[0]->set_selected_color(Qt::blue);
-		QString mesg=QString("Selected link: %1").arg(links_sel_[0]->get_id());
-		mouse_label->setText(mesg);
+
+	QString mesg;
+	for( unsigned i=0; i<links_sel_.size();i++){
+		links_sel_[i]->set_selected(true);
+		links_sel_[i]->set_selected_color(Qt::blue);
+		if (i==0)
+			mesg=QString("Selected link: %1").arg(links_sel_[0]->get_id());
+		else
+			mesg+=QString(",%1").arg(links_sel_[i]->get_id());		
 	}	
+	mouse_label->setText(mesg);
 }
 
+/**
+* unselect nodes
+*/
 void MainForm::unselectNodes()
 {
 	for( unsigned i=0; i<nodes_sel_.size(); i++){
@@ -619,6 +648,10 @@ void MainForm::unselectNodes()
 	}
 	nodes_sel_.clear();		
 }
+
+/**
+* unselect links
+*/
 void MainForm::unselectLinks()
 {
 	for( unsigned i=0; i<links_sel_.size(); i++){
@@ -627,7 +660,9 @@ void MainForm::unselectLinks()
 	links_sel_.clear();
 }
 
-// draw the rectangle for zooming
+/*
+* draw the rectangle for zooming
+*/
 void MainForm::drawZoomRect()
 {
 	// compute the rectangle to the current view
@@ -670,7 +705,9 @@ void MainForm::drawZoomRect()
 	Canvas->repaint();
 }
 
-// zoom the window area selected 
+/** 
+* zoom the window area selected 
+*/
 void MainForm::zoomRectArea()
 {
 	// do nothing when rectangle is a point 

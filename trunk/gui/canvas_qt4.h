@@ -117,7 +117,7 @@ private:
     QStringList files;
     QString filename;
     bool breaknow;
-    QStatusBar* statusbar;
+    //QStatusBar* statusbar;
 	
 	// sub dialogs
 	ParametersDialog* pmdlg;
