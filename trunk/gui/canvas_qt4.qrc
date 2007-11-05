@@ -1,13 +1,11 @@
 <RCC>
     <qresource prefix="/" >
         <file>images/1rightarrow.png</file>
-        <file>images/Magnifier.png</file>
         <file>images/background.png</file>
         <file>images/bt_pause.png</file>
         <file>images/bt_play.png</file>
         <file>images/bt_stop.png</file>
         <file>images/dvi.png</file>
-        <file>images/empty.png</file>
         <file>images/exit.png</file>
         <file>images/file_explore.png</file>
         <file>images/fileopen2.png</file>
