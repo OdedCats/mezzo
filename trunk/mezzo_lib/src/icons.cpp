@@ -139,16 +139,10 @@ LinkIcon::LinkIcon(int x, int y, int tox, int toy ): Icon (x, y), stopx(tox), st
 	//handlex=(2*startx+stopx)/3+shiftx;
 	//handley=(2*starty+stopy)/3+shifty;
 	
-	handlex=static_cast <int> ( 0.66 *vx+startx + shiftx);
-	handley=static_cast <int> ( 0.66 *vy+starty + shifty);
-	x2=static_cast <int> ( 0.70 *vx+startx + shiftx);
-	y2=static_cast <int> ( 0.70 *vy+starty + shifty);
-
-	// Setting the points for the arrowhead
-	//x2=static_cast <int> ( 0.66 *vx+startx);
-	x3= static_cast <int> (0.96 *vx+startx+2*shiftx);
-	//y2=static_cast <int> (0.66 *vy+starty);
-	y3= static_cast <int> (0.96 *vy+starty+2*shifty);   
+	handlex=static_cast <int> ( 0.66 *vx+startx + shiftx + 0.5);
+	handley=static_cast <int> ( 0.66 *vy+starty + shifty  + 0.5);
+	x2=static_cast <int> ( 0.70 *vx+startx + shiftx  + 0.5);
+	y2=static_cast <int> ( 0.70 *vy+starty + shifty  + 0.5) ;
   
 }
 
@@ -190,13 +184,8 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 	// draw the center line
 	paint.setPen(pen1);
 	paint.drawLine( startx+shiftx,starty+shifty, stopx+shiftx,stopy+shifty ); 
-	
-	// draw an arrow to show the direction of the link
-	//  paint.drawLine( stopx+shiftx,stopy+shifty, x2,y2 );
-	//  paint.drawLine( stopx+shiftx,stopy+shifty, x3,y3 );
-	//  paint.drawLine( x3,y3, x2,y2 );
-	
-	// drawing the handler 
+		
+	// drawing the handler ( half arrow) 
 	if(handler_on_)
 	{
 		QPen pen_h(theParameters->linkcolor, 1.5*(theParameters->link_thickness));
