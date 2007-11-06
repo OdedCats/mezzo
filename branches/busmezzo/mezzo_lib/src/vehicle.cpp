@@ -119,7 +119,7 @@ double Bus::calc_departure_time (double time) // calculates departure time from 
 
 	if (curr_trip == driving_roster.begin()) // if it is the first trip for this bus
 	{
-		return (curr_departure + random->nrandom_trunc (mean_error_layover, std_error_layover, 1.0)
+		return (curr_departure + random->nrandom_trunc (mean_error_layover, std_error_layover, 1.0));
 			// first dispatching is subject to a normal truncated deviation (Vandebona & Richardson, 1986)
 	}
 
