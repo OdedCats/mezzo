@@ -578,6 +578,78 @@ void MainForm::mouseReleaseEvent(QMouseEvent* mev)
 	lmouse_pressed_=false;
 }
 
+/*
+* draw the rectangle for zooming
+*/
+void MainForm::drawZoomRect()
+{
+	// compute the rectangle to the current view
+	int rect_w = zoomrect_->width();
+	int rect_h = zoomrect_->height();
+	int view_w = viewSize_.width();
+	int view_h = viewSize_.height();
+
+	// do nothing when rectangle is a point 
+	if (rect_w==0||rect_h==0) return;
+
+	double scale_x = (double)view_w/(double)rect_w;
+    double scale_y = (double)view_h/(double)rect_h;
+	if (scale_x >= scale_y){	
+		double newscale=scale_x;	
+		int newheight=view_h/newscale;
+		zoomrect_->setHeight(newheight);
+   }
+   else{
+		double newscale=scale_y;	
+		int newwidth=view_w/newscale;
+		zoomrect_->setWidth(newwidth);
+   }
+
+	// copy pixmap
+	pm1=pm2;
+	
+	//start painter
+	QPainter paint(&pm1); 
+	paint.setRenderHint(QPainter::Antialiasing); // smooth lines
+	// set the pen
+	QPen pen1(Qt::black, 1);
+	pen1.setStyle(Qt::DashLine);
+	paint.setPen(pen1);
+	paint.drawRect(*zoomrect_); 
+	paint.end();
+	// update the canvas with pm1 and leave pm2 as a copy 
+	// of the network
+	Canvas->setPixmap(pm1);
+	Canvas->repaint();
+}
+
+/** 
+* zoom the window area selected 
+*/
+void MainForm::zoomRectArea()
+{
+	// do nothing when rectangle is a point 
+	if (zoomrect_->width()==0||zoomrect_->height()==0) return;
+
+	// compute the scale
+	double rect2view_factor=viewSize_.width()/zoomrect_->width();
+	scale*=rect2view_factor;
+
+	// transfer matrix
+	QWMatrix tempMat;
+	tempMat.reset();
+	tempMat.scale(rect2view_factor, rect2view_factor);
+	tempMat.translate(-zoomrect_->left(),-zoomrect_->top());
+	
+	// new transfer matrix from standard view to current view 
+	viewMat_=viewMat_*tempMat;
+	// new general tranfer matrix
+	wm=mod2stdViewMat_*viewMat_;
+	panfactor=static_cast<int>(0.5+(double)panpixels/scale);
+	//update the canvas
+	updateCanvas();	
+}
+
 /** 
 * select nodes by mouse pointer
 */
@@ -661,74 +733,3 @@ void MainForm::unselectLinks()
 	links_sel_.clear();
 }
 
-/*
-* draw the rectangle for zooming
-*/
-void MainForm::drawZoomRect()
-{
-	// compute the rectangle to the current view
-	int rect_w = zoomrect_->width();
-	int rect_h = zoomrect_->height();
-	int view_w = viewSize_.width();
-	int view_h = viewSize_.height();
-
-	// do nothing when rectangle is a point 
-	if (rect_w==0||rect_h==0) return;
-
-	double scale_x = view_w/rect_w;
-    double scale_y = view_h/rect_h;
-	if (scale_x >= scale_y){	
-		double newscale=scale_x;	
-		int newheight=view_h/newscale;
-		zoomrect_->setHeight(newheight);
-   }
-   else{
-		double newscale=scale_y;	
-		int newwidth=view_w/newscale;
-		zoomrect_->setWidth(newwidth);
-   }
-
-	// copy pixmap
-	pm1=pm2;
-	
-	//start painter
-	QPainter paint(&pm1); 
-	paint.setRenderHint(QPainter::Antialiasing); // smooth lines
-	// set the pen
-	QPen pen1(Qt::black, 1);
-	pen1.setStyle(Qt::DashLine);
-	paint.setPen(pen1);
-	paint.drawRect(*zoomrect_); 
-	paint.end();
-	// update the canvas with pm1 and leave pm2 as a copy 
-	// of the network
-	Canvas->setPixmap(pm1);
-	Canvas->repaint();
-}
-
-/** 
-* zoom the window area selected 
-*/
-void MainForm::zoomRectArea()
-{
-	// do nothing when rectangle is a point 
-	if (zoomrect_->width()==0||zoomrect_->height()==0) return;
-
-	// compute the scale
-	double rect2view_factor=viewSize_.width()/zoomrect_->width();
-	scale*=rect2view_factor;
-
-	// transfer matrix
-	QWMatrix tempMat;
-	tempMat.reset();
-	tempMat.scale(rect2view_factor, rect2view_factor);
-	tempMat.translate(-zoomrect_->left(),-zoomrect_->top());
-	
-	// new transfer matrix from standard view to current view 
-	viewMat_=viewMat_*tempMat;
-	// new general tranfer matrix
-	wm=mod2stdViewMat_*viewMat_;
-	panfactor=static_cast<int>(0.5+(double)panpixels/scale);
-	//update the canvas
-	updateCanvas();	
-}

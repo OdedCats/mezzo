@@ -62,10 +62,10 @@ Link::Link()
 	moe_outflow=new MOE(theParameters->moe_outflow_update);
 	moe_queue=new MOE(theParameters->moe_queue_update);
 	moe_density=new MOE(theParameters->moe_density_update);
-  blocked_until=-1.0; // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
-  nr_exits_blocked=0; // set by the turning movements if they are blocked
-  freeflowtime=1.0;	
-  selected = false;
+	blocked_until=-1.0; // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
+	nr_exits_blocked=0; // set by the turning movements if they are blocked
+	freeflowtime=1.0;	
+	selected = false;
 }		
 
 Link::~Link()
