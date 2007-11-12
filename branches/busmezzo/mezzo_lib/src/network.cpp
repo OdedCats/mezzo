@@ -691,7 +691,7 @@ bool Network::readserver(istream& in)
   }
    in  >> sid >> stype >> mu >> sd >> delay;
    assert  ( (find_if (servers.begin(),servers.end(), compare <Server> (sid))) == servers.end() );   // no server with sid exists
-	assert ( (stype > -1) && (stype < 4) && (mu>0.0) && (sd>=0.0) && (delay>=0.0)); // to be updated when more server types are added
+   assert ( (stype > -1) && (stype < 4) && (mu>0.0) && (sd>=0.0) && (delay>=0.0)); // to be updated when more server types are added
    // check id, vmax, vmin, romax;
    in >> bracket;
    if (bracket != '}')

@@ -331,7 +331,7 @@ bool Link::enter_veh(Vehicle* veh, double time)
 		}
 	}
 // add here the BUSSTOP FUNCTIONS
-#define _BUSES
+//#define _BUSES
 #ifdef _BUSES
 	//if (typeid (*veh) == typeid (Bus))
 	if (veh->get_type() == 4)
