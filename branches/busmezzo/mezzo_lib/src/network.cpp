@@ -1104,7 +1104,7 @@ bool Network::readbuslines(string name) // reads the busstops, buslines, trips a
 		} 
 	}
 	// Third read the trips
-	in >> keyword;
+in >> keyword;
 #ifdef _DEBUG_NETWORK
 	cout << keyword << endl;
 #endif //_DEBUG_NETWORK
@@ -1126,7 +1126,7 @@ bool Network::readbuslines(string name) // reads the busstops, buslines, trips a
 
 	}
 	// Forth read the passengers rates
-	in >> keyword;
+in >> keyword;
 #ifdef _DEBUG_NETWORK
 	cout << keyword << endl;
 #endif //_DEBUG_NETWORK
@@ -1145,7 +1145,27 @@ bool Network::readbuslines(string name) // reads the busstops, buslines, trips a
    			return false;
 		} 
 	}
-	return true;
+	// Fifth read bus types
+in >> keyword;
+#ifdef _DEBUG_NETWORK
+	cout << keyword << endl;
+#endif //_DEBUG_NETWORK
+	if (keyword!="bustypes:")
+	{
+		cout << " readbustypes: no << bustypes: >> keyword " << endl;
+		return false;
+	}
+	in >> nr;
+	limit = i + nr;
+	for (i; i<limit;i++)
+	{
+ 		if (!read_bustypes(in))
+		{
+			cout << " readbustypes: read_bustypes returned false for line nr " << (i+1) << endl;
+   			return false;
+		} 
+	}
+return true;
 }
 
 bool Network::readbusstop (istream& in) // reads a busstop
@@ -1366,7 +1386,36 @@ bool Network::read_passenger_rates (istream& in) // reads the passenger rates fo
   return ok;
 }
 
+bool Network::read_bustypes (istream& in) // reads a bustype
+{
 
+//{ type_id	length	number_seats	capacity }
+  char bracket;
+  int type_id, number_seats, capacity;
+  double length;
+  bool ok= true;
+  vector <Bustype*> types;
+  in >> bracket;
+  if (bracket != '{')
+  {
+  	cout << "readfile::readsbusstop scanner jammed at " << bracket;
+  	return false;
+  }
+  in >> type_id  >> length >> number_seats >> capacity;
+  Bustype* bt= new Bustype (type_id, length, number_seats, capacity);
+  in >> bracket;
+  if (bracket != '}')
+  {
+    cout << "readfile::readbustype scanner jammed at " << bracket;
+    return false;
+  }
+  types.push_back (bt);
+
+#ifdef _DEBUG_NETWORK
+  cout << " read busstop"<< stop_id <<endl;
+#endif //_DEBUG_NETWORK
+  return ok;
+}
  
 // read traffic control
 bool Network::readsignalcontrols(string name)

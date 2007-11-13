@@ -158,3 +158,17 @@ void Bus::advance_curr_trip ()
 	assert(out);
 	out << "Bus ID: " << get_id() << " was created at: " << start_time << endl;  
 }*/
+
+// Bus-types functions
+Bustype::Bustype ()
+{
+}
+
+Bustype::Bustype (int type_id_, double length_, int number_seats_, int capacity_):
+	type_id(type_id_), length(length_), number_seats(number_seats_), capacity(capacity_)
+{
+
+}
+Bustype::~Bustype ()
+{
+}

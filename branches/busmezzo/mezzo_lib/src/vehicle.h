@@ -14,6 +14,7 @@ class ODpair;
 class Route;
 class Link;
 //class PVM;
+class Bustype;
 
 class Vehicle
 {
@@ -61,6 +62,19 @@ class Vehicle
 #ifdef _BUSES
 class Bustrip;
 typedef pair<Bustrip*,double> Start_trip;
+
+class Bustype 
+{
+public:
+	Bustype ();
+	Bustype (int type_id_, double length_, int number_seats_, int capacity_);
+	~Bustype ();
+protected:
+	int type_id;	// bus type id
+	double length;
+	int number_seats;
+	int capacity;
+};
 
 class Bus : public Vehicle
 {
@@ -124,6 +138,7 @@ protected:
 	vector <Start_trip>::iterator curr_trip; // pointer to the current trip served by the bus vehicle
 	bool at_stop;
 };
+
 #endif// BUSES
 
 class VehicleRecycler
@@ -167,3 +182,4 @@ extern VehicleRecycler recycler;
 		
 
 #endif
+
