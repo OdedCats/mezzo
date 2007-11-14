@@ -3361,9 +3361,9 @@ void Network::broadcast_incident_start(int lid)
 
 }
 
+
 void Network::broadcast_incident_stop(int lid)
-{
-	//cout << "BROADCAST END of incident on link  "<< lid << endl;
+{	//cout << "BROADCAST END of incident on link  "<< lid << endl;
 	// for all origins: stop the automatic switching stuff
    for (vector <Origin*>::iterator iter=origins.begin();iter<origins.end();iter++)
  	{
@@ -3371,7 +3371,17 @@ void Network::broadcast_incident_stop(int lid)
 	}
 }
 
-
+void Network::removeRoute(Route* theroute)
+{
+	for(vector<Route*>::iterator it=routes.begin(); it!=routes.end(); it++)
+	{
+		if((*it)==theroute)
+		{
+			routes.erase(it);
+			break;
+		}
+	}
+}
 
 Incident::Incident (int lid_, int sid_, double start_, double stop_, double info_start_,double info_stop_, Eventlist* eventlist, Network* network_, bool blocked_):start(start_), stop(stop_),
 	info_start(info_start_), info_stop(info_stop_), lid(lid_), sid(sid_),network(network_), blocked (blocked_)

@@ -3,7 +3,7 @@
  *   add the access ports to originals, destinations, routes, odpairs
  *
  * Xiaoliang Ma 
- * last change: 2007-07-20 
+ * last change: 2007-11-13 
  */
 
 #ifndef NETWORK_HH
@@ -160,6 +160,7 @@ class Network
   bool readserverrates(string name); // reads in new rates for specified servers. This way server capacity can be variable over time for instance for exits.
   bool readsignalcontrols(string name); // reads the signal control settings
   void seed (long int seed_) {randseed=seed_; vehtypes.set_seed(seed_);}          // sets the random seed
+  void removeRoute(Route* theroute);
 
 #ifndef _NO_GUI
   void recenter_image();   // sets the image in the center and adapts zoom to fit window
@@ -206,7 +207,7 @@ protected:
   vector <Sdfunc*> sdfuncs;
   vector <Turning*> turnings;
   vector <Server*> servers;
-  vector <Route*> routes;	
+  vector <Route*> routes;
   vector <ODpair*> odpairs;
   vector <Incident*> incidents;
   vector <VirtualLink*> virtuallinks;

@@ -14,6 +14,8 @@ ODCheckerDlg::ODCheckerDlg(QWidget* parent):QDialog(parent)
    odsel_=0;
    orgId_=-1;
    destId_=-1;
+   rowCnt_=0;
+   colCnt_=0;
    networkset_=false;
    allroutesdrawn_=false;
    paintrouteseq_=new vector<std::pair<int,QString>>(0);	
@@ -84,32 +86,50 @@ ODCheckerDlg::~ODCheckerDlg()
 bool ODCheckerDlg::eventFilter(QObject *obj, QEvent *evt)
 {
 	// handling event for table view
-	if (obj == ODTableView) {
-		if (evt->type() == QEvent::KeyPress) {
+	if (obj == ODTableView) 
+	{
+		// handling key event for the table view
+		if (evt->type() == QEvent::KeyPress) 
+		{
 		  QKeyEvent* kevt = static_cast<QKeyEvent*>(evt);
 		  // if Control + A is pressed
-		  if ((kevt->key ()==Qt::Key_A)&&(kevt->modifiers()&Qt::ControlModifier)){
+		  if ((kevt->key ()==Qt::Key_A)&&(kevt->modifiers()&Qt::ControlModifier))
+		  {
 			// clear routes drawn previously
 			unselectRoutes();
 			drawAllRoutes();
 			updateGraph();
 		  }
+		  else if ((kevt->key()==Qt::Key_D)&&(kevt->modifiers()&Qt::ControlModifier))
+		  {
+			QMessageBox::warning(this, "Delete route", 
+					          "do you really want to delete the selected routes?", 
+						QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
+			if (odsel_)
+			{
+				rmselectedRoutes();
+				updateGraph();
+				ODTableView->update();
+			}
+		  }
 		  return true;
-		} 
+		}
 		else {
             return QDialog::eventFilter(obj, evt);
         }
     } 
-	else {
+	else
+	{
          // pass the event on to the parent class
          return QDialog::eventFilter(obj, evt);
     }
 }
 
+
 // implement the virtual public slot "reject" function
 void ODCheckerDlg::reject()
 {	
-	//trigger the checkbutton
+	// trigger the checkbutton
 	CheckButton->setChecked(false);
 	loadInitOD();
 	clearTableView();
@@ -377,32 +397,34 @@ void ODCheckerDlg::selectionHandle(	const QItemSelection& sel,
 								    const QItemSelection& unsel)
 {
 	// initialize a row and column counter for the selection area
-	const int rowCnt=itemmodel_->rowCount();
-	const int colCnt=itemmodel_->columnCount();
-	vector<int> rowcounterlist;
-	for(int i=0; i<rowCnt; i++){
-		rowcounterlist.push_back(0);
+	rowCnt_=itemmodel_->rowCount();
+	colCnt_=itemmodel_->columnCount();
+	rowcounterlist_.clear();
+
+	//vector<int> rowcounterlist;
+	for(int i=0; i<rowCnt_; i++){
+		rowcounterlist_.push_back(0);
 	}
 
-	// there is a bug for using ItemSelection of selected items
+	// there is a bug in QT for using QItemSelection of selected items
 	// so I use a more complicated way to determine the case
 	QItemSelectionModel *selmodel = ODTableView->selectionModel();
 	const QItemSelection selitems= selmodel->selection();
-	for (int rowi=0; rowi<rowCnt; rowi++){
-		for (int colj=0; colj<colCnt; colj++){
+	for (int rowi=0; rowi<rowCnt_; rowi++){
+		for (int colj=0; colj<colCnt_; colj++){
 			QModelIndex ind=itemmodel_->index(rowi, colj, QModelIndex());
 			if (selitems.contains(ind)){
-				(rowcounterlist[rowi])++;
+				(rowcounterlist_[rowi])++;
 			}
 		}
 	}
 
 	// determine the truth of selecting all
 	bool allselected=true;
-	for(unsigned i=0; i<rowcounterlist.size(); i++){
+	for(unsigned i=0; i<rowcounterlist_.size(); i++){
 		//QMessageBox::warning(this, "Notice", QString::number(rowcounterlist[i]), 
 		//	QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
-		if(rowcounterlist[i]!=colCnt){
+		if(rowcounterlist_[i]!=colCnt_){
 			allselected=false;
 			break;
 		}
@@ -542,15 +564,42 @@ void ODCheckerDlg::loadInitOD()
  */
 void ODCheckerDlg::clearTableView()
 {
-	int rowcount=itemmodel_->rowCount();
-	if (rowcount>0){
+	rowCnt_=itemmodel_->rowCount();
+	if (rowCnt_>0){
+		// clear the table view
 		ODTableView->setVisible(false);
-		itemmodel_->removeRows(0,rowcount);
+		itemmodel_->removeRows(0,rowCnt_);
+		
 		// clear routes drawn previously
 		unselectRoutes();
 		updateGraph();
+
+		// reinitialize the parameters
+		rowCnt_=0;
+		rowcounterlist_.clear();
 	}
 	CheckButton->setChecked(false);
+}
+
+/**
+* funciton to remove selected routes for an OD pair
+*/
+void ODCheckerDlg::rmselectedRoutes()
+{
+	// not necessary but to make sure the row and column number is updated
+	rowCnt_=itemmodel_->rowCount();
+	colCnt_=itemmodel_->columnCount();
+
+	for(int i=0; i<rowCnt_; i++) 
+	{
+		// for selected rows
+		if(rowcounterlist_[i]==colCnt_)
+		{
+			itemmodel_->removeRows(i,1);
+			Route* temproute=odsel_->filteredRoute(i);
+			mezzonet_->removeRoute(temproute);
+		}
+	}
 }
 
 /**

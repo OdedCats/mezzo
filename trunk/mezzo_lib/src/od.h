@@ -53,10 +53,10 @@ class ODpair
 
 {
   public:
-	  ODpair();
-	 ODpair(Origin* origin_, Destination* destination_, int rate_, Vtypes* vtypes_);
+	ODpair();
+	ODpair(Origin* origin_, Destination* destination_, int rate_, Vtypes* vtypes_);
     ~ODpair();
-  	 bool execute(Eventlist* eventlist, double time);
+  	bool execute(Eventlist* eventlist, double time);
     void add_route(Route* route);
 	long get_nr_routes() {return routes.size();}
     Route* select_route(double time); // pretrip route choice
@@ -76,6 +76,7 @@ class ODpair
 	bool less_than(ODpair* od); 
 	vector <int> delete_spurious_routes(double time=0.0); // deletes spurious routes (with unrealistic costs) and returns ids of routes deleted
 	Random* get_random(){return random;} 
+	Route* filteredRoute(int index);
   private:
    int id;  // for later use
 	ODaction* odaction;
@@ -84,6 +85,7 @@ class ODpair
 	int rate;
   //double rate;
 	vector <Route*> routes;
+	vector <Route*> filtered_routes_;
 	vector <double> utilities;
 	Random* random;
 	Grid* grid;

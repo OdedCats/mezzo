@@ -146,6 +146,9 @@ void ODpair::add_route(Route* route)
    		return NULL;
  }
 
+/**
+* a heuristic to delete spurious route
+*/
 vector <int> ODpair::delete_spurious_routes(double time)
 // finds routes that are more than 
 {
@@ -297,8 +300,8 @@ odval ODpair::odids ()
 	return odval(origin->get_id(), destination->get_id());
 }
 
-ODpair::ODpair(Origin* origin_, Destination* destination_, int rate_, Vtypes* vtypes_):
- 	origin(origin_), destination(destination_), rate(rate_), vtypes (vtypes_)
+ODpair::ODpair(Origin* origin_, Destination* destination_, int rate_, Vtypes* vtypes_)
+	:origin(origin_), destination(destination_), rate(rate_), vtypes (vtypes_)
 {
  	odaction=new ODaction(this);
  	random=new Random();
@@ -316,7 +319,8 @@ ODpair::ODpair(Origin* origin_, Destination* destination_, int rate_, Vtypes* vt
 	grid=new Grid(nr_fields,fields);	
 }
 
-ODpair::ODpair(): id (-1), odaction (NULL), origin (NULL), destination (NULL), rate (-1), random (NULL)
+ODpair::ODpair(): id (-1), odaction (NULL), origin (NULL), destination (NULL), 
+                  rate (-1), random (NULL)
 {
 
 }
@@ -395,3 +399,11 @@ bool ODpair::less_than(ODpair* od)
 		}
 	 }
  }
+
+Route* ODpair::filteredRoute(int index)
+{
+	Route* theroute=routes[index];
+	filtered_routes_.push_back(theroute);
+	routes.erase(routes.begin()+index);
+	return theroute;
+}

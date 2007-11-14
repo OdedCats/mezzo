@@ -47,7 +47,7 @@ class ODCheckerDlg : public QDialog, public Ui::ODCheckerDlg
 	void loadSelectOD(vector<Node*>& selnodes);
 
  public slots:
-	virtual void reject(); // virutal function of QDialog
+	virtual void reject(); // virutal function of QDialog  
 
 protected:
 	bool eventFilter(QObject *obj, QEvent *evt);
@@ -59,6 +59,7 @@ protected:
 	void drawRoute(const QString& colortext, const int& index);
 	void drawAllRoutes();
 	void selectionHandle(const QItemSelection& sel, const QItemSelection& unsel);
+	//void keyPressEvent(QKeyEvent* kev);
 
  signals:
     void paintRequest();
@@ -69,12 +70,17 @@ protected:
 	void unselectRoutes();
 	QColor txt2Color(const QString& colortext);
 	void updateGraph();
+	void rmselectedRoutes();
 	
 	//properties 
 	int orgId_;
 	int destId_;
 	bool networkset_;
 	bool allroutesdrawn_;
+	
+	// selection properties
+	int rowCnt_, colCnt_;
+	vector<int> rowcounterlist_;
 
 	// references 
 	QStandardItemModel* itemmodel_; // model to the tableview
