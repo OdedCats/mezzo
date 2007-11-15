@@ -115,9 +115,9 @@ double Bus::calc_departure_time (double time) // calculates departure time from 
 	// These three parameters should be used from the parameters input file
 
 	double error_layover = random->lnrandom (mean_error_layover, std_error_layover); // error factor following log normal distribution
-	double curr_departure = curr_trip->second;
+	double curr_departure = (*next_trip)->second;
 
-	if (curr_trip == driving_roster.begin()) // if it is the first trip for this bus
+	if (get_next_trip() == driving_roster.begin()) // if it is the first trip for this bus
 	{
 		return (curr_departure + random->nrandom_trunc (mean_error_layover, std_error_layover, 1.0));
 			// first dispatching is subject to a normal truncated deviation (Vandebona & Richardson, 1986)
@@ -131,18 +131,18 @@ double Bus::calc_departure_time (double time) // calculates departure time from 
 	return departure_time;// output note: departure time
 }
 
-void Bus::advance_curr_trip () 
+void Bus::advance_next_trip () 
 {
 	if (get_active() == false) // first time this function is called
 	{
-		curr_trip = driving_roster.begin();
+		next_trip = driving_roster.begin();
 		set_active (true);
 	}
 	else
 	{
-		if (curr_trip != driving_roster.end())
+		if (next_trip != driving_roster.end())
 		{
-			curr_trip++; // a trip was completed - points to the next trip on the schedule
+			next_trip++; // a trip was completed - points to the next trip on the schedule
 		}
 		else
 		{

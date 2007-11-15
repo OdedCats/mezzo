@@ -69,6 +69,10 @@ public:
 	Bustype ();
 	Bustype (int type_id_, double length_, int number_seats_, int capacity_);
 	~Bustype ();
+	double get_length () {return length;}
+	int get_number_seats () {return number_seats;}
+	int get_capacity () {return capacity;}
+	int get_id () {return type_id;}
 protected:
 	int type_id;	// bus type id
 	double length;
@@ -110,6 +114,23 @@ public:
 		{
 				random->randomize();
 		}		
+	};	
+	Bus (int bv_id_, Bustype* bty) 
+	{	id = bv_id_;
+		occupancy = 0;
+		active = false;
+		length = bty->get_length();
+		number_seats = bty->get_number_seats();
+		capacity = bty->get_capacity();
+		random = new (Random);
+		if (randseed != 0)
+		{
+				random->seed(randseed);
+		}
+		else
+		{
+				random->randomize();
+		}		
 	};
 // GETS and SETS
 	const int get_occupancy() {return occupancy;}
@@ -124,18 +145,19 @@ public:
 	void set_at_stop ( bool val) { at_stop = val;}
 
 	double calc_departure_time (double time); // calculates departure time from origin according to arrival time and schedule (including layover effect)
-	void advance_curr_trip (); // Returns true if progressed trip-pointer and false if the roster is done.
+	void advance_next_trip (); // Returns true if progressed trip-pointer and false if the roster is done.
 //	void write_buses_generation (string name); // Not needed anymore
-
+	void add_trips (vector <Start_trip*>  st) {driving_roster = st; next_trip = driving_roster.begin();}
+	vector <Start_trip*> driving_roster; // trips assignment for each bus vehicle.
+	vector <Start_trip*> :: iterator& get_next_trip() {return next_trip;} // returns pointer to next trip
 protected:
 	Random* random;
 	int number_seats; // Two added variables for LOS satistics and for dwell time calculations
 	int capacity; // In the future will be determined according to the bus type
 	int occupancy;
 	Bustrip* trip;
-	bool active; // istrue when the bus started to serve trips (called set_curr_trip());
-	vector <Start_trip> driving_roster; // trips assignment for each bus vehicle.	
-	vector <Start_trip>::iterator curr_trip; // pointer to the current trip served by the bus vehicle
+	bool active; // istrue when the bus started to serve trips (called set_curr_trip());	
+	vector <Start_trip*>::iterator next_trip; // pointer to the current trip served by the bus vehicle
 	bool at_stop;
 };
 

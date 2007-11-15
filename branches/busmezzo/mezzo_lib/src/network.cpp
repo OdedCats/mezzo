@@ -1057,7 +1057,7 @@ bool Network::readbusroute(istream& in)
   return true;
 }
 
-bool Network::readbuslines(string name) // reads the busstops, buslines, trips and passengers rates
+bool Network::readbuslines(string name) // reads the busstops, buslines, trips, passengers rates, bustypes and busvehicles
 {
 	ifstream in(name.c_str()); // open input file
 	assert (in);
@@ -1159,9 +1159,30 @@ in >> keyword;
 	limit = i + nr;
 	for (i; i<limit;i++)
 	{
- 		if (!read_bustypes(in))
+ 		if (!read_bustype(in))
 		{
 			cout << " readbustypes: read_bustypes returned false for line nr " << (i+1) << endl;
+   			return false;
+		} 
+	}
+
+	// Sixth read the bus vehicles
+	in >> keyword;
+#ifdef _DEBUG_NETWORK
+	cout << keyword << endl;
+#endif //_DEBUG_NETWORK
+	if (keyword!="busvehicles:")
+	{
+		cout << " readbusvehicle: no << busvehicles: >> keyword " << endl;
+		return false;
+	}
+	in >> nr;
+	limit = i + nr;
+	for (i; i<limit;i++)
+	{
+ 		if (!read_busvehicle(in))
+		{
+			cout << " readbusvehicles: read_busvehicle returned false for line nr " << (i+1) << endl;
    			return false;
 		} 
 	}
@@ -1338,6 +1359,9 @@ bool Network::readbustrip(istream& in) // reads a trip
   trip->add_stops(stops);
   bl->add_trip(trip,start_time);
   trip->set_line(bl);
+  
+  // add to bustrips vector
+  bustrips.push_back (trip);
 
   in >> bracket;
   if (bracket != '}')
@@ -1381,12 +1405,11 @@ bool Network::read_passenger_rates (istream& in) // reads the passenger rates fo
   }
 
 #ifdef _DEBUG_NETWORK
-  cout << " read busstop"<< stop_id <<endl;
 #endif //_DEBUG_NETWORK
   return ok;
 }
 
-bool Network::read_bustypes (istream& in) // reads a bustype
+bool Network::read_bustype (istream& in) // reads a bustype
 {
 
 //{ type_id	length	number_seats	capacity }
@@ -1409,14 +1432,66 @@ bool Network::read_bustypes (istream& in) // reads a bustype
     cout << "readfile::readbustype scanner jammed at " << bracket;
     return false;
   }
-  types.push_back (bt);
+  bustypes.push_back (bt);
 
 #ifdef _DEBUG_NETWORK
-  cout << " read busstop"<< stop_id <<endl;
+  cout << " read bustype"<< type_id <<endl;
 #endif //_DEBUG_NETWORK
   return ok;
 }
  
+bool Network::read_busvehicle(istream& in) // reads a bus vehicle
+{
+  char bracket;
+  int bv_id, type_id, nr_trips, trip_id;
+  vector <Start_trip*> driving_roster;
+  bool ok= true;
+  in >> bracket;
+  if (bracket != '{')
+  {
+  	cout << "readfile::readsbusvehicle scanner jammed at " << bracket;
+  	return false;
+  }
+  in >> bv_id >> type_id >> nr_trips;
+  in >> bracket;
+  if (bracket != '{')
+  {
+  		cout << "readfile::readsbusvehicle scanner jammed at " << bracket;
+  		return false;
+  }
+  for (int i=0; i < nr_trips; i++)
+  {
+	  in >> trip_id;
+	  // create the Start_trip
+	  // find the trip in the list
+	  Bustrip* btr=(*(find_if(bustrips.begin(), bustrips.end(), compare <Bustrip> (trip_id) )));
+	  Start_trip* st = new Start_trip (btr, btr->get_starttime());
+	  driving_roster.push_back(st);
+  }
+
+  // find bus type and create bus vehicle
+  Bustype* bty=(*(find_if(bustypes.begin(), bustypes.end(), compare <Bustype> (type_id) )));
+  Bus* bv= new Bus (bv_id, bty);
+  bv->add_trips(driving_roster);
+  
+  in >> bracket;
+  if (bracket != '}')
+  {
+  		cout << "readfile::readsbusvehicle scanner jammed at " << bracket;
+  		return false;
+  }   
+  in >> bracket;
+  if (bracket != '}')
+  {
+    cout << "readfile::readbusvehicle scanner jammed at " << bracket;
+    return false;
+  }
+#ifdef _DEBUG_NETWORK
+  cout << " read busvehicle"<< bv_id <<endl;
+#endif //_DEBUG_NETWORK
+return ok;	
+}
+
 // read traffic control
 bool Network::readsignalcontrols(string name)
 {

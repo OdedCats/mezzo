@@ -184,7 +184,8 @@ class Network
   bool readbusline(istream& in); // reads a busline
   bool readbustrip(istream& in); // reads a trip
   bool read_passenger_rates (istream& in); // reads the passenger rates for a specific line and stop
-  bool read_bustypes (istream& in); // reads a bus type
+  bool read_bustype (istream& in); // reads a bus type
+  bool read_busvehicle(istream& in); // reads a bus vehicle 
 #ifndef _NO_GUI
   double get_width_x() {return width_x;} // returns image width in original coordinate system
   double get_height_y() {return height_y;} // ... height ...
@@ -216,6 +217,7 @@ class Network
   vector <Bustrip*> bustrips;  // the trips list of all buses
   vector <Busstop*> busstops; // stops on the buslines
   vector <Busroute*> busroutes; // the routes that buses follow
+  vector <Bustype*> bustypes; // types of bus vehicles
 
   //Shortest path graph
 #ifndef _USE_VAR_TIMES

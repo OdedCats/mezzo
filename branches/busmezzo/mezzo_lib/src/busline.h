@@ -68,6 +68,7 @@ public:
 	Bus* get_busv () {return busv;}
 	void set_line (Busline* line_) {line = line_;}
 	Busline* get_line () {return line;}
+	double get_starttime () {return starttime;}
 	vector <Visit_stop*> :: iterator& get_next_stop() {return next_stop;} // returns pointer to next stop
 //	bool is_trip_timepoint(Busstop* stop); // returns 1 if true, 0 if false, -1 if busstop not found
 	bool advance_next_stop (); // advances the pointer to the next stop (checking bounds)
