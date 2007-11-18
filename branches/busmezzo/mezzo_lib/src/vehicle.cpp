@@ -109,45 +109,48 @@ VehicleRecycler::	~VehicleRecycler()
 
 double Bus::calc_departure_time (double time) // calculates departure time from origin according to arrival time and schedule (including layover effect)
 {
-	double min_layover = 2.00; 
-	double mean_error_layover = 2.00;
-	double std_error_layover = 1.00;
+	double min_recovery = 2.00; 
+	double mean_error_recovery = 2.00;
+	double std_error_recovery = 1.00;
 	// These three parameters should be used from the parameters input file
 
-	double error_layover = random->lnrandom (mean_error_layover, std_error_layover); // error factor following log normal distribution
-	double curr_departure = (*next_trip)->second;
+	double error_recovery = min_recovery + random->lnrandom (mean_error_recovery, std_error_recovery); // error factor following log normal distribution
+	double scheduled_departure = (*next_trip)->second; // departure time according to schedule
 
 	if (get_next_trip() == driving_roster.begin()) // if it is the first trip for this bus
 	{
-		return (curr_departure + random->nrandom_trunc (mean_error_layover, std_error_layover, 1.0));
-			// first dispatching is subject to a normal truncated deviation (Vandebona & Richardson, 1986)
+		return scheduled_departure;
+			// first dispatching is cuurently assumed to follow the schedule
 	}
 
-	double departure_time = Max(curr_departure, time + min_layover);
-	// If the scheduled time is after arrival+layover, it determines departure time. 
+	double departure_time = Max (time + error_recovery , scheduled_departure);
+	// If the scheduled time is after arrival+recovery, it determines departure time. 
 	// Otherwise (bus arrived behind schedule) - delay at origin.
 
-	departure_time += error_layover; // Allways add the error factor
 	return departure_time;// output note: departure time
 }
 
-void Bus::advance_next_trip () 
+void Bus::advance_next_trip (double time, Eventlist* eventlist) 
 {
-	if (get_active() == false) // first time this function is called
+	next_trip++; // a trip was completed - points to the next trip on the schedule
+	if (next_trip != driving_roster.end()) // there are more trips for this bus
 	{
-		next_trip = driving_roster.begin();
-		set_active (true);
+		
+		if ((*next_trip)->second <= time) // if the bus is late for the next trip
+		{
+			Busline* line = (*next_trip)->first->get_line();
+			// then the trip is activated
+			// to be implemented: take care of some stochastic recovery time
+			(*next_trip)->first->activate(calc_departure_time(time), line->get_busroute(), line->get_vtype(), line->get_odpair(), eventlist);
+		}
+		else // if the bus is early for the next trip
+		{
+			set_on_trip (false);
+		}
 	}
-	else
+	else // there are no more trips for this bus
 	{
-		if (next_trip != driving_roster.end())
-		{
-			next_trip++; // a trip was completed - points to the next trip on the schedule
-		}
-		else
-		{
-			set_active (false); // no more trips on the schedule for this bus
-		}
+		set_on_trip (false); // no more trips on the schedule for this bus
 	}
 }
 

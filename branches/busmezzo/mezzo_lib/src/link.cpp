@@ -338,10 +338,11 @@ bool Link::enter_veh(Vehicle* veh, double time)
 	{
 		// Calc time to stop
 		Bus* bus =  (Bus*)(veh); // so we can do Bus operations
-		Bustrip* trip = bus->get_bustrip();
+		vector <Start_trip*>::iterator next_trip = bus->get_next_trip();
+		Bustrip* trip = (*next_trip)->first;
 		if (trip->check_end_trip() == false)
 		{
-			Visit_stop* next_stop1 = *((bus->get_bustrip())->get_next_stop());
+			Visit_stop* next_stop1 = *(trip->get_next_stop());
 			if (id == (next_stop1->first->get_link_id()))
 			{
 				double stop_position = (next_stop1->first)->get_position();

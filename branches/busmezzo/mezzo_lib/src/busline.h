@@ -30,7 +30,10 @@ public:
 
 	// GETS & SETS
 	int get_id () {return id;} // returns id, used in the compare <..> functions for find and find_if algorithms
-	
+	Busroute* get_busroute() {return busroute;} 
+	Vtype* get_vtype() {return vtype;}
+	ODpair* get_odpair() {return odpair;}
+
 	bool execute(Eventlist* eventlist, double time); // re-implemented from virtual function in Action
 													 // this function does the real work. It initiates 
 													//	the current Bustrip and books the next one
@@ -66,12 +69,13 @@ public:
 	// GETS & SETS
 	int get_id () {return id;} // returns id, used in the compare <..> functions for find and find_if algorithms
 	Bus* get_busv () {return busv;}
+	void set_busv (Bus* busv_) {busv = busv_;}
 	void set_line (Busline* line_) {line = line_;}
 	Busline* get_line () {return line;}
 	double get_starttime () {return starttime;}
 	vector <Visit_stop*> :: iterator& get_next_stop() {return next_stop;} // returns pointer to next stop
 //	bool is_trip_timepoint(Busstop* stop); // returns 1 if true, 0 if false, -1 if busstop not found
-	bool advance_next_stop (); // advances the pointer to the next stop (checking bounds)
+	bool advance_next_stop (double time, Eventlist* eventlist_); // advances the pointer to the next stop (checking bounds)
 	void add_stops (vector <Visit_stop*>  st) {stops = st; next_stop = stops.begin();}
 	bool activate (double time, Route* route, Vtype* vehtype, ODpair* odpair, Eventlist* eventlist_); // activates the trip. Generates the bus and inserts in net.
 	double scheduled_arrival_time (Busstop* stop); // finds the scheduled arrival time for a given bus stop

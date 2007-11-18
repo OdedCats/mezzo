@@ -218,6 +218,7 @@ class Network
   vector <Busstop*> busstops; // stops on the buslines
   vector <Busroute*> busroutes; // the routes that buses follow
   vector <Bustype*> bustypes; // types of bus vehicles
+  vector <Bus*> busvehicles; // a list of the bus vehicles
 
   //Shortest path graph
 #ifndef _USE_VAR_TIMES
