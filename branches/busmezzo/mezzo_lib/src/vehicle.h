@@ -120,7 +120,7 @@ public:
 		type = 4;
 		occupancy = 0;
 		on_trip = false;
-		next_trip = driving_roster.begin();
+		curr_trip = driving_roster.begin();
 		length = bty->get_length();
 		number_seats = bty->get_number_seats();
 		capacity = bty->get_capacity();
@@ -146,18 +146,18 @@ public:
 	void set_at_stop ( bool val) { at_stop = val;}
 
 	double calc_departure_time (double time); // calculates departure time from origin according to arrival time and schedule (including layover effect)
-	void advance_next_trip (double time, Eventlist* eventlist); // progresses trip-pointer 
+	void advance_curr_trip (double time, Eventlist* eventlist); // progresses trip-pointer 
 //	void write_buses_generation (string name); // Not needed anymore
-	void add_trips (vector <Start_trip*>  st) {driving_roster = st; next_trip = driving_roster.begin();}
+	void add_trips (vector <Start_trip*>  st) {driving_roster = st; curr_trip = driving_roster.begin();}
 	vector <Start_trip*> driving_roster; // trips assignment for each bus vehicle.
-	vector <Start_trip*>::iterator& get_next_trip() {return next_trip;} // returns pointer to next trip
+	vector <Start_trip*>::iterator& get_curr_trip() {return curr_trip;} // returns pointer to next trip
 protected:
 	int	bus_id;
 	Random* random;
 	int number_seats; // Two added variables for LOS satistics and for dwell time calculations
 	int capacity; // In the future will be determined according to the bus type
 	int occupancy;
-	vector <Start_trip*>::iterator next_trip; // pointer to the current trip served by the bus vehicle
+	vector <Start_trip*>::iterator curr_trip; // pointer to the current trip served by the bus vehicle
 	bool at_stop;
 	bool on_trip; // is true when bus is on a trip and false when waiting for the next trip	
 };

@@ -115,9 +115,9 @@ double Bus::calc_departure_time (double time) // calculates departure time from 
 	// These three parameters should be used from the parameters input file
 
 	double error_recovery = min_recovery + random->lnrandom (mean_error_recovery, std_error_recovery); // error factor following log normal distribution
-	double scheduled_departure = (*next_trip)->second; // departure time according to schedule
+	double scheduled_departure = (*curr_trip)->second; // departure time according to schedule
 
-	if (get_next_trip() == driving_roster.begin()) // if it is the first trip for this bus
+	if (get_curr_trip() == driving_roster.begin()) // if it is the first trip for this bus
 	{
 		return scheduled_departure;
 			// first dispatching is cuurently assumed to follow the schedule
@@ -130,18 +130,18 @@ double Bus::calc_departure_time (double time) // calculates departure time from 
 	return departure_time;// output note: departure time
 }
 
-void Bus::advance_next_trip (double time, Eventlist* eventlist) 
+void Bus::advance_curr_trip (double time, Eventlist* eventlist) 
 {
-	next_trip++; // a trip was completed - points to the next trip on the schedule
-	if (next_trip != driving_roster.end()) // there are more trips for this bus
+	curr_trip++; // a trip was completed - points to the next trip on the schedule
+	if (curr_trip != driving_roster.end()) // there are more trips for this bus
 	{
 		
-		if ((*next_trip)->second <= time) // if the bus is late for the next trip
+		if ((*curr_trip)->second <= time) // if the bus is late for the next trip
 		{
-			Busline* line = (*next_trip)->first->get_line();
+			Busline* line = (*curr_trip)->first->get_line();
 			// then the trip is activated
 			// to be implemented: take care of some stochastic recovery time
-			(*next_trip)->first->activate(calc_departure_time(time), line->get_busroute(), line->get_vtype(), line->get_odpair(), eventlist);
+			(*curr_trip)->first->activate(calc_departure_time(time), line->get_busroute(), line->get_vtype(), line->get_odpair(), eventlist);
 		}
 		else // if the bus is early for the next trip
 		{

@@ -53,7 +53,7 @@ protected:
 	Vtype* vtype; // the type of vehicle for the buses to be generated.
 	ODpair* odpair; 
 	bool active; // is true when the busline has started generating trips
-	vector <Start_trip>::iterator next_trip; // indicates the next trip
+	vector <Start_trip>::iterator curr_trip; // indicates the next trip
 	
 };
 
