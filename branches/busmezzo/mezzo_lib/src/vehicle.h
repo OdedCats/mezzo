@@ -23,6 +23,7 @@ class Vehicle
    Vehicle(int id_, int type_, double length_,Route* route_, ODpair* odpair_, double time_);
    void init (int id_, int type_, double length_, Route* route_, ODpair* odpair_, double time_);
    const double get_length(){return length;}
+   void set_length (double length_) {length = length_;}
    const double get_exit_time(){return exit_time;}
    const double get_start_time(){return start_time;}
    const odval get_odids () ;
@@ -117,6 +118,7 @@ public:
 	};	
 	Bus (int bv_id_, Bustype* bty) 
 	{	bus_id = bv_id_;
+		bus_type_id = bty->get_id();
 		type = 4;
 		occupancy = 0;
 		on_trip = false;
@@ -136,6 +138,7 @@ public:
 	};
 // GETS and SETS
 	int get_bus_id () {return bus_id;}
+	void set_bus_id (int bus_id_) {bus_id = bus_id_;}
 	const int get_occupancy() {return occupancy;}
 	void set_occupancy (const int occup) {occupancy=occup;}
 	int get_number_seats () {return number_seats;}
@@ -144,7 +147,8 @@ public:
 	void set_on_trip (bool on_trip_) {on_trip=on_trip_;}
 	int get_at_stop() { return at_stop; }
 	void set_at_stop ( bool val) { at_stop = val;}
-
+	
+	void set_bustype_attributes (Bustype* bty); // change the fields that are determined by the bustype
 	double calc_departure_time (double time); // calculates departure time from origin according to arrival time and schedule (including layover effect)
 	void advance_curr_trip (double time, Eventlist* eventlist); // progresses trip-pointer 
 //	void write_buses_generation (string name); // Not needed anymore
@@ -153,6 +157,7 @@ public:
 	vector <Start_trip*>::iterator& get_curr_trip() {return curr_trip;} // returns pointer to next trip
 protected:
 	int	bus_id;
+	int bus_type_id;
 	Random* random;
 	int number_seats; // Two added variables for LOS satistics and for dwell time calculations
 	int capacity; // In the future will be determined according to the bus type

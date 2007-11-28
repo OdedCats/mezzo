@@ -87,12 +87,14 @@ return false;
 Bustrip::Bustrip ()
 {
 	init_occupancy=0;
+	avaliable_bus=false;
 
 }
 
 Bustrip::Bustrip (int id_, double start_time_): id(id_), starttime(start_time_)
 {
 	init_occupancy=0;
+	avaliable_bus=false;
 //	for (map<Busstop*,bool>::iterator tp = trips_timepoint.begin(); tp != trips_timepoint.end(); tp++)
 //	{
 //		tp->second = false;
@@ -126,54 +128,27 @@ bool Bustrip::activate (double time, Route* route, Vtype* vehtype, ODpair* odpai
 {
 	eventlist = eventlist_;
 	bool ok = false; // flag to check if all goes ok
-	vector <Start_trip*>::iterator curr_trip = this->get_busv()->get_curr_trip();
-	if (curr_trip == this->get_busv()->driving_roster.begin()) // this is the first trip for this bus vehicle
+	if (avaliable_bus == true) // if the assigned bus is avaliable 
 	{
-			// generate a new bus vehicle
-			vid++; // increment the veh id counter, buses are vehicles too
-			Bus* bus=recycler.newBus(); // get a bus vehicle
-			// !!! init should be modified to reflect the extra vars of the bus !!!
-			
-			bus = this->get_busv();
-			for (curr_trip = this->get_busv()->driving_roster.begin(); curr_trip == this->get_busv()->driving_roster.end(); curr_trip++)
-			{
-				(*curr_trip)->first->set_busv(bus);
-			}
-
-			bus->init(vid,vehtype->id, bus->get_length(),route,odpair,time);  // initialise the variables of the bus
-
-			if ( (odpair->get_origin())->insert_veh(bus,time)) // insert the bus at the origin.
-			{
-  				bus->set_on_trip(true); // turn on indicator for bus on a trip
-				ok=true;
-			}
-			else // if insert returned false
-  			{
-  				ok=false; 
-				recycler.addBus(bus);
-  			}	
+		busv->init(busv->get_id(),4, busv->get_length(),route,odpair,time);  // initialise the variables of the bus
+		
+		if ( (odpair->get_origin())->insert_veh(this->get_busv(),this->get_busv()->calc_departure_time(time))) // insert the bus at the origin 
+		{
+  			this->get_busv()->set_on_trip(true); // turn on indicator for bus on a trip
+			ok=true;
+		}
+		else // if insert returned false
+  		{
+  			ok=false; 
+  		}
 	}
-	
-	else if ((*curr_trip)->first == this) // if the bus assigned to this trip exists and avaliable 
+	else 
 	{
-
-		if ( (odpair->get_origin())->insert_veh(this->get_busv(),this->get_busv()->calc_departure_time(time))) // insert the bus at the origin.
-			{
-  				this->get_busv()->set_on_trip(true); // turn on indicator for bus on a trip
-				ok=true;
-			}
-			else // if insert returned false
-  			{
-  				ok=false; 
-				recycler.addBus(this->get_busv());
-  			}
-		//route->firstlink()->enter_veh(this->get_busv(),this->get_busv()->calc_departure_time(time)); // start following the route	
-	}
-
+		ok=false;
 	 // if the bus assigned to this trip exists but is not avaliable yet, then it will be activated 
 	 // from Bus::advance_curr_trip as soon as it is done with the previous trip
-	 // (and then will get into the previous condition)
-	
+	 // (and then will get into the previous condition)	
+	}	
 	return ok;
 }
 

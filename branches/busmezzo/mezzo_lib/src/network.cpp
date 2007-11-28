@@ -1456,7 +1456,13 @@ bool Network::read_busvehicle(istream& in) // reads a bus vehicle
 	
   // find bus type and create bus vehicle
   Bustype* bty=(*(find_if(bustypes.begin(), bustypes.end(), compare <Bustype> (type_id) )));
-  Bus* bv= new Bus (bv_id, bty);
+  // generate a new bus vehicle
+  vid++; // increment the veh id counter, buses are vehicles too
+  Bus* bus=recycler.newBus(); // get a bus vehicle
+  //Bus* bus= new Bus (bv_id,bty);
+  bus->set_bus_id(bv_id);
+  bus->set_bustype_attributes(bty);
+
   in >> bracket;
   if (bracket != '{')
   {
@@ -1469,14 +1475,17 @@ bool Network::read_busvehicle(istream& in) // reads a bus vehicle
 	  // create the Start_trip
 	  // find the trip in the list
 	  Bustrip* btr=(*(find_if(bustrips.begin(), bustrips.end(), compare <Bustrip> (trip_id) )));
-	  btr->set_busv(bv);
+	  btr->set_busv(bus);
+	  if (i==0) 
+	  {
+		btr->set_avaliable_bus(true); // the vehicle is avaliable for the first trip on its driving roster
+	  }
 	  Start_trip* st = new Start_trip (btr, btr->get_starttime());
 	  driving_roster.push_back(st);
-
   }
 
-  bv->add_trips(driving_roster);
-  busvehicles.push_back (bv);
+  bus->add_trips(driving_roster);
+  busvehicles.push_back (bus);
   in >> bracket;
   if (bracket != '}')
   {

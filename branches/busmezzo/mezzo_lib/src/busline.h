@@ -83,6 +83,9 @@ public:
 	bool check_end_trip (); // returns 1 if true, 0 if false
 	vector <Visit_stop*> stops; // contains all the busstops and the times that they are supposed to be served.
 								// NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
+	int get_avaliable_bus () {return avaliable_bus;}
+	void set_avaliable_bus (bool avaliable_bus_) {avaliable_bus=avaliable_bus_;}
+
 protected:
 	
 	int id; // course nr
@@ -91,7 +94,8 @@ protected:
 	int init_occupancy; // initial occupancy, usually 0
 	double starttime; // when the trip is starting from the origin
 	vector <Visit_stop*> :: iterator next_stop;
-	 
+	bool avaliable_bus; // is true if the assigned vehicle is avaliable (done with its previous trip) and false if not 
+
 //	map <Busstop*,bool> trips_timepoint; // will be relevant only when time points are trip-specific. binary map with time point indicatons for stops on route only (according to the schedule input file)  
 	Eventlist* eventlist; // for use by busstops etc to book themselves.
 };

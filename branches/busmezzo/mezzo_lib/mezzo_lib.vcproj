@@ -261,10 +261,6 @@
 				RelativePath=".\src\vissimcom.h"
 				>
 			</File>
-			<File
-				RelativePath=".\src\vtypes.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -277,6 +273,10 @@
 			>
 			<File
 				RelativePath=".\mezzo_lib.pro"
+				>
+			</File>
+			<File
+				RelativePath=".\src\vtypes.h"
 				>
 			</File>
 		</Filter>
