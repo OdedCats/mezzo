@@ -110,10 +110,10 @@ VehicleRecycler::	~VehicleRecycler()
 void Bus::set_bustype_attributes (Bustype* bty) // change the fields that are determined by the bustype
 {
 	type = 4;
-	bus_type_id = bty->get_id();
 	length = bty->get_length();
 	number_seats = bty->get_number_seats();
 	capacity = bty->get_capacity();
+	bus_type = bty;
 }
 
 double Bus::calc_departure_time (double time) // calculates departure time from origin according to arrival time and schedule (including layover effect)
@@ -145,6 +145,11 @@ void Bus::advance_curr_trip (double time, Eventlist* eventlist)
 	if (curr_trip != driving_roster.end()) // there are more trips for this bus
 	{
 		(*curr_trip)->first->set_avaliable_bus(true); // the bus is avaliable for its next trip
+		/*
+		Bus* new_bus=recycler.newBus(); // then generate a new vehicle
+		new_bus = this;
+		(*curr_trip)->first->set_busv(new_bus);
+		*/
 		if ((*curr_trip)->second <= time) // if the bus is already late for the next trip
 		{
 			Busline* line = (*curr_trip)->first->get_line();

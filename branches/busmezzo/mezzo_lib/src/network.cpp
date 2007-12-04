@@ -1475,11 +1475,12 @@ bool Network::read_busvehicle(istream& in) // reads a bus vehicle
 	  // create the Start_trip
 	  // find the trip in the list
 	  Bustrip* btr=(*(find_if(bustrips.begin(), bustrips.end(), compare <Bustrip> (trip_id) )));
-	  btr->set_busv(bus);
 	  if (i==0) 
 	  {
 		btr->set_avaliable_bus(true); // the vehicle is avaliable for the first trip on its driving roster
 	  }
+
+	  btr->set_previous_bus(bus);
 	  Start_trip* st = new Start_trip (btr, btr->get_starttime());
 	  driving_roster.push_back(st);
   }

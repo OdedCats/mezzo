@@ -70,6 +70,8 @@ public:
 	int get_id () {return id;} // returns id, used in the compare <..> functions for find and find_if algorithms
 	Bus* get_busv () {return busv;}
 	void set_busv (Bus* busv_) {busv = busv_;}
+	Bus* get_previous_bus () {return previous_busv;}
+	void set_previous_bus (Bus* previous_busv_) {previous_busv = previous_busv_;}
 	void set_line (Busline* line_) {line = line_;}
 	Busline* get_line () {return line;}
 	double get_starttime () {return starttime;}
@@ -90,6 +92,7 @@ protected:
 	
 	int id; // course nr
 	Bus* busv; // pointer to the bus vehicle
+	Bus* previous_busv;
 	Busline* line; // pointer to the line it serves
 	int init_occupancy; // initial occupancy, usually 0
 	double starttime; // when the trip is starting from the origin

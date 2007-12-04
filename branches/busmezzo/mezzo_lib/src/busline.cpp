@@ -112,10 +112,10 @@ bool Bustrip::advance_next_stop (double time, Eventlist* eventlist)
 	{	
 		vector <Start_trip*>::iterator curr_trip = this->get_busv()->get_curr_trip();
 		this->get_busv()->advance_curr_trip(time, eventlist); // progress the roster for the vehicle
-		if (curr_trip == this->get_busv()->driving_roster.end()) // if it was the last trip for this vehicle - send to recycle
-		{
-			recycler.addBus(this->get_busv());
-		}
+		//if (curr_trip == this->get_busv()->driving_roster.end()) // if it was the last trip for this vehicle - send to recycle
+		//{
+		recycler.addBus(this->get_busv());
+		//}
 		return false;
 	}
 	else
@@ -130,11 +130,14 @@ bool Bustrip::activate (double time, Route* route, Vtype* vehtype, ODpair* odpai
 	bool ok = false; // flag to check if all goes ok
 	if (avaliable_bus == true) // if the assigned bus is avaliable 
 	{
-		busv->init(busv->get_id(),4, busv->get_length(),route,odpair,time);  // initialise the variables of the bus
-		
+		vid++;
+		Bus* new_bus=recycler.newBus(); // then generate a new vehicle
+		new_bus = previous_busv; // pass over the attributes
+		this->set_busv(new_bus); 
+		busv->init(busv->get_id(),4,busv->get_length(),route,odpair,time); // initialize with the trip specific details
 		if ( (odpair->get_origin())->insert_veh(this->get_busv(),this->get_busv()->calc_departure_time(time))) // insert the bus at the origin 
 		{
-  			this->get_busv()->set_on_trip(true); // turn on indicator for bus on a trip
+  			busv->set_on_trip(true); // turn on indicator for bus on a trip
 			ok=true;
 		}
 		else // if insert returned false
