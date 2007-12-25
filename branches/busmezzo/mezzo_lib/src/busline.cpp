@@ -14,7 +14,7 @@ struct compare_pair
  bool operator () (T thing)
 
  	{
- 	 return (thing.first->get_id()==id);
+ 	 return (thing->first->get_id()==id);
  	}
 
  int id;
@@ -88,7 +88,6 @@ Bustrip::Bustrip ()
 {
 	init_occupancy=0;
 	avaliable_bus=false;
-
 }
 
 Bustrip::Bustrip (int id_, double start_time_): id(id_), starttime(start_time_)
@@ -105,17 +104,70 @@ Bustrip::Bustrip (int id_, double start_time_): id(id_), starttime(start_time_)
 Bustrip::~Bustrip ()
 {}
 
+double Bustrip::calc_departure_time (double time) // calculates departure time from origin according to arrival time and schedule (including layover effect)
+{
+	double min_recovery = 2.00; 
+	double mean_error_recovery = 2.00;
+	double std_error_recovery = 1.00;
+	// These three parameters should be used from the parameters input file
+
+	//double scheduled_departure = (*curr_trip)->second; // departure time according to schedule
+	vector <Start_trip*>::iterator this_trip;
+	for (vector <Start_trip*>::iterator trip = driving_roster.begin(); trip < driving_roster.end(); trip++)
+	{
+		if ((*trip)->first == this)
+		{
+			this_trip = trip;
+			break;
+		}
+	}
+	if (this_trip == driving_roster.begin()) // if it is the first trip for this bus
+	{
+		return starttime;  // first dispatching is cuurently assumed to follow the schedule
+	}
+	else
+	{
+		random = new (Random);
+		if (randseed != 0)
+		{
+			random->seed(randseed);
+		}
+		else
+		{
+			random->randomize();
+		}
+		return (Max (time + min_recovery , starttime) + random->lnrandom (mean_error_recovery, std_error_recovery)); // error factor following log normal distribution;
+	}
+	// If the scheduled time is after arrival+recovery, it determines departure time. 
+	// Otherwise (bus arrived behind schedule) - delay at origin.
+}
+
 bool Bustrip::advance_next_stop (double time, Eventlist* eventlist)
 {
 	next_stop++;
 	if (next_stop == stops.end()) // if it was the last stop for this trip
 	{	
-		vector <Start_trip*>::iterator curr_trip = this->get_busv()->get_curr_trip();
-		this->get_busv()->advance_curr_trip(time, eventlist); // progress the roster for the vehicle
-		//if (curr_trip == this->get_busv()->driving_roster.end()) // if it was the last trip for this vehicle - send to recycle
-		//{
-		recycler.addBus(this->get_busv());
-		//}
+		//vector <Start_trip*>::iterator curr_trip = busv->get_curr_trip();
+		busv->advance_curr_trip(time, eventlist); // progress the roster for the vehicle
+		vector <Start_trip*>::iterator last_trip = driving_roster.end()-1;
+		if (busv->get_curr_trip() == (*last_trip)->first) // if it was the last trip for this vehicle - send to recycle
+		{
+			recycler.addBus(busv);
+			/*
+			vector <Start_trip*>::iterator next_trip = busv->get_curr_trip();
+			next_trip++;
+			(*next_trip)->first->set_previous_bus(busv);
+			Start_trip* curr_trip = (*(find_if(driving_roster.begin(), driving_roster.end(), compare_pair <Start_trip*> (id))));
+			vector <Start_trip*>::iterator this_trip;
+			for (vector <Start_trip*>::iterator trip = driving_roster.begin(); trip < driving_roster.end(); trip++)
+			{
+				if ((*trip)->first == this)
+				{
+					this_trip = trip;
+					break;
+				}
+				*/
+		}
 		return false;
 	}
 	else
@@ -132,10 +184,15 @@ bool Bustrip::activate (double time, Route* route, Vtype* vehtype, ODpair* odpai
 	{
 		vid++;
 		Bus* new_bus=recycler.newBus(); // then generate a new vehicle
-		new_bus = previous_busv; // pass over the attributes
-		this->set_busv(new_bus); 
+		//new_bus = previous_busv; // pass over the attributes
+		//vector <Start_trip*>::iterator next_trip = busv->get_curr_trip();
+		//next_trip++;
+		//(*next_trip)->first->set_previous_bus(new_bus);
+		busv = new_bus;
 		busv->init(busv->get_id(),4,busv->get_length(),route,odpair,time); // initialize with the trip specific details
-		if ( (odpair->get_origin())->insert_veh(this->get_busv(),this->get_busv()->calc_departure_time(time))) // insert the bus at the origin 
+		busv->set_curr_trip(this);
+		busv->set_bustype_attributes (btype);
+		if ( (odpair->get_origin())->insert_veh(busv, calc_departure_time(time))) // insert the bus at the origin 
 		{
   			busv->set_on_trip(true); // turn on indicator for bus on a trip
 			ok=true;
@@ -255,17 +312,17 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 		// BUS entering stop
 		Bus* bus = expected_arrivals [time];
 		occupy_length (bus);
-		vector <Start_trip*>::iterator curr_trip = bus->get_curr_trip();
-		exit_time = calc_exiting_time((*curr_trip)->first, time); 
+		//vector <Start_trip*>::iterator curr_trip = bus->get_curr_trip();
+		exit_time = calc_exiting_time(bus->get_curr_trip(), time); 
 		// get the expected exit time according to dwell time calculations and time point considerations
 
 		buses_at_stop [time + exit_time] = bus; 	
 		eventlist->add_event (time + exit_time, this); // book an event for the time it exits the stop
 
-		write_busstop_visit ("buslog_out.dat", (*curr_trip)->first, time); // document stop-related info
+		write_busstop_visit ("buslog_out.dat", bus->get_curr_trip(), time); // document stop-related info
 								// done BEFORE update_last_departures in order to calc the headway
-		bool val = (*curr_trip)->first->advance_next_stop(exit_time, eventlist);
-		update_last_departures ((*curr_trip)->first, exit_time); // in order to follow the headways
+		bool val = bus->get_curr_trip()->advance_next_stop(exit_time, eventlist);
+		update_last_departures (bus->get_curr_trip(), exit_time); // in order to follow the headways
 		expected_arrivals.erase(time);
 		
 		/*

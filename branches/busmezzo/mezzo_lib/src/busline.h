@@ -18,6 +18,7 @@ class Busstop;
 class Bustrip;
 class ODpair;
 class Bus;
+class Bustype;
 
 typedef pair<Bustrip*,double> Start_trip;
 
@@ -72,9 +73,16 @@ public:
 	void set_busv (Bus* busv_) {busv = busv_;}
 	Bus* get_previous_bus () {return previous_busv;}
 	void set_previous_bus (Bus* previous_busv_) {previous_busv = previous_busv_;}
+	void set_bustype (Bustype* btype_) {btype = btype_;}
+	Bustype* get_bustype () {return btype;}
 	void set_line (Busline* line_) {line = line_;}
 	Busline* get_line () {return line;}
 	double get_starttime () {return starttime;}
+	double get_departure_time () {return departure_time;}
+	void set_departure_time (double departure_time_) {departure_time = departure_time_;}
+	Bustrip* get_previous_trip () {return previous_trip;}
+	void set_previous_trip (Bustrip* previous_trip_) {previous_trip = previous_trip_;} 
+	
 	vector <Visit_stop*> :: iterator& get_next_stop() {return next_stop;} // returns pointer to next stop
 //	bool is_trip_timepoint(Busstop* stop); // returns 1 if true, 0 if false, -1 if busstop not found
 	bool advance_next_stop (double time, Eventlist* eventlist_); // advances the pointer to the next stop (checking bounds)
@@ -87,18 +95,29 @@ public:
 								// NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
 	int get_avaliable_bus () {return avaliable_bus;}
 	void set_avaliable_bus (bool avaliable_bus_) {avaliable_bus=avaliable_bus_;}
+	vector <Start_trip*> driving_roster; // trips assignment for each bus vehicle.
+	void add_trips (vector <Start_trip*>  st) {driving_roster = st;}
+	const vector <Start_trip*>::iterator& get_this_trip() {return this_trip;} // returns pointer to current trip
+	void set_this_trip (vector <Start_trip*>::iterator& this_trip_) {this_trip = this_trip_;}
+	double calc_departure_time (double time); // calculates departure time from origin according to arrival time and schedule (including layover effect)
+	//void add_driving_roster(Bustrip* trip, double starttime){driving_roster[trip] = starttime;}
 
 protected:
-	
 	int id; // course nr
 	Bus* busv; // pointer to the bus vehicle
 	Bus* previous_busv;
+	Bustype* btype;
+	Bustrip* previous_trip;
 	Busline* line; // pointer to the line it serves
 	int init_occupancy; // initial occupancy, usually 0
 	double starttime; // when the trip is starting from the origin
+	double departure_time;
 	vector <Visit_stop*> :: iterator next_stop;
 	bool avaliable_bus; // is true if the assigned vehicle is avaliable (done with its previous trip) and false if not 
+	//map <Bustrip*, double> driving_roster; 
 
+	vector <Start_trip*>::iterator this_trip; // pointer to the current trip served by the bus vehicle
+	Random* random;
 //	map <Busstop*,bool> trips_timepoint; // will be relevant only when time points are trip-specific. binary map with time point indicatons for stops on route only (according to the schedule input file)  
 	Eventlist* eventlist; // for use by busstops etc to book themselves.
 };

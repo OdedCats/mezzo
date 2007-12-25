@@ -1459,10 +1459,8 @@ bool Network::read_busvehicle(istream& in) // reads a bus vehicle
   // generate a new bus vehicle
   vid++; // increment the veh id counter, buses are vehicles too
   Bus* bus=recycler.newBus(); // get a bus vehicle
-  //Bus* bus= new Bus (bv_id,bty);
   bus->set_bus_id(bv_id);
   bus->set_bustype_attributes(bty);
-
   in >> bracket;
   if (bracket != '{')
   {
@@ -1478,14 +1476,30 @@ bool Network::read_busvehicle(istream& in) // reads a bus vehicle
 	  if (i==0) 
 	  {
 		btr->set_avaliable_bus(true); // the vehicle is avaliable for the first trip on its driving roster
+		btr->set_busv(bus);
+		btr->set_departure_time (btr->get_starttime());
 	  }
-
+	
 	  btr->set_previous_bus(bus);
+	  btr->set_bustype(bty);
 	  Start_trip* st = new Start_trip (btr, btr->get_starttime());
-	  driving_roster.push_back(st);
+	  driving_roster.push_back(st); 
   }
 
-  bus->add_trips(driving_roster);
+  for (vector<Start_trip*>::iterator trip = driving_roster.begin(); trip < driving_roster.end(); trip++)
+  {
+	//for (vector<Start_trip*>::iterator trip1 = driving_roster.begin(); trip1 < driving_roster.end(); trip1++)	
+	//{
+	//	(*trip)->first->add_driving_roster((*trip1)->first,(*trip1)->second);
+	//}
+		(*trip)->first->add_trips(driving_roster);
+		//if ((*trip)->first == (*(find_if(bustrips.begin(), bustrips.end(), compare <Bustrip> ((*trip)->first->get_id()) ))))
+		//{
+		//	(*trip)->first->set_this_trip (trip);
+		//}
+  }
+  
+ // bus->add_trips(driving_roster);
   busvehicles.push_back (bus);
   in >> bracket;
   if (bracket != '}')

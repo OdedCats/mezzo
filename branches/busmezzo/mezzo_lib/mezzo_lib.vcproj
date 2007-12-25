@@ -155,10 +155,6 @@
 				RelativePath=".\src\vissimcom.cpp"
 				>
 			</File>
-			<File
-				RelativePath=".\src\vtypes.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
