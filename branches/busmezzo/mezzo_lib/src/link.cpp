@@ -349,6 +349,7 @@ bool Link::enter_veh(Vehicle* veh, double time)
 				double time_to_stop = time + ((exit_time - time) * (stop_position / length)); 
 				// book  stop visit
 				trip->book_stop_visit (time_to_stop, bus);
+				return true;
 			}
 		}
 	}

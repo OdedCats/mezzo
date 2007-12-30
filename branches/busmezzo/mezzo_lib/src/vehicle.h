@@ -86,10 +86,11 @@ class Bus : public Vehicle
 public:
 	Bus():Vehicle() 
 	{
-		occupancy=0;
+		occupancy = 0;
 		on_trip = false;
 		number_seats = 50;
 		capacity = 80;
+		type = 4;
 		random = new (Random);
 		if (randseed != 0)
 		{
@@ -106,6 +107,7 @@ public:
 		on_trip = false;
 		number_seats = 50;
 		capacity = 80;
+		type = 4;
 		random = new (Random);
 		if (randseed != 0)
 		{
@@ -121,7 +123,6 @@ public:
 		type = 4;
 		occupancy = 0;
 		on_trip = false;
-		//curr_trip = (*(driving_roster.begin()))->first;
 		length = bty->get_length();
 		number_seats = bty->get_number_seats();
 		capacity = bty->get_capacity();
@@ -142,21 +143,15 @@ public:
 	void set_occupancy (const int occup) {occupancy=occup;}
 	int get_number_seats () {return number_seats;}
 	int get_capacity () {return capacity;}
-	int get_on_trip () {return on_trip;}
+	bool get_on_trip () {return on_trip;}
 	void set_on_trip (bool on_trip_) {on_trip=on_trip_;}
 	Bustype* get_bus_type () {return bus_type;}
-	//int get_at_stop() { return at_stop; }
-	//void set_at_stop ( bool val) { at_stop = val;}
-	
-	void set_bustype_attributes (Bustype* bty); // change the fields that are determined by the bustype
-	double calc_departure_time (double time); // calculates departure time from origin according to arrival time and schedule (including layover effect)
-	void advance_curr_trip (double time, Eventlist* eventlist); // progresses trip-pointer 
-//	void write_buses_generation (string name); // Not needed anymore
-//	void add_trips (vector <Start_trip*>  st) {driving_roster = st; curr_trip = driving_roster.begin();}
-//	vector <Start_trip*> driving_roster; // trips assignment for each bus vehicle.
-	//vector <Start_trip*>::iterator& get_curr_trip() {return curr_trip;} // returns pointer to current trip
 	void set_curr_trip (Bustrip* curr_trip_) {curr_trip = curr_trip_;}
 	Bustrip* get_curr_trip () {return curr_trip;}
+	
+// other functions:	
+	void set_bustype_attributes (Bustype* bty); // change the fields that are determined by the bustype
+	void advance_curr_trip (double time, Eventlist* eventlist); // progresses trip-pointer 
 
 protected:
 	int	bus_id;
@@ -166,8 +161,6 @@ protected:
 	int capacity; // In the future will be determined according to the bus type
 	int occupancy;
 	Bustrip* curr_trip;
-	//vector <Start_trip*>::iterator curr_trip; // pointer to the current trip served by the bus vehicle
-	//bool at_stop;
 	bool on_trip; // is true when bus is on a trip and false when waiting for the next trip	
 };
 

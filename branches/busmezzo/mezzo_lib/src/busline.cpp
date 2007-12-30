@@ -20,7 +20,7 @@ struct compare_pair
  int id;
 };
 
-// Busline functions
+// ***** Busline functions *****
 
 Busline::Busline ()
 {
@@ -82,24 +82,23 @@ bool Busline::is_line_timepoint (Busstop* stop)
 return false;
 }
 
-// Bustrip Functions
+// ***** Bustrip Functions *****
 
 Bustrip::Bustrip ()
 {
 	init_occupancy=0;
-	avaliable_bus=false;
 }
 
 Bustrip::Bustrip (int id_, double start_time_): id(id_), starttime(start_time_)
 {
 	init_occupancy=0;
-	avaliable_bus=false;
-//	for (map<Busstop*,bool>::iterator tp = trips_timepoint.begin(); tp != trips_timepoint.end(); tp++)
-//	{
-//		tp->second = false;
-//	} // will be relevant only when time points will be trip-specific
+	/*  will be relevant only when time points will be trip-specific
+	for (map<Busstop*,bool>::iterator tp = trips_timepoint.begin(); tp != trips_timepoint.end(); tp++)
+	{
+		tp->second = false;
+	} 
+	*/
 }
-
 
 Bustrip::~Bustrip ()
 {}
@@ -110,22 +109,24 @@ double Bustrip::calc_departure_time (double time) // calculates departure time f
 	double mean_error_recovery = 2.00;
 	double std_error_recovery = 1.00;
 	// These three parameters should be used from the parameters input file
-
-	//double scheduled_departure = (*curr_trip)->second; // departure time according to schedule
-	vector <Start_trip*>::iterator this_trip;
+	vector <Start_trip*>::iterator curr_trip; // find the pointer to the current trip
 	for (vector <Start_trip*>::iterator trip = driving_roster.begin(); trip < driving_roster.end(); trip++)
 	{
 		if ((*trip)->first == this)
 		{
-			this_trip = trip;
+			curr_trip = trip;
 			break;
 		}
 	}
-	if (this_trip == driving_roster.begin()) // if it is the first trip for this bus
+	if (curr_trip == driving_roster.begin()) // if it is the first trip for this bus
 	{
 		return starttime;  // first dispatching is cuurently assumed to follow the schedule
 	}
 	else
+	// if it is not the first trip for this bus then:
+	// if the scheduled time is after arrival+recovery, it determines departure time. 
+	// otherwise (bus arrived behind schedule) - delay at origin.
+	// in any case - there is error factor.
 	{
 		random = new (Random);
 		if (randseed != 0)
@@ -138,35 +139,39 @@ double Bustrip::calc_departure_time (double time) // calculates departure time f
 		}
 		return (Max (time + min_recovery , starttime) + random->lnrandom (mean_error_recovery, std_error_recovery)); // error factor following log normal distribution;
 	}
-	// If the scheduled time is after arrival+recovery, it determines departure time. 
-	// Otherwise (bus arrived behind schedule) - delay at origin.
 }
 
 bool Bustrip::advance_next_stop (double time, Eventlist* eventlist)
 {
-	next_stop++;
-	if (next_stop == stops.end()) // if it was the last stop for this trip
+	if (busv->get_on_trip()== true && next_stop < stops.end()) // progress to the next stop, unless it is the last stop for this trip
+	{
+		next_stop++;
+		return true;
+	}
+	if (busv->get_on_trip()== false && next_stop == stops.end()) // if it was the last stop for this trip
 	{	
-		//vector <Start_trip*>::iterator curr_trip = busv->get_curr_trip();
-		busv->advance_curr_trip(time, eventlist); // progress the roster for the vehicle
-		vector <Start_trip*>::iterator last_trip = driving_roster.end()-1;
-		if (busv->get_curr_trip() == (*last_trip)->first) // if it was the last trip for this vehicle - send to recycle
+		vector <Start_trip*>::iterator curr_trip, next_trip; // find the pointer to the current and next trip
+		for (vector <Start_trip*>::iterator trip = driving_roster.begin(); trip < driving_roster.end(); trip++)
 		{
-			recycler.addBus(busv);
-			/*
-			vector <Start_trip*>::iterator next_trip = busv->get_curr_trip();
-			next_trip++;
-			(*next_trip)->first->set_previous_bus(busv);
-			Start_trip* curr_trip = (*(find_if(driving_roster.begin(), driving_roster.end(), compare_pair <Start_trip*> (id))));
-			vector <Start_trip*>::iterator this_trip;
-			for (vector <Start_trip*>::iterator trip = driving_roster.begin(); trip < driving_roster.end(); trip++)
+			if ((*trip)->first == this)
 			{
-				if ((*trip)->first == this)
-				{
-					this_trip = trip;
-					break;
-				}
-				*/
+				curr_trip = trip;
+				break;
+			}
+				
+		}
+		next_trip = curr_trip +1;
+		busv->advance_curr_trip(time, eventlist); // progress the roster for the vehicle
+		//int pass_id = busv->get_id();
+		//recycler.addBus(busv);
+		vector <Start_trip*>::iterator last_trip = driving_roster.end()-1;
+		if (busv->get_curr_trip() != (*last_trip)->first) // if there are more trips for this vehicle
+		{
+			vid++;
+			Bus* new_bus=recycler.newBus(); // then generate a new (chained) vehicle 
+			new_bus->set_bustype_attributes ((*next_trip)->first->get_bustype());
+			(*next_trip)->first->set_busv (new_bus);
+			new_bus->set_curr_trip((*next_trip)->first);
 		}
 		return false;
 	}
@@ -178,21 +183,34 @@ bool Bustrip::advance_next_stop (double time, Eventlist* eventlist)
 
 bool Bustrip::activate (double time, Route* route, Vtype* vehtype, ODpair* odpair, Eventlist* eventlist_)
 {
+	// inserts the bus at the origin of the route
+	// if the assigned bus isn't avaliable at the scheduled time, then the trip is activated by Bus::advance_curr_trip as soon as it is done with the previous trip
 	eventlist = eventlist_;
 	bool ok = false; // flag to check if all goes ok
-	if (avaliable_bus == true) // if the assigned bus is avaliable 
+	if (busv->get_on_trip() == false) // if the assigned bus is avaliable 
 	{
-		vid++;
-		Bus* new_bus=recycler.newBus(); // then generate a new vehicle
-		//new_bus = previous_busv; // pass over the attributes
-		//vector <Start_trip*>::iterator next_trip = busv->get_curr_trip();
-		//next_trip++;
-		//(*next_trip)->first->set_previous_bus(new_bus);
-		busv = new_bus;
+		vector <Start_trip*>::iterator curr_trip, next_trip; // find the pointer to the current and next trip
+		for (vector <Start_trip*>::iterator trip = driving_roster.begin(); trip < driving_roster.end(); trip++)
+		{
+			if ((*trip)->first == this)
+			{
+				curr_trip = trip;
+				break;
+			}
+				
+		}
+		if (curr_trip == driving_roster.begin()) // if it is the first trip for this chain
+		{
+			vid++;
+			Bus* new_bus=recycler.newBus(); // then generate a new vehicle
+			new_bus->set_bustype_attributes (btype);
+			busv =new_bus;
+			busv->set_curr_trip(this);
+			
+		}
 		busv->init(busv->get_id(),4,busv->get_length(),route,odpair,time); // initialize with the trip specific details
-		busv->set_curr_trip(this);
-		busv->set_bustype_attributes (btype);
-		if ( (odpair->get_origin())->insert_veh(busv, calc_departure_time(time))) // insert the bus at the origin 
+		busv->set_on_trip (true);
+		if ( (odpair->get_origin())->insert_veh(busv, calc_departure_time(time))) // insert the bus at the origin at the possible departure time
 		{
   			busv->set_on_trip(true); // turn on indicator for bus on a trip
 			ok=true;
@@ -205,21 +223,20 @@ bool Bustrip::activate (double time, Route* route, Vtype* vehtype, ODpair* odpai
 	else 
 	{
 		ok=false;
-	 // if the bus assigned to this trip exists but is not avaliable yet, then it will be activated 
-	 // from Bus::advance_curr_trip as soon as it is done with the previous trip
-	 // (and then will get into the previous condition)	
 	}	
 	return ok;
 }
 
 void Bustrip::book_stop_visit (double time, Bus* bus)
 { 
+	// books an event for the arrival of a bus at a bus stop
 	((*next_stop)->first)->book_bus_arrival(eventlist,time,bus);
 }
 
 
 bool Bustrip::check_end_trip ()
 {
+	// indicates if the trip doesn't have anymore stops on its route
 	if (next_stop == stops.end())
 	{
 		return true;
@@ -243,9 +260,7 @@ double Bustrip::scheduled_arrival_time (Busstop* stop) // finds the scheduled ar
 	return 0; // if bus stop isn't on the trip's route
 }
 
-
-
-/*
+/* will be relevant only when time points will be trip-specific
 bool Bustrip::is_trip_timepoint (Busstop* stop)
 {
 	 if (trips_timepoint.count(stop) > 0)
@@ -256,7 +271,7 @@ bool Bustrip::is_trip_timepoint (Busstop* stop)
 */
 
 
-// Busstop functions
+// ***** Busstop functions *****
 
 Busstop::Busstop()
 {
@@ -269,7 +284,6 @@ Busstop::Busstop()
 Busstop::Busstop (int id_, int link_id_, double position_, double length_, bool has_bay_, double dwelltime_):
 	id(id_), link_id(link_id_), position (position_), length(length_), has_bay(has_bay_), dwelltime(dwelltime_)
 {
-	
 	avaliable_length = length;
 	nr_boarding = 0;
 	nr_alighting = 0;
@@ -293,54 +307,101 @@ Busstop::~Busstop ()
 
 void Busstop::book_bus_arrival(Eventlist* eventlist, double time, Bus* bus)
 {
+	// books an event for the arrival of a bus at a bus stop by adding it to the expected arrivals at the stop 
 	expected_arrivals [time] = bus; // not sure if we really want to index them by time? maybe simply by bus id?
 	eventlist->add_event(time,this);
-	
-} // add to expected arrivals
+} 
 
 bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the eventlist and means a bus needs to be processed
 {
-	if (buses_at_stop.count(time) > 0) // Search if this is for a bus exiting the stop
+  	// progress the vehicle when entering or exiting a stop
+	// if this is for a bus exiting the stop:
+	if (buses_at_stop.count(time) > 0) 
 	{
-		//BUS exiting stop
-		Bus* bus = buses_at_stop [time];
+		Bus* bus = buses_at_stop [time]; // identify the relevant bus
 		free_length (bus);
 		buses_at_stop.erase(time);
+		double relative_length, relative_time;
+		// calculate the updated exit time from the link	
+		double ro =0.0;
+		#ifdef _RUNNING     // if running segment is seperate density is calculated on that part only
+			ro=bus->get_curr_link()->density_running(time);
+		#else
+			#ifdef _RUNNING_ONLY
+				ro = bus->get_curr_link()->density_running_only(time);
+			#else	
+			ro=bus->get_curr_link()->density();
+			#endif	//_RUNNING_ONLY
+		#endif  //_RUNNING
+	
+		double speed = bus->get_curr_link()->get_sdfunc()->speed(ro);	
+		double exit_time = (time + (bus->get_curr_link()->get_length()/speed)) ;
+	
+		#ifdef _USE_EXPECTED_DELAY
+			double exp_delay = 1.44 * (queue->queue(time)) / bus->get_curr_link()->get_nr_lanes();
+			exit_time = exit_time + exp_delay;
+		#endif //_USE_EXPECTED_DELAY
+		bus->set_exit_time (exit_time);
+		if (bus->get_curr_trip()->check_end_trip() == false) // if there are more stops on the bus's route
+		{
+			Visit_stop* next_stop1 = *(bus->get_curr_trip()->get_next_stop());
+			if (bus->get_curr_link()->get_id() == (next_stop1->first->get_link_id())) // the next stop is on this link
+			{
+				double stop_position = (next_stop1->first)->get_position();
+				relative_length = (stop_position - position)/(bus->get_curr_link()->get_length());
+				relative_time = bus->get_exit_time() - time;
+				double time_to_stop = time + relative_time * relative_length; // calculated for the interval between the two sequential stops
+				bus->get_curr_trip()->book_stop_visit (time_to_stop, bus); // book  stop visit
+			}
+			else // the next stop is not on this link
+			{
+				Vehicle* veh =  (Vehicle*)(bus); // so we can do vehicle operations
+				relative_length = (bus->get_curr_link()->get_length()-position)/ bus->get_curr_link()->get_length();
+				relative_time = bus->get_exit_time() - time;
+				double exit_time = time + relative_time * relative_length; // calculated for the remaining part of the link
+				veh->set_exit_time(exit_time);
+				veh->get_curr_link()->get_queue()->enter_veh(veh);
+			}
+		}
+		else // there are no more stops on this route
+		{
+			Vehicle* veh =  (Vehicle*)(bus); // so we can do vehicle operations
+			relative_length = (bus->get_curr_link()->get_length()-position)/ bus->get_curr_link()->get_length();
+			relative_time = bus->get_exit_time() - time;
+			double exit_time = time + relative_time * relative_length; // calculated for the remaining part of the link 
+			veh->set_exit_time(exit_time);
+			veh->get_curr_link()->get_queue()->enter_veh(veh);
+			bus->set_on_trip(false); // indicate that there are no more stops on this route
+			bool val = bus->get_curr_trip()->advance_next_stop(exit_time, eventlist); // only in order to advance to the next trip
+		}
 	}
-	else if (expected_arrivals.count(time) > 0) // Search if this is for a bus entering the stop
+	// if this is for a bus entering the stop:
+	else if (expected_arrivals.count(time) > 0) 
 	{		
-		// BUS entering stop
-		Bus* bus = expected_arrivals [time];
+		Bus* bus = expected_arrivals [time]; // identify the relevant bus
 		occupy_length (bus);
-		//vector <Start_trip*>::iterator curr_trip = bus->get_curr_trip();
-		exit_time = calc_exiting_time(bus->get_curr_trip(), time); 
-		// get the expected exit time according to dwell time calculations and time point considerations
-
-		buses_at_stop [time + exit_time] = bus; 	
-		eventlist->add_event (time + exit_time, this); // book an event for the time it exits the stop
-
+		exit_time = calc_exiting_time(bus->get_curr_trip(), time); // get the expected exit time according to dwell time calculations and time point considerations
+		buses_at_stop [exit_time] = bus; 
+		eventlist->add_event (exit_time, this); // book an event for the time it exits the stop
 		write_busstop_visit ("buslog_out.dat", bus->get_curr_trip(), time); // document stop-related info
 								// done BEFORE update_last_departures in order to calc the headway
-		bool val = bus->get_curr_trip()->advance_next_stop(exit_time, eventlist);
+		bool val = bus->get_curr_trip()->advance_next_stop(exit_time, eventlist); 
 		update_last_departures (bus->get_curr_trip(), exit_time); // in order to follow the headways
 		expected_arrivals.erase(time);
-		
-		/*
-		bool rest_of_trip;
-		rest_of_trip = (*curr_trip)->advance_next_stop(exit_time, eventlist); // advance the pointer to the next bus stop
-		if (rest_of_trip == false) // If the bus reached it last stop - move the pointer to the next trip
-		{
-			bus->advance_curr_trip();
-			eventlist->add_event (time + bus->calc_departure_time(time), this);
-		}
-		*/
 	}
 	return true;
 }
 double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dwelltime of each bus serving this stop
 {
-	int loadfactor; // bus crowdedness factor
-	int curr_occupancy = trip->get_busv()->get_occupancy(); // pass. on the bus when entring the stop, the value will be imported from the bus object
+	int loadfactor, curr_occupancy; // bus crowdedness factor
+	if (trip->get_next_stop() == trip->stops.begin()) // pass. on the bus when entring the stop
+	{
+		curr_occupancy = trip->get_init_occupancy();
+	}
+	else
+	{
+		curr_occupancy = trip->get_busv()->get_occupancy(); 
+	}
 	int boarding_standees;
 	int alighting_standees;
 	int number_seats = trip->get_busv()->get_number_seats(); // will be imported from the bus object

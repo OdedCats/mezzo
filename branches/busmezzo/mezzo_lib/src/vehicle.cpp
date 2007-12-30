@@ -105,9 +105,10 @@ VehicleRecycler::	~VehicleRecycler()
 
 }
 
-// Special Bus Functions
+// ***** Special Bus Functions *****
 
-void Bus::set_bustype_attributes (Bustype* bty) // change the fields that are determined by the bustype
+void Bus::set_bustype_attributes (Bustype* bty) 
+// change the fields that are determined by the bustype
 {
 	type = 4;
 	length = bty->get_length();
@@ -116,79 +117,33 @@ void Bus::set_bustype_attributes (Bustype* bty) // change the fields that are de
 	bus_type = bty;
 }
 
-/*
-double Bus::calc_departure_time (double time) // calculates departure time from origin according to arrival time and schedule (including layover effect)
+void Bus::advance_curr_trip (double time, Eventlist* eventlist) // progresses trip-pointer 
 {
-	double min_recovery = 2.00; 
-	double mean_error_recovery = 2.00;
-	double std_error_recovery = 1.00;
-	// These three parameters should be used from the parameters input file
-
-	double scheduled_departure = (*curr_trip)->second; // departure time according to schedule
-
-	if (get_curr_trip() == driving_roster.begin()) // if it is the first trip for this bus
-	{
-		return scheduled_departure;
-			// first dispatching is cuurently assumed to follow the schedule
-	}
-
-	double departure_time = Max (time + min_recovery , scheduled_departure);
-	// If the scheduled time is after arrival+recovery, it determines departure time. 
-	// Otherwise (bus arrived behind schedule) - delay at origin.
-
-	return (departure_time + random->lnrandom (mean_error_recovery, std_error_recovery)); // error factor following log normal distribution;
-}
-*/
-
-void Bus::advance_curr_trip (double time, Eventlist* eventlist) 
-{
-	//curr_trip++; // a trip was completed - points to the next trip on the schedule
-	vector <Start_trip*>::iterator this_trip, next_trip;
+	vector <Start_trip*>::iterator trip1, next_trip; // find the pointer to the current and next trip
 	for (vector <Start_trip*>::iterator trip = curr_trip->driving_roster.begin(); trip < curr_trip->driving_roster.end(); trip++)
 	{
 		if ((*trip)->first == curr_trip)
 		{
-			this_trip = trip;
+			trip1 = trip;
 			break;
 		}
 	}
-	next_trip = this_trip+1;
-	
+	next_trip = trip1+1;
+	on_trip = false;  // the bus is avaliable for its next trip
 	if (next_trip != curr_trip->driving_roster.end()) // there are more trips for this bus
 	{
-		(*next_trip)->first->set_avaliable_bus(true); // the bus is avaliable for its next trip
-		/*
-		Bus* new_bus=recycler.newBus(); // then generate a new vehicle
-		new_bus = this;
-		(*curr_trip)->first->set_busv(new_bus);
-		*/
 		if ((*next_trip)->first->get_starttime() <= time) // if the bus is already late for the next trip
 		{
 			Busline* line = (*next_trip)->first->get_line();
 			// then the trip is activated
-			// to be implemented: take care of some stochastic recovery time
 			(*next_trip)->first->activate((*next_trip)->first->calc_departure_time(time), line->get_busroute(), line->get_vtype(), line->get_odpair(), eventlist);
 		}
-		else // if the bus is early for the next trip
-		{
-			set_on_trip (false);
-		}
-	}
-	else // there are no more trips for this bus
-	{
-		set_on_trip (false); // no more trips on the schedule for this bus
+		// if the bus is early for the next trip, then it will be activated at the scheduled time from Busline
 	}
 }
 
-// not needed anymore
-/*void Bus::write_buses_generation (string name)
-{
-	ofstream out(name.c_str());
-	assert(out);
-	out << "Bus ID: " << get_id() << " was created at: " << start_time << endl;  
-}*/
 
-// Bus-types functions
+// ***** Bus-types functions *****
 Bustype::Bustype ()
 {
 }

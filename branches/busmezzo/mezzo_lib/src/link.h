@@ -83,6 +83,8 @@ public:
 	const int get_in_node_id() ;
 	const int get_length() {return length;}	
 	const int get_nr_lanes() {return nr_lanes;}
+	Sdfunc* get_sdfunc() {return sdfunc;}
+	Q* get_queue () {return queue;}
 	//const int Link::size();
 	const int size();
 	void set_hist_time(double time) {	hist_time=time;}

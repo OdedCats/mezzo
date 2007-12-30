@@ -1467,39 +1467,22 @@ bool Network::read_busvehicle(istream& in) // reads a bus vehicle
   		cout << "readfile::readsbusvehicle scanner jammed at " << bracket;
   		return false;
   }
-  for (int i=0; i < nr_trips; i++)
+  for (int i=0; i < nr_trips; i++) // for each trip on the chain
   {
 	  in >> trip_id;
-	  // create the Start_trip
-	  // find the trip in the list
-	  Bustrip* btr=(*(find_if(bustrips.begin(), bustrips.end(), compare <Bustrip> (trip_id) )));
-	  if (i==0) 
+	  Bustrip* btr=(*(find_if(bustrips.begin(), bustrips.end(), compare <Bustrip> (trip_id) ))); // find the trip in the list
+	  if (i==0) // for the first trip on the chain
 	  {
-		btr->set_avaliable_bus(true); // the vehicle is avaliable for the first trip on its driving roster
 		btr->set_busv(bus);
-		btr->set_departure_time (btr->get_starttime());
 	  }
-	
-	  btr->set_previous_bus(bus);
-	  btr->set_bustype(bty);
+	  btr->set_bustype(bty); 
 	  Start_trip* st = new Start_trip (btr, btr->get_starttime());
-	  driving_roster.push_back(st); 
+	  driving_roster.push_back(st); // save the driving roster at the vehicle level
   }
-
   for (vector<Start_trip*>::iterator trip = driving_roster.begin(); trip < driving_roster.end(); trip++)
   {
-	//for (vector<Start_trip*>::iterator trip1 = driving_roster.begin(); trip1 < driving_roster.end(); trip1++)	
-	//{
-	//	(*trip)->first->add_driving_roster((*trip1)->first,(*trip1)->second);
-	//}
-		(*trip)->first->add_trips(driving_roster);
-		//if ((*trip)->first == (*(find_if(bustrips.begin(), bustrips.end(), compare <Bustrip> ((*trip)->first->get_id()) ))))
-		//{
-		//	(*trip)->first->set_this_trip (trip);
-		//}
+	(*trip)->first->add_trips(driving_roster); // save the driving roster at the trip level for each trip on the chain
   }
-  
- // bus->add_trips(driving_roster);
   busvehicles.push_back (bus);
   in >> bracket;
   if (bracket != '}')

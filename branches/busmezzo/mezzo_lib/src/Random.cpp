@@ -272,6 +272,10 @@ Random::poisson (double relative_lambda) // using a cdf inverse. The duration is
 	long double sum_p, sum = 0.0;
 	int counter = 0;
 	long double cdf_value = urandom();
+	if (relative_lambda == 0)
+	{
+		return 0;
+	}
 	if (relative_lambda > 12)
 	{
 		return Round(nrandom_trunc(relative_lambda,relative_lambda,0.0));
