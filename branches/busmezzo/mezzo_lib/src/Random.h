@@ -81,6 +81,7 @@ public:
   // lognormal with mean m and stddev v
 
   double lnrandom(double m, double v);
+  double lnrandom1(double m, double v);
 
   // discrete random number in [0, n) with given CDF
 

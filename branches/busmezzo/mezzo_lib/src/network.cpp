@@ -693,12 +693,6 @@ bool Network::readserver(istream& in)
    assert  ( (find_if (servers.begin(),servers.end(), compare <Server> (sid))) == servers.end() );   // no server with sid exists
    assert ( (stype > -1) && (stype < 4) && (mu>0.0) && (sd>=0.0) && (delay>=0.0)); // to be updated when more server types are added
    // check id, vmax, vmin, romax;
-   in >> bracket;
-   if (bracket != '}')
-  {
-  	cout << "readfile::readservers scanner jammed at " << bracket;
-  	return false;
-  }
 	// type 0= dummy server: Const server
 	// type 1=standard N(mu,sd) sever
    // type 2=deterministic (mu) server
@@ -714,8 +708,16 @@ bool Network::readserver(istream& in)
 	if (stype==3)
 	{
 		in >> delay_std;
-		assert (delay_std >=0.0); 
-		servers.insert(servers.begin(),new StochasticDelayServer(sid,stype,mu,sd,delay,delay_std));
+		assert (delay_std >=0.0);
+		StochasticDelayServer* ser = new StochasticDelayServer (sid,stype,mu,sd,delay,delay_std);
+		ser->set_delay_std (delay_std);
+		servers.insert(servers.begin(),ser);
+	}
+	in >> bracket;
+    if (bracket != '}')
+    {
+  		cout << "readfile::readservers scanner jammed at " << bracket;
+  		return false;
 	}
 #ifdef _DEBUG_NETWORK
   cout << " read a server"<<endl;
@@ -1471,9 +1473,10 @@ bool Network::read_busvehicle(istream& in) // reads a bus vehicle
   {
 	  in >> trip_id;
 	  Bustrip* btr=(*(find_if(bustrips.begin(), bustrips.end(), compare <Bustrip> (trip_id) ))); // find the trip in the list
-	  if (i==0) // for the first trip on the chain
+	  btr->set_busv(bus);
+	  if (i>0) // flag as busy for all trip except the first on the chain
 	  {
-		btr->set_busv(bus);
+		  btr->get_busv()->set_on_trip(true);
 	  }
 	  btr->set_bustype(bty); 
 	  Start_trip* st = new Start_trip (btr, btr->get_starttime());

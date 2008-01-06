@@ -115,14 +115,12 @@ class StochasticDelayServer : public Server
   */
 {
 public:
-	StochasticDelayServer (const int id_, const int type_, const double mu_, const double sd_, const double delay_mean, const double std_delay) :
-		Server (id_,type_,mu_,sd_,delay_mean) {}
-	const double get_delay ();
-	double get_delay_mean () {return delay_mean;}
+	StochasticDelayServer (const int id_, const int type_, const double mu_, const double sd_, const double delay_, const double delay_std) :
+	  Server (id_,type_,mu_,sd_,delay_) {}
+	double next (const double time);
 	double get_delay_std () {return delay_std;}
-
+	void set_delay_std (double delay_std_) {delay_std = delay_std_;}
 protected:
-	double delay_mean;
 	double delay_std;
 };
 

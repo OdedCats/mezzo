@@ -161,9 +161,6 @@ bool Bustrip::advance_next_stop (double time, Eventlist* eventlist)
 				
 		}
 		next_trip = curr_trip +1;
-		busv->advance_curr_trip(time, eventlist); // progress the roster for the vehicle
-		//int pass_id = busv->get_id();
-		//recycler.addBus(busv);
 		vector <Start_trip*>::iterator last_trip = driving_roster.end()-1;
 		if (busv->get_curr_trip() != (*last_trip)->first) // if there are more trips for this vehicle
 		{
@@ -173,6 +170,10 @@ bool Bustrip::advance_next_stop (double time, Eventlist* eventlist)
 			(*next_trip)->first->set_busv (new_bus);
 			new_bus->set_curr_trip((*next_trip)->first);
 		}
+		busv->advance_curr_trip(time, eventlist); // progress the roster for the vehicle
+		//int pass_id = busv->get_id();
+		//recycler.addBus(busv);
+		
 		return false;
 	}
 	else
@@ -187,43 +188,43 @@ bool Bustrip::activate (double time, Route* route, Vtype* vehtype, ODpair* odpai
 	// if the assigned bus isn't avaliable at the scheduled time, then the trip is activated by Bus::advance_curr_trip as soon as it is done with the previous trip
 	eventlist = eventlist_;
 	bool ok = false; // flag to check if all goes ok
-	if (busv->get_on_trip() == false) // if the assigned bus is avaliable 
+	vector <Start_trip*>::iterator curr_trip, previous_trip; // find the pointer to the current and previous trip
+	for (vector <Start_trip*>::iterator trip = driving_roster.begin(); trip < driving_roster.end(); trip++)
 	{
-		vector <Start_trip*>::iterator curr_trip, next_trip; // find the pointer to the current and next trip
-		for (vector <Start_trip*>::iterator trip = driving_roster.begin(); trip < driving_roster.end(); trip++)
+		if ((*trip)->first == this)
 		{
-			if ((*trip)->first == this)
-			{
-				curr_trip = trip;
-				break;
-			}
-				
+			curr_trip = trip;
+			break;
 		}
-		if (curr_trip == driving_roster.begin()) // if it is the first trip for this chain
-		{
-			vid++;
-			Bus* new_bus=recycler.newBus(); // then generate a new vehicle
-			new_bus->set_bustype_attributes (btype);
-			busv =new_bus;
-			busv->set_curr_trip(this);
-			
-		}
-		busv->init(busv->get_id(),4,busv->get_length(),route,odpair,time); // initialize with the trip specific details
-		busv->set_on_trip (true);
-		if ( (odpair->get_origin())->insert_veh(busv, calc_departure_time(time))) // insert the bus at the origin at the possible departure time
-		{
-  			busv->set_on_trip(true); // turn on indicator for bus on a trip
-			ok=true;
-		}
-		else // if insert returned false
-  		{
-  			ok=false; 
-  		}
 	}
-	else 
+	if (curr_trip == driving_roster.begin()) // if it is the first trip for this chain
 	{
-		ok=false;
+		vid++;
+		Bus* new_bus=recycler.newBus(); // then generate a new vehicle
+		new_bus->set_bustype_attributes (btype);
+		busv =new_bus;
+		busv->set_curr_trip(this);	
+	}
+	else // if it isn't the first trip for this chain 
+	{
+		previous_trip = curr_trip-1;
+		if ((*previous_trip)->first->busv->get_on_trip() == true) // if the assigned bus isn't avaliable 
+		{
+			ok=false;
+			return ok;
+		}
 	}	
+	busv->init(busv->get_id(),4,busv->get_length(),route,odpair,time); // initialize with the trip specific details
+	busv->set_on_trip (true);
+	if ( (odpair->get_origin())->insert_veh(busv, calc_departure_time(time))) // insert the bus at the origin at the possible departure time
+	{
+  		busv->set_on_trip(true); // turn on indicator for bus on a trip
+		ok = true;
+	}
+	else // if insert returned false
+  	{
+  		ok = false; 
+  	}	
 	return ok;
 }
 
