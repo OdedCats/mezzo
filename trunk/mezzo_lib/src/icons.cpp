@@ -1,6 +1,7 @@
 //#undef _NO_GUI
 #ifndef _NO_GUI
 
+#include "node.h"
 #include "icons.h"
 #include "parameters.h"
 #include <math.h>
@@ -262,13 +263,12 @@ void VirtualLinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pix
 // NodeIcon functions
 ///////////////////////////////////////////////
 
-NodeIcon::NodeIcon( int x, int y): Icon(x,y)
+NodeIcon::NodeIcon( int x, int y, Node* node):Icon(x,y)
 {
- 	//startx=x;
- 	//starty=y;
  	width=2*theParameters->node_radius;
  	height=2*theParameters->node_radius;
 	text="";
+	thenode_=node;
 }
 
 void NodeIcon::draw(QPixmap *pm,QMatrix *wm)
@@ -281,12 +281,33 @@ void NodeIcon::draw(QPixmap *pm,QMatrix *wm)
 
 	QPen pen1;
 	if (!selected)
+	{
 		pen1 =QPen(theParameters->nodecolor, theParameters->node_thickness);
+		paint.setPen(pen1);
+		if(thenode_->className()=="Origin")
+		{
+			paint.drawRect(startx,starty,width,height);
+		}
+		else if (thenode_->className()=="Destination")
+		{
+			static const QPointF points[3] = {
+					QPointF(startx+width/2, starty),
+					QPointF(startx, starty+height),
+					QPointF(startx+width, starty+height)
+			};
+			paint.drawPolygon(points,3);
+		}
+		else
+		{
+			paint.drawEllipse (startx,starty, width,height);
+		}
+	}
 	else
+	{
 		pen1 =QPen(selected_color, 8*(theParameters->node_thickness)); 
-
-	paint.setPen(pen1);
-	paint.drawEllipse (startx,starty, width,height ); 
+		paint.setPen(pen1);
+		paint.drawEllipse (startx,starty, width,height );
+	}
 	paint.end();	
 	// draw the stuff on pixmap
 }

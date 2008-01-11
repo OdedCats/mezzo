@@ -1,13 +1,12 @@
 /**
  * modification:
  *   add a handler to the linkicon
- *
+ *   
  * Xiaoliang Ma 
  * last change: 2007-10-30 
  */
  #ifndef ICONS_HH
 #define ICONS_HH
-
 //#undef _NO_GUI
 #ifndef _NO_GUI
 //Added by qt3to4:
@@ -24,6 +23,7 @@
 using namespace std;
 
 class Icon;
+class Node;
 
 class Drawing
 {
@@ -99,12 +99,13 @@ class VirtualLinkIcon: public LinkIcon
 
 class NodeIcon : public Icon
 {
-  public:
-  	NodeIcon(int x, int y) ;       
-	virtual ~NodeIcon(){};
+ public:
+  	NodeIcon(int x, int y, Node *node);
+	virtual ~NodeIcon(){}
     virtual void draw(QPixmap * pm,QMatrix * wm);
-  private:
+ private:
   	int width, height;
+	Node* thenode_;
       
 };
 

@@ -40,6 +40,7 @@ private slots:
 	void on_zoomout_activated();
 	void on_zoombywin_triggered(bool);
 	void on_showhandle_triggered(bool);
+	void on_inselectmode_triggered(bool);
 	void on_savescreenshot_activated();
 	void on_loadbackground_activated();
 	void on_breakoff_activated ();
@@ -52,11 +53,12 @@ private slots:
 	void on_saveresults_activated();
 		
 	// other slots	
-	void keyPressEvent(QKeyEvent *e);
-	void keyReleaseEvent(QKeyEvent *kev);
-	void mousePressEvent(QMouseEvent *event );
-	void mouseMoveEvent(QMouseEvent *mev);
-	void mouseReleaseEvent(QMouseEvent *mev);  
+	void keyPressEvent(QKeyEvent* e);
+	void keyReleaseEvent(QKeyEvent* kev);
+	void mousePressEvent(QMouseEvent* event);
+	void mouseDoubleClickEvent(QMouseEvent* mev); 
+	void mouseMoveEvent(QMouseEvent* mev);
+	void mouseReleaseEvent(QMouseEvent* mev);  
 	
 	void loop();
 	void paintEvent(QPaintEvent *event );
@@ -99,6 +101,7 @@ private:
 	// states
 	bool initialised;
 	bool zoombywin_triggered_;
+	bool inselection_;
 
 	//key and mouse states
 	bool lmouse_pressed_;

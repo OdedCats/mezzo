@@ -193,8 +193,8 @@
     </property>
     <property name="sizePolicy" >
      <sizepolicy>
-      <hsizetype>7</hsizetype>
-      <vsizetype>7</vsizetype>
+      <hsizetype>5</hsizetype>
+      <vsizetype>5</vsizetype>
       <horstretch>0</horstretch>
       <verstretch>0</verstretch>
      </sizepolicy>
@@ -603,7 +603,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>338</width>
+     <width>370</width>
      <height>32</height>
     </rect>
    </property>
@@ -627,12 +627,13 @@
    <addaction name="zoomout" />
    <addaction name="zoombywin" />
    <addaction name="linkhandlemark" />
+   <addaction name="inselectmode" />
    <addaction name="separator" />
   </widget>
   <widget class="Q3ToolBar" name="Toolbar2" >
    <property name="geometry" >
     <rect>
-     <x>338</x>
+     <x>370</x>
      <y>0</y>
      <width>79</width>
      <height>32</height>
@@ -653,14 +654,6 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="EditMenu" >
-    <property name="title" >
-     <string>&amp;Edit</string>
-    </property>
-    <addaction name="parametersdialog" />
-    <addaction name="loadbackground" />
-    <addaction name="inspectdialog" />
-   </widget>
    <widget class="QMenu" name="fileMenu" >
     <property name="title" >
      <string>&amp;File</string>
@@ -671,8 +664,26 @@
     <addaction name="saveresults" />
     <addaction name="quit" />
    </widget>
+   <widget class="QMenu" name="EditMenu" >
+    <property name="title" >
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="linkhandlemark" />
+    <addaction name="inselectmode" />
+    <addaction name="parametersdialog" />
+    <addaction name="loadbackground" />
+    <addaction name="inspectdialog" />
+   </widget>
+   <widget class="QMenu" name="menuSimulation" >
+    <property name="title" >
+     <string>Simulation</string>
+    </property>
+    <addaction name="run" />
+    <addaction name="breakoff" />
+   </widget>
    <addaction name="fileMenu" />
    <addaction name="EditMenu" />
+   <addaction name="menuSimulation" />
   </widget>
   <action name="openmasterfile" >
    <property name="icon" >
@@ -837,10 +848,30 @@
     <iconset resource="canvas_qt4.qrc" >:/images/penmark.png</iconset>
    </property>
    <property name="text" >
-    <string>linkhandlemark</string>
+    <string>Link marks</string>
    </property>
    <property name="toolTip" >
     <string>Show link handlers</string>
+   </property>
+  </action>
+  <action name="inselectmode" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
+   <property name="icon" >
+    <iconset resource="canvas_qt4.qrc" >:/images/file_edit.png</iconset>
+   </property>
+   <property name="text" >
+    <string>Selection mode</string>
+   </property>
+   <property name="iconText" >
+    <string>Selection mode</string>
+   </property>
+   <property name="toolTip" >
+    <string>Selction mode</string>
    </property>
   </action>
  </widget>

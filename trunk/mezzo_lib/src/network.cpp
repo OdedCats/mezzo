@@ -242,22 +242,22 @@ bool Network::readnode(istream& in)
    if (type==1)
   {
 	Origin* optr=new Origin(nid);
-  #ifndef _NO_GUI
-  os << "o:"<< nid << endl;
-   os.get(t,sz);
+#ifndef _NO_GUI
+	os << "o:"<< nid << endl;
+	os.get(t,sz);
 	optr->setxy(x,y);
-	NodeIcon* niptr=new NodeIcon(static_cast<int>(x),static_cast<int>(y));
-  niptr->settext(t);
+	NodeIcon* niptr=new NodeIcon(static_cast<int>(x),static_cast<int>(y), optr);
+	niptr->settext(t);
 	optr->set_icon(niptr);
 	drawing->add_icon(niptr);
-	#endif // _NO_GUI
+#endif // _NO_GUI
   	nodes.insert(nodes.begin(),optr);
   	origins.insert(origins.begin(),optr);
 #ifdef _DEBUG_NETWORK
   	cout << " origin " << nid;
 #endif //_DEBUG_NETWORK
   }
-   if (type==2)
+  if (type==2)
   {
     int sid;
     in >>  sid;
@@ -278,10 +278,10 @@ bool Network::readnode(istream& in)
     }
 #ifndef _NO_GUI
 	os << "d:"<< nid << endl;
-  os.get(t,sz);
+	os.get(t,sz);
  	dptr->setxy(x,y);
- 	NodeIcon* niptr=new NodeIcon(static_cast<int>(x),static_cast<int>(y));
-  niptr->settext(t);
+ 	NodeIcon* niptr=new NodeIcon(static_cast<int>(x),static_cast<int>(y),dptr);
+	niptr->settext(t);
 	dptr->set_icon(niptr);
 	drawing->add_icon(niptr);
 #endif //_NO_GUI
@@ -291,21 +291,21 @@ bool Network::readnode(istream& in)
   	 cout << " destination " << nid ;
 
 #endif //_DEBUG_NETWORK  	
-   }
-    if (type==3)     // JUNCTION
+  }
+  if (type==3)     // JUNCTION
   {
  	Junction* jptr=new Junction(nid);
 #ifndef _NO_GUI
 	os << "j:"<< nid << endl;
-  os.get(t,sz);
+	os.get(t,sz);
  	jptr->setxy(x,y);
-	NodeIcon* niptr=new NodeIcon(static_cast<int>(x),static_cast<int>(y));
-  niptr->settext(t);
+	NodeIcon* niptr=new NodeIcon(static_cast<int>(x),static_cast<int>(y),jptr);
+	niptr->settext(t);
 	jptr->set_icon(niptr);
 	drawing->add_icon(niptr);
 #endif // _NO_GUI
-   nodes.insert(nodes.begin(),jptr);
-   junctions.insert(junctions.begin(),jptr);
+	nodes.insert(nodes.begin(),jptr);
+	junctions.insert(junctions.begin(),jptr);
 #ifdef _DEBUG_NETWORK
    	 cout << " junction " << nid ;
 #endif //_DEBUG_NETWORK   	
@@ -315,10 +315,10 @@ bool Network::readnode(istream& in)
    BoundaryIn* dptr=new BoundaryIn(nid);
 #ifndef _NO_GUI
 	os << "bi:"<< nid << endl;
-  os.get(t,sz);
+	os.get(t,sz);
  	dptr->setxy(x,y);
- 	NodeIcon* niptr=new NodeIcon(static_cast<int>(x),static_cast<int>(y));
-  niptr->settext(t);
+ 	NodeIcon* niptr=new NodeIcon(static_cast<int>(x),static_cast<int>(y),dptr);
+	niptr->settext(t);
 	dptr->set_icon(niptr);
 	drawing->add_icon(niptr);
 #endif //_NO_GUI
@@ -333,13 +333,13 @@ bool Network::readnode(istream& in)
   if (type==5) // BOUNDARY OUT
     // 2002-12-03 NEW: Boundary out has become a junction, turning movements replace the bo actions
   {
-  BoundaryOut* jptr=new BoundaryOut(nid);
+	BoundaryOut* jptr=new BoundaryOut(nid);
 #ifndef _NO_GUI    
 	os << "bo:"<< nid << endl;
-  os.get(t,sz);
-  jptr->setxy(x,y);  
- 	NodeIcon* niptr=new NodeIcon(static_cast<int>(x),static_cast<int>(y));
-  niptr->settext(t);
+	os.get(t,sz);
+	jptr->setxy(x,y);  
+ 	NodeIcon* niptr=new NodeIcon(static_cast<int>(x),static_cast<int>(y),jptr);
+	niptr->settext(t);
 	jptr->set_icon(niptr);
 	drawing->add_icon(niptr);
 #endif //_NO_GUI
@@ -353,10 +353,10 @@ bool Network::readnode(istream& in)
 
    in >> bracket;
    if (bracket != '}')
-  {
+   {
   	cout << "readfile::readnodes scanner jammed at " << bracket;
   	return false;
-  }
+   }
 
 #ifdef _DEBUG_NETWORK
   cout << "read"<<endl;

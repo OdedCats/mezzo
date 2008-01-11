@@ -12,6 +12,7 @@
 
 #include "link.h"
 #include <vector>
+#include <string>
 #include "turning.h"
 #include "q.h"
 #include "vehicle.h"
@@ -66,6 +67,7 @@ class Node
 	Node(int id_);
 	virtual ~Node();
 	virtual const int get_id();
+	virtual const string className(){return "Node";}
 	void setxy(double x, double y);
 	const Coord getxy();
 #ifndef _NO_GUI
@@ -86,6 +88,7 @@ class Origin : public Node
 public:
 	Origin (int id_);
 	virtual ~Origin();
+	virtual const string className(){return "Origin";}
 	virtual bool transfer_veh(Link* link, double time); // transfers the vehicle from InputQueue to one of the
 																				//outgoing links
 	virtual bool insert_veh(Vehicle* veh, double time); // inserts the vehicle into the InputQueue
@@ -119,29 +122,31 @@ public:
 
 class Destination : public Node
 {
-	public:
-	Destination (int id_, Server* server_);
+public:
+	 Destination (int id_, Server* server_);
 	 Destination (int id_);
+	 virtual const string className(){return "Destination";}
 	 virtual ~Destination();
 	 virtual void register_links(vector<Link*> links);
 	 virtual bool execute(Eventlist* eventlist, double time);
-	protected:
-		vector <Link*>  incoming;
-		vector <Daction*> dactions;
-		Server* server;		
+protected:
+	 vector <Link*>  incoming;
+	 vector <Daction*> dactions;
+	 Server* server;		
 };
 
 class Junction : public Node
 {
 	public:	
 	 Junction (int id_);
+	 virtual const string className(){return "Junction";}
 	 void register_links(vector <Link*> links) ;
    	 vector <Link*> get_incoming() {return incoming;}
 	 vector <Link*> get_outgoing() {return outgoing;}
 	private:
-	vector <Turning*> turnings;
-	vector <Link*>  incoming;
-	vector <Link*>  outgoing;
+	 vector <Turning*> turnings;
+	 vector <Link*>  incoming;
+	 vector <Link*>  outgoing;
 };
 
 class BoundaryOut : public Junction
@@ -149,6 +154,7 @@ class BoundaryOut : public Junction
  public:
  	BoundaryOut (int id_);
  	~BoundaryOut();
+	virtual const string className(){return "BoundaryOut";}
  	void block(int code,double speed); // spread the news to the virtual links (setting full to true/false)
  	void register_virtual(VirtualLink* vl) { vlinks.insert(vlinks.begin(),vl);}
 	vector <VirtualLink*> & get_virtual_links() {return vlinks;}

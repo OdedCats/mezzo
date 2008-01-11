@@ -18,7 +18,7 @@ QT+= core gui qt3support
 CONFIG += uic4
 
 # Input
-HEADERS += canvas_qt4.h parametersdialog_qt4.h
-FORMS += canvas_qt4.ui parametersdialog_qt4.ui
-SOURCES += canvas_qt4.cpp main.cpp parametersdialog_qt4.cpp
+HEADERS += canvas_qt4.h parametersdialog_qt4.h src/nodedlg.h
+FORMS += canvas_qt4.ui parametersdialog_qt4.ui ui/nodedlg.ui
+SOURCES += canvas_qt4.cpp main.cpp parametersdialog_qt4.cpp src/nodedlg.cpp
 RESOURCES += canvas_qt4.qrc

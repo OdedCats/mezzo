@@ -38,6 +38,7 @@ MainForm::MainForm(QWidget *parent)
 	// states
 	initialised=false;
 	lmouse_pressed_=false;
+	inselection_=false;
 	keyN_pressed_=false;
 	keyL_pressed_=false;
 	nodes_sel_=vector<Node*>();
@@ -81,7 +82,8 @@ MainForm::MainForm(QWidget *parent)
 	zoombywin_triggered_=false;
 	QObject::connect(zoombywin, SIGNAL(toggled(bool)), this,
 					 SLOT(on_zoombywin_triggered(bool)));
-
+	QObject::connect(inselectmode, SIGNAL(toggled(bool)), this,
+					 SLOT(on_inselectmode_triggered(bool)));
 	// show link handlers
 	QObject::connect(linkhandlemark, SIGNAL(toggled(bool)), this,
 					 SLOT(on_showhandle_triggered(bool)));
@@ -239,6 +241,11 @@ void MainForm::on_showhandle_triggered(bool triggered)
 			alllinks[i]->get_icon()->setHandler(triggered);
 		updateCanvas();
 	}
+}
+
+void MainForm::on_inselectmode_triggered(bool triggered)
+{
+	inselection_=triggered;
 }
 
 void MainForm::on_savescreenshot_activated()
@@ -468,10 +475,11 @@ void MainForm::mousePressEvent ( QMouseEvent * event )
 	// left mouse button pressed
 	if (event->button() == Qt::LeftButton) 
 	{
+		lmouse_pressed_=true;
 		// mouse position relative to the up-left corner of the Canvas
 		int	x_current = event->x() - start_x; 
 		int	y_current = event->y() - start_y - yadjust_; 
-		lmouse_pressed_=true;
+		
 		
 		if (keyN_pressed_) //node selecting mode
 		{
@@ -559,7 +567,7 @@ void MainForm::mouseMoveEvent(QMouseEvent* mev)
 */
 void MainForm::mouseReleaseEvent(QMouseEvent* mev) 
 {
-	if (mev->button() == Qt::LeftButton)
+	if(lmouse_pressed_)
 	{
 		if(zoombywin_triggered_&&zoomrect_)
 			zoomRectArea();
@@ -576,6 +584,11 @@ void MainForm::mouseReleaseEvent(QMouseEvent* mev)
 		zoomrect_=0; 
 	}
 	lmouse_pressed_=false;
+}
+
+void MainForm::mouseDoubleClickEvent(QMouseEvent* mev)
+{
+
 }
 
 /*

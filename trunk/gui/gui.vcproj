@@ -73,6 +73,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\nodedlg.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\parametersdialog_qt4.cpp"
 				>
 			</File>
@@ -84,6 +88,10 @@
 			>
 			<File
 				RelativePath=".\canvas_qt4.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\nodedlg.h"
 				>
 			</File>
 			<File
@@ -114,6 +122,10 @@
 			>
 			<File
 				RelativePath=".\canvas_qt4.ui"
+				>
+			</File>
+			<File
+				RelativePath=".\ui\nodedlg.ui"
 				>
 			</File>
 			<File
