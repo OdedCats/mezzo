@@ -1010,19 +1010,32 @@ bool Network::readroute(istream& in)
   	return false;
   }
   // find the origin & dest  pointers
-  vector <Origin*>::iterator o_iter=origins.begin();
+ /*
+ vector <Origin*>::iterator o_iter=origins.begin();
   o_iter =  find_if (origins.begin(),origins.end(), compare <Origin> (oid));
   //Origin* optr=(*o_iter) ;
-
-  assert ( o_iter < origins.end() ); // the origin exists
+	assert ( o_iter < origins.end() ); // the origin exists
+	*/
+	map <int, Origin*>::iterator o_iter; 
+	o_iter = originmap.find(lid);
+  assert (o_iter != originmap.end());
+	Origin* optr = o_iter->second;
+ /*
   vector <Destination*>::iterator d_iter=destinations.begin();
   d_iter= find_if (destinations.begin(),destinations.end(), compare <Destination> (did));
   //Destination* dptr=(*d_iter) ;
 	assert ( d_iter < destinations.end() );  // the destination exists
+	*/
+	map <int, Destination*>::iterator d_iter; 
+	d_iter = destinationmap.find(lid);
+  assert (d_iter != destinationmap.end());
+	Destination* dptr = d_iter->second;
 #ifdef _DEBUG_NETWORK
   cout << "found o&d for route" << endl;
 #endif //_DEBUG_NETWORK
-  routes.insert(routes.end(),new Route(rid, *o_iter, *d_iter, rlinks));
+  Route* rptr = new Route(rid, optr, dptr, rlinks);
+	routes.insert(routes.end(), rptr);
+	routemap [rid] = rptr;
 #ifdef _DEBUG_NETWORK
   cout << " read a route"<<endl;
 #endif //_DEBUG_NETWORK
