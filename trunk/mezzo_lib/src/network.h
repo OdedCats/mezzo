@@ -3,7 +3,13 @@
  *   add the access ports to originals, destinations, routes, odpairs
  *
  * Xiaoliang Ma 
- * last change: 2007-11-13 
+ 
+ * modification:
+ * add map <int,Object*> containers for Nodes, Links, Routes, Origins, Destinations, Junctions for faster look-up.
+
+ * Wilco Burghout
+ * last change: 2008-01-11
+  
  */
 
 #ifndef NETWORK_HH
@@ -197,20 +203,34 @@ class Network
 #endif // _NO_GUI 
   
 protected:
-  vector <Node*> nodes;
+ vector <Node*> nodes;
+  map <int, Node*> nodemap; // alternative storage, MUCH faster (log seek time, log insert time)
   vector <Origin*> origins;
+  map <int, Origin*> originmap; // alternative storage, MUCH faster (log seek time, log insert time)
   vector <Destination*> destinations;
+  map <int, Destination*> destinationmap; // alternative storage, MUCH faster (log seek time, log insert time)
   vector <Junction*> junctions;
+  map <int, Junction*> junctionmap; // alternative storage, MUCH faster (log seek time, log insert time)
   vector <BoundaryOut*> boundaryouts;
+  map <int, BoundaryOut*> boundaryoutmap; // alternative storage, MUCH faster (log seek time, log insert time)
   vector <BoundaryIn*> boundaryins;
+  map <int, BoundaryIn*> boundaryinmap; // alternative storage, MUCH faster (log seek time, log insert time)
   vector <Link*> links;
+  map <int, Link*> linkmap; // alternative storage, MUCH faster (log seek time, log insert time)
   vector <Sdfunc*> sdfuncs;
+  map <int, Sdfunc*> sdfuncmap; // alternative storage, MUCH faster (log seek time, log insert time)
   vector <Turning*> turnings;
+  map <int, Turning*> turningmap; // alternative storage, MUCH faster (log seek time, log insert time)
   vector <Server*> servers;
-  vector <Route*> routes;
+  map <int, Server*> servermap; // alternative storage, MUCH faster (log seek time, log insert time)
+  vector <Route*> routes;	
+  map <int, Route*> routemap; // alternative storage, MUCH faster (log seek time, log insert time)
   vector <ODpair*> odpairs;
+  map <int, ODpair*> odpairmap; // alternative storage, MUCH faster (log seek time, log insert time)
   vector <Incident*> incidents;
   vector <VirtualLink*> virtuallinks;
+  map <int, VirtualLink*> virtuallinkmap; // alternative storage, MUCH faster (log seek time, log insert time)
+
   vector <double> incident_parameters; // yes this is very ugly, as is the web of functions added, but I'll take them out asap
   vector <Stage*> stages;
   vector <SignalPlan*> signalplans;

@@ -237,7 +237,8 @@ bool Network::readnode(istream& in)
    // check nid, type; assert ( !exists (nid) && exists(type) )
    assert ((type < 6) && (type > 0) );
 #ifndef _UNSAFE
-   assert  ( (find_if (nodes.begin(),nodes.end(), compare <Node> (nid))) == nodes.end() ); // no node with nid exists
+   //assert  ( (find_if (nodes.begin(),nodes.end(), compare <Node> (nid))) == nodes.end() ); // no node with nid exists
+   assert (!nodemap.count(nid));
 #endif // _UNSAFE
    if (type==1)
   {
@@ -251,6 +252,8 @@ bool Network::readnode(istream& in)
 	optr->set_icon(niptr);
 	drawing->add_icon(niptr);
 #endif // _NO_GUI
+	nodemap [nid] = optr; // later on take out the vectors. Now we use both map and old vectors
+	originmap [nid] = optr;
   	nodes.insert(nodes.begin(),optr);
   	origins.insert(origins.begin(),optr);
 #ifdef _DEBUG_NETWORK
@@ -262,11 +265,13 @@ bool Network::readnode(istream& in)
     int sid;
     in >>  sid;
     Destination* dptr=NULL;
-    if (sid < 0)
+    if (sid < 0) // why was this clause again? check what server == -1 means...
     	dptr=new Destination(nid);
     else
     {
-     	Server* sptr=(*(find_if (servers.begin(),servers.end(), compare <Server> (sid)))) ;
+		assert (servermap.count(sid));
+     	//Server* sptr=(*(find_if (servers.begin(),servers.end(), compare <Server> (sid)))) ;
+		Server* sptr = servermap [sid];
      	if (sptr!=NULL)
      		dptr=new Destination(nid,sptr);
     }	
@@ -285,6 +290,8 @@ bool Network::readnode(istream& in)
 	dptr->set_icon(niptr);
 	drawing->add_icon(niptr);
 #endif //_NO_GUI
+	nodemap [nid] = dptr; // later on take out the vectors. Now we use both map and old vectors
+	destinationmap [nid] = dptr;
   	nodes.insert(nodes.begin(),dptr);
   	destinations.insert(destinations.begin(),dptr);
 #ifdef _DEBUG_NETWORK  	
@@ -304,6 +311,8 @@ bool Network::readnode(istream& in)
 	jptr->set_icon(niptr);
 	drawing->add_icon(niptr);
 #endif // _NO_GUI
+	nodemap [nid] = jptr; // later on take out the vectors. Now we use both map and old vectors
+	junctionmap [nid] = jptr;
 	nodes.insert(nodes.begin(),jptr);
 	junctions.insert(junctions.begin(),jptr);
 #ifdef _DEBUG_NETWORK
@@ -312,19 +321,23 @@ bool Network::readnode(istream& in)
   }
   if (type==4)
   {
-   BoundaryIn* dptr=new BoundaryIn(nid);
+   BoundaryIn* biptr=new BoundaryIn(nid);
 #ifndef _NO_GUI
 	os << "bi:"<< nid << endl;
 	os.get(t,sz);
- 	dptr->setxy(x,y);
- 	NodeIcon* niptr=new NodeIcon(static_cast<int>(x),static_cast<int>(y),dptr);
+ 	biptr->setxy(x,y);
+ 	NodeIcon* niptr=new NodeIcon(static_cast<int>(x),static_cast<int>(y),biptr);
 	niptr->settext(t);
-	dptr->set_icon(niptr);
+	biptr->set_icon(niptr);
 	drawing->add_icon(niptr);
 #endif //_NO_GUI
- 	nodes.insert(nodes.begin(),dptr);
- 	boundaryins.insert(boundaryins.begin(),dptr);
- 	origins.insert(origins.begin(),dptr);
+	nodemap [nid] = biptr; // later on take out the vectors. Now we use both map and old vectors
+	boundaryinmap [nid] = biptr;
+	originmap [nid] = biptr;
+
+ 	nodes.insert(nodes.begin(),biptr);
+ 	boundaryins.insert(boundaryins.begin(),biptr);
+ 	origins.insert(origins.begin(),biptr);
 #ifdef _DEBUG_NETWORK  	
   	 cout << " boundaryin "  << nid;
 #endif //_DEBUG_NETWORK  	
@@ -343,6 +356,10 @@ bool Network::readnode(istream& in)
 	jptr->set_icon(niptr);
 	drawing->add_icon(niptr);
 #endif //_NO_GUI
+	nodemap [nid] = jptr; // later on take out the vectors. Now we use both map and old vectors
+	boundaryoutmap [nid] = jptr;
+	junctionmap [nid] = jptr;
+
  	nodes.insert(nodes.begin(),jptr);
  	boundaryouts.insert(boundaryouts.begin(),jptr);
  	junctions.insert(junctions.begin(),jptr);
@@ -405,11 +422,9 @@ bool Network::readsdfunc(istream& in)
    		//cout << "Dynamit sd func: vmin "<< vmin << " vmax " << vmax << " romax " << romax << "romin " << romin << endl;
    }
 
-     //  cout << "SDFUNC:: " << sdid << " " << type << " " << vmax << " " << vmin << " " << romax << endl;
-   // check id, vmax, vmin, romax;
-   // assert ( !exists (id) &&  vmax > vmin > 0 && 0< romax )
-    assert  ( (find_if (sdfuncs.begin(),sdfuncs.end(), compare <Sdfunc> (sdid))) == sdfuncs.end() );
-	assert ( (vmin>0) && (vmax>=vmin) && (romin >= 0) && (romax>=romin) );
+   // assert  ( (find_if (sdfuncs.begin(),sdfuncs.end(), compare <Sdfunc> (sdid))) == sdfuncs.end() );
+	assert (!sdfuncmap.count(sdid));
+    assert ( (vmin>0) && (vmax>=vmin) && (romin >= 0) && (romax>=romin) );
     assert ( (type==0) || (type==1) || (type==2));
    in >> bracket;
    if (bracket != '}')
@@ -417,12 +432,21 @@ bool Network::readsdfunc(istream& in)
   	cout << "readfile::readsdfuncs scanner jammed at " << bracket;
   	return false;
   }
+  Sdfunc* sdptr;
   if (type==0)
-	  sdfuncs.insert(sdfuncs.begin(),new Sdfunc(sdid,vmax,vmin,romax));
-	else if (type==1)	
-	  sdfuncs.insert(sdfuncs.begin(),new GenSdfunc(sdid,vmax,vmin,romax,alpha,beta));
-	else if (type==2)
-  	  sdfuncs.insert(sdfuncs.begin(),new DynamitSdfunc(sdid,vmax,vmin,romax,romin,alpha,beta));
+  {
+	  sdptr = new Sdfunc(sdid,vmax,vmin,romax);
+  }	else if (type==1)	
+  {
+	  sdptr = new GenSdfunc(sdid,vmax,vmin,romax,alpha,beta);
+  }	else if (type==2)
+  {
+	  sdptr = new DynamitSdfunc(sdid,vmax,vmin,romax,romin,alpha,beta);
+  }
+  assert (sdptr);
+  sdfuncmap [sdid] = sdptr;
+  sdfuncs.insert(sdfuncs.begin(),sdptr );
+
 #ifdef _DEBUG_NETWORK
   cout << " read a sdfunc"<<endl;
 #endif //_DEBUG_NETWORK
@@ -463,7 +487,6 @@ bool Network::readlink(istream& in)
   }
    in  >> lid >> innode >> outnode >> length >> nrlanes >> sdid;
    // check lid, vmax, vmin, romax;
-	// assert (!exists (lid) &&exists(innode) && exists(outnode) && length >0 && 0<nrlanes && exists(sdid) )
    in >> bracket;
    if (bracket != '}')
   {
@@ -474,19 +497,31 @@ bool Network::readlink(istream& in)
   
   assert ( (length>0) && (nrlanes > 0) );           // check that the length and nrlanes are positive
 #ifndef _UNSAFE
-	assert  ( (find_if (links.begin(),links.end(), compare <Link> (lid))) == links.end() );    // no link with lid exists
+	//assert  ( (find_if (links.begin(),links.end(), compare <Link> (lid))) == links.end() );    // no link with lid exists
+	assert (!linkmap.count(lid));
 #endif // _UNSAFE  
+/*
   vector <Node*>::iterator iter=nodes.begin();
   iter= find_if (nodes.begin(),nodes.end(), compare <Node> (innode)) ;
   assert  ( iter < nodes.end() ); // innode exists
   Node* inptr=(*iter) ;   
+  */
+  assert (nodemap.count(innode));
+  Node* inptr = nodemap [innode];
+  /*
   iter= find_if (nodes.begin(),nodes.end(), compare <Node> (outnode)) ;
   assert  ( iter < nodes.end() ); // outnode exists
-  Node* outptr=(*iter) ;
+  Node* outptr=(*iter) ; */
+  assert (nodemap.count(outnode));
+  Node* outptr = nodemap [outnode];
+  /*
   vector <Sdfunc*>::iterator iter2=sdfuncs.begin();
   iter2= find_if (sdfuncs.begin(),sdfuncs.end(), compare <Sdfunc> (sdid));
   assert  ( iter2 < sdfuncs.end() );  // sdfunc exists
   Sdfunc* sdptr=(*iter2) ;    
+  */
+  assert (sdfuncmap.count(sdid));
+  Sdfunc* sdptr = sdfuncmap [sdid];
   // make the drawable icon for the link
 #ifndef _NO_GUI  
   Coord st=inptr->getxy();
@@ -510,7 +545,8 @@ bool Network::readlink(istream& in)
   // register the icon in the link
 #ifndef _NO_GUI
   link->set_icon(icon);
-#endif //_NO_GUI  
+#endif //_NO_GUI 
+  linkmap [lid] = link;
   links.insert(links.end(),link);
 #ifdef _DEBUG_NETWORK
   cout << " read a link"<<endl;
@@ -587,31 +623,47 @@ bool Network::readvirtuallink(istream& in)
   }
   // find the nodes and sdfunc pointers
   assert ( (length>0) && (nrlanes > 0) );           // check that the length and nrlanes are positive
-  assert  ( (find_if (links.begin(),links.end(), compare <Link> (lid))) == links.end() );    // no link with lid exists
+  //assert  ( (find_if (links.begin(),links.end(), compare <Link> (lid))) == links.end() );    // no link with lid exists
+  assert (!virtuallinkmap.count(lid));
   //OPTIMIZE
-  vector <Node*>::iterator iter=nodes.begin();
+  /*vector <Node*>::iterator iter=nodes.begin();
   iter= find_if (nodes.begin(),nodes.end(), compare <Node> (innode)) ;
   assert  ( iter < nodes.end() ); // innode exists
   Node* inptr=(*iter) ;
+  */
+  assert (nodemap.count(innode));
+  Node* inptr = nodemap [innode];
+  /*
   iter= find_if (nodes.begin(),nodes.end(), compare <Node> (outnode)) ;
   assert  ( iter < nodes.end() ); // outnode exists
   Node* outptr=(*iter) ;   
-
+*/
+  assert (nodemap.count(outnode));
+  Node* outptr = nodemap [outnode];
+/*
   vector <BoundaryIn*>::iterator iter1=boundaryins.begin();
   iter1= find_if (boundaryins.begin(),boundaryins.end(), compare <BoundaryIn> (outnode));
   assert  ( iter1 < boundaryins.end() ); // the outnode is a boundaryIn
   BoundaryIn* biptr=(*iter1);
-
+*/
+  assert (boundaryinmap.count(outnode));
+  BoundaryIn* biptr = boundaryinmap [outnode];
+/*
   vector <BoundaryOut*>::iterator iter2=boundaryouts.begin();
   iter2=find_if (boundaryouts.begin(),boundaryouts.end(), compare <BoundaryOut> (innode));
   assert  ( iter2 < boundaryouts.end() );   //innode exists in Boundaryouts
   BoundaryOut* boptr=(*iter2) ;  
-
-
+*/
+  assert (boundaryoutmap.count(innode));
+  BoundaryOut* boptr = boundaryoutmap [innode];
+/*
   vector <Sdfunc*>::iterator iter3=sdfuncs.begin();
   iter3= find_if (sdfuncs.begin(),sdfuncs.end(), compare <Sdfunc> (sdid));
   assert  ( iter3 < sdfuncs.end() );       // sdfunc exists
   Sdfunc* sdptr=(*iter3) ;    
+  */
+  assert (sdfuncmap.count(sdid));
+  Sdfunc* sdptr = sdfuncmap [sdid];
   // make the drawable icon for the link
 #ifndef _NO_GUI
   Coord st=inptr->getxy();
@@ -639,11 +691,13 @@ bool Network::readvirtuallink(istream& in)
 #ifndef _NO_GUI
   link->set_icon(icon);
 #endif //_NO_GUI  
+  linkmap [lid] = link;
+  virtuallinkmap [lid] = link;
+
   links.insert(links.end(),link);
   virtuallinks.insert(virtuallinks.end(),link);
   biptr->register_virtual(link);
   boptr->register_virtual(link);
-
 
 #ifdef _DEBUG_NETWORK
   cout << " read a virtual link"<<endl;
@@ -684,8 +738,9 @@ bool Network::readserver(istream& in)
   	return false;
   }
    in  >> sid >> stype >> mu >> sd >> delay;
-   assert  ( (find_if (servers.begin(),servers.end(), compare <Server> (sid))) == servers.end() );   // no server with sid exists
-	assert ( (stype > -1) && (stype<3) && (mu>0.0) && (sd>=0.0) && (delay>=0.0)); // to be updated when more server types are added
+   //assert  ( (find_if (servers.begin(),servers.end(), compare <Server> (sid))) == servers.end() );   // no server with sid exists
+   assert (!servermap.count(sid));
+   assert ( (stype > -1) && (stype<3) && (mu>0.0) && (sd>=0.0) && (delay>=0.0)); // to be updated when more server types are added
    // check id, vmax, vmin, romax;
    in >> bracket;
    if (bracket != '}')
@@ -698,12 +753,16 @@ bool Network::readserver(istream& in)
    // type 2=deterministic (mu) server
 	// type -1 (internal) = OD server
 	// type -2 (internal)= Destination server
-	if (stype==0)
-		servers.insert(servers.begin(),new ConstServer(sid,stype,mu,sd,delay));
+	Server* sptr;
+    if (stype==0)
+		sptr = new ConstServer(sid,stype,mu,sd,delay);
 	if (stype==1)
-  		servers.insert(servers.begin(),new Server(sid,stype,mu,sd,delay));
+  		sptr = new Server(sid,stype,mu,sd,delay);
 	if (stype==2)
-  		servers.insert(servers.begin(),new DetServer(sid,stype,mu,sd,delay));
+  		sptr = new DetServer(sid,stype,mu,sd,delay);
+	assert (sptr);
+	servermap [sid] = sptr;
+	servers.insert(servers.begin(),new ConstServer(sid,stype,mu,sd,delay));
 #ifdef _DEBUG_NETWORK
   cout << " read a server"<<endl;
 #endif //_DEBUG_NETWORK
@@ -755,19 +814,34 @@ bool Network::readturning(istream& in)
   	return false;
   }
   // find the node , links and server pointers
-  vector <Node*>::iterator iter1=nodes.begin();
-
+/* vector <Node*>::iterator iter1=nodes.begin();
   iter1=  find_if (nodes.begin(),nodes.end(), compare <Node> (nid));
   assert  ( iter1 < nodes.end() ); // the node exists
   Node* nptr=(*iter1) ;
+  */
+   map <int, Node*>::iterator node_iter;
+   node_iter=nodemap.find(nid);
+   assert (node_iter != nodemap.end());
+   Node* nptr = (*node_iter).second;
+/*
   vector <Link*>::iterator iter2=links.begin();
   iter2=find_if (links.begin(),links.end(), compare <Link> (inlink));
   assert  ( iter2 < links.end() );  // inlink exists
   Link* inlinkptr=(*iter2) ;
+*/
+  map <int, Link*>::iterator link_iter;
+  link_iter=linkmap.find(inlink);
+  assert (link_iter != linkmap.end());
+  Link* inlinkptr = (*link_iter).second;
+
+/*
   iter2=find_if (links.begin(),links.end(), compare <Link> (outlink));
   assert  ( iter2 < links.end() );  // outlink exists
   Link* outlinkptr=(*iter2) ;
-
+*/
+  link_iter=linkmap.find(outlink);
+  assert (link_iter != linkmap.end());
+  Link* outlinkptr = (*link_iter).second;
 
   if (sid < 0) // special case: this means a turning prohibitor
   {
@@ -778,15 +852,21 @@ bool Network::readturning(istream& in)
      turnpenalties.insert(turnpenalties.begin(),tptr);
      return true;
   }
-
+/*
   vector <Server*>::iterator iter3=servers.begin();
   iter3= find_if (servers.begin(),servers.end(), compare <Server> (sid));
   assert  ( iter3 < servers.end() );  // server exists
   Server* sptr=(*iter3) ;
+  */
+  assert (servermap.count(sid));
+  Server* sptr = servermap[sid];
 #ifndef _UNSAFE
-  assert  ( (find_if (turnings.begin(),turnings.end(), compare <Turning> (tid))) == turnings.end() );  // there exists no turning with tid
+  //assert  ( (find_if (turnings.begin(),turnings.end(), compare <Turning> (tid))) == turnings.end() );  // there exists no turning with tid
+  assert (!turningmap.count(tid));
 #endif // _UNSAFE
-  turnings.insert(turnings.begin(),new Turning(tid, nptr, sptr, inlinkptr, outlinkptr,size));
+  Turning* tptr = new Turning(tid, nptr, sptr, inlinkptr, outlinkptr,size);
+  turningmap [tid] = tptr;
+  turnings.insert(turnings.begin(),tptr);
 #ifdef _DEBUG_NETWORK
   cout << " read a turning"<<endl;
 #endif //_DEBUG_NETWORK
@@ -803,7 +883,8 @@ void Network::create_turnings()
 	int size= theParameters->default_lookback_size;
 	vector<Link*> incoming;
 	vector<Link*> outgoing;
-	Server* sptr=servers.back();
+	//Server* sptr=servers.back(); // Why was this the back? Front makes more sense, since there the standard servers are placed.
+	Server* sptr = (*servermap.begin()).second; // safest way, since servermap [0] may not exist (if someone starts numbering their servers at 1 for instance)
 	// for all junctions
 	for (vector<Junction*>::iterator iter1=junctions.begin();iter1<junctions.end();iter1++)
 	{
@@ -879,6 +960,7 @@ bool Network::readroute(istream& in)
   char bracket;
   int rid, oid, did, lnr, lid;
   vector<Link*> rlinks;
+  map <int,Link*>::iterator link_iter;
   in >> bracket;
   if (bracket != '{')
   {
@@ -900,11 +982,16 @@ bool Network::readroute(istream& in)
   for (int i=0; i<lnr; i++)
   {
    in >> lid;
+   /*
    vector <Link*>::iterator iter=links.begin();
    iter= find_if (links.begin(),links.end(), compare <Link> (lid));
    //Link* linkptr=(*iter) ;
 	assert ( iter < links.end() ); // the link exists
    rlinks.insert(rlinks.end(),(*iter));
+   */
+   link_iter = linkmap.find(lid);
+   assert (link_iter != linkmap.end());
+   Link* linkptr = (*link_iter).second;
 #ifdef _DEBUG_NETWORK
    cout << " inserted link " << lid << " into route " << rid << endl;
 #endif //_DEBUG_NETWORK
@@ -1423,7 +1510,6 @@ bool Network::readnetwork(string name)
 {
   ifstream inputfile(name.c_str());
   assert  (inputfile);
-//  if (readnodes(inputfile) && readsdfuncs(inputfile) && readlinks (inputfile) && readservers(inputfile))
   if (readservers(inputfile) && readnodes(inputfile) && readsdfuncs(inputfile) && readlinks (inputfile) )		
   {
 	  	return true;
@@ -1749,14 +1835,16 @@ bool Network::readserverrate(istream& in)
   	return  false;
   }
    in  >> sid >> time >> mu >> sd;
-   assert  ( (find_if (servers.begin(),servers.end(), compare <Server> (sid))) != servers.end() );   // server with sid exists
+   //assert  ( (find_if (servers.begin(),servers.end(), compare <Server> (sid))) != servers.end() );   // server with sid exists
+   assert (servermap.count(sid)); // make sure exists
    in >> bracket;
    if (bracket != '}')
   {
   	cout << "readinput::readserverrate scanner jammed at " << bracket;
   	return false;
   }
-   Server* sptr=*(find_if (servers.begin(),servers.end(), compare <Server> (sid)));
+   //Server* sptr=*(find_if (servers.begin(),servers.end(), compare <Server> (sid)));
+   Server* sptr = servermap[sid];
    ChangeRateAction* cptr=new ChangeRateAction(eventlist,time,sptr,mu,sd);
    assert (cptr != NULL);
 	return true;
@@ -1803,7 +1891,6 @@ bool Network::readvtype (istream & in)
   }
    in  >> id >> label >> prob >> length;
 
-  // assert  ( (find_if (vtypes.begin(),vtypes.end(), compare <Server> (sid))) == servers.end() );   //
 	assert ( (prob >= 0.0) && (prob<=1.0) && (length>0.0) ); // 0.0 means unused in the vehicle míx
    in >> bracket;
    if (bracket != '}')
