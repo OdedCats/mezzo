@@ -19,6 +19,11 @@ struct compare
 Route::Route(int id_, Origin* origin_, Destination* destination_, vector <Link*> links_):	id(id_), origin(origin_), destination(destination_),sumcost(0.0)
 {
  	links=links_;
+	vector <Link*>::iterator iter = links.begin();
+	for (iter; iter < links.end(); iter++)
+	{
+			(*iter)->register_route(this);
+	}
 #ifdef _DEBUG_ROUTE 	
  	cout << "new route: rid,oid,did : lid* " << id << ","<< origin->get_id();
 	cout << "," << destination->get_id() << " : ";

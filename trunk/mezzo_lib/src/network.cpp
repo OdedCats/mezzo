@@ -992,6 +992,7 @@ bool Network::readroute(istream& in)
    link_iter = linkmap.find(lid);
    assert (link_iter != linkmap.end());
    Link* linkptr = (*link_iter).second;
+	 rlinks.insert(rlinks.end(),linkptr);
 #ifdef _DEBUG_NETWORK
    cout << " inserted link " << lid << " into route " << rid << endl;
 #endif //_DEBUG_NETWORK

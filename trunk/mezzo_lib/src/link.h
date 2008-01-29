@@ -109,6 +109,7 @@ public:
 	const bool empty();
 	const bool exit_ok() {	return ok;}
 	const double next_action (double time);
+	void register_route (Route* route) {} // STUB to be implemented later 2008-01-29
 #ifndef _NO_GUI   
 	LinkIcon* get_icon(){return icon;}
 	void set_icon(LinkIcon* icon_) {icon=icon_; icon->set_pointers(&queue_percentage, &running_percentage);}
