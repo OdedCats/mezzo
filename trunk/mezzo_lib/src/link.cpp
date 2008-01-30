@@ -156,6 +156,13 @@ const int Link::size()
 void Link::add_alternative(int dest, vector<Link*> route)
 	{queue->add_alternative(dest, route);}	
 
+void Link::register_route (Route* route) 
+{
+	int dest_id = route->get_destination()->get_id();
+	routemap.insert(pair<int,Route*>(dest_id,route));
+
+} // STUB to be implemented later 2008-01-29
+
 void Link::set_selected (const bool sel) 
 {	
 	selected = sel;

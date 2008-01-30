@@ -109,7 +109,7 @@ public:
 	const bool empty();
 	const bool exit_ok() {	return ok;}
 	const double next_action (double time);
-	void register_route (Route* route) {} // STUB to be implemented later 2008-01-29
+	void register_route (Route* route) ;// adds route to routemap at link
 #ifndef _NO_GUI   
 	LinkIcon* get_icon(){return icon;}
 	void set_icon(LinkIcon* icon_) {icon=icon_; icon->set_pointers(&queue_percentage, &running_percentage);}
@@ -210,6 +210,9 @@ protected:
 	// ass_matrix [linkflow_period] [od_pair] [od_period]
 	// it is accessed by the following iterator, which has to be set to the correct linkflow_period
 	map <odval, map <int,int>, less_odval > ::iterator ass_iter; // used to write the assignment matrix for given linkperiod
+
+// New 2008-01-30
+	multimap <int, Route*> routemap; // map storing routes by Destination_id
 	bool use_ass_matrix; // boolean set to true if this link collects assignment matrix data
 	bool selected; //true if link is 'selected'
 };
