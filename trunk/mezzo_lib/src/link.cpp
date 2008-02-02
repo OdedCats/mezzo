@@ -619,6 +619,21 @@ void Link::update_icon(double time)
 	cout << "  queueingsize " << queuesize << endl;
 #endif //_DEBUG_LINK	
 }
+// INCIDENT FUNCTIONS
+
+vector <Route*> Link::get_routes_to_dest(int dest) 
+{
+	multimap <int, Route*>::iterator start,stop; // CHECK OUT if we can simply pass the iterators...
+	start = routemap.lower_bound(dest);
+	stop = routemap.upper_bound(dest);
+	vector <Route*> return_routes;
+	for (start; start != stop; start++)
+	{
+		return_routes.push_back((*start).second);
+	}
+ return return_routes;
+
+}
 
 void Link::set_incident(Sdfunc* sdptr, bool blocked_)
 {

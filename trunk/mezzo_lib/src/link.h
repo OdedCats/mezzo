@@ -109,7 +109,8 @@ public:
 	const bool empty();
 	const bool exit_ok() {	return ok;}
 	const double next_action (double time);
-	void register_route (Route* route) ;// adds route to routemap at link
+	void update_icon(double time);
+
 #ifndef _NO_GUI   
 	LinkIcon* get_icon(){return icon;}
 	void set_icon(LinkIcon* icon_) {icon=icon_; icon->set_pointers(&queue_percentage, &running_percentage);}
@@ -123,9 +124,16 @@ public:
 	else
 		return NULL;}
 	LinkTime* get_avgtimes () {return avgtimes;}
-	void add_alternative(int dest, vector<Link*> route) ;
+	//  Incident stuff
+	void add_alternative(int dest, vector<Link*> route) ; // old way for incidents
+	void register_route (Route* route) ;// adds route to routemap at link
+	vector <Route*> get_routes_to_dest(int dest) ;// find all routes through this link leading to destination
 	void receive_broadcast(Vehicle* veh, int lid, vector <double> parameters) ;
-	// methods  	
+	void set_incident(Sdfunc* sdptr, bool blocked_);
+	void unset_incident();
+	void broadcast_incident_start(int lid, vector <double> parameters);
+
+	// general methods  for entering, exiting vehicles etc.
 	virtual bool enter_veh(Vehicle* veh, double time);
 	virtual Vehicle* exit_veh(double time, Link* nextlink, int lookback);
 	void update_exit_times(double time,Link* nextlink, int lookback);
@@ -134,14 +142,10 @@ public:
 	const double density_running(double time);
 	const double density_running_only(double time);
 	virtual double speed_density(double density_);
-
 	double speed(double time);
+	// IO methods
 	bool write(ostream& out);
 	void write_time(ostream& out);	
-	void update_icon(double time);
-	void set_incident(Sdfunc* sdptr, bool blocked_);
-	void unset_incident();
-	void broadcast_incident_start(int lid, vector <double> parameters);
 	void write_speeds(ostream & out ) {out << id << "\t" ; moe_speed->write_values(out);}
 	void write_speed(ostream & out, int index ) {moe_speed->write_value(out,index);}
 	void write_inflows(ostream & out ) {out << id << "\t" ; moe_inflow->write_values(out);}

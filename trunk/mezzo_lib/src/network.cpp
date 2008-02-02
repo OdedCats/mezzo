@@ -942,11 +942,11 @@ bool Network::readroutes(istream& in)
  in >> nr;
  for (int i=0; i<nr;i++)
  {
- 	if (!readroute(in))
-  {
-    cout << " readroutes: readroute returned false for line nr " << (i+1) << endl;
-   	return false;
-  } 
+ 		if (!readroute(in))
+		{
+			cout << " readroutes: readroute returned false for line nr " << (i+1) << endl;
+   		return false;
+		} 
  }
  for (vector<BoundaryIn*>::iterator iter=boundaryins.begin(); iter < boundaryins.end(); iter++)
  {
