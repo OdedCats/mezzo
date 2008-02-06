@@ -1018,7 +1018,7 @@ bool Network::readroute(istream& in)
 	assert ( o_iter < origins.end() ); // the origin exists
 	*/
 	map <int, Origin*>::iterator o_iter; 
-	o_iter = originmap.find(lid);
+	o_iter = originmap.find(oid);
   assert (o_iter != originmap.end());
 	Origin* optr = o_iter->second;
  /*
@@ -1028,7 +1028,7 @@ bool Network::readroute(istream& in)
 	assert ( d_iter < destinations.end() );  // the destination exists
 	*/
 	map <int, Destination*>::iterator d_iter; 
-	d_iter = destinationmap.find(lid);
+	d_iter = destinationmap.find(did);
   assert (d_iter != destinationmap.end());
 	Destination* dptr = d_iter->second;
 #ifdef _DEBUG_NETWORK
