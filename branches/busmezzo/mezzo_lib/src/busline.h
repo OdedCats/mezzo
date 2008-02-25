@@ -148,9 +148,11 @@ public:
 	bool check_out_of_stop (Bus* bus); // returns TRUE if there is NO avaliable space for the bus at the stop (meaning the bus is out of the stop)
 	void occupy_length (Bus* bus); // update avaliable length when bus arrives
 	void free_length (Bus* bus); // update avaliable length when bus leaves
-	void update_last_departures (Bustrip* trip, double time); //everytime a bus EXITS it updates the last_arrivlas vector (only AFTER we claculated the dwell time)
-	double get_headway (Bustrip* trip, double time); // calculates the headway (defined as the differnece in time between sequential departures) 
-	void write_busstop_visit (string name, Bustrip* trip, double time); // creates a log-file for stop-related info
+	void update_last_arrivals (Bustrip* trip, double time); //everytime a bus ENTERS it updates the last_arrivals vector 
+	void update_last_departures (Bustrip* trip, double time); //everytime a bus EXITS it updates the last_departures vector 
+	double get_enter_headway (Bustrip* trip, double time); // calculates the headway (defined as the differnece in time between sequential arrivals) 
+	double get_exit_headway (Bustrip* trip, double time); // calculates the headway (defined as the differnece in time between sequential departures) 
+	void write_busstop_visit (string name, Bustrip* trip, double enter_time); // creates a log-file for stop-related info
 
 // Action for visits to stop
 	void book_bus_arrival(Eventlist* eventlist, double time, Bus* bus);  // add to expected arrivals
@@ -175,7 +177,8 @@ protected:
 	map <Busline*, int> nr_waiting; // number of waiting passengers for each of the bus lines that stops at the stop
 	map <Busline*, double> arrival_rates; // parameter lambda that defines the poission proccess of passengers arriving at the stop
 	map <Busline*, double> alighting_fractions; // parameter that defines the poission process of the alighting passengers (second contains the alighting fraction)
-	map <Busline*, double> last_departures; // contains the arrival time of the last bus from each line that stops at the stop (can result headways)
+	map <Busline*, double> last_arrivals; // contains the arrival time of the last bus from each line that stops at the stop (can result headways)
+	map <Busline*, double> last_departures; // contains the departure time of the last bus from each line that stops at the stop (can result headways)
 	map <double,Bus*> expected_arrivals; // booked arrivals of buses on the link on their way to the stop
 	map <double,Bus*> buses_at_stop; // buses currently visiting stop
 	// Maybe in the future, these three vectors could be integrated into a single matrix ( a map with busline as the key)

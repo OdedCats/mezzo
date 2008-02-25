@@ -379,15 +379,17 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 	// if this is for a bus entering the stop:
 	else if (expected_arrivals.count(time) > 0) 
 	{		
+		double enter_time = time;
 		Bus* bus = expected_arrivals [time]; // identify the relevant bus
 		occupy_length (bus);
 		exit_time = calc_exiting_time(bus->get_curr_trip(), time); // get the expected exit time according to dwell time calculations and time point considerations
 		buses_at_stop [exit_time] = bus; 
 		eventlist->add_event (exit_time, this); // book an event for the time it exits the stop
-		write_busstop_visit ("buslog_out.dat", bus->get_curr_trip(), time); // document stop-related info
-								// done BEFORE update_last_departures in order to calc the headway
+		write_busstop_visit ("buslog_out.dat", bus->get_curr_trip(), enter_time); // document stop-related info
+								// done BEFORE update_last_arrivals in order to calc the headway
 		bool val = bus->get_curr_trip()->advance_next_stop(exit_time, eventlist); 
-		update_last_departures (bus->get_curr_trip(), exit_time); // in order to follow the headways
+		update_last_arrivals (bus->get_curr_trip(), enter_time); // in order to follow the arrival times (AFTER dwell time is calculated)
+		update_last_departures (bus->get_curr_trip(), exit_time); // in order to follow the departure times (AFTER the dwell time and time point stuff)
 		expected_arrivals.erase(time);
 	}
 	return true;
@@ -407,14 +409,30 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 	int alighting_standees;
 	int number_seats = trip->get_busv()->get_number_seats(); // will be imported from the bus object
 
+	// Dwell time parameters according to TCQSM
+	double dwell_constant = 5.0; 
+	double out_of_stop_coefficient = 3.0;
+	double bay_coefficient = 7.0;
+	double boarding_coefficient = 4.0;	
+	double alighting_front_coefficient = 3.8;
+	double alighting_rear_coefficient = 2.1;
+	double percent_alighting_front = 0.25;
+	double addition_boarding_crowdness = 0.5;
+	
+	bool crowded = 0;
+	
+	/* Lin & Wilson version of dwell time function
 	double dwell_constant = 12.5; // Value of the constant component in the dwell time function. 
 	double boarding_coefficient = 0.55;	// Should be read as an input parameter. Would be different for low floor for example.
 	double alighting_coefficient = 0.23;
 	double crowdedness_coefficient = 0.0078;
 	double out_of_stop_coefficient = 3.0; // Taking in consideration the increasing dwell time when bus stops out of the stop
+	double bay_coefficient = 4.0;
+	*/
+	
 	bool out_of_stop = check_out_of_stop(trip->get_busv());
-
-	nr_waiting [trip->get_line()] += random -> poisson (((get_arrival_rates (trip)) * get_headway (trip, time)) / 3600.0 );
+	
+	nr_waiting [trip->get_line()] += random -> poisson (((get_arrival_rates (trip)) * get_enter_headway (trip, time)) / 3600.0 );
 				//the arrival process follows a poisson distribution and the lambda is relative to the headway
 				// with arrival time and the headway as the duration
 
@@ -438,6 +456,10 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 	}
 	
 	curr_occupancy -= get_nr_alighting(); 
+	if (curr_occupancy > 40)
+	{
+		crowded = 1;
+	}
 	set_nr_boarding (Min(nr_waiting [trip->get_line()] , trip->get_busv()->get_capacity() - curr_occupancy));  // The number of boarding passengers is limited by the capacity
 	nr_waiting [trip->get_line()] = Max(nr_waiting [trip->get_line()] - get_nr_boarding(), 0); // the number of waiting passenger is decreased by the number of passengers that went on the bus. 
 	
@@ -452,11 +474,18 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 	{
 		boarding_standees = 0;
 	}
+	
+	/* Lin & Wilson version of dwell time function
 	loadfactor = get_nr_boarding() * alighting_standees + get_nr_alighting() * boarding_standees;
 	dwelltime = (dwell_constant + boarding_coefficient*get_nr_boarding() + alighting_coefficient*get_nr_alighting() 
-		+ crowdedness_coefficient*loadfactor + get_bay() * 4 + out_of_stop_coefficient*out_of_stop); // Lin&Wilson (1992) + out of stop effect. 
-																			// IMPLEMENT: for articulated buses should be has_bay * 7
-		// OUTPUT NOTE
+		+ crowdedness_coefficient*loadfactor + get_bay() * bay_coefficient + out_of_stop_coefficient*out_of_stop); // Lin&Wilson (1992) + out of stop effect. 
+	*/	
+	
+	double time_front_door = boarding_coefficient*get_nr_boarding() + alighting_front_coefficient*percent_alighting_front*get_nr_alighting()+0.5*crowded*get_nr_boarding();
+	double time_rear_door = alighting_rear_coefficient*(1-percent_alighting_front)*get_nr_alighting();
+	dwelltime = dwell_constant + get_bay()*bay_coefficient + out_of_stop_coefficient*out_of_stop + 
+			max(time_front_door, time_rear_door);
+	
 	return dwelltime;
 }
 
@@ -484,55 +513,87 @@ bool Busstop::check_out_of_stop (Bus* bus) // checks if there is any space left 
 	}
 }
 
+void Busstop::update_last_arrivals (Bustrip* trip, double time) // everytime a bus ENTERS a stop it should be updated, 
+// in order to keep an updated vector of the last arrivals from each line. 
+// the time paramater which is sent is the enter_time, cause headways are defined as the differnece in time between sequential arrivals
+{ 
+	last_arrivals [trip->get_line()] = time;
+}
+
 void Busstop::update_last_departures (Bustrip* trip, double time) // everytime a bus EXITS a stop it should be updated, 
-// in order to keep an updated vector of the last arrivals from each line. ONLY after the dwell time had been calaculated.
-// the time paramater which is sent is the exit_time, cause headways are defined as the differnece in time between sequential departures
+// in order to keep an updated vector of the last deparures from each line. 
+// the time paramater which is sent is the exit_time, cause headways are defined as the differnece in time between sequential arrivals
 { 
 	last_departures [trip->get_line()] = time;
 }
 
-double Busstop::get_headway (Bustrip* trip, double time) // calculates the headway 
-{ // time - the current time, according to the simulation clock
-	double expected_dwelltime = 20.0; // an estimated average value of the dwell time
-	double headway = time + expected_dwelltime - last_departures[trip->get_line()];
-	// the headway is defined as the differnece in time between sequential departures
-	
-	if (trip->get_line()->is_line_timepoint(this) == true)
-	{
-		headway = Max (headway ,trip->scheduled_arrival_time(this)-last_departures[trip->get_line()]);
-	}
-	// if stop is a time point then the headway might be determined b the scheduled time
+double Busstop::get_enter_headway (Bustrip* trip, double time) // calculates the headway (between arrivals)
+{  
+	double enter_headway = time - last_arrivals[trip->get_line()];
+	// the headway is defined as the differnece in time between sequential arrivals
+	return enter_headway;
+}
 
-	return headway;
+double Busstop::get_exit_headway (Bustrip* trip, double time) // calculates the headway (between departures)
+{  
+	double exit_headway = time - last_departures[trip->get_line()];
+	// the headway is defined as the differnece in time between sequential departures
+	return exit_headway;
 }
 
 double Busstop::calc_exiting_time (Bustrip* trip, double time)
 {
+	// explicitly determined values:
+	double headway = 480; // in sec  
+	double ratio_headway = 1.0; // the minimal ratio of headway 
+	
 	double dwelltime = calc_dwelltime (trip,time);
-	if (trip->get_line()->is_line_timepoint(this) == true)
+	if (trip->get_line()->is_line_timepoint(this) == true) // if it is a time point
 	{
-		return Max(trip->scheduled_arrival_time(this), time + dwelltime) ; // since it is a time-point stop, it will wait if neccesary till the scheduled time
+// for headway based:
+		if (headway * ratio_headway > get_enter_headway(trip,time)) // if it is less then the minimal headway 
+		{	 
+			if (last_departures[trip->get_line()] + (headway * ratio_headway) > time + dwelltime)
+			{
+				// account for passengers that board while the bus is holded at the time point
+				double holding_time = last_departures[trip->get_line()] - time - dwelltime;
+				double additional_boarding = random -> poisson ((get_arrival_rates (trip)) * holding_time);
+				nr_boarding += additional_boarding;
+				double curr_occupancy = trip->get_busv()->get_occupancy();  
+				trip->get_busv()->set_occupancy(curr_occupancy + additional_boarding); // Updating the occupancy
+				return last_departures[trip->get_line()] + (headway * ratio_headway);
+			}
+		}
+// for schedule based:
+		if (trip->scheduled_arrival_time(this) > time + dwelltime)		
+		{	
+				// account for passengers that board while the bus is holded at the time point
+				double holding_time = trip->scheduled_arrival_time(this) - time - dwelltime;
+				double additional_boarding = random -> poisson ((get_arrival_rates (trip)) * holding_time);
+				nr_boarding += additional_boarding;
+				double curr_occupancy = trip->get_busv()->get_occupancy();  
+				trip->get_busv()->set_occupancy(curr_occupancy + additional_boarding); // Updating the occupancy
+				return trip->scheduled_arrival_time(this); // since it is a time-point stop, it will wait if neccesary till the scheduled time
+		}
 	}
-	else 
-	{
-		return time + dwelltime; // since it isn't a time-point stop, it will simply exit after dwell time
-	}
+	return time + dwelltime; // since it isn't a time-point stop, it will simply exit after dwell time
 }
 
 
-void Busstop::write_busstop_visit (string name, Bustrip* trip, double time)  // creates a log-file for stop-related info
+void Busstop::write_busstop_visit (string name, Bustrip* trip, double enter_time)  // creates a log-file for stop-related info
 {
 	ofstream out(name.c_str(),ios_base::app);
 	assert(out);
-	out << trip->get_line()->get_id() << '\t' <<  trip->get_id() << '\t' << trip->get_busv()->get_bus_id() << '\t' << get_id() << '\t' << time  << '\t'; 
+	out << trip->get_line()->get_id() << '\t' <<  trip->get_id() << '\t' << trip->get_busv()->get_bus_id() << '\t' << get_id() << '\t' << enter_time  << '\t'; 
 	if (trip->scheduled_arrival_time (this) == 0)
 	{
 		out << "Error : Busstop ID: " << get_id() << " is not on Bustrip ID: " << trip->get_id() << " route." << endl;
 	}
 	else
 	{
-		out << trip->scheduled_arrival_time (this) << '\t' << time - trip->scheduled_arrival_time (this) << '\t' << dwelltime << '\t' <<
-		exit_time << '\t' << get_headway (trip , time) << '\t' << get_nr_alighting() << '\t' << get_nr_boarding() << '\t' << trip->get_busv()->get_occupancy() << '\t' << get_nr_waiting(trip)<< endl; 
+		out << trip->scheduled_arrival_time (this) << '\t' << enter_time - trip->scheduled_arrival_time (this) << '\t' << dwelltime << '\t' <<
+		exit_time << '\t' << get_enter_headway (trip , enter_time) << '\t'<< get_exit_headway (trip , exit_time) << '\t' << get_nr_alighting() << '\t' 
+		<< get_nr_boarding() << '\t' << trip->get_busv()->get_occupancy() << '\t' << get_nr_waiting(trip)<< '\t' << exit_time-enter_time-dwelltime << endl; 
 	}
 	out.close();
 }

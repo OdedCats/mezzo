@@ -155,27 +155,12 @@ double Random::lnrandom(double m, double v)
  double result=exp(nrandom(mu_,sd_));
  return result;
 }
-/*
+
 double Random::lnrandom1 (double m, double sd)
 {	
-	long double sum_p, sum = 0, part1, part2, part3;
-	int counter = 0;
-	long double cdf_value = urandom();
-
-	do
-	{
-		sum_p = sum;
-		part1 = 1/(counter*sd*sqrt(TWO_PI));
-		part2 = pow(ln(counter)-m,2);
-		part3 = exp (-part2/(2*pow(sd,2)));
-		sum += part1*part3;
-		counter++;
-	}
-	while (sum <= cdf_value);
-	
-	return Min(counter,m);
+	double y = nrandom(m,sd);
+	return exp(y);
 }
-*/
 
 // Generates an integer random number that is uniformly distributed
 // between [0, n).
