@@ -44,6 +44,7 @@ class Route
 	double cost(double time=0.0);
 	bool equals (Route& route); // returns true if same route {return ( (route.get_links())==(get_links()) );}
 	vector<Link*> get_links() {return links;}	
+	vector<Link*> get_upstream_links(int link_id) ;// returns all links upstream of link_id
 	bool has_link(int lid);
 	bool has_link_after(int lid, int curr_lid);
 	void write(ostream& out);

@@ -127,6 +127,7 @@ public:
 	//  Incident stuff
 	void add_alternative(int dest, vector<Link*> route) ; // old way for incidents
 	void register_route (Route* route) ;// adds route to routemap at link
+	multimap <int,Route*> get_routes() {return routemap;}
 	vector <Route*> get_routes_to_dest(int dest) ;// find all routes through this link leading to destination
 	void receive_broadcast(Vehicle* veh, int lid, vector <double> parameters) ;
 	void set_incident(Sdfunc* sdptr, bool blocked_);

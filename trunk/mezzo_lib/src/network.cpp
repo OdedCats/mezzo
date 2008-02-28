@@ -2604,6 +2604,7 @@ bool Network::shortest_paths_all()
 }
 
 
+/* Old ************
 bool Network::shortest_alternatives_all (int lid, double penalty)
 {
 	double cost=(graph->linkCost (lid)) + penalty;
@@ -2632,6 +2633,31 @@ bool Network::shortest_alternatives_all (int lid, double penalty)
 			}
 		}
 	}
+	return true;
+}
+***/
+
+bool Network::shortest_alternatives_all (int lid, double penalty)
+// Makes sure that each affected link has an alternative
+{
+	map <int, Link*> affected_link_map;
+	// Find all the affected links
+	Link* incident_link=linkmap[lid];
+	multimap <int, Route*> routemap = incident_link->get_routes();// get all routes through incident link
+	multimap <int, Route*>::iterator rmiter=routemap.begin();
+	// get all affected links from each route, and store the destinations as well
+ for (rmiter;rmiter != routemap.end(); rmiter++)
+ {
+	 Route* r = (*rmiter).second;
+	 vector <Link*> affectedlinks = r->get_upstream_links(lid);
+	 vector<Link*>::iterator l_iter;
+	 for (l_iter=affectedlinks.begin();l_iter!=affectedlinks.end();l_iter++)
+	 {
+		 affected_link_map [((*l_iter)->get_id())]=(*l_iter);  // ignores doubles
+	 }
+
+ }
+
 	return true;
 }
 

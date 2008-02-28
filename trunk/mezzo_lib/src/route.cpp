@@ -85,6 +85,12 @@ odval Route::get_oid_did()
 	 }
  }
 
+ vector<Link*> Route::get_upstream_links(int link_id)
+ {
+		return (vector <Link*> (links.begin(), find_if (links.begin(),links.end(), compare <Link> (link_id))));
+ }
+
+
  void Route::set_selected(bool selected) // sets the links' selected attribute
  {
 	 vector <Link*>::iterator iter = links.begin();
