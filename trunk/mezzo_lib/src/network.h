@@ -129,7 +129,7 @@ class Network
   bool init_shortest_path(); // builds the shortest path graph
   vector<Link*> get_path(int destid); //gives the links on the shortest path to destid (from current rootlink)
   bool shortest_paths_all(); // calculates shortest paths and generates the routes
-  bool shortest_alternatives_all (int lid, double penalty); // finds the alternative paths 'without' link lid.
+  bool find_alternatives_all (int lid, double penalty, Incident* incident); // finds the alternative paths 'without' link lid.
   void delete_spurious_routes(); // deletes all routes that have no OD pair.
   void renum_routes (); // renumerates the routes, to keep a consecutive series after deletions & additions
   bool run(int period); // RUNS the network for 'period' seconds
@@ -326,12 +326,14 @@ class Incident: public Action
   public:
   		Incident (int lid_, int sid_, double start_, double stop_,double info_start_,double info_stop_, Eventlist* eventlist, Network* network_, bool blocked_);
   		bool execute(Eventlist* eventlist, double time);
+			void set_affected_links(multimap <int,Link*> & affected_links_) {affected_links=affected_links_;}
   private:
+		   multimap <int,Link*> affected_links; 
        double start;
        double stop;
        double info_start;
        double info_stop;
-       int lid;
+       int lid; // Incident link
        int sid;
        Network* network;
        bool blocked;

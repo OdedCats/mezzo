@@ -2150,11 +2150,12 @@ bool Network::readincident (istream & in)
   	return false;
 
   }
-  incidents.insert(incidents.begin(), new Incident(lid, sid, start,stop,info_start,info_stop,eventlist,this, blocked)); // makes the incident and initialises its start in the eventlist
+	 Incident* incident = new Incident(lid, sid, start,stop,info_start,info_stop,eventlist,this, blocked);
+  incidents.insert(incidents.begin(), incident); // makes the incident and initialises its start in the eventlist
 #ifdef _DEBUG_NETWORK
  cout <<"incident from " << start << " to " << stop << " on link nr " << lid << endl;
 #endif //_DEBUG_NETWORK
-  return shortest_alternatives_all(lid,penalty);    // make the alternatives
+  return find_alternatives_all(lid,penalty,incident);    // make the alternatives
 }
 
 
@@ -2637,10 +2638,11 @@ bool Network::shortest_alternatives_all (int lid, double penalty)
 }
 ***/
 
-bool Network::shortest_alternatives_all (int lid, double penalty)
+bool Network::find_alternatives_all (int lid, double penalty, Incident* incident)
 // Makes sure that each affected link has an alternative
 {
-	map <int, Link*> affected_link_map;
+	multimap <int, Link*> affected_link_map; // indexed by destination
+	multimap <int, Link*> affected_links_without_alternative;// indexed by destination
 	// Find all the affected links
 	Link* incident_link=linkmap[lid];
 	multimap <int, Route*> routemap = incident_link->get_routes();// get all routes through incident link
@@ -2649,12 +2651,28 @@ bool Network::shortest_alternatives_all (int lid, double penalty)
  for (rmiter;rmiter != routemap.end(); rmiter++)
  {
 	 Route* r = (*rmiter).second;
+	 int dest =(*rmiter).first;
 	 vector <Link*> affectedlinks = r->get_upstream_links(lid);
 	 vector<Link*>::iterator l_iter;
 	 for (l_iter=affectedlinks.begin();l_iter!=affectedlinks.end();l_iter++)
 	 {
-		 affected_link_map [((*l_iter)->get_id())]=(*l_iter);  // ignores doubles
+		 
+		 affected_link_map.insert(pair<int,Link*>(dest,(*l_iter)));  // stores all affected links, per destination
 	 }
+	 // Add the affected links to the Incident
+	 incident->set_affected_links(affected_link_map);
+ // per destination, for all affected links, find out if they have an alternative that does not go through incident link
+	 multimap<int, Link*>::iterator lm_iter=affected_link_map.begin();
+	 for (lm_iter; lm_iter!=affected_link_map.end(); lm_iter++)
+	 {
+		 int dest = (*lm_iter).first;
+		 Link* link = (*lm_iter).second;
+		 if (!(link->nr_alternative_routes(dest, link->get_id())) )
+				affected_links_without_alternative.insert(pair<int,Link*>(dest,link)); 
+		 // maybe do something smarter here, store by link_id (will be root in shortest path search), and then a list of destinations.
+	 }
+	// TODO: IF affected_links_without_alternative is NOT empty
+	 // DO a shortest path init, and a shortest path search wih penalty for incident link to create alternatives for each link.
 
  }
 

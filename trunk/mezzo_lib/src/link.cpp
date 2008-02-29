@@ -634,7 +634,18 @@ vector <Route*> Link::get_routes_to_dest(int dest)
  return return_routes;
 
 }
-
+unsigned int Link::nr_alternative_routes(int dest, int incidentlink_id)
+{
+	unsigned int count = 0;
+	vector <Route*> routes_to_dest=get_routes_to_dest(dest);
+	vector <Route*>::iterator route_iter= routes_to_dest.begin();
+	for (route_iter; route_iter!=routes_to_dest.end();route_iter++)
+	{	
+		if ( ! ((*route_iter)->has_link(incidentlink_id)) )
+			 count++;
+	}
+  return count;
+}
 void Link::set_incident(Sdfunc* sdptr, bool blocked_)
 {
 	temp_sdfunc=sdfunc;

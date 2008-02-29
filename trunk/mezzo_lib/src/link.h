@@ -129,6 +129,7 @@ public:
 	void register_route (Route* route) ;// adds route to routemap at link
 	multimap <int,Route*> get_routes() {return routemap;}
 	vector <Route*> get_routes_to_dest(int dest) ;// find all routes through this link leading to destination
+	unsigned int nr_alternative_routes(int dest, int incidentlink_id); // returns number of alternative routes from this link to dest, avoiding incidentlink_id
 	void receive_broadcast(Vehicle* veh, int lid, vector <double> parameters) ;
 	void set_incident(Sdfunc* sdptr, bool blocked_);
 	void unset_incident();
