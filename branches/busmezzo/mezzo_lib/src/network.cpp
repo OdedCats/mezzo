@@ -1231,7 +1231,8 @@ bool Network::readbusline(istream& in) // reads a busline
 //}
 	
   char bracket;
-  int busline_id, ori_id, dest_id, route_id, vehtype, nr_stops, stop_id, nr_tp, tp_id;
+  int busline_id, ori_id, dest_id, route_id, vehtype, average_headway, holding_strategy, nr_stops, stop_id, nr_tp, tp_id;
+  float ratio_headway_holding;
   string name;
   vector <Busstop*> stops, line_timepoint;
   Busstop* stop;
@@ -1243,7 +1244,7 @@ bool Network::readbusline(istream& in) // reads a busline
   	cout << "readfile::readsbusline scanner jammed at " << bracket;
   	return false;
   }
-  in >> busline_id >> name >> ori_id >> dest_id >> route_id >> vehtype >> nr_stops;
+  in >> busline_id >> name >> ori_id >> dest_id >> route_id >> vehtype >> average_headway >> ratio_headway_holding >> holding_strategy >> nr_stops;
   in >> bracket;
   if (bracket != '{')
   {
@@ -1271,7 +1272,7 @@ bool Network::readbusline(istream& in) // reads a busline
   ODpair* odptr=(*(find_if (odpairs.begin(),odpairs.end(), compareod (odid) )));
   Busroute* br=(*(find_if(busroutes.begin(), busroutes.end(), compare <Route> (route_id) )));
   Vtype* vt= (*(find_if(vehtypes.vtypes.begin(), vehtypes.vtypes.end(), compare <Vtype> (vehtype) )));
-  Busline* bl= new Busline (busline_id, name,br,vt,odptr );
+  Busline* bl= new Busline (busline_id,name,br,vt,odptr,average_headway,ratio_headway_holding,holding_strategy);
   bl->add_stops(stops);
   stop->add_lines(bl);
   stop->add_line_nr_waiting(bl, 0);

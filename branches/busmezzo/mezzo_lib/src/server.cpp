@@ -105,7 +105,8 @@ double OServer::next(const double time)
 
 double StochasticDelayServer::next (const double time)
 {
-	double result = mu + max(random->lnrandom(delay, delay_std), delay + 2 * delay_std);
+	double result = mu + random->lnrandom(delay, delay_std);
+	//double result = mu + min(random->lnrandom(delay, delay_std), delay + 2 * delay_std);
 	return time + result ;
 }
 

@@ -29,7 +29,7 @@ class Busline: public Action
 {
 public:
 	Busline (); // simple constructor
-	Busline (int id_, string name_, Busroute* busroute_, Vtype* vtype_, ODpair* odpair_); // Initialising constructor
+	Busline (int id_, string name_, Busroute* busroute_, Vtype* vtype_, ODpair* odpair_, int average_headway_, float ratio_headway_holding_, int holding_strategy_); // Initialising constructor
 	virtual ~Busline(); // destructor
 
 	// GETS & SETS
@@ -37,6 +37,9 @@ public:
 	Busroute* get_busroute() {return busroute;} 
 	Vtype* get_vtype() {return vtype;}
 	ODpair* get_odpair() {return odpair;}
+	int get_average_headway() {return average_headway;}
+	float get_ratio_headway_holding() {return ratio_headway_holding;}
+	int get_holding_strategy() {return holding_strategy;}
 
 	bool execute(Eventlist* eventlist, double time); // re-implemented from virtual function in Action
 													 // this function does the real work. It initiates 
@@ -56,6 +59,9 @@ protected:
 	Busroute* busroute; // the route (in terms of links) that the busses follow
 	Vtype* vtype; // the type of vehicle for the buses to be generated.
 	ODpair* odpair; 
+	int average_headway;
+	float ratio_headway_holding;
+	int holding_strategy; 
 	bool active; // is true when the busline has started generating trips
 	vector <Start_trip>::iterator curr_trip; // indicates the next trip
 };
@@ -150,8 +156,8 @@ public:
 	void free_length (Bus* bus); // update avaliable length when bus leaves
 	void update_last_arrivals (Bustrip* trip, double time); //everytime a bus ENTERS it updates the last_arrivals vector 
 	void update_last_departures (Bustrip* trip, double time); //everytime a bus EXITS it updates the last_departures vector 
-	double get_enter_headway (Bustrip* trip, double time); // calculates the headway (defined as the differnece in time between sequential arrivals) 
-	double get_exit_headway (Bustrip* trip, double time); // calculates the headway (defined as the differnece in time between sequential departures) 
+	double get_time_since_arrival (Bustrip* trip, double time); // calculates the headway (defined as the differnece in time between sequential arrivals) 
+	double get_time_since_departure (Bustrip* trip, double time); // calculates the headway (defined as the differnece in time between sequential departures) 
 	void write_busstop_visit (string name, Bustrip* trip, double enter_time); // creates a log-file for stop-related info
 
 // Action for visits to stop
