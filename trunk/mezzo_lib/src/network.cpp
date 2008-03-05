@@ -2674,7 +2674,8 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 		 {
 			 Link* link = linkiter->second;
 			 int linkid=link->get_id();
-			 if (!(link->nr_alternative_routes(dest, link->get_id())) )
+			 int nr_alternatives = link->nr_alternative_routes(dest,lid );
+			 if (nr_alternatives == 0 )
 				affected_links_without_alternative[dest] [linkid] = link; 
 				// maybe do something smarter here, store by link_id (will be root in shortest path search), and then a list of destinations.
 		 }
