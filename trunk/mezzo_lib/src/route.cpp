@@ -22,7 +22,9 @@ Route::Route(int id_, Origin* origin_, Destination* destination_, vector <Link*>
 	vector <Link*>::iterator iter = links.begin();
 	for (iter; iter < links.end(); iter++)
 	{
-			(*iter)->register_route(this);
+			Link* link=(*iter);
+			link->register_route(this);
+			linkmap [link->get_id()]=link;
 	}
 #ifdef _DEBUG_ROUTE 	
  	cout << "new route: rid,oid,did : lid* " << id << ","<< origin->get_id();
@@ -138,7 +140,11 @@ Link* Route::nextlink(Link* currentlink)
 
 bool Route::has_link(int lid)
 {
- return ( (find_if (links.begin(),links.end(), compare <Link> (lid))) < links.end() ); // the link exists
+  //return ( (find_if (links.begin(),links.end(), compare <Link> (lid))) < links.end() ); // the link exists
+	if (linkmap.count(lid))
+		return true;
+	else
+		return false;
 }
 
 

@@ -54,7 +54,8 @@ class Route
 	int id;
 	Origin* origin;
 	Destination* destination;
-	vector <Link*> links;
+	vector <Link*> links; // ordered sequence of the links in the route
+	map <int, Link*> linkmap; // in addition to the 'links' vector, to enable fast lookup
 	double sumcost; // the cached route cost.
 	double last_calc_time; // last time the route cost was updated
 };

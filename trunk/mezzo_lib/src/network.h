@@ -326,9 +326,9 @@ class Incident: public Action
   public:
   		Incident (int lid_, int sid_, double start_, double stop_,double info_start_,double info_stop_, Eventlist* eventlist, Network* network_, bool blocked_);
   		bool execute(Eventlist* eventlist, double time);
-			void set_affected_links(multimap <int,Link*> & affected_links_) {affected_links=affected_links_;}
+			void set_affected_links(map <int, map <int,Link*>> & affected_links_) {affected_links=affected_links_;}
   private:
-		   multimap <int,Link*> affected_links; 
+	   map <int, map <int,Link*>> affected_links; 
        double start;
        double stop;
        double info_start;
