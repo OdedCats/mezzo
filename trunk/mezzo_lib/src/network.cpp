@@ -1492,7 +1492,7 @@ bool Network::readstage(istream& in, SignalPlan* sp)
 	   in >> turnid;
 	   // find turning in turnings list
 	   vector <Turning*>::iterator turn = find_if(turnings.begin(), turnings.end(), compare<Turning>(turnid));
-	   assert (turn < turnings.end());
+	   assert (turn != turnings.end());
 	   // add to stage
 	   stageptr->add_turning(*turn);
    }
@@ -2673,17 +2673,24 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 		 for (linkiter; linkiter != thelinks.end(); linkiter++)
 		 {
 			 Link* link = linkiter->second;
+			 link->set_selected(true); // set the affected link icon to 'selected colour'
 			 int linkid=link->get_id();
 			 int nr_alternatives = link->nr_alternative_routes(dest,lid );
 			 if (nr_alternatives == 0 )
+			 {
 				affected_links_without_alternative[dest] [linkid] = link; 
 				// maybe do something smarter here, store by link_id (will be root in shortest path search), and then a list of destinations.
+#ifndef _NO_GUI  
+				link->set_selected_color(Qt::red); // set red colour for Affected links without alternatives
+#endif
+			 }
 		 }
 	 }
 		 // TODO: IF affected_links_without_alternative is NOT empty
 	 // DO a shortest path init, and a shortest path search wih penalty for incident link to create alternatives for each link.
   }
-	cout << " nr of routes affected by incident " << routemap.size() << endl;
+//Now select all links that are affected:
+   	cout << " nr of routes affected by incident " << routemap.size() << endl;
 	cout << " nr of links without alternatives " << affected_links_without_alternative.size() << endl;
 	return true;
 }
