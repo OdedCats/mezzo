@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="gui"
 	ProjectGUID="{60259A8A-DDD3-4036-B4D1-C598A9F0B0E3}"
 	RootNamespace="gui"
@@ -46,7 +46,7 @@
 				BuildCommandLine="qmake&#x0D;&#x0A;nmake release"
 				ReBuildCommandLine="qmake &#x0D;&#x0A;nmake clean&#x0D;&#x0A;nmake release"
 				CleanCommandLine="nmake clean"
-				Output="release\gui.exe"
+				Output="release\mezzo_gui.exe"
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""
