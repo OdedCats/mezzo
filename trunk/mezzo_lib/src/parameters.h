@@ -114,6 +114,9 @@ public:
    double kirchoff_alpha; // parameter for Kirchoff route choice
    double max_rel_route_cost; // max relative cost of a route, compared to the minimum cost route, to be allowed in the choice set.
    bool delete_bad_routes; // deletes bad (long) routes as well as cleans up nr of routes for small od pairs.
+
+   // statevar:
+   bool shortest_paths_initialised; // true if shortest paths have been initialised
 // #mime_parameters: ONLY for use in HYBRID situations
    double mime_comm_step; // Communication step for MICRO-MESO information exchange
    int mime_min_queue_length; // min queue length for stopping / starting shockwaves

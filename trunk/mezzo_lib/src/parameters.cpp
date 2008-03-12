@@ -47,6 +47,9 @@ Parameters::Parameters ()
    kirchoff_alpha = -1.0;
    max_rel_route_cost = 2.0;
    delete_bad_routes= false;
+
+   shortest_paths_initialised = false;
+
 // #mime_parameters
    mime_comm_step= 0.5;
    mime_min_queue_length= 20;
