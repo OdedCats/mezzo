@@ -1,6 +1,7 @@
 #ifndef _BUSLINE
 #define _BUSLINE
 
+
 #include "parameters.h" 
 #include "route.h"
 #include "Random.h"
@@ -12,9 +13,6 @@
 #include "sdfunc.h"
 #include "q.h"
 
-// ODED: what i am doing here is not correct yet. I made everything public and have no constructor, destructor etc.
-//		 When the structure of the classes is final, I move all the variables to protected: and make constructors,
-//		 destructors, and the get_ and set_ functions.
 
 class Busroute;
 class Busstop;
@@ -26,44 +24,44 @@ class Bustype;
 typedef pair<Bustrip*,double> Start_trip;
 
 class Busline: public Action
+	
+	
 {
 public:
-	Busline (); // simple constructor
-	Busline (int id_, string name_, Busroute* busroute_, Vtype* vtype_, ODpair* odpair_, int average_headway_, float ratio_headway_holding_, int holding_strategy_); // Initialising constructor
-	virtual ~Busline(); // destructor
+	
+	
+	Busline (); //!< simple constructor
+	Busline (int id_, string name_, Busroute* busroute_, Vtype* vtype_, ODpair* odpair_, int average_headway_, float ratio_headway_holding_, int holding_strategy_); //!< Initialising constructor
+	virtual ~Busline(); //!< destructor
 
-	// GETS & SETS
-	int get_id () {return id;} // returns id, used in the compare <..> functions for find and find_if algorithms
-	Busroute* get_busroute() {return busroute;} 
-	Vtype* get_vtype() {return vtype;}
-	ODpair* get_odpair() {return odpair;}
-	int get_average_headway() {return average_headway;}
-	float get_ratio_headway_holding() {return ratio_headway_holding;}
-	int get_holding_strategy() {return holding_strategy;}
-
-	bool execute(Eventlist* eventlist, double time); // re-implemented from virtual function in Action
-													 // this function does the real work. It initiates 
-													//	the current Bustrip and books the next one
+	int get_id () {return id;} //!< returns id, used in the compare  functions for find and find_if algorithms
+	Busroute* get_busroute() {return busroute;} //!< returns Busroute
+	Vtype* get_vtype() {return vtype;} //!< returns Vtype
+	ODpair* get_odpair() {return odpair;} //!< returns ODpair
+	int get_average_headway() {return average_headway;} //!< returns avg headway to previous bus
+	float get_ratio_headway_holding() {return ratio_headway_holding;} //!< returns ratio_headway_holding
+	int get_holding_strategy() {return holding_strategy;} //!< returns the holding strategy
+	bool execute(Eventlist* eventlist, double time); //!< re-implemented from virtual function in Action this function does the real work. It initiates the current Bustrip and books the next one
 	void add_stops (vector <Busstop*>  st) {stops = st;}
 	void add_timepoints (vector <Busstop*> tp) {line_timepoint = tp;}
 	void add_trip(Bustrip* trip, double starttime){trips.push_back(Start_trip(trip,starttime));}
-	bool is_line_timepoint (Busstop* stop); // returns true if stops is a time point for this busline, otherwise it returns false
+	bool is_line_timepoint (Busstop* stop); //!< returns true if stops is a time point for this busline, otherwise it returns false
 
 protected:
-	int id; // line ID
-	string name; // name of the busline "46 Sofia"
-//	int vtype; // vehicle type. There are usually multiple types of Busses
-	vector <Busstop*>  stops; // contains all the stops on this line
+	int id; //!< line ID
+	string name; //!< name of the busline "46 Sofia"
+//	int vtype; //!< vehicle type. There are usually multiple types of Busses
+	vector <Busstop*>  stops; //!< contains all the stops on this line
 	vector <Busstop*> line_timepoint;
-	vector <Start_trip> trips; // the trips that are to be made
-	Busroute* busroute; // the route (in terms of links) that the busses follow
-	Vtype* vtype; // the type of vehicle for the buses to be generated.
+	vector <Start_trip> trips; //!< the trips that are to be made
+	Busroute* busroute; //!< the route (in terms of links) that the busses follow
+	Vtype* vtype; //!< the type of vehicle for the buses to be generated.
 	ODpair* odpair; 
 	int average_headway;
 	float ratio_headway_holding;
 	int holding_strategy; 
-	bool active; // is true when the busline has started generating trips
-	vector <Start_trip>::iterator curr_trip; // indicates the next trip
+	bool active; //!< is true when the busline has started generating trips
+	vector <Start_trip>::iterator curr_trip; //!< indicates the next trip
 };
 
 typedef pair<Busstop*,double> Visit_stop;
@@ -76,7 +74,7 @@ public:
 	Bustrip (int id_, double start_time_);
 
 // GETS & SETS
-	int get_id () {return id;} // returns id, used in the compare <..> functions for find and find_if algorithms
+	int get_id () {return id;} //!< returns id, used in the compare <..> functions for find and find_if algorithms
 	Bus* get_busv () {return busv;}
 	void set_busv (Bus* busv_) {busv = busv_;}
 	void set_bustype (Bustype* btype_) {btype = btype_;}
@@ -85,36 +83,35 @@ public:
 	Busline* get_line () {return line;}
 	double get_starttime () {return starttime;}
 	int get_init_occupancy () {return init_occupancy;}
-	vector <Visit_stop*> :: iterator& get_next_stop() {return next_stop;} // returns pointer to next stop
+	vector <Visit_stop*> :: iterator& get_next_stop() {return next_stop;} //!< returns pointer to next stop
 
 // other functions:	
-//	bool is_trip_timepoint(Busstop* stop); // returns 1 if true, 0 if false, -1 if busstop not found
-	bool activate (double time, Route* route, Vtype* vehtype, ODpair* odpair, Eventlist* eventlist_); // activates the trip. Generates the bus and inserts in net.
-	bool advance_next_stop (double time, Eventlist* eventlist_); // advances the pointer to the next stop (checking bounds)
+//	bool is_trip_timepoint(Busstop* stop); //!< returns 1 if true, 0 if false, -1 if busstop not found
+	bool activate (double time, Route* route, Vtype* vehtype, ODpair* odpair, Eventlist* eventlist_); //!< activates the trip. Generates the bus and inserts in net.
+	bool advance_next_stop (double time, Eventlist* eventlist_); //!< advances the pointer to the next stop (checking bounds)
 	void add_stops (vector <Visit_stop*>  st) {stops = st; next_stop = stops.begin();}
 	void add_trips (vector <Start_trip*>  st) {driving_roster = st;} 
-	double scheduled_arrival_time (Busstop* stop); // finds the scheduled arrival time for a given bus stop
-	void book_stop_visit (double time, Bus* bus); // books a visit to the stop
-	bool check_end_trip (); // returns 1 if true, 0 if false
-	double calc_departure_time (double time); // calculates departure time from origin according to arrival time and schedule (including layover effect)
+	double scheduled_arrival_time (Busstop* stop); //!< finds the scheduled arrival time for a given bus stop
+	void book_stop_visit (double time, Bus* bus); //!< books a visit to the stop
+	bool check_end_trip (); //!< returns 1 if true, 0 if false
+	double calc_departure_time (double time); //!< calculates departure time from origin according to arrival time and schedule (including layover effect)
 
-// public vectors
-	vector <Visit_stop*> stops; // contains all the busstops and the times that they are supposed to be served.
-								// NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
-	vector <Start_trip*> driving_roster; // trips assignment for each bus vehicle.
+//!< public vectors
+	vector <Visit_stop*> stops; //!< contains all the busstops and the times that they are supposed to be served. NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
+	vector <Start_trip*> driving_roster; //!< trips assignment for each bus vehicle.
 	
 protected:
-	int id; // course nr
-	Bus* busv; // pointer to the bus vehicle
+	int id; //!< course nr
+	Bus* busv; //!< pointer to the bus vehicle
 	Bustype* btype;
-	Busline* line; // pointer to the line it serves
-	int init_occupancy; // initial occupancy, usually 0
-	double starttime; // when the trip is starting from the origin
+	Busline* line; //!< pointer to the line it serves
+	int init_occupancy; //!< initial occupancy, usually 0
+	double starttime; //!< when the trip is starting from the origin
 	vector <Visit_stop*> :: iterator next_stop;
-	//map <Bustrip*, double> driving_roster; 
+	// map <Bustrip*, double> driving_roster; 
 	Random* random;
-//	map <Busstop*,bool> trips_timepoint; // will be relevant only when time points are trip-specific. binary map with time point indicatons for stops on route only (according to the schedule input file)  
-	Eventlist* eventlist; // for use by busstops etc to book themselves.
+//	map <Busstop*,bool> trips_timepoint; //!< will be relevant only when time points are trip-specific. binary map with time point indicatons for stops on route only (according to the schedule input file)  
+	Eventlist* eventlist; //!< for use by busstops etc to book themselves.
 };
 
 class Busstop : public Action
@@ -125,7 +122,7 @@ public:
 	Busstop (int id_, int link_id_, double position_, double length_, bool has_bay_, double dwelltime_);
 
 // GETS & SETS:
-	int get_id () {return id;} // returns id, used in the compare <..> functions for find and find_if algorithms
+	int get_id () {return id;} //!< returns id, used in the compare <..> functions for find and find_if algorithms
 	int get_link_id() {return link_id;}
 	double get_arrival_rates (Bustrip* trip) {return arrival_rates[trip->get_line()];}
 	double get_alighting_fractions (Bustrip* trip) {return alighting_fractions[trip->get_line()];}
@@ -148,45 +145,45 @@ public:
 	void add_line_nr_alighting(Busline* line, double value){alighting_fractions[line]= value;}
 
 //	other functions
-	double calc_dwelltime (Bustrip* trip, double time); // calculates the dwelltime of each bus serving this stop
-							// currently includes: standees, out of stop, bay/lane,  vehicle refernce, poisson headways, unique boarding and alighting rates									
-	double calc_exiting_time (Bustrip* trip, double time); // To be implemented when time-points will work
-	bool check_out_of_stop (Bus* bus); // returns TRUE if there is NO avaliable space for the bus at the stop (meaning the bus is out of the stop)
-	void occupy_length (Bus* bus); // update avaliable length when bus arrives
-	void free_length (Bus* bus); // update avaliable length when bus leaves
-	void update_last_arrivals (Bustrip* trip, double time); //everytime a bus ENTERS it updates the last_arrivals vector 
-	void update_last_departures (Bustrip* trip, double time); //everytime a bus EXITS it updates the last_departures vector 
-	double get_time_since_arrival (Bustrip* trip, double time); // calculates the headway (defined as the differnece in time between sequential arrivals) 
-	double get_time_since_departure (Bustrip* trip, double time); // calculates the headway (defined as the differnece in time between sequential departures) 
-	void write_busstop_visit (string name, Bustrip* trip, double enter_time); // creates a log-file for stop-related info
+	double calc_dwelltime (Bustrip* trip, double time); //!< calculates the dwelltime of each bus serving this stop. currently includes: standees, out of stop, bay/lane,  vehicle refernce, poisson headways, unique boarding and alighting rates									
+	double calc_exiting_time (Bustrip* trip, double time); //!< To be implemented when time-points will work
+	bool check_out_of_stop (Bus* bus); //!< returns TRUE if there is NO avaliable space for the bus at the stop (meaning the bus is out of the stop)
+	void occupy_length (Bus* bus); //!< update avaliable length when bus arrives
+	void free_length (Bus* bus); //!< update avaliable length when bus leaves
+	void update_last_arrivals (Bustrip* trip, double time); //!< everytime a bus ENTERS it updates the last_arrivals vector 
+	void update_last_departures (Bustrip* trip, double time); //!< everytime a bus EXITS it updates the last_departures vector 
+	double get_time_since_arrival (Bustrip* trip, double time); //!< calculates the headway (defined as the differnece in time between sequential arrivals) 
+	double get_time_since_departure (Bustrip* trip, double time); //!< calculates the headway (defined as the differnece in time between sequential departures) 
+	void write_busstop_visit (string name, Bustrip* trip, double enter_time); //!< creates a log-file for stop-related info
 
 // Action for visits to stop
-	void book_bus_arrival(Eventlist* eventlist, double time, Bus* bus);  // add to expected arrivals
-	bool execute(Eventlist* eventlist, double time); // is executed by the eventlist and means a bus needs to be processed
+	void book_bus_arrival(Eventlist* eventlist, double time, Bus* bus);  //!< add to expected arrivals
+	bool execute(Eventlist* eventlist, double time); //!< is executed by the eventlist and means a bus needs to be processed
 	
 
 protected:
-	int id; // stop id
-	string name; //name of the bus stop "Ziv plaza"
-	int link_id; // link it is on, maybe later a pointer to the respective link if needed
-	bool has_bay; // TRUE if it has a bay, so that vehicles on same lane can pass.
-	double length; // length of the busstop, determines how many buses can be served at the same time
-	double position; // relative position from the upstream node of the link (beteen 0 to 1)
-	double avaliable_length; // length of the busstop minus occupied length
+	int id; //!< stop id
+	string name; //!< name of the bus stop "Ziv plaza"
+	int link_id; //!< link it is on, maybe later a pointer to the respective link if needed
+	bool has_bay; //!< TRUE if it has a bay, so that vehicles on same lane can pass.
+	double length; //!< length of the busstop, determines how many buses can be served at the same time
+	double position; //!< relative position from the upstream node of the link (beteen 0 to 1)
+	double avaliable_length; //!< length of the busstop minus occupied length
 	double exit_time;
-	double dwelltime; // standard dwell time
-	int nr_boarding;// pass. boarding
-	int nr_alighting; // pass alighting
+	double dwelltime; //!< standard dwell time
+	int nr_boarding;//!< pass. boarding
+	int nr_alighting; //!< pass alighting
 	Random* random;
 	
 	vector <Busline*> lines;
-	map <Busline*, int> nr_waiting; // number of waiting passengers for each of the bus lines that stops at the stop
-	map <Busline*, double> arrival_rates; // parameter lambda that defines the poission proccess of passengers arriving at the stop
-	map <Busline*, double> alighting_fractions; // parameter that defines the poission process of the alighting passengers (second contains the alighting fraction)
-	map <Busline*, double> last_arrivals; // contains the arrival time of the last bus from each line that stops at the stop (can result headways)
-	map <Busline*, double> last_departures; // contains the departure time of the last bus from each line that stops at the stop (can result headways)
-	map <double,Bus*> expected_arrivals; // booked arrivals of buses on the link on their way to the stop
-	map <double,Bus*> buses_at_stop; // buses currently visiting stop
+	map <Busline*, int> nr_waiting; //!< number of waiting passengers for each of the bus lines that stops at the stop
+	map <Busline*, double> arrival_rates; //!< parameter lambda that defines the poission proccess of passengers arriving at the stop
+	map <Busline*, double> alighting_fractions; //!< parameter that defines the poission process of the alighting passengers (second contains the alighting fraction)
+	map <Busline*, double> last_arrivals; //!< contains the arrival time of the last bus from each line that stops at the stop (can result headways)
+	map <Busline*, double> last_departures; //!< contains the departure time of the last bus from each line that stops at the stop (can result headways)
+	map <double,Bus*> expected_arrivals; //!< booked arrivals of buses on the link on their way to the stop
+	map <double,Bus*> buses_at_stop; //!< buses currently visiting stop
+	
 	// Maybe in the future, these three vectors could be integrated into a single matrix ( a map with busline as the key)
 };
 

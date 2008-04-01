@@ -242,7 +242,7 @@ bool Parameters::read_parameters (istream & in )
 	}
 	in >> linktime_alpha;
 
-///////
+
 	in >> keyword;
 	if (keyword!= "#assignment_matrix_parameters")
 	{

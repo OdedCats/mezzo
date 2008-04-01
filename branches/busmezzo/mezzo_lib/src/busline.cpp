@@ -1,6 +1,4 @@
-// busline.cpp: implementation of the busline class.
-//
-//////////////////////////////////////////////////////////////////////
+///! busline.cpp: implementation of the busline class.
 
 #include "busline.h"
 #include <math.h>

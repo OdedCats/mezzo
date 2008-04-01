@@ -3149,7 +3149,7 @@ bool Network::writeall()
 	string cleantimes=filenames[10]+".clean";
 	time_alpha=1.0;
 	writelinktimes(cleantimes);
-	////////
+
 	writesummary(filenames[12]); // write the summary first because	
 	writeoutput(filenames[11]);  // here the detailed output is written and then deleted from memory
 	writemoes();
