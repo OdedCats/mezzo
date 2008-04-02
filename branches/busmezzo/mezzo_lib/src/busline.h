@@ -96,7 +96,7 @@ public:
 	bool check_end_trip (); //!< returns 1 if true, 0 if false
 	double calc_departure_time (double time); //!< calculates departure time from origin according to arrival time and schedule (including layover effect)
 
-//!< public vectors
+// public vectors
 	vector <Visit_stop*> stops; //!< contains all the busstops and the times that they are supposed to be served. NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
 	vector <Start_trip*> driving_roster; //!< trips assignment for each bus vehicle.
 	
@@ -108,7 +108,7 @@ protected:
 	int init_occupancy; //!< initial occupancy, usually 0
 	double starttime; //!< when the trip is starting from the origin
 	vector <Visit_stop*> :: iterator next_stop;
-	// map <Bustrip*, double> driving_roster; 
+// map <Bustrip*, double> driving_roster; 
 	Random* random;
 //	map <Busstop*,bool> trips_timepoint; //!< will be relevant only when time points are trip-specific. binary map with time point indicatons for stops on route only (according to the schedule input file)  
 	Eventlist* eventlist; //!< for use by busstops etc to book themselves.
