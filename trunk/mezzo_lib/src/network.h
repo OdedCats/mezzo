@@ -1,12 +1,8 @@
-/**
- * modification:
- *   add the access ports to originals, destinations, routes, odpairs
- *
- * Xiaoliang Ma 
- 
- * modification:
+/*!
+ * 
+ * last modifications:
  * add map <int,Object*> containers for Nodes, Links, Routes, Origins, Destinations, Junctions for faster look-up.
-
+ * modified find_alternatives_all (int lid, double penalty, Incident* incident) to use the routemap structure at links for finding alternative routes.
  * Wilco Burghout
  * last change: 2008-01-11
   
@@ -18,7 +14,7 @@
 //#undef _NO_GUI
 //#define _DEBUG_NETWORK
 //#define _DEBUG_SP // shortest path routines
-#define _USE_VAR_TIMES   // variable link travel times
+#define _USE_VAR_TIMES   //!< variable link travel times
 
 
 
@@ -116,62 +112,62 @@ class Network
   public:
   Network();
   ~Network();
-  bool readmaster(string name); // reads the master file.
+  bool readmaster(string name); //!< reads the master file.
 #ifndef _NO_GUI
-  double executemaster(QPixmap * pm_, QMatrix * wm_); // starts the scenario, returns total running time
-   double get_scale() {return scale;} // returns the scale of the drawing
+  double executemaster(QPixmap * pm_, QMatrix * wm_); //!< starts the scenario, returns total running time
+   double get_scale() {return scale;} //!< returns the scale of the drawing
 #endif //_NO_GUI
-  double executemaster(); // without GUI
-  double step(double timestep); // executes one step of simulation, called by the gui, returns current value of time
+  double executemaster(); //!< without GUI
+  double step(double timestep); //!< executes one step of simulation, called by the gui, returns current value of time
   bool writeall();
-  bool readnetwork(string name); // reads the network and creates the appropriate structures
-  bool init(); // creates eventlist and initializes first actions for all turnings at time 0 and starts the Communicator
-  bool init_shortest_path(); // builds the shortest path graph
-  vector<Link*> get_path(int destid); //gives the links on the shortest path to destid (from current rootlink)
-  bool shortest_paths_all(); // calculates shortest paths and generates the routes
-  bool find_alternatives_all (int lid, double penalty, Incident* incident); // finds the alternative paths 'without' link lid.
-  void delete_spurious_routes(); // deletes all routes that have no OD pair.
-  void renum_routes (); // renumerates the routes, to keep a consecutive series after deletions & additions
-  bool run(int period); // RUNS the network for 'period' seconds
-  bool addroutes (int oid, int did, ODpair* odpair); // adds routes to an ODpair
-  bool add_od_routes()	; // adds routes to all ODpairs
-  bool readinput(string name);  // reads the OD matrix and creates the ODpairs
-  bool readlinktimes(string name); // reads historical link travel times
+  bool readnetwork(string name); //!< reads the network and creates the appropriate structures
+  bool init(); //!< creates eventlist and initializes first actions for all turnings at time 0 and starts the Communicator
+  bool init_shortest_path(); //!< builds the shortest path graph
+  vector<Link*> get_path(int destid); //!<gives the links on the shortest path to destid (from current rootlink)
+  bool shortest_paths_all(); //!< calculates shortest paths and generates the routes
+  bool find_alternatives_all (int lid, double penalty, Incident* incident); //!< finds the alternative paths 'without' link lid.
+  void delete_spurious_routes(); //!< deletes all routes that have no OD pair.
+  void renum_routes (); //!< renumerates the routes, to keep a consecutive series after deletions & additions
+  bool run(int period); //!< RUNS the network for 'period' seconds
+  bool addroutes (int oid, int did, ODpair* odpair); //!< adds routes to an ODpair
+  bool add_od_routes()	; //!< adds routes to all ODpairs
+  bool readinput(string name);  //!< reads the OD matrix and creates the ODpairs
+  bool readlinktimes(string name); //!< reads historical link travel times
   bool setlinktimes();
-  bool readpathfile(string name); // reads the routes
-  bool readincidentfile(string name); // reads the file with the incident (for now only 1)
-  bool writepathfile (string name); // appends the routes found to the route file
-  bool writeoutput(string name); // writes detailed output, at this time theOD output!
-  bool writesummary(string name); // writes the summary of the OD output
-  bool writelinktimes(string name); //writes average link traversal times.
-  bool writeheadways(string name); // writes the timestamps of vehicles entering a Virtual Link (i e Mitsim).
-            //same format as historical times read by readlinktimes(string name)
-  bool register_links();//registers the links at the origins and destinations
-  void set_incident(int lid, int sid, bool blocked); // sets the incident on link lid (less capacity, lower max speed)
-  void unset_incident(int lid); // restores the incident link to its normal behaviour
-  void broadcast_incident_start(int lid); // informs the vehicles on the links of the incident on link lid
-  void broadcast_incident_stop(int lid); // informs the vehicles that the incident on link lid has been cleared
-  bool readturnings(string name); // reads the turning movements
-  void create_turnings();          // creates the turning movements
-  bool writeturnings(string name);  // writes the turing movements
-  bool writemoes(); // writes all the moes: speeds, inflows, outflows, queuelengths and densities per link
-  bool writeallmoes(string name); // writes all the moes in one file.
-  bool writeassmatrices(string name); // writes the assignment matrices
-  bool write_v_queues(string name); // writes the virtual queue lengths
+  bool readpathfile(string name); //!< reads the routes
+  bool readincidentfile(string name); //!< reads the file with the incident (for now only 1)
+  bool writepathfile (string name); //!< appends the routes found to the route file
+  bool writeoutput(string name); //!< writes detailed output, at this time theOD output!
+  bool writesummary(string name); //!< writes the summary of the OD output
+  bool writelinktimes(string name); //!<writes average link traversal times.
+  bool writeheadways(string name); //!< writes the timestamps of vehicles entering a Virtual Link (i e Mitsim).
+            //!<same format as historical times read by readlinktimes(string name)
+  bool register_links();//!<registers the links at the origins and destinations
+  void set_incident(int lid, int sid, bool blocked); //!< sets the incident on link lid (less capacity, lower max speed)
+  void unset_incident(int lid); //!< restores the incident link to its normal behaviour
+  void broadcast_incident_start(int lid); //!< informs the vehicles on the links of the incident on link lid
+  void broadcast_incident_stop(int lid); //!< informs the vehicles that the incident on link lid has been cleared
+  bool readturnings(string name); //!< reads the turning movements
+  void create_turnings();          //!< creates the turning movements
+  bool writeturnings(string name);  //!< writes the turing movements
+  bool writemoes(); //!< writes all the moes: speeds, inflows, outflows, queuelengths and densities per link
+  bool writeallmoes(string name); //!< writes all the moes in one file.
+  bool writeassmatrices(string name); //!< writes the assignment matrices
+  bool write_v_queues(string name); //!< writes the virtual queue lengths
 
-  bool readassignmentlinksfile(string name); // reads the file with the links for which the assignment matrix is collected
+  bool readassignmentlinksfile(string name); //!< reads the file with the links for which the assignment matrix is collected
   
-  bool readvtypes (string name); // reads the vehicles types with their lentghs and percentages.
-  bool readvirtuallinks(string name); // reads the virtual links that connect boundary out nodes to boundary in nodes.
-  bool readserverrates(string name); // reads in new rates for specified servers. This way server capacity can be variable over time for instance for exits.
-  bool readsignalcontrols(string name); // reads the signal control settings
-  void seed (long int seed_) {randseed=seed_; vehtypes.set_seed(seed_);}          // sets the random seed
+  bool readvtypes (string name); //!< reads the vehicles types with their lentghs and percentages.
+  bool readvirtuallinks(string name); //!< reads the virtual links that connect boundary out nodes to boundary in nodes.
+  bool readserverrates(string name); //!< reads in new rates for specified servers. This way server capacity can be variable over time for instance for exits.
+  bool readsignalcontrols(string name); //!< reads the signal control settings
+  void seed (long int seed_) {randseed=seed_; vehtypes.set_seed(seed_);}          //!< sets the random seed
   void removeRoute(Route* theroute);
 
 #ifndef _NO_GUI
-  void recenter_image();   // sets the image in the center and adapts zoom to fit window
-  QWMatrix netgraphview_init(); // scale the network graph to the view initialized by pixmaps
-  void redraw(); // redraws the image
+  void recenter_image();   //!< sets the image in the center and adapts zoom to fit window
+  QWMatrix netgraphview_init(); //!< scale the network graph to the view initialized by pixmaps
+  void redraw(); //!< redraws the image
 #endif //_NO_GUI
 
   // GET's
@@ -183,63 +179,63 @@ class Network
   vector <Node*>& get_nodes(){return nodes;}
   vector <Link*>& get_links(){return links;}
   
-  double calc_diff_input_output_linktimes (); // calculates the sum of the differences in output-input link travel times
-  double calc_sumsq_input_output_linktimes (); // calculates the sum square of the differences in output-input link travel times
+  double calc_diff_input_output_linktimes (); //!< calculates the sum of the differences in output-input link travel times
+  double calc_sumsq_input_output_linktimes (); //!< calculates the sum square of the differences in output-input link travel times
 // SET's
   void set_workingdir (const string dir) {workingdir = dir;}
 
 
 // Public transport
-  bool readbusroutes(string name); // reads the busroutes, similar to readroutes
-  bool readbusroute(istream& in); // reads a busroute
-  bool readbuslines(string name); // reads the busstops, buslines, and trips
-  bool readbusstop (istream& in); // reads a busstop
-  bool readbusline(istream& in); // reads a busline
-  bool readbustrip(istream& in); // reads a trip
+  bool readbusroutes(string name); //!< reads the busroutes, similar to readroutes
+  bool readbusroute(istream& in); //!< reads a busroute
+  bool readbuslines(string name); //!< reads the busstops, buslines, and trips
+  bool readbusstop (istream& in); //!< reads a busstop
+  bool readbusline(istream& in); //!< reads a busline
+  bool readbustrip(istream& in); //!< reads a trip
 #ifndef _NO_GUI
-  double get_width_x() {return width_x;} // returns image width in original coordinate system
-  double get_height_y() {return height_y;} // ... height ...
+  double get_width_x() {return width_x;} //!< returns image width in original coordinate system
+  double get_height_y() {return height_y;} //!< ... height ...
   void set_background (string name) {if (drawing) drawing->set_background(name.c_str());}
 #endif // _NO_GUI 
   
 protected:
  vector <Node*> nodes;
-  map <int, Node*> nodemap; // alternative storage, MUCH faster (log seek time, log insert time)
+  map <int, Node*> nodemap; //!< alternative storage, MUCH faster (log seek time, log insert time)
   vector <Origin*> origins;
-  map <int, Origin*> originmap; // alternative storage, MUCH faster (log seek time, log insert time)
+  map <int, Origin*> originmap; //!< alternative storage, MUCH faster (log seek time, log insert time)
   vector <Destination*> destinations;
-  map <int, Destination*> destinationmap; // alternative storage, MUCH faster (log seek time, log insert time)
+  map <int, Destination*> destinationmap; //!< alternative storage, MUCH faster (log seek time, log insert time)
   vector <Junction*> junctions;
-  map <int, Junction*> junctionmap; // alternative storage, MUCH faster (log seek time, log insert time)
+  map <int, Junction*> junctionmap; //!< alternative storage, MUCH faster (log seek time, log insert time)
   vector <BoundaryOut*> boundaryouts;
-  map <int, BoundaryOut*> boundaryoutmap; // alternative storage, MUCH faster (log seek time, log insert time)
+  map <int, BoundaryOut*> boundaryoutmap; //!< alternative storage, MUCH faster (log seek time, log insert time)
   vector <BoundaryIn*> boundaryins;
-  map <int, BoundaryIn*> boundaryinmap; // alternative storage, MUCH faster (log seek time, log insert time)
+  map <int, BoundaryIn*> boundaryinmap; //!< alternative storage, MUCH faster (log seek time, log insert time)
   vector <Link*> links;
-  map <int, Link*> linkmap; // alternative storage, MUCH faster (log seek time, log insert time)
+  map <int, Link*> linkmap; //!< alternative storage, MUCH faster (log seek time, log insert time)
   vector <Sdfunc*> sdfuncs;
-  map <int, Sdfunc*> sdfuncmap; // alternative storage, MUCH faster (log seek time, log insert time)
+  map <int, Sdfunc*> sdfuncmap; //!< alternative storage, MUCH faster (log seek time, log insert time)
   vector <Turning*> turnings;
-  map <int, Turning*> turningmap; // alternative storage, MUCH faster (log seek time, log insert time)
+  map <int, Turning*> turningmap; //!< alternative storage, MUCH faster (log seek time, log insert time)
   vector <Server*> servers;
-  map <int, Server*> servermap; // alternative storage, MUCH faster (log seek time, log insert time)
+  map <int, Server*> servermap; //!< alternative storage, MUCH faster (log seek time, log insert time)
   vector <Route*> routes;	
-  map <int, Route*> routemap; // alternative storage, MUCH faster (log seek time, log insert time)
+  map <int, Route*> routemap; //!< alternative storage, MUCH faster (log seek time, log insert time)
   vector <ODpair*> odpairs;
-  map <int, ODpair*> odpairmap; // alternative storage, MUCH faster (log seek time, log insert time)
+  map <int, ODpair*> odpairmap; //!< alternative storage, MUCH faster (log seek time, log insert time)
   vector <Incident*> incidents;
   vector <VirtualLink*> virtuallinks;
-  map <int, VirtualLink*> virtuallinkmap; // alternative storage, MUCH faster (log seek time, log insert time)
+  map <int, VirtualLink*> virtuallinkmap; //!< alternative storage, MUCH faster (log seek time, log insert time)
 
   vector <double> incident_parameters; // yes this is very ugly, as is the web of functions added, but I'll take them out asap
   vector <Stage*> stages;
   vector <SignalPlan*> signalplans;
   vector <SignalControl*> signalcontrols;
   // Public Transport
-  vector <Busline*> buslines; // the buslines that generate bus trips on busroutes, serving busstops
-  vector <Bustrip*> bustrips;  // the trips list of all buses
-  vector <Busstop*> busstops; // stops on the buslines
-  vector <Busroute*> busroutes; // the routes that buses follow
+  vector <Busline*> buslines; //!< the buslines that generate bus trips on busroutes, serving busstops
+  vector <Bustrip*> bustrips;  //!< the trips list of all buses
+  vector <Busstop*> busstops; //!< stops on the buslines
+  vector <Busroute*> busroutes; //!< the routes that buses follow
   //Shortest path graph
 #ifndef _USE_VAR_TIMES
   Graph<double, GraphNoInfo<double> > * graph;
@@ -251,13 +247,13 @@ protected:
 
 //GUI
 #ifndef _NO_GUI
- Drawing* drawing; // the place where all the Icons live
- QPixmap* pm; // the place where the drawing is drawn
- QWMatrix* wm; // worldmatrix that contains all the transformations of the drawing (scaling, translation, rotation, &c)
- QWMatrix initview_wm; // world matrix that transform the drawing to the inital view
- double scale; // contains the scale of the drawing
- double width_x; // width of boundaries of drawing in original coordinate system
- double height_y; // height of boundaries of drawing in org. coord. sys.
+ Drawing* drawing; //!< the place where all the Icons live
+ QPixmap* pm; //!< the place where the drawing is drawn
+ QWMatrix* wm; //!< worldmatrix that contains all the transformations of the drawing (scaling, translation, rotation, &c)
+ QWMatrix initview_wm; //!< world matrix that transform the drawing to the inital view
+ double scale; //!< contains the scale of the drawing
+ double width_x; //!< width of boundaries of drawing in original coordinate system
+ double height_y; //!< height of boundaries of drawing in org. coord. sys.
 #endif // _NO_GUI
   // Eventlist
   Eventlist* eventlist;
@@ -292,16 +288,16 @@ protected:
   bool readstage(istream& in, SignalPlan* sp);
   bool readparameters(string name);
   // end of read functions
-   vector <string> filenames; // filenames for input/output as read in the master file
+   vector <string> filenames; //!< filenames for input/output as read in the master file
    string workingdir;
-   int runtime; // == stoptime
+   int runtime; //!< == stoptime
    int starttime;
-   bool calc_paths; // if true new shortest paths are calculated and new paths added to the route file
+   bool calc_paths; //!< if true new shortest paths are calculated and new paths added to the route file
    double time;
-   int no_ass_links; // number of links observed in assignment matrix
+   int no_ass_links; //!< number of links observed in assignment matrix
    // Linktimes
-   int nrperiods; // number of linktime periods
-   double periodlength; // length of each period in seconds.
+   int nrperiods; //!< number of linktime periods
+   double periodlength; //!< length of each period in seconds.
    LinkTimeInfo* linkinfo;
    // Turning penalties
    vector <TurnPenalty*> turnpenalties;
@@ -333,7 +329,7 @@ class Incident: public Action
        double stop;
        double info_start;
        double info_stop;
-       int lid; // Incident link
+       int lid; //!< Incident link
        int sid;
        Network* network;
        bool blocked;

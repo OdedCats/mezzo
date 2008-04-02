@@ -1,4 +1,4 @@
-/** 
+/*! 
  * changes: 
  * 1)add the mezzo analyzer dialog
  * 2)solve the zooming problems
@@ -12,7 +12,6 @@
 #define MAINFORM
 
 #include <Qt3Support>
-//#include <q3filedialog.h> // taken out, replaced by Qfiledialog
 #include <Qfiledialog>
 #include <QWMatrix>
 #include "ui_canvas_qt4.h"
@@ -26,8 +25,8 @@ class MainForm : public Q3MainWindow, private Ui::MainForm
 	Q_OBJECT
 
 public:
-	MainForm(QWidget *parent = 0); // inits the main form
-	void seed(int sd ); // sets the seed
+	MainForm(QWidget *parent = 0); //!< inits the main form
+	void seed(int sd ); //!< sets the seed
 
 	// access ports
 	Network* getMezzoNet(){return (&theNetwork);}
@@ -78,20 +77,20 @@ private:
 	void zoomRectArea();
 
 //VARS
-	int start_x ; // the x coordinate of the upper right corner of the canvas
-    int start_y ; // the y coordinate of the upper right corner of the canvas
-	int yadjust_;  // the height of menu and tool bars
-	QPoint canvas_center; // the center of the canvas
+	int start_x ; //!< the x coordinate of the upper right corner of the canvas
+    int start_y ; //!< the y coordinate of the upper right corner of the canvas
+	int yadjust_;  //!< the height of menu and tool bars
+	QPoint canvas_center; //!< the center of the canvas
 	int panelx, panely;
     int dx,dy;
     bool exited;
 
 	// xiaoliang work variables on zooming
-	QWMatrix wm;			  // general world matrix from model to current view	
-    QWMatrix mod2stdViewMat_; //define transition from basic model to standard view
-	QWMatrix viewMat_;		  //define transition from standard view to current view
+	QWMatrix wm;			  //!< general world matrix from model to current view	
+    QWMatrix mod2stdViewMat_; //!< define transition from basic model to standard view
+	QWMatrix viewMat_;		  //!< define transition from standard view to current view
 	QSize viewSize_;
-	QPixmap pm1, pm2; //shared
+	QPixmap pm1, pm2; //!< shared pixmaps on which the network is drawn off-screen
 	QRect* zoomrect_;
 	double scalefactor;
     double scale;
@@ -105,8 +104,8 @@ private:
 
 	//key and mouse states
 	bool lmouse_pressed_;
-	bool keyN_pressed_;   //node selection
-	bool keyL_pressed_;   //link selection
+	bool keyN_pressed_;   //!< node selection
+	bool keyL_pressed_;   //!< link selection
 
 	// network 
 	Network theNetwork;
