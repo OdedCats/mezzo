@@ -1,12 +1,4 @@
-/*!
- * 
- * last modifications:
- * add map <int,Object*> containers for Nodes, Links, Routes, Origins, Destinations, Junctions for faster look-up.
- * modified find_alternatives_all (int lid, double penalty, Incident* incident) to use the routemap structure at links for finding alternative routes.
- * Wilco Burghout
- * last change: 2008-01-11
-  
- */
+
 
 #ifndef NETWORK_HH
 #define NETWORK_HH
@@ -106,6 +98,18 @@ class MatrixAction: public Action
     vector <ODpair*> * ods;
 };
 
+/*! Network is the main simulation class, containing all the network objects 
+ * such as Links, Nodes, ODpairs, etc. as well as all the main simulation, reading and writing functions
+ * It is included in the GUI part (MainForm in canvas_qt4.h) that calls it's public functions to read in the input files, simulate
+ * and write results.
+ *
+ * last modifications:
+ * add map <int,Object*> containers for Nodes, Links, Routes, Origins, Destinations, Junctions for faster look-up.
+ * modified find_alternatives_all (int lid, double penalty, Incident* incident) to use the routemap structure at links for finding alternative routes.
+ * Wilco Burghout
+ * last change: 2008-01-11
+  
+ */
 
 class Network
 {

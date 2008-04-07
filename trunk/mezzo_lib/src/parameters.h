@@ -1,6 +1,10 @@
 #ifndef PARAMETERS_
 #define PARAMETERS_
-
+/*! Here go all the constants that are used as parameters, later they will be read from a file.
+	There should be a global Parameters class, and a global var Parameters theParameters; and all use of parameters should then be 
+	theParameters.randseed for example
+	Also, this file should specify which modules are used and which ones not, instead of the current DEFINES
+*/
 #include <string>
 #include <vector>
 #include "Random.h"
@@ -8,11 +12,7 @@
 #ifndef _NO_GUI
 #include <qcolor.h>
 #endif
-/* Here go all the constants that are used as parameters, later they will be read from a file.
-	There should be a global Parameters class, and a global var Parameters theParameters; and all use of parameters should then be 
-	theParameters.randseed for example
-	Also, this file should specify which modules are used and which ones not, instead of the current DEFINES
-*/
+
 
 // DEFINES
 
@@ -56,7 +56,8 @@ const double dont_know_delay=0.114; // percentage of drivers that don't know del
 const double small_od_rate = 3.0; // determines when a OD can have more than 1 route
 
 // PARAMETER CLASS
-
+/*!  Here go all the global parameters used in the simulation and the GUI
+*/
 class Parameters
 {	
 public:
@@ -66,64 +67,64 @@ public:
 
 // THE (PUBLIC) PARAMETERS
 	// Drawing parameters
-	bool draw_link_ids; // If true link ID's are shown
-	int link_thickness; 
-	int node_thickness;
-	int node_radius;
-	int queue_thickness;
-	int selected_thickness;
-	int text_size;
-	bool show_background;
+	bool draw_link_ids; //!< If true link ID's are shown
+	int link_thickness; //!< Thickness with which links are drawn
+	int node_thickness; //!< Thickness with which nodes are drawn	
+	int node_radius; //!< Radius with which nodes are drawn
+	int queue_thickness; //!< Thickness with which the Queue part of a Link is drawn
+	int selected_thickness; //!< Thickness with which selected objects are drawn
+	int text_size; //!< Size of text in the network image
+	bool show_background; //!< If true background image is displayed behind network (if any image was loaded)
 #ifndef _NO_GUI
-	QColor linkcolor;
-	QColor nodecolor;
-	QColor queuecolor;
-	QColor backgroundcolor;
-	QColor selectedcolor;
+	QColor linkcolor; //!< Colour of links
+	QColor nodecolor; //!< Colour of nodes
+	QColor queuecolor; //!< Colour of queue part of links
+	QColor backgroundcolor; //!< Background colour
+	QColor selectedcolor; //!< Colour for selected objects
 #endif
-	double gui_update_step; // TODO: implement the gui update step!
-	double zerotime; // TODO implement reading this var. It is for displaying the 'Start time' correctly
+	double gui_update_step; //!< TODO: implement the gui update step!
+	double zerotime; //!< Start time of simulation
 	
 // #moe_parameters
-   double moe_speed_update; // update interval for link speed data
-   double moe_inflow_update; //  update interval for link inflow data
-   double moe_outflow_update; //  update interval for link outflow data
-   double moe_queue_update; //  update interval for link queuelength data
-   double moe_density_update; //  update interval for link density data
-   double linktime_alpha; // smoothing factor for link travel times
+   double moe_speed_update; //!< update interval for link speed data
+   double moe_inflow_update; //!<  update interval for link inflow data
+   double moe_outflow_update; //!<  update interval for link outflow data
+   double moe_queue_update; //!<  update interval for link queuelength data
+   double moe_density_update; //!<  update interval for link density data
+   double linktime_alpha; //!< smoothing factor for link travel times
 
 // #assignment_matrix_parameters
-   bool use_ass_matrix; // if true an assignment matrix is generated for all links in ass_links.dat
-   double ass_link_period; // interval length for link periods in Ass. matrix
-   double ass_od_period; // interval length for OD periods in ass. matrix
+   bool use_ass_matrix; //!< if true an assignment matrix is generated for all links in ass_links.dat
+   double ass_link_period; //!< interval length for link periods in Ass. matrix
+   double ass_od_period; //!< interval length for OD periods in ass. matrix
 
 //#turning_parameters
-   int default_lookback_size; // default queue look-back
-   double turn_penalty_cost;  // added penalty in shortest path alg. if a turn is forbidden
+   int default_lookback_size; //!< default queue look-back
+   double turn_penalty_cost;  //!< added penalty in shortest path alg. if a turn is forbidden
 
 // #server_parameters
-   bool od_servers_deterministic; // if true the time headways in OD servers are determiunistic, otherwise neg_exp
-   double odserver_sigma; // Obsolete since OD servers now have Mu=Sigma  (neg exp). Was for use with previous combined normal-neg_exp servers
+   bool od_servers_deterministic; //!< if true the time headways in OD servers are determiunistic, otherwise neg_exp
+   double odserver_sigma; //!< Obsolete since OD servers now have Mu=Sigma  (neg exp). Was for use with previous combined normal-neg_exp servers
 
 // #vehicle_parameters
-   int standard_veh_length; // used to calculate a-priori capacity of links
+   int standard_veh_length; //!< used to calculate a-priori capacity of links
 
 // #route_parameters
-   double update_interval_routes; // interval for re-calculating route costs based on time-dependent travel times.
-   double mnl_theta; // parameter for Multinomial LOGIT route choice
-   double kirchoff_alpha; // parameter for Kirchoff route choice
-   double max_rel_route_cost; // max relative cost of a route, compared to the minimum cost route, to be allowed in the choice set.
-   bool delete_bad_routes; // deletes bad (long) routes as well as cleans up nr of routes for small od pairs.
+   double update_interval_routes; //!< interval for re-calculating route costs based on time-dependent travel times.
+   double mnl_theta; //!< parameter for Multinomial LOGIT route choice
+   double kirchoff_alpha; //!< parameter for Kirchoff route choice
+   double max_rel_route_cost; //!< max relative cost of a route, compared to the minimum cost route, to be allowed in the choice set.
+   bool delete_bad_routes; //!< deletes bad (long) routes as well as cleans up nr of routes for small od pairs.
 
    // statevar:
-   bool shortest_paths_initialised; // true if shortest paths have been initialised
+   bool shortest_paths_initialised; //!< true if shortest paths have been initialised
 // #mime_parameters: ONLY for use in HYBRID situations
-   double mime_comm_step; // Communication step for MICRO-MESO information exchange
-   int mime_min_queue_length; // min queue length for stopping / starting shockwaves
-   double mime_queue_dis_speed; // queue dissipation speed if not calculated from flow & density data
+   double mime_comm_step; //!< Communication step for MICRO-MESO information exchange
+   int mime_min_queue_length; //!< min queue length for stopping / starting shockwaves
+   double mime_queue_dis_speed; //!< queue dissipation speed if not calculated from flow & density data
 // TODO: Implement the use of the following paramaters
-   double vissim_step; // time step for the VISSIM micro model
-   double sim_speed_factor; // REALTIME factor to keep the hybrid model running at a fixed speed
+   double vissim_step; //!< time step for the VISSIM micro model
+   double sim_speed_factor; //!< REALTIME factor to keep the hybrid model running at a fixed speed
 	
    
 

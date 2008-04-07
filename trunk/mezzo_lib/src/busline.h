@@ -4,10 +4,6 @@
 #include "parameters.h" 
 #include "route.h"
 
-// ODED: what i am doing here is not correct yet. I made everything public and have no constructor, destructor etc.
-//		 When the structure of the classes is final, I move all the variables to protected: and make constructors,
-//		 destructors, and the get_ and set_ functions.
-
 class Busroute;
 class Busstop;
 class Bustrip;
@@ -15,15 +11,19 @@ class ODpair;
 
 typedef pair<Bustrip*,double> Start_trip;
 
+/*! Busline contains the information about the entire busline: 
+ *  The bus stops, trips, vehicle type, ODpair, Busroute etc.
+
+*/
 class Busline: public Action
 {
 public:
-	Busline (); // constructor
-	Busline (int id_, string name_, Busroute* busroute_, Vtype* vtype_, ODpair* odpair_);
+	Busline ();  //!< simple constructor
+	Busline (int id_, string name_, Busroute* busroute_, Vtype* vtype_, ODpair* odpair_);  //!< constructor
 	virtual ~Busline(); // destructor
-	bool execute(Eventlist* eventlist, double time); // re-implemented from virtual function in Action
-													 // this function does the real work. It initiates 
-													//	the current Bustrip and books the next one
+	bool execute(Eventlist* eventlist, double time);  //!< re-implemented from virtual function in Action
+													  //!< this function does the real work. It initiates 
+													  //!< the current Bustrip and books the next one
 
 	int get_id () {return id;} // returns id, used in the compare <..> functions for find and find_if algorithms
 	void add_stops (vector <Busstop*>&  st) {stops.reserve (st.size()); copy (st.begin(), st.end(), stops.begin());}
