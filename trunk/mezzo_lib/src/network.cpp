@@ -2646,6 +2646,8 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 // Makes sure that each affected link has an alternative
 {
 	map <int, map <int,Link*>> affected_link_map; // indexed by destination, each destination will have a nr of affected links
+	map <int, Origin*> affected_origins; // Simple map of affected origins
+	map <int, Link*> affected_links; // simple map of affected links
 	map <int, map <int,Link*>> affected_links_without_alternative;// indexed by destination
 	map <int, set <int>> aff_dests_per_link; // easier to do shortest path search on: map <linkid, vector <destid>>
 	// Find all the affected links
@@ -2665,35 +2667,45 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 			Link* link = (*l_iter);
 			int link_id =link->get_id();
 			affected_link_map [dest] [link_id] = link;  // stores all affected links, per destination
+			affected_links [link_id] = link; // stores all affected links, once
 		}
-		// Add the affected links to the Incident
-		incident->set_affected_links(affected_link_map);
-		// per destination, for all affected links, find out if they have an alternative that does not go through incident link
-		map<int, map <int,Link*>>::iterator lm_iter=affected_link_map.begin();
-		for (lm_iter; lm_iter!=affected_link_map.end(); lm_iter++)
+		Origin* ori = r->get_origin();
+		int oid = ori->get_id();
+		affected_origins [oid] = ori;
+	}
+// per destination, for all affected links, find out if they have an alternative that does not go through incident link
+	map<int, map <int,Link*>>::iterator lm_iter=affected_link_map.begin();
+	for (lm_iter; lm_iter!=affected_link_map.end(); lm_iter++)
+	{
+		int dest = (*lm_iter).first;
+		map <int,Link*> thelinks = (*lm_iter).second;
+		map <int,Link*>::iterator linkiter=thelinks.begin();
+		for (linkiter; linkiter != thelinks.end(); linkiter++)
 		{
-			int dest = (*lm_iter).first;
-			map <int,Link*> thelinks = (*lm_iter).second;
-			map <int,Link*>::iterator linkiter=thelinks.begin();
-			for (linkiter; linkiter != thelinks.end(); linkiter++)
-			{
-				 Link* link = linkiter->second;
-				 link->set_selected(true); // set the affected link icon to 'selected colour'
-				 int linkid=link->get_id();
-				 int nr_alternatives = link->nr_alternative_routes(dest,lid );
-				 if (nr_alternatives == 0 )
-				 {
-					 affected_links_without_alternative[dest] [linkid] = link; 
-					 // maybe do something smarter here, store by link_id (will be root in shortest path search), and then a list of destinations.
-					 aff_dests_per_link [linkid].insert(dest);
+			 Link* link = linkiter->second;
+			 link->set_selected(true); // set the affected link icon to 'selected colour'
+			 int linkid=link->get_id();
+			 int nr_alternatives = link->nr_alternative_routes(dest,lid );
+			 if (nr_alternatives == 0 )
+			 {
+				 affected_links_without_alternative[dest] [linkid] = link; 
+				 // maybe do something smarter here, store by link_id (will be root in shortest path search), and then a list of destinations.
+				 aff_dests_per_link [linkid].insert(dest);
 
 #ifndef _NO_GUI  
-					 link->set_selected_color(Qt::red); // set red colour for Affected links without alternatives
+				 link->set_selected_color(Qt::red); // set red colour for Affected links without alternatives
 #endif
-				}
 			}
-		}	
-	}
+		}
+	}	
+
+
+
+	// Add the affected links & origins to the Incident
+	incident->set_affected_links(affected_links);
+	incident->set_affected_origins(affected_origins);
+
+
 	// IF affected_links_without_alternative is NOT empty
 	if (!(affected_links_without_alternative.empty()))
 	{
