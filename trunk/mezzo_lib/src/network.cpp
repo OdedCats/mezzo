@@ -3540,15 +3540,18 @@ void Network::redraw() // redraws the image
 void Network::set_incident(int lid, int sid, bool blocked)
  {
 	 //cout << "incident start on link " << lid << endl;
- 	Link* lptr=(*(find_if (links.begin(),links.end(), compare <Link> (lid) ))) ;
- 	Sdfunc* sdptr=(*(find_if (sdfuncs.begin(),sdfuncs.end(), compare <Sdfunc> (sid) ))) ;
- 	lptr->set_incident (sdptr, blocked);
+ 	//Link* lptr=(*(find_if (links.begin(),links.end(), compare <Link> (lid) ))) ;
+	 Link* lptr = linkmap [lid];
+ 	//Sdfunc* sdptr=(*(find_if (sdfuncs.begin(),sdfuncs.end(), compare <Sdfunc> (sid) ))) ;
+ 	Sdfunc* sdptr = sdfuncmap [sid];
+	lptr->set_incident (sdptr, blocked);
  }
 
 void Network::unset_incident(int lid)
  {
  	//cout << "end of incident on link  "<< lid << endl;
-	Link* lptr=(*(find_if (links.begin(),links.end(), compare <Link> (lid) ))) ;
+	//Link* lptr=(*(find_if (links.begin(),links.end(), compare <Link> (lid) ))) ;
+	Link* lptr = linkmap [lid];
 	lptr->unset_incident ();
  }
 
@@ -3599,36 +3602,46 @@ Incident::Incident (int lid_, int sid_, double start_, double stop_, double info
 bool Incident::execute(Eventlist* eventlist, double time)
 {
 	//cout << "incident_execute time: " << time << endl;
+
+	// In case no information is Broadcasted:
 	if ((info_start < 0.0) || (info_stop<0.0)) // there is no information broadcast
 	{
+		// #1: Start the incident on the link
 	 	if (time < stop)
 	 	{
 	     	network->set_incident(lid, sid, blocked); // replace sdfunc with incident sd function
  	 		eventlist->add_event(stop,this);
 	 	}
+		// #2: End the incident on the link
 	    else
 	    {
 	      network->unset_incident(lid);
 	    }
 	}
+	
 	else
 	{
+		// #1: Start the incident on the link
 		if (time < info_start)
 		{
  	 		network->set_incident(lid, sid, blocked); // replace sdfunc with incident sd function
  	 		eventlist->add_event(info_start,this);
  	 	}
+		// #2: Start the broadcast of Information
  		else if (time < stop)
  		{	
  			network->broadcast_incident_start(lid);
+			// TO DO: Change the broadcast to only include only the affected links and origins
 			eventlist->add_event(stop,this);
 		}
+		// #3: End the incident on the link
 		else if (time < info_stop)
     	{
 
     	 	network->unset_incident(lid);
      		eventlist->add_event(info_stop,this);
     	}
+		// #4: End the broadcast of Information
     	else
     	{
      		network->broadcast_incident_stop(lid);

@@ -321,12 +321,20 @@ protected:
 }; 
 //end of network definition
 
+//! Incident Class contains the methods needed for the simulation of incidents on a link.
+//! It derives from Action, and the execute() creates four events:
+//! 1. Set the incident on the affected link at the pre-specified time. This changes the speed-density function
+//! 2. Start the broadcast of information to the affected links and origins
+//! 3. End the incident on the affected link
+//! 4. End the broadcast of the information.
+
 class Incident: public Action
 {
   public:
   		Incident (int lid_, int sid_, double start_, double stop_,double info_start_,double info_stop_, Eventlist* eventlist, Network* network_, bool blocked_);
-  		bool execute(Eventlist* eventlist, double time);
-			void set_affected_links(map <int, map <int,Link*>> & affected_links_) {affected_links=affected_links_;}
+  		bool execute(Eventlist* eventlist, double time); //!< Creates the events needed for setting and ending the incident and information broadcast
+		void set_affected_links(map <int, map <int,Link*>> & affected_links_) {affected_links=affected_links_;} //!< sets the links that are affected by the incident
+		
   private:
 	   map <int, map <int,Link*>> affected_links; 
        double start;
