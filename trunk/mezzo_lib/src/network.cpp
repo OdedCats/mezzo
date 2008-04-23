@@ -2645,7 +2645,7 @@ bool Network::shortest_alternatives_all (int lid, double penalty)
 bool Network::find_alternatives_all (int lid, double penalty, Incident* incident)
 // Makes sure that each affected link has an alternative
 {
-	map <int, map <int,Link*>> affected_link_map; // indexed by destination, each destination will have a nr of affected links
+	map <int, map <int,Link*>> affected_links_per_dest; // indexed by destination, each destination will have a nr of affected links
 	map <int, Origin*> affected_origins; // Simple map of affected origins
 	map <int, Link*> affected_links; // simple map of affected links
 	map <int, map <int,Link*>> affected_links_without_alternative;// indexed by destination
@@ -2666,7 +2666,7 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 		{
 			Link* link = (*l_iter);
 			int link_id =link->get_id();
-			affected_link_map [dest] [link_id] = link;  // stores all affected links, per destination
+			affected_links_per_dest [dest] [link_id] = link;  // stores all affected links, per destination
 			affected_links [link_id] = link; // stores all affected links, once
 		}
 		Origin* ori = r->get_origin();
@@ -2674,8 +2674,8 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 		affected_origins [oid] = ori;
 	}
 // per destination, for all affected links, find out if they have an alternative that does not go through incident link
-	map<int, map <int,Link*>>::iterator lm_iter=affected_link_map.begin();
-	for (lm_iter; lm_iter!=affected_link_map.end(); lm_iter++)
+	map<int, map <int,Link*>>::iterator lm_iter=affected_links_per_dest.begin();
+	for (lm_iter; lm_iter!=affected_links_per_dest.end(); lm_iter++)
 	{
 		int dest = (*lm_iter).first;
 		map <int,Link*> thelinks = (*lm_iter).second;
