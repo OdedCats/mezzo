@@ -2128,7 +2128,7 @@ bool Network::readtime(istream& in)
 
 bool Network::readincident (istream & in)
 {
-  // OPTIMIZE
+  // OPTIMIZE LATER
   char bracket;
   int lid, sid;
   bool blocked;
@@ -2152,6 +2152,7 @@ bool Network::readincident (istream & in)
 
   }
 	 Incident* incident = new Incident(lid, sid, start,stop,info_start,info_stop,eventlist,this, blocked);
+	 incident->set_incident_parameters(incident_parameters);
   incidents.insert(incidents.begin(), incident); // makes the incident and initialises its start in the eventlist
 #ifdef _DEBUG_NETWORK
  cout <<"incident from " << start << " to " << stop << " on link nr " << lid << endl;
@@ -2218,8 +2219,6 @@ bool Network::readincidentparam (istream &in)
   	cout << "readfile::readincidentparam scanner jammed at " << bracket;
   	return false;
   }
-  // SOMEWHERE I NEED TO STORE THEM SO THEY CAN BE ACCESSED!!! DON'T KNOW YET WHERE
-
     incident_parameters.push_back(mu);
    //  cout << "checking: mu " << mu << " first of list " << incident_parameters[0] << endl;
     incident_parameters.push_back(sd);
@@ -2238,11 +2237,7 @@ bool Network::readx1 (istream &in)
  	return false;
  double mu,sd;
  in >> bracket >> mu >> sd >> bracket;
-// STORE THE MU AND SD SOMEWHERE!
-
-
 	incident_parameters.push_back(mu);
-
     incident_parameters.push_back(sd);
  return true;
 
@@ -3642,7 +3637,7 @@ bool Incident::execute(Eventlist* eventlist, double time)
 		// #2: Start the broadcast of Information
  		else if (time < stop)
  		{	
- 			network->broadcast_incident_start(lid);
+ 			broadcast_incident_start(lid);
 			// TO DO: Change the broadcast to only include only the affected links and origins
 			eventlist->add_event(stop,this);
 		}
@@ -3656,11 +3651,39 @@ bool Incident::execute(Eventlist* eventlist, double time)
 		// #4: End the broadcast of Information
     	else
     	{
-     		network->broadcast_incident_stop(lid);
+     		broadcast_incident_stop(lid);
     	}
     }
     return true;
 }
+
+void Incident::broadcast_incident_start(int lid)
+{
+	// for all links
+	map <int, Link*>::iterator linkiter = affected_links.begin();
+	for (linkiter; linkiter != affected_links.end(); linkiter++)
+	{
+		(*linkiter).second->broadcast_incident_start (lid,incident_parameters);
+	}
+
+	// for all origins
+	map <int,Origin*>::iterator oriter= affected_origins.begin();
+	for (oriter;oriter != affected_origins.end(); oriter++)
+	{
+		(*oriter).second->broadcast_incident_start (lid,incident_parameters);
+	}
+}
+
+void Incident::broadcast_incident_stop(int lid)
+{
+
+	map <int,Origin*>::iterator oriter= affected_origins.begin();
+	for (oriter;oriter != affected_origins.end(); oriter++)
+	{
+		(*oriter).second->broadcast_incident_stop (lid);
+	}
+}
+
 
 // ODMATRIX CLASSES
 
