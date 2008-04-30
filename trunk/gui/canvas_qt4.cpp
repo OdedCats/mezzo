@@ -274,6 +274,7 @@ void MainForm::on_run_activated()
 {
 	simprogress_widget->setVisible(true);
 	breaknow=false;
+	theNetwork.reset_link_icons();
 	loop();
 }
 

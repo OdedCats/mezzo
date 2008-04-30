@@ -167,7 +167,7 @@ class Network
   bool readsignalcontrols(string name); //!< reads the signal control settings
   void seed (long int seed_) {randseed=seed_; vehtypes.set_seed(seed_);}          //!< sets the random seed
   void removeRoute(Route* theroute);
-
+  void reset_link_icons(); //!< makes sure all the link-icons are shown normally when the run button is pressed. This corrects the colours in case of an incident file (it colours show affected links)
 #ifndef _NO_GUI
   void recenter_image();   //!< sets the image in the center and adapts zoom to fit window
   QWMatrix netgraphview_init(); //!< scale the network graph to the view initialized by pixmaps

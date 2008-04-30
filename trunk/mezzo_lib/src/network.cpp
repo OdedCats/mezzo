@@ -2786,6 +2786,17 @@ void Network::renum_routes ()
 	
 }
 
+void Network::reset_link_icons()
+{
+	map <int,Link*>::iterator link = linkmap.begin();
+	for (link; link!=linkmap.end(); link++)
+	{
+#ifndef _NO_GUI 
+		(link->second)->set_selected_color(theParameters->linkcolor);
+#endif
+	}
+}
+
 
 bool Network::readmaster(string name)
 {
