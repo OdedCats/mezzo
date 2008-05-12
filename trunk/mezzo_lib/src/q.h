@@ -27,13 +27,13 @@ class Link;
 
 typedef pair <int , vector<Link*> > alternativetype   ;
 
-typedef pair <double , Vehicle*> Vehtype;
+typedef pair <double , Vehicle*> Veh_in_Q;
 
 
 struct compare_time
 {
  compare_time(double time_):time(time_) {}
- bool operator () (Vehtype value)
+ bool operator () (Veh_in_Q value)
  	{
  	 return (value.first>time);
  	}
@@ -54,7 +54,7 @@ class Q
   inline const bool exit_ok() {return ok;}
   inline const int size() {return vehicles.size();}
   inline const int queue(double time) {return (size()-nr_running(time));}
-  inline const int nr_running(double time) 	{list <Vehtype> :: iterator iter=(find_if (vehicles.begin(),vehicles.end(), compare_time (time) ) ); 	
+  inline const int nr_running(double time) 	{list <Veh_in_Q> :: iterator iter=(find_if (vehicles.begin(),vehicles.end(), compare_time (time) ) ); 	
   																	return distance(iter,vehicles.end());}
   inline const double next () {return next_action;}
   inline void add_alternative(int dest, vector<Link*> route) {alternatives.insert(alternatives.begin(),alternativetype(dest,route));}
@@ -75,13 +75,13 @@ class Q
   bool ok;   // used to indicate whether an exit_veh has been successful
   double next_action; // when the next turn action should be scheduled.
   							 // used when a vehicle hasn't arrived at the stopline yet.
-  list <Vehtype>::iterator viter; // iterator for the vehicles
+  list <Veh_in_Q>::iterator viter; // iterator for the vehicles
    double ttime;
   int n, nextid,vnextid;
   Vehicle* vehicle;
-  Vehtype value;
+  Veh_in_Q value;
   // end help vars
-  list  <Vehtype> vehicles;
+  list  <Veh_in_Q> vehicles;
   Random* random; // to produce random numbers for broadcast, route switch &c
   vector <alternativetype> alternatives; // alternative routes from this link to each destination.
   vector <Route*> routes; // alternative routes created from 'alternatives' when needed, used by the diverted vehicles.

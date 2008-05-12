@@ -2152,12 +2152,19 @@ bool Network::readincident (istream & in)
 
   }
 	 Incident* incident = new Incident(lid, sid, start,stop,info_start,info_stop,eventlist,this, blocked);
-	 incident->set_incident_parameters(incident_parameters);
-  incidents.insert(incidents.begin(), incident); // makes the incident and initialises its start in the eventlist
+#ifndef _NO_GUI
+	 // Set the icon
+	 Link* link = linkmap[lid];
+	 int x = link->get_icon()->get_x ();
+	 int y = link->get_icon()->get_y();
+
+
+#endif
+	incidents.insert(incidents.begin(), incident); // makes the incident and initialises its start in the eventlist
 #ifdef _DEBUG_NETWORK
- cout <<"incident from " << start << " to " << stop << " on link nr " << lid << endl;
+	cout <<"incident from " << start << " to " << stop << " on link nr " << lid << endl;
 #endif //_DEBUG_NETWORK
-  return find_alternatives_all(lid,penalty,incident);    // make the alternatives
+	return find_alternatives_all(lid,penalty,incident);    // make the alternatives
 }
 
 
@@ -2221,7 +2228,8 @@ bool Network::readincidentparam (istream &in)
   }
     incident_parameters.push_back(mu);
    //  cout << "checking: mu " << mu << " first of list " << incident_parameters[0] << endl;
-    incident_parameters.push_back(sd);
+     incident_parameters.push_back(sd);
+	
     return true;
 }
 
@@ -2250,7 +2258,13 @@ bool Network::readincidentfile(string name)
 	ifstream inputfile(name.c_str());
 	assert (inputfile);
 	if (readsdfuncs (inputfile) && readincidents(inputfile) &&readincidentparams(inputfile) && readx1(inputfile))
+	{
+		for (vector <Incident*>::iterator incident=incidents.begin(); incident != incidents.end(); incident++)
+		{
+			(*incident)->set_incident_parameters(incident_parameters);
+		}
 		return true;
+	}
 	else
 		return false;		
 
@@ -2791,8 +2805,9 @@ void Network::reset_link_icons()
 	map <int,Link*>::iterator link = linkmap.begin();
 	for (link; link!=linkmap.end(); link++)
 	{
+		link->second->set_selected ( false);
 #ifndef _NO_GUI 
-		(link->second)->set_selected_color(theParameters->linkcolor);
+		(link->second)->set_selected_color(theParameters->selectedcolor);
 #endif
 	}
 }

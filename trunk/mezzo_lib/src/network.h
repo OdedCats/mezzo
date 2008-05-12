@@ -331,8 +331,8 @@ protected:
 class Incident: public Action
 {
   public:
-  	Incident (int lid_, int sid_, double start_, double stop_,double info_start_,double info_stop_, Eventlist* eventlist, Network* network_, bool blocked_);
-  	bool execute(Eventlist* eventlist, double time); //!< Creates the events needed for setting and ending the incident and information broadcast
+  		Incident (int lid_, int sid_, double start_, double stop_,double info_start_,double info_stop_, Eventlist* eventlist, Network* network_, bool blocked_);
+  		bool execute(Eventlist* eventlist, double time); //!< Creates the events needed for setting and ending the incident and information broadcast
 		void broadcast_incident_start(int lid); //!< Broadcasts the incident to all the affected links and origins. At origins a flag will be set so all created vehicles will automatically switch, until notification that incident is over
 		void broadcast_incident_stop(int lid); //!< Broadcasts the end of an incident to all Origins (Not needed for Links? Check...)
 
@@ -350,7 +350,7 @@ class Incident: public Action
        int sid;
        Network* network;
        bool blocked;
-			  vector <double> incident_parameters; 
+	   vector <double> incident_parameters; 
 };
 
 class TurnPenalty

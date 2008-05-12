@@ -312,4 +312,28 @@ void NodeIcon::draw(QPixmap *pm,QMatrix *wm)
 	// draw the stuff on pixmap
 }
 
+
+// IncidentIcon
+IncidentIcon::IncidentIcon(int x, int y):Icon(x,y)
+{
+	width=5*theParameters->node_radius;
+ 	height=5*theParameters->node_radius;
+	visible=true;
+}
+
+void IncidentIcon::draw(QPixmap * pm,QMatrix * wm)
+{
+	if (visible)
+	{
+		QPainter paint(pm); // automatic paint.begin()
+		paint.setRenderHint(QPainter::Antialiasing); // smooth lines
+		paint.setWorldMatrix(*wm);
+
+		QPen pen1;
+		pen1 =QPen(Qt::red, 8*(theParameters->selected_thickness)); 
+		paint.drawRect(startx,starty,width,height);
+		paint.end();
+	}
+}
+
 #endif //_NO_GUI

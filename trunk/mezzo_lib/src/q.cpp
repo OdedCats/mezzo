@@ -27,18 +27,18 @@ bool Q::enter_veh(Vehicle* veh)
 	if (!full())
 	{
 	   ttime=veh->get_exit_time();
-		//list <Vehtype> :: iterator iter=(find_if (vehicles.begin(),vehicles.end(), compare_time (time) ) );
- 		//vehicles.insert(iter,Vehtype(time , veh));
+		//list <Veh_in_Q> :: iterator iter=(find_if (vehicles.begin(),vehicles.end(), compare_time (time) ) );
+ 		//vehicles.insert(iter,Veh_in_Q(time , veh));
  		if (empty())
 		{
-		   vehicles.insert(vehicles.end(),Vehtype(ttime , veh));
+		   vehicles.insert(vehicles.end(),Veh_in_Q(ttime , veh));
 		   return true;
 		}
 		viter=vehicles.end();
 		viter--;
 		while ( (viter->first >ttime ) && (viter !=vehicles.begin()) )
 			viter--;
-		vehicles.insert(++viter,Vehtype(ttime , veh));
+		vehicles.insert(++viter,Veh_in_Q(ttime , veh));
 		return true;
      }
     else
@@ -108,7 +108,7 @@ void Q::update_exit_times(double time, Link* nextlink, int lookback, double v_ex
   double t0=time, t1=1.0, t2=0.0, newtime=time;
 	if (!empty())
 	{
-		list <Vehtype>::iterator iter=vehicles.begin();
+		list <Veh_in_Q>::iterator iter=vehicles.begin();
     int nextid=nextlink->get_id();
     while (iter != vehicles.end())
     {
@@ -291,7 +291,7 @@ Vehicle* Q::exit_veh(double time)
 void Q::broadcast_incident_start(int lid, vector <double> parameters)
 {
  // for all vehicles
- 	for (list <Vehtype>::iterator iter1=vehicles.begin();iter1!=vehicles.end();iter1++)
+ 	for (list <Veh_in_Q>::iterator iter1=vehicles.begin();iter1!=vehicles.end();iter1++)
  	{	
  		double receive=random->urandom();	
  		if (receive < perc_receive_broadcast) // if vehicle receives the message '
@@ -387,7 +387,7 @@ void Q::switchroute(Vehicle* veh, Route* curr_route, Route* alt_route, vector <d
 	if (empty())
 		return 0.0;
 	double space=0.0;
-	list <Vehtype>::iterator iter1=vehicles.end();
+	list <Veh_in_Q>::iterator iter1=vehicles.end();
    	while (iter1!=vehicles.begin())
    	{
    		iter1--;
@@ -404,7 +404,7 @@ void Q::switchroute(Vehicle* veh, Route* curr_route, Route* alt_route, vector <d
    if (empty())
 		return 0.0;
 	double space=0.0;
-	list <Vehtype>::iterator iter1=vehicles.end();
+	list <Veh_in_Q>::iterator iter1=vehicles.end();
    	while (iter1!=vehicles.begin())
    	{
    		iter1--;

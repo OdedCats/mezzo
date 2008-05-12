@@ -1,8 +1,5 @@
 /**
- * modification:
- *   add a function to compute route length
- * Xiaoliang Ma 
- * last change: 2007-08-01 
+ 
  */
 #ifndef ROUTE_HH
 #define ROUTE_HH

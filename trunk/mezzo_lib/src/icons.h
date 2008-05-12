@@ -109,6 +109,19 @@ class NodeIcon : public Icon
       
 };
 
+class IncidentIcon : public Icon
+{
+public:
+	IncidentIcon (int x, int y);
+	virtual ~IncidentIcon () {}
+	virtual void draw(QPixmap * pm,QMatrix * wm);
+	void set_visible( bool val) {visible = val;}
+	bool is_visible () {return visible;}
+private:
+	int width, height; // probably set this to x*node_radius or something, to avoid yet another parameter
+	bool visible;
+};
+
 #endif // _NO_GUI
 
 #endif
