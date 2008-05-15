@@ -316,8 +316,8 @@ void NodeIcon::draw(QPixmap *pm,QMatrix *wm)
 // IncidentIcon
 IncidentIcon::IncidentIcon(int x, int y):Icon(x,y)
 {
-	width=5*theParameters->node_radius;
- 	height=5*theParameters->node_radius;
+	width=12*theParameters->node_radius;
+ 	height=12*theParameters->node_radius;
 	visible=true;
 }
 
@@ -330,8 +330,15 @@ void IncidentIcon::draw(QPixmap * pm,QMatrix * wm)
 		paint.setWorldMatrix(*wm);
 
 		QPen pen1;
-		pen1 =QPen(Qt::red, 8*(theParameters->selected_thickness)); 
-		paint.drawRect(startx,starty,width,height);
+		pen1 =QPen(Qt::red, 2*(theParameters->selected_thickness)); 
+		paint.setPen(pen1);
+		//paint.drawRect(startx,starty,width,height);
+		static const QPointF points[3] = {
+					QPointF(startx+width/2, starty),
+					QPointF(startx, starty+height),
+					QPointF(startx+width, starty+height)
+			};
+			paint.drawPolygon(points,3);
 		paint.end();
 	}
 }

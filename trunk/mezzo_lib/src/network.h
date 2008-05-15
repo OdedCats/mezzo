@@ -339,6 +339,11 @@ class Incident: public Action
 		void set_affected_links(map <int, Link*> & affected_links_) {affected_links=affected_links_;} //!< sets the links that are affected by the incident
 		void set_affected_origins(map<int, Origin*> & affected_origins_) {affected_origins=affected_origins_;} //!< sets the origins that are affected by the incident
 		void set_incident_parameters(vector <double> & incident_parameters_) {incident_parameters = incident_parameters_;} //!< sets the incident parameters that are used for the choices
+#ifndef _NO_GUI
+		void set_icon(IncidentIcon* icon_) {icon=icon_;}
+		void set_visible(bool val) {icon->set_visible(val);}
+#endif
+
   private:
 	   map <int, Link*> affected_links; 
 	   map <int, Origin*> affected_origins;
@@ -351,6 +356,9 @@ class Incident: public Action
        Network* network;
        bool blocked;
 	   vector <double> incident_parameters; 
+#ifndef _NO_GUI
+	   IncidentIcon* icon;
+#endif
 };
 
 class TurnPenalty

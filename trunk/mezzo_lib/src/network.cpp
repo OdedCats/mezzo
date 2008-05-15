@@ -2157,7 +2157,9 @@ bool Network::readincident (istream & in)
 	 Link* link = linkmap[lid];
 	 int x = link->get_icon()->get_x ();
 	 int y = link->get_icon()->get_y();
-
+	 IncidentIcon* iptr=new IncidentIcon(x,y);
+	 incident->set_icon(iptr);
+	 drawing->add_icon(iptr);
 
 #endif
 	incidents.insert(incidents.begin(), incident); // makes the incident and initialises its start in the eventlist
@@ -2800,16 +2802,21 @@ void Network::renum_routes ()
 	
 }
 
-void Network::reset_link_icons()
+void Network::reset_link_icons() // reset the links to normal color and hide the incident icon
 {
+#ifndef _NO_GUI 
 	map <int,Link*>::iterator link = linkmap.begin();
 	for (link; link!=linkmap.end(); link++)
 	{
 		link->second->set_selected ( false);
-#ifndef _NO_GUI 
+
 		(link->second)->set_selected_color(theParameters->selectedcolor);
-#endif
 	}
+	for (vector <Incident*>::iterator inc=incidents.begin();inc != incidents.end(); inc++)
+	{
+		(*inc)->set_visible(false);
+	}
+#endif
 }
 
 
@@ -3643,12 +3650,18 @@ bool Incident::execute(Eventlist* eventlist, double time)
 	 	if (time < stop)
 	 	{
 	     	network->set_incident(lid, sid, blocked); // replace sdfunc with incident sd function
+#ifndef _NO_GUI
+			icon->set_visible(true);
+#endif
  	 		eventlist->add_event(stop,this);
 	 	}
 		// #2: End the incident on the link
 	    else
 	    {
 	      network->unset_incident(lid);
+#ifndef _NO_GUI
+			icon->set_visible(false);
+#endif
 	    }
 	}
 	
@@ -3658,6 +3671,9 @@ bool Incident::execute(Eventlist* eventlist, double time)
 		if (time < info_start)
 		{
  	 		network->set_incident(lid, sid, blocked); // replace sdfunc with incident sd function
+#ifndef _NO_GUI
+			icon->set_visible(true);
+#endif
  	 		eventlist->add_event(info_start,this);
  	 	}
 		// #2: Start the broadcast of Information
@@ -3670,8 +3686,10 @@ bool Incident::execute(Eventlist* eventlist, double time)
 		// #3: End the incident on the link
 		else if (time < info_stop)
     	{
-
     	 	network->unset_incident(lid);
+#ifndef _NO_GUI
+			icon->set_visible(false);
+#endif
      		eventlist->add_event(info_stop,this);
     	}
 		// #4: End the broadcast of Information

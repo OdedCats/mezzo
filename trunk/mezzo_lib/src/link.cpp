@@ -651,12 +651,14 @@ void Link::set_incident(Sdfunc* sdptr, bool blocked_)
 	temp_sdfunc=sdfunc;
 	sdfunc=sdptr;
 	blocked=blocked_;
+	set_blocked(-2.0);
 }
 
 void Link::unset_incident()
 {
 	sdfunc=temp_sdfunc;
 	blocked=false;
+	set_blocked (-1.0);
 	cout << "the incident on link " << id << " is over. " << endl;
 }
 
