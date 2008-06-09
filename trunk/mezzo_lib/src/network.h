@@ -147,7 +147,7 @@ class Network
   bool writeheadways(string name); //!< writes the timestamps of vehicles entering a Virtual Link (i e Mitsim).
             //!<same format as historical times read by readlinktimes(string name)
   bool register_links();//!<registers the links at the origins and destinations
-  void set_incident(int lid, int sid, bool blocked); //!< sets the incident on link lid (less capacity, lower max speed)
+  void set_incident(int lid, int sid, bool blocked, double blocked_until); //!< sets the incident on link lid (less capacity, lower max speed)
   void unset_incident(int lid); //!< restores the incident link to its normal behaviour
   void broadcast_incident_start(int lid); //!< informs the vehicles on the links of the incident on link lid
   void broadcast_incident_stop(int lid); //!< informs the vehicles that the incident on link lid has been cleared

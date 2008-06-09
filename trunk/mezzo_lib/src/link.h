@@ -131,7 +131,7 @@ public:
 	vector <Route*> get_routes_to_dest(int dest) ;// find all routes through this link leading to destination
 	unsigned int nr_alternative_routes(int dest, int incidentlink_id); // returns number of alternative routes from this link to dest, avoiding incidentlink_id
 	void receive_broadcast(Vehicle* veh, int lid, vector <double> parameters) ;
-	void set_incident(Sdfunc* sdptr, bool blocked_);
+	void set_incident(Sdfunc* sdptr, bool blocked_, double blocked_until_);
 	void unset_incident();
 	void broadcast_incident_start(int lid, vector <double> parameters);
 

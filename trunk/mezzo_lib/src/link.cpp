@@ -115,8 +115,7 @@ const bool Link::full(double time)
    {    
      if (nr_exits_blocked >0)     // IF one of the turning movements is blocked
          blocked_until=-2.0; // blocked until further notice.
-         //cout <<" on link "<< id << " the queue has become full and density = " << density() << " and space occupied ";
-         //cout << queue->calc_total_space() << " and total space available: " <<length*nr_lanes << endl;
+         // TO DO: make turnings unblock when the specific queue for that exit < lookback for other turnings
          
      return true; // IF the queue is full this returns true. IF ALSO at least one exit is blocked, blocked_until=-2.0 and this will stay blocked untill a shockwave.
    }
@@ -192,6 +191,8 @@ void Link::update_exit_times(double time,Link* nextlink, int lookback)
 
    if (v_shockwave >= v_exit) // due to the limited domain of the speed/density functions we need to check
        v_shockwave=v_exit - 1.0;
+   if (v_shockwave==0.0)
+	   v_shockwave = v_exit;
    
    /*
     v_exit=sdfunc->speed(k_dnstr);
@@ -646,19 +647,19 @@ unsigned int Link::nr_alternative_routes(int dest, int incidentlink_id)
 	}
   return count;
 }
-void Link::set_incident(Sdfunc* sdptr, bool blocked_)
+void Link::set_incident(Sdfunc* sdptr, bool blocked_, double blocked_until_)
 {
 	temp_sdfunc=sdfunc;
 	sdfunc=sdptr;
 	blocked=blocked_;
-	set_blocked(-2.0);
+	blocked_until=-2.0; 
 }
 
 void Link::unset_incident()
 {
 	sdfunc=temp_sdfunc;
 	blocked=false;
-	set_blocked (-1.0);
+	blocked_until=-1.0; // unblocked
 	cout << "the incident on link " << id << " is over. " << endl;
 }
 

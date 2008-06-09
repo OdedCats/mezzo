@@ -1663,10 +1663,11 @@ bool Network::add_od_routes()
 	nr_deleted = deleted_routes.size();
 	cout << nr_deleted << " routes deleted" << endl;
 // find routes and delete
-	
+/* *********OLD*	
 	vector <Route*>::iterator route;
 	vector <int>::iterator del;
 	bool next_route = true;
+
 	for (route=routes.begin(); route < routes.end(); )
 	{
 		next_route=true;
@@ -1686,7 +1687,19 @@ bool Network::add_od_routes()
 		else
 			next_route=true;
 	}
+	*/
+
 // write the new routes file.
+	vector <int>::iterator del=deleted_routes.begin();
+	map<int,Route*>::iterator route_m;
+	vector <Route*>::iterator route;
+	for (del; del < deleted_routes.end(); del++)
+	{
+		route_m  = routemap.find(*del);
+		routemap.erase(route_m);
+		route = find_if(routes.begin(),routes.end(),compare <Route>(*del));
+		routes.erase(route);
+	}
 
 
 	return true;
@@ -2540,7 +2553,7 @@ bool Network::shortest_paths_all()
 			{	
 				double od_rate= (*iter1)->get_rate();
 				double nr_routes= (*iter1)->get_nr_routes();
-				if ( ((od_rate > small_od_rate) && ( (od_rate/small_od_rate) < nr_routes)) || (nr_routes < 1) )
+				if ( ((od_rate > theParameters->small_od_rate) && ( (od_rate/theParameters->small_od_rate) < nr_routes)) || (nr_routes < 1) )
 					// if the od pair has not too many routes for its size
 					dests.push_back((*iter1)->get_destination());
 				iter1++;
@@ -2707,6 +2720,12 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 				 link->set_selected_color(Qt::red); // set red colour for Affected links without alternatives
 #endif
 			}
+			else
+			{
+				// Store the routes at the link
+
+			}
+
 		}
 	}	
 
@@ -3577,14 +3596,14 @@ void Network::redraw() // redraws the image
  
  // INCIDENT FUNCTIONS
 
-void Network::set_incident(int lid, int sid, bool blocked)
+void Network::set_incident(int lid, int sid, bool blocked, double blocked_until)
  {
 	 //cout << "incident start on link " << lid << endl;
  	//Link* lptr=(*(find_if (links.begin(),links.end(), compare <Link> (lid) ))) ;
 	 Link* lptr = linkmap [lid];
  	//Sdfunc* sdptr=(*(find_if (sdfuncs.begin(),sdfuncs.end(), compare <Sdfunc> (sid) ))) ;
  	Sdfunc* sdptr = sdfuncmap [sid];
-	lptr->set_incident (sdptr, blocked);
+	lptr->set_incident (sdptr, blocked, blocked_until);
  }
 
 void Network::unset_incident(int lid)
@@ -3649,7 +3668,7 @@ bool Incident::execute(Eventlist* eventlist, double time)
 		// #1: Start the incident on the link
 	 	if (time < stop)
 	 	{
-	     	network->set_incident(lid, sid, blocked); // replace sdfunc with incident sd function
+	     	network->set_incident(lid, sid, blocked, stop); // replace sdfunc with incident sd function
 #ifndef _NO_GUI
 			icon->set_visible(true);
 #endif
@@ -3670,7 +3689,7 @@ bool Incident::execute(Eventlist* eventlist, double time)
 		// #1: Start the incident on the link
 		if (time < info_start)
 		{
- 	 		network->set_incident(lid, sid, blocked); // replace sdfunc with incident sd function
+ 	 		network->set_incident(lid, sid, blocked, stop); // replace sdfunc with incident sd function
 #ifndef _NO_GUI
 			icon->set_visible(true);
 #endif

@@ -169,16 +169,16 @@ vector <int> ODpair::delete_spurious_routes(double time)
 	  }
 	}
 	
-	if (rate < small_od_rate ) // if the rate is small there should be no route choice
+	if (rate < theParameters->small_od_rate ) // if the rate is small there should be no route choice
 	{
 		threshold = 1.5; // all other routes will be deleted
-		maxroutes = 2;
+		maxroutes = 5;
 		reason = " small OD ";
 	}
 	else
 	{
 		
-		double r = (rate/small_od_rate); // even for larger OD pairs, limit nr of routes by rate
+		double r = (rate/theParameters->small_od_rate); // even for larger OD pairs, limit nr of routes by rate
 		//if (routes.size() > r)
 	//		threshold = 1.50; // only good routes 
 	//	else
@@ -206,6 +206,7 @@ vector <int> ODpair::delete_spurious_routes(double time)
 	
 	sort (routes.begin(), routes.end(), compare_route_cost);
 	cout << "cost of sorted routes " << endl;
+	reason = " Max nr routes reached ";
 	vector <Route*>::iterator r_iter = routes.begin();
 	for (r_iter; r_iter < routes.end(); r_iter++)
 	{
@@ -217,6 +218,7 @@ vector <int> ODpair::delete_spurious_routes(double time)
 		vector<Route*>::iterator r=routes.end();
 		for (unsigned int k = routes.size(); k > maxroutes; k--)
 		{
+			r=routes.end();
 			r--;
 			cout << " erased route " << (*r)->get_id() << " from route choice set for OD pair ("
 			  << odids().first << "," << odids().second << ") because: " << reason << ", cost: "<< (*r)->cost(time) << 

@@ -53,7 +53,7 @@ const double dont_know_delay=0.114; // percentage of drivers that don't know del
 
 
 //OD parameters
-const double small_od_rate = 3.0; // determines when a OD can have more than 1 route
+//const double small_od_rate = 3.0; // determines when a OD can have more than 1 route
 
 // PARAMETER CLASS
 /*!  Here go all the global parameters used in the simulation and the GUI
@@ -113,8 +113,9 @@ public:
    double update_interval_routes; //!< interval for re-calculating route costs based on time-dependent travel times.
    double mnl_theta; //!< parameter for Multinomial LOGIT route choice
    double kirchoff_alpha; //!< parameter for Kirchoff route choice
-   double max_rel_route_cost; //!< max relative cost of a route, compared to the minimum cost route, to be allowed in the choice set.
    bool delete_bad_routes; //!< deletes bad (long) routes as well as cleans up nr of routes for small od pairs.
+   double max_rel_route_cost; //!< max relative cost of a route, compared to the minimum cost route, to be allowed in the choice set.
+   double small_od_rate; //!< minimum od_rate for an od-pair to have more than 1 route
 
    // statevar:
    bool shortest_paths_initialised; //!< true if shortest paths have been initialised
@@ -125,10 +126,6 @@ public:
 // TODO: Implement the use of the following paramaters
    double vissim_step; //!< time step for the VISSIM micro model
    double sim_speed_factor; //!< REALTIME factor to keep the hybrid model running at a fixed speed
-	
-   
-
-
 };
 
 
