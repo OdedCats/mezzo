@@ -2734,7 +2734,7 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 	// Add the affected links & origins to the Incident
 	incident->set_affected_links(affected_links);
 	incident->set_affected_origins(affected_origins);
-
+	int found_links = 0;
 
 	// IF affected_links_without_alternative is NOT empty
 	if (!(affected_links_without_alternative.empty()))
@@ -2771,6 +2771,7 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 					 if (frontid!=root)
 						 rlinks.insert(rlinks.begin(), rootlink); // add the rddoot link from the path
 					 rootlink->add_alternative((*di),rlinks);
+					 found_links++;
 				 }
 			 }
 		 }
