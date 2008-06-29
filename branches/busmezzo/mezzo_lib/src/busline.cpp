@@ -80,6 +80,24 @@ bool Busline::is_line_timepoint (Busstop* stop)
 return false;
 }
 
+bool Busline::check_first_stop (Busstop* stop)
+{
+	if (stop==*(stops.begin()))
+	{
+		return true;
+	}
+return false;
+}
+
+bool Busline::check_first_trip (Bustrip* trip)
+{
+	if (trip == trips.begin()->first)
+	{
+		return true;
+	}
+return false;
+}
+
 // ***** Bustrip Functions *****
 
 Bustrip::Bustrip ()
@@ -535,6 +553,10 @@ double Busstop::get_time_since_arrival (Bustrip* trip, double time) // calculate
 
 double Busstop::get_time_since_departure (Bustrip* trip, double time) // calculates the headway (between departures)
 {  
+	if (trip->get_line()->check_first_trip(trip)==true && trip->get_line()->check_first_stop(this)==true) // for the first stop on the first trip on that line - use the planned headway value
+	{
+		return trip->get_line()->get_average_headway();
+	}
 	double time_since_departure = time - last_departures[trip->get_line()];
 	// the headway is defined as the differnece in time between sequential departures
 	return time_since_departure;
