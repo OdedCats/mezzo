@@ -92,6 +92,11 @@ odval Route::get_oid_did()
 		return (vector <Link*> (links.begin(), find_if (links.begin(),links.end(), compare <Link> (link_id))));
  }
 
+ vector<Link*> Route::get_downstream_links(int link_id)
+ {
+	    return (vector <Link*> (find_if (links.begin(),links.end(), compare <Link> (link_id)),links.end()  ));
+ }
+
 
  void Route::set_selected(bool selected) // sets the links' selected attribute
  {

@@ -311,7 +311,8 @@ void Q::receive_broadcast(Vehicle* veh, int lid, vector <double> parameters)
  			if (curr_route->has_link_after(lid, curr_lid))
  			{
  				odval odvalue=curr_route->get_oid_did();
- 				// find an alternative route with the same o and d;
+ 				// find an alternative route with the same o and d; 
+				// TODO change to a map <> structure instead
  		   		vector <Route*>::iterator iter2=(find_if (routes.begin(),routes.end(), compare_route (odvalue))) ;
 	 		    if (iter2<routes.end())
  			    {

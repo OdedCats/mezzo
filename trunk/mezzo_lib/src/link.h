@@ -125,7 +125,8 @@ public:
 		return NULL;}
 	LinkTime* get_avgtimes () {return avgtimes;}
 	//  Incident stuff
-	void add_alternative(int dest, vector<Link*> route) ; // old way for incidents
+	void add_alternative(int dest, vector<Link*> route) ; // old way for incidents, adds stubs for alternative routes from this link to destination
+	void add_alternative_route(Route* route) ; // adds a whole route as alternative.
 	void register_route (Route* route) ;// adds route to routemap at link
 	multimap <int,Route*> get_routes() {return routemap;}
 	vector <Route*> get_routes_to_dest(int dest) ;// find all routes through this link leading to destination

@@ -154,6 +154,8 @@ const int Link::size()
 	
 void Link::add_alternative(int dest, vector<Link*> route)
 	{queue->add_alternative(dest, route);}	
+void Link::add_alternative_route(Route* route) 
+	{queue->add_alternative_route(route);}
 
 void Link::register_route (Route* route) 
 {

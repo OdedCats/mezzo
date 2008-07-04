@@ -58,6 +58,7 @@ class Q
   																	return distance(iter,vehicles.end());}
   inline const double next () {return next_action;}
   inline void add_alternative(int dest, vector<Link*> route) {alternatives.insert(alternatives.begin(),alternativetype(dest,route));}
+  inline void add_alternative_route (Route* route_) {routes.insert(routes.begin(),route_);}
   // entering and exiting vehicles, maybe they should be inline as well...
   bool enter_veh(Vehicle* veh);
   Vehicle* exit_veh(double time, Link* nextlink, int lookback);
