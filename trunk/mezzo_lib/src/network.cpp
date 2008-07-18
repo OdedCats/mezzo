@@ -2722,7 +2722,7 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 			}
 			else
 			{
-				// Store the routes at the link
+				// Store the routes at the link (do this already at the counting)
 
 			}
 

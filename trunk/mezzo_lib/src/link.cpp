@@ -155,7 +155,12 @@ const int Link::size()
 void Link::add_alternative(int dest, vector<Link*> route)
 	{queue->add_alternative(dest, route);}	
 void Link::add_alternative_route(Route* route) 
-	{queue->add_alternative_route(route);}
+{
+	queue->add_alternative_route(route);
+	vector<Link*> route_v = route->get_downstream_links (id);
+	int dest =route->get_destination()->get_id(); 
+	queue->add_alternative (dest, route_v);
+}
 
 void Link::register_route (Route* route) 
 {
@@ -645,7 +650,10 @@ unsigned int Link::nr_alternative_routes(int dest, int incidentlink_id)
 	for (route_iter; route_iter!=routes_to_dest.end();route_iter++)
 	{	
 		if ( ! ((*route_iter)->has_link(incidentlink_id)) )
+		{
 			 count++;
+			 add_alternative_route(*route_iter);
+		}
 	}
   return count;
 }
