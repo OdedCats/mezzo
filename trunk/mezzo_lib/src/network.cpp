@@ -2633,38 +2633,6 @@ bool Network::shortest_paths_all()
 }
 
 
-/* Old ************
-bool Network::shortest_alternatives_all (int lid, double penalty)
-{
-	double cost=(graph->linkCost (lid)) + penalty;
-	graph->linkCost(lid, cost);
-	for (vector<Link*>::iterator iter1=links.begin();iter1<links.end();iter1++)
-	{	
-		graph->labelCorrecting((*iter1)->get_id());
-		for (vector<Destination*>::iterator iter2=destinations.begin(); iter2<destinations.end();iter2++)
-		{	
-		 	if (graph->reachable ((*iter2)->get_id()))
-		 	{
-				
-				vector<Link*> rlinks=get_path((*iter2)->get_id());
-				#ifdef _DEBUG_SP
-					cout << " network::shortest_alternatives from link " << (*iter1)->get_id() << " to destination " <<(*iter2)->get_id() << endl;
-			 		graph->printPathToNode((*iter2)->get_id());
-				#endif //_DEBUG_SP
-				//save the found remainder in the link table
-				int frontid=(rlinks.front())->get_id();
-			//	if (frontid==(*iter1)->get_id())
-	       //				rlinks.erase(rlinks.begin()); // remove the root link from the path
-	        // let's makes sure the current link is in the path
-	       	if (frontid!=(*iter1)->get_id())
-	       				rlinks.insert(rlinks.begin(), (*iter1)); // a the rddoot link from the path
-				(*iter1)->add_alternative((*iter2)->get_id(),rlinks);
-			}
-		}
-	}
-	return true;
-}
-***/
 
 bool Network::find_alternatives_all (int lid, double penalty, Incident* incident)
 // Makes sure that each affected link has an alternative
@@ -2672,21 +2640,20 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 	map <int, map <int,Link*>> affected_links_per_dest; // indexed by destination, each destination will have a nr of affected links
 	map <int, Origin*> affected_origins; // Simple map of affected origins
 	map <int, Link*> affected_links; // simple map of affected links
-	map <int, map <int,Link*>> affected_links_without_alternative;// indexed by destination
-	map <int, set <int>> aff_dests_per_link; // easier to do shortest path search on: map <linkid, vector <destid>>
+	map <int, set <int>> links_without_alternative; // all links,dests without a 'ready' alternative. indexed by link_id, dest_id
 	// Find all the affected links
 	Link* incident_link=linkmap[lid];
 	multimap <int, Route*> routemap = incident_link->get_routes();// get all routes through incident link
 	unsigned int nr_affected_routes = routemap.size();
 	multimap <int, Route*>::iterator rmiter=routemap.begin();
-	// get all affected links from each route, and store the destinations as well
+	// get all affected (links,destinations) from each route, and store the origins as well
 	for (rmiter;rmiter != routemap.end(); rmiter++)
 	{
 		Route* r = (*rmiter).second;
 		int dest =(*rmiter).first;
-		vector <Link*> affectedlinks = r->get_upstream_links(lid);
+		vector <Link*> route_affected_links_upstream = r->get_upstream_links(lid);
 		vector<Link*>::iterator l_iter;
-		for (l_iter=affectedlinks.begin();l_iter!=affectedlinks.end();l_iter++)
+		for (l_iter=route_affected_links_upstream.begin();l_iter!=route_affected_links_upstream.end();l_iter++)
 		{
 			Link* link = (*l_iter);
 			int link_id =link->get_id();
@@ -2708,13 +2675,12 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 		{
 			 Link* link = linkiter->second;
 			 link->set_selected(true); // set the affected link icon to 'selected colour'
+			 link->set_selected_color(Qt::green);
 			 int linkid=link->get_id();
 			 int nr_alternatives = link->nr_alternative_routes(dest,lid );
 			 if (nr_alternatives == 0 )
 			 {
-				 affected_links_without_alternative[dest] [linkid] = link; 
-				 // maybe do something smarter here, store by link_id (will be root in shortest path search), and then a list of destinations.
-				 aff_dests_per_link [linkid].insert(dest);
+				 links_without_alternative [linkid].insert(dest);
 
 #ifndef _NO_GUI  
 				 link->set_selected_color(Qt::red); // set red colour for Affected links without alternatives
@@ -2737,7 +2703,7 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 	int found_links = 0;
 
 	// IF affected_links_without_alternative is NOT empty
-	if (!(affected_links_without_alternative.empty()))
+	if (!(links_without_alternative.empty()))
 	{
 		// DO a shortest path init, and a shortest path search wih penalty for incident link to create alternatives for each link.
 		bool initok=false;
@@ -2745,8 +2711,8 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 			initok = init_shortest_path();
 		if (initok)
 	 {
-		 map <int, set <int >>::iterator mi = aff_dests_per_link.begin();
-		 for (mi; mi != aff_dests_per_link.end();mi++)
+		 map <int, set <int >>::iterator mi = links_without_alternative.begin();
+		 for (mi; mi != links_without_alternative.end();mi++)
 		 {
 			 // get shortest path and add.
 			 double cost=(graph->linkCost (lid)) + penalty;
@@ -2780,7 +2746,7 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 	}
 	//Now select all links that are affected:
 	cout << " nr of routes affected by incident " << routemap.size() << endl;
-	cout << " nr of links without alternatives " << affected_links_without_alternative.size() << endl;
+//	cout << " nr of links without alternatives " << affected_links_without_alternative.size() << endl;
 	return true;
 }
 
