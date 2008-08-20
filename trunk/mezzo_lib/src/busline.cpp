@@ -42,6 +42,8 @@ bool Busline::execute(Eventlist* eventlist, double time)
 	else // if the Busline is active
 	{
 		bool ok=next_trip->first->activate(time, busroute, vtype, odpair); // activates the trip, generates bus etc.
+		if (!ok)
+			cout << "next_trip returns false. " << endl;
 		next_trip++; // now points to next trip
 		if (next_trip < trips.end()) // if there exists a next trip
 		{

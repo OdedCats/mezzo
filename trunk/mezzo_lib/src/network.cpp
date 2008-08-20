@@ -2675,7 +2675,9 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 		{
 			 Link* link = linkiter->second;
 			 link->set_selected(true); // set the affected link icon to 'selected colour'
+#ifndef _NO_GUI  
 			 link->set_selected_color(Qt::green);
+#endif
 			 int linkid=link->get_id();
 			 int nr_alternatives = link->nr_alternative_routes(dest,lid );
 			 if (nr_alternatives == 0 )

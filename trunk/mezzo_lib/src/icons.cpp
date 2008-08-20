@@ -161,13 +161,16 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
     
 	// set the world matrix that controls zoom and translation of  the drawn image
 	paint.setWorldMatrix(*wm);
+	int scale_ = 1;
+	if ( (wm->m11() > 0) && (wm->m11() < 1) ) 
+		scale_ = static_cast<int> (1/wm->m11()); // the horizontal scale factor
 	QPen pen1;
 	if (!selected)
-		pen1 =QPen( theParameters->linkcolor , theParameters->link_thickness); // pen for the link base
+		pen1 =QPen( theParameters->linkcolor , theParameters->link_thickness*scale_); // pen for the link base
 	else
-		pen1 =QPen( selected_color , theParameters->selected_thickness); // pen for the link base
+		pen1 =QPen( selected_color , theParameters->selected_thickness*scale_); // pen for the link base
 	
-	QPen pen2 ( theParameters->queuecolor , theParameters->queue_thickness); // pen for queue
+	QPen pen2 ( theParameters->queuecolor , theParameters->queue_thickness*scale_); // pen for queue
 #ifdef FIXED_RUNNING
 	int r,g,b;
 	g=0;
@@ -177,9 +180,9 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 	   b=255;
 	r=255;
 	int width=static_cast<int>((theParameters->link_thickness+theParameters->queue_thickness)*perc_density) ;
-	QPen pen3 (QColor(r,g,b),width); // pen for variable (density)
+	QPen pen3 (QColor(r,g,b),width*scale_); // pen for variable (density)
 #else
-	QPen pen3 ( Qt::blue , theParameters->queue_thickness);
+	QPen pen3 ( Qt::blue , theParameters->queue_thickness*scale_);
 #endif // FIXED_RUNNING
 
 	// draw the center line
@@ -189,7 +192,7 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 	// drawing the handler ( half arrow) 
 	if(handler_on_)
 	{
-		QPen pen_h(theParameters->linkcolor, 1.5*(theParameters->link_thickness));
+		QPen pen_h(theParameters->linkcolor, 1.5*(theParameters->link_thickness)*scale_);
 		paint.setPen(pen_h);
 	//	paint.drawLine(handlex-shiftx/2,handley-shifty/2,handlex+shiftx/2,handley+shifty/2);
 		paint.drawLine(handlex,handley,handlex+shiftx,handley+shifty);
@@ -219,7 +222,7 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 	if (theParameters->draw_link_ids)
 	{
 		paint.setFont(QFont ("Helvetica", theParameters->text_size));
-		QPen pen4 ( Qt::red , 1);
+		QPen pen4 ( Qt::red , 1*scale_);
 		paint.setPen(pen4);
 		paint.drawText (((startx+stopx)/2)+shiftx*theParameters->text_size - 2*theParameters->text_size,((starty+stopy)/2)+shifty*theParameters->text_size, text);
 	}
@@ -228,8 +231,7 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 
 const bool LinkIcon::within_boundary(const double x, const double y, const int rad)
 {
-	// don't re-use parameters as variables. I suggest we should start coding stricter: make unchangeable parameters const, so we don't mess up
-	// (i agree i haven't been doing that myself most of the time...)
+
 	int rad2=linkicon_leng_/12;
 	if (x<=handlex+rad2 && x>=handlex-rad2)
 		if(y<=handley+rad2 && y>=handley-rad2)
@@ -247,7 +249,10 @@ void VirtualLinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pix
    QPainter paint(pm); // automatic paint.begin()
     paint.setRenderHint(QPainter::Antialiasing); // make nice smooth lines
     paint.setWorldMatrix(*wm);
-   QPen pen1 ( Qt::green , 1);
+	int scale_ = 1;
+	if ((wm->m11() > 0) && (wm->m11() < 1))
+		scale_ = static_cast<int> (1/wm->m11()); // the horizontal scale factor   
+	QPen pen1 ( Qt::green , 1*scale_);
 
    paint.setPen(pen1);
    paint.drawLine( startx+shiftx,starty+shifty, stopx+shiftx,stopy+shifty ); // draw the center line
@@ -278,11 +283,13 @@ void NodeIcon::draw(QPixmap *pm,QMatrix *wm)
 	QPainter paint(pm); // automatic paint.begin()
 	paint.setRenderHint(QPainter::Antialiasing); // smooth lines
 	paint.setWorldMatrix(*wm);
-
+	int scale_ = 1;
+	if ((wm->m11() > 0) && (wm->m11() < 1))
+		scale_ = static_cast<int> (1/wm->m11()); // the horizontal scale factor	
 	QPen pen1;
 	if (!selected)
 	{
-		pen1 =QPen(theParameters->nodecolor, theParameters->node_thickness);
+		pen1 =QPen(theParameters->nodecolor, theParameters->node_thickness * scale_);
 		paint.setPen(pen1);
 		if(thenode_->className()=="Origin")
 		{
@@ -304,7 +311,7 @@ void NodeIcon::draw(QPixmap *pm,QMatrix *wm)
 	}
 	else
 	{
-		pen1 =QPen(selected_color, 8*(theParameters->node_thickness)); 
+		pen1 =QPen(selected_color, 8*(theParameters->node_thickness)*scale_); 
 		paint.setPen(pen1);
 		paint.drawEllipse (startx,starty, width,height );
 	}
@@ -328,9 +335,11 @@ void IncidentIcon::draw(QPixmap * pm,QMatrix * wm)
 		QPainter paint(pm); // automatic paint.begin()
 		paint.setRenderHint(QPainter::Antialiasing); // smooth lines
 		paint.setWorldMatrix(*wm);
-
+		int scale_ = 1;
+		if ((wm->m11() > 0) && (wm->m11() < 1))
+		scale_ = static_cast<int> (1/wm->m11()); // the horizontal scale factor
 		QPen pen1;
-		pen1 =QPen(Qt::red, 2*(theParameters->selected_thickness)); 
+		pen1 =QPen(Qt::red, scale_*2*(theParameters->selected_thickness)); 
 		paint.setPen(pen1);
 		//paint.drawRect(startx,starty,width,height);
 		static const QPointF points[3] = {

@@ -663,6 +663,7 @@ void Link::set_incident(Sdfunc* sdptr, bool blocked_, double blocked_until_)
 	sdfunc=sdptr;
 	blocked=blocked_;
 	blocked_until=-2.0; 
+	// NOTE : Check why blocked_until_ is ignored!
 }
 
 void Link::unset_incident()

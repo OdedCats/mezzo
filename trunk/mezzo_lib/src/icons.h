@@ -50,7 +50,7 @@ class Icon
 	  Icon( int startx_, int starty_) : startx(startx_), starty(starty_) 
 			{selected = false; selected_color = theParameters->selectedcolor;}
 	  virtual ~Icon(){};
-	  virtual void draw(QPixmap * pm,QMatrix * wm){};
+	  virtual void draw(QPixmap * ,QMatrix * ){};
 	  virtual const bool within_boundary(const double x, const double y, const int rad);
 	  void settext(const string st) {text=QString(st.c_str());}
 	  const int get_x()  { return startx;}
