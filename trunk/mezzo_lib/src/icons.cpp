@@ -38,7 +38,7 @@ void Drawing::draw(QPixmap* pm,QMatrix * wm)
 	}
 	else	
 	{
-		pm->resize(800,600); // standard width & height
+		//pm->resize(800,600); // standard width & height
 		pm->fill(theParameters->backgroundcolor); // fill with white background
 	}
 	for (list<Icon*>::iterator iter=icons.begin(); iter != icons.end(); iter++)

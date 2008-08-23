@@ -27,7 +27,7 @@ MainForm::MainForm(QWidget *parent)
 	start_x=Canvas->x();
 	start_y=Canvas->y();
 	yadjust_=54;
-	
+	canvasOffset=QSize((width()-panelx),(height()-panely));
 	scalefactor=1.50;
 	panfactor=20;
 	panpixels=20;
@@ -67,6 +67,7 @@ MainForm::MainForm(QWidget *parent)
 	theParameters=theNetwork.get_parameters();
 	
 	// need to figure out if this affect the simulation
+	// COMMENT WILCO: this is to slow down the simulation
 	//simspeed->setValue(static_cast<int> (  theParameters->sim_speed_factor * 100 ));
 	
 	// Parameters dialog
@@ -100,7 +101,15 @@ MainForm::MainForm(QWidget *parent)
 	activateToolbars(false);
     
 	// hide the status bar
-	statusBar()->hide();
+	// WILCO: move all the status widgets to the Statusbar
+	//statusBar()->hide();
+	statusBar()->addWidget (status_label);
+	statusBar()->addWidget(simprogress_widget);
+	statusBar()->addWidget(this->TextLabel12,10);
+	statusBar()->addWidget(this->LCDNumber),10;
+	statusBar()->addWidget(this->progressbar),10;
+	statusBar()->addWidget(mouse_label),10;
+	
 	simprogress_widget->setVisible(false);
 }
 
@@ -747,3 +756,21 @@ void MainForm::unselectLinks()
 	links_sel_.clear();
 }
 
+// Use the resize event to resize the Canvas. The bl**dy spacers and layouts dont seem to work!
+void MainForm::resizeEvent(QResizeEvent* event)
+{	
+	panelx=width()-canvasOffset.width(); // offset is from right and bottom of form.
+	panely=height()-canvasOffset.height();
+	viewSize_=QSize(panelx,panely);
+	pm1.resize(viewSize_);
+	pm2.resize(viewSize_);
+	Canvas->resize(panelx,panely); // resize the canvas
+	if (initialised) // update the matrix and redraw
+	{
+		mod2stdViewMat_=theNetwork.netgraphview_init();
+		wm=mod2stdViewMat_;
+		updateCanvas();
+	}
+	// Call the parent's resizeEvent		
+	QWidget::resizeEvent(event);
+}

@@ -79,6 +79,7 @@ private:
 	void unselectLinks();
 	void drawZoomRect();
 	void zoomRectArea();
+	void resizeEvent(QResizeEvent*);
 
 //VARS
 	int start_x ; //!< the x coordinate of the upper right corner of the canvas
@@ -94,6 +95,7 @@ private:
     QWMatrix mod2stdViewMat_; //!< define transition from basic model to standard view
 	QWMatrix viewMat_;		  //!< define transition from standard view to current view
 	QSize viewSize_;
+	QSize canvasOffset; // off set in X and Y of the Canvas to the Mainform
 	QPixmap pm1, pm2; //!< shared pixmaps on which the network is drawn off-screen
 	QRect* zoomrect_;
 	double scalefactor;
