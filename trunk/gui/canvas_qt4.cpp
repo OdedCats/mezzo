@@ -16,8 +16,7 @@
 #include <qmessagebox.h>
 #include "canvas_qt4.h"
 
-MainForm::MainForm(QWidget *parent)
-: Q3MainWindow(parent)
+MainForm::MainForm(QWidget *parent): Q3MainWindow(parent)
 {
 	setupUi(this);
 	
@@ -311,7 +310,7 @@ void MainForm::on_parametersdialog_activated()
 */
 void MainForm::on_inspectdialog_activated()
 {
-    // if initialized (network is created)
+    // if initialized (network is built)
 	if (this->initialised){
 
 		// set the network if necessary
@@ -613,7 +612,7 @@ void MainForm::drawZoomRect()
 	int view_h = viewSize_.height();
 
 	// do nothing when rectangle is a point 
-	if (rect_w==0||rect_h==0) return;
+	if (rect_w<=3||rect_h<=3) return;
 
 	double scale_x = (double)view_w/(double)rect_w;
     double scale_y = (double)view_h/(double)rect_h;
@@ -652,7 +651,7 @@ void MainForm::drawZoomRect()
 void MainForm::zoomRectArea()
 {
 	// do nothing when rectangle is a point 
-	if (zoomrect_->width()==0||zoomrect_->height()==0) return;
+	if (zoomrect_->width()<=3||zoomrect_->height()<=3) return;
 
 	// compute the scale
 	double rect2view_factor=viewSize_.width()/zoomrect_->width();
@@ -761,16 +760,28 @@ void MainForm::resizeEvent(QResizeEvent* event)
 {	
 	panelx=width()-canvasOffset.width(); // offset is from right and bottom of form.
 	panely=height()-canvasOffset.height();
+
+	// resize the drawing widgets
+	QSize oldviewsize=viewSize_;
 	viewSize_=QSize(panelx,panely);
 	pm1.resize(viewSize_);
 	pm2.resize(viewSize_);
 	Canvas->resize(panelx,panely); // resize the canvas
-	if (initialised) // update the matrix and redraw
-	{
-		mod2stdViewMat_=theNetwork.netgraphview_init();
-		wm=mod2stdViewMat_;
-		updateCanvas();
-	}
+
+	if (!initialised) return; 
+	// update the matrix and redraw
+	//mod2stdViewMat_=theNetwork.netgraphview_init();
+	//wm=mod2stdViewMat_;
+	//updateCanvas();
+
+	// the view center offset
+	int dxviewC=viewSize_.width()/2-oldviewsize.width()/2;
+	int dyviewC=viewSize_.height()/2-oldviewsize.height()/2;
+	wm.translate(dxviewC, dyviewC);
+	mod2stdViewMat_=wm*viewMat_.invert();
+	//update the canvas
+	updateCanvas();
+	
 	// Call the parent's resizeEvent		
 	QWidget::resizeEvent(event);
 }

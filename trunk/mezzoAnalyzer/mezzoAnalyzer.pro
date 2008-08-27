@@ -11,7 +11,7 @@ LIBS+= $(SUBLIBS) -L../mezzo_lib/Debug -lmezzo_lib -L$(QTDIR)/lib -lQtCore -lQtG
 QT+= core gui qt3support 
 # activeqt xml network svg
 QMAKE= $(QTDIR)/bin/qmake
-CONFIG += uic4 staticlib
+CONFIG += uic4 staticlib debug
 
 # Input
 HEADERS += src/assist.h \

@@ -15,7 +15,7 @@ LIBS += -L$(QTDIR)/lib -lQtCore -lQtGui -lQtNetwork -lQt3Support -lQtDesigner
 
 QT+= core gui qt3support 
 #activeqt xml network svg
-CONFIG += uic4
+CONFIG += uic4 debug
 
 # Input
 HEADERS += canvas_qt4.h parametersdialog_qt4.h src/nodedlg.h
