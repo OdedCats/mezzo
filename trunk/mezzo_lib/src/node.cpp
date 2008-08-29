@@ -53,7 +53,8 @@ bool  Node::process_veh(Vehicle* , double )       //unused Vehicle* veh, double 
 	return false;
 }
 
-
+void Node::reset()
+{}
 
 Origin::Origin(int id_):Node(id_)
 {
@@ -66,12 +67,7 @@ Origin::~Origin()
 {
 	if (inputqueue)
 		delete inputqueue;
-	// TAKE OUT THE OACTIONS (COMMENT THEM OUT SO WE CAN USE THEM LATER
-	for (vector <Oaction*>::iterator iter=oactions.begin();iter<oactions.end();)
-	{	
-		delete (*iter);
-		iter=oactions.erase(iter);	
-	}
+
 	for (vector <OServer*>::iterator iter1=servers.begin(); iter1<servers.end(); )
 	{
 	
@@ -81,40 +77,12 @@ Origin::~Origin()
 	currentperiod = 0;
 }
 
-void Origin::get_link_rates()
+void Origin::reset()
 {
-	
-	vector<rateval> route_rates;
-	for (vector<ODpair*>::iterator iter=odpairs.begin();iter<odpairs.end(); iter++)
-	{
-		route_rates=	(*iter)->get_route_rates();
-		for (vector<rateval>::iterator iter2=route_rates.begin();iter2<route_rates.end();iter2++)
-		{		
-			linkrate temp ( (*iter2).first->firstlink(), (*iter2).second );
-			link_rates.push_back(temp);
-		}
-		
-	}
-   	// !!! !!! Sort out the mess of link*, rate that we have in te vector of link_rates !! !! !! !!
- 	vector<linkrate>::iterator temp=link_rates.begin(); // temp
-	vector<linkrate>::iterator start=temp; // the startpoint
-//	bool stop=false;
-	while (temp < link_rates.end())
-	{
-		start=temp;
-		start++; // start comparing from the NEXT position;
-		for (vector<linkrate>::iterator iter=start; iter<link_rates.end();) // compare all link-rates from start
-		{
-			if ( (*iter).first->get_id() == (*temp).first->get_id() ) // if iter has the same link as temp
-			{
-				(*temp).second+=(*iter).second; // then add the rate to that of temp
-				iter=link_rates.erase(iter); // and delete the rate from the list (automatically advancing the iterator)
-			}
-			else
-				iter++;
-		}
-		temp++; // look at the next
-	}
+	//inputqueue->reset(); // to be implemented
+	// reset Oactions (how??)
+	currentperiod = 0;
+
 
 }
 
@@ -142,73 +110,9 @@ void Origin::register_links(vector <Link*> links)
  	 }	
 }
 
-void Origin::initialise() // initialises the Oservers for each outgoing link based on the rates from the OD pairs
-{
-   get_link_rates();    // get the rates per outgoing link from the OD pairs
-	// if all links have a route starting there then (link_rates.size()==outgoing.size()) should be true
-#ifdef _DEBUG_NODE
-	cout << "number of outgoing links : " << outgoing.size() << endl;
-	cout << "number of link rates registered " << link_rates.size() <<endl;
-#endif //_DEBUG_NODE
-	for (vector<linkrate>::iterator iter=link_rates.begin();iter<link_rates.end();iter++) // make the oactions for each link in link_rates
-	{
-		double mu=(3600.0/(*iter).second);
-		#ifdef _DEBUG_NODE
-			cout << " Origin::initialise mu = " << mu << endl;
-		#endif //_DEBUG_NODE	
-		servers.insert (servers.begin(),new OServer(3000, 2,mu , 0.5));
-		for (int i=0;i<((*iter).first->get_nr_lanes());i++)
-		{				
- 			oactions.insert(oactions.begin(),new Oaction((*iter).first,this,servers.front()));  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    	}
-	}
-}
 
-bool Origin::execute(Eventlist* eventlist, double time)
-{
-#ifdef _DEBUG_NODE
-	cout << "Origin execute" << endl;
-#endif //_DEBUG_NODE
-	bool ok=true;
- 	for (vector<Oaction*>::iterator iter=oactions.begin(); iter<oactions.end(); iter++)
-		ok=ok && ( (*iter)->execute(eventlist, time) );	
-	return ok;
-}
 
-/*
-bool Origin::insert_veh(Vehicle* veh, double time)
-{
-	if (!inputqueue->full())
-	{
-		return inputqueue->enter_veh(veh, time);
-	
-	}
-	else
-		return false;
-}
 
-bool Origin::transfer_veh(Link* link, double time)
-{
-	if (!(inputqueue->empty()))
-	{
-		if (!(link->full()))
-		{
-			bool ok=false;
-			Vehicle* veh=inputqueue->exit_veh(time, link, 600);
-			
-			ok=inputqueue->exit_ok();
-			if (ok)
-			{
-				veh->set_entered();
-				if (incident)
-					link->receive_broadcast(veh,incident_link,incident_parameters);
-				return link->enter_veh(veh,time);
-			}
-		}
-	}
-return false;
-}
-*/
 void Origin::write_v_queues(ostream& out)
 {
 	for (unsigned int i = 0 ; i < v_queue_lengths.size(); i++)
@@ -242,10 +146,6 @@ bool Origin::insert_veh(Vehicle* veh, double time)
 		{
 			if (  inputqueue->enter_veh(veh,time) ) 
 			{
-				/*
-				if (!((inputqueue->size()) % 100) )
-					cout << time << " : At origin " << id << " virtual queue is " << inputqueue->size() << endl;
-					*/
 				
 				return true;
 			}
@@ -354,8 +254,8 @@ bool Origin::transfer_veh(Link* link, double time)
 void Origin::broadcast_incident_start(int lid, vector <double> parameters)
 {
 	incident_parameters=parameters;
-  incident_link=lid;
-  incident=true;
+	incident_link=lid;
+	incident=true;
 }
 
 void Origin::broadcast_incident_stop(int)          // unused int lid
@@ -367,7 +267,7 @@ void Origin::broadcast_incident_stop(int)          // unused int lid
 
 void Origin::add_odpair(ODpair* odpair)
 {
- odpairs.insert(odpairs.begin(),odpair);
+	odpairs.insert(odpairs.begin(),odpair);
 }
 
 void Junction::register_links(vector <Link*> links)
@@ -709,31 +609,6 @@ bool BoundaryIn::newvehicle(Signature* sig)
 
 Junction::Junction(int id_):Node(id_) {}
 
-Oaction::Oaction(Link* link_, Origin* origin_, OServer* server_): link(link_), origin(origin_), server(server_)
-
-{}
-
-Oaction::~Oaction()
-{
-//		delete server;
-}
-
-bool Oaction::execute(Eventlist*, double) // unused    Eventlist* eventlist, double time
-// not used anymore. Vehicles are put directly onto the link by OD action
-{
-/*
-// process vehicles if any
-	bool exec_ok=origin->transfer_veh(link,time);
-	if (!exec_ok)
-		cout << "Oaction:: couldn't transfer vehicle" << endl;
-	// get new time from server
-	double new_time=server->next(time);
-   eventlist->add_event(new_time,this); */
-
-   // taken out 2002-11-26 to eliminate the vehicle loading process. Now OD pairs generate traffic that is loaded directly onto the links.
-	return true;
-}
-
 
 
 Daction::Daction(Link* link_, Destination* destination_, Server* server_):link(link_),
@@ -781,51 +656,4 @@ bool Daction::process_veh(double time)
   return ok;
 }
 
- /*
-// BOaction funcitons
 
-BOaction::BOaction (Link* link_, BoundaryOut* boundaryout_, Server* server_):Daction(link_,boundaryout_,server_)
-{
-	boundaryout=boundaryout_;
-}
-
-BOaction::~BOaction()
-{}
-
-bool BOaction::process_veh(double time)
-{
-	if (boundaryout->blocked())
-	{
-	  cout << "exit blocked " << endl;
-	  return false;	
-	}
-	else
-	{
- 		Vehicle* veh=link->exit_veh(time) ;
-  		bool ok=link->exit_ok();
-  		if (ok)
-  		{
-			 #ifdef _DEBUG_NODE
-			cout << "BOaction::process_veh detete veh" << endl;
-			cout << "Vehicle exit time " << (veh->get_exit_time());
-		  	cout << "link exit ok?: " << link-> exit_ok() << endl;
- 			cout << "link id "<<link->get_id()<< endl;
-			 #endif // _DEBUG_NODE
-			veh->report(time);
-			Link* lptr=NULL;
-			lptr=veh->nextlink();
-			if (lptr)
-			{
- 				// make the signature and put it in the BoundaryOut
-				int tmpori = lptr->get_in_node_id();     // temp origin for MITSIM
-				int tmpdest = lptr->get_out_node_id(); // temp destination for MITSIM
-				Signature* sig=new Signature(veh->get_id(), link->speed(time), time,time,veh->get_start_time(), veh->get_meters(),
-					veh->get_oid(),veh->get_did(),veh->get_type(), veh->get_length(), (veh->get_route()->get_id()), tmpori, tmpdest);
-				boundaryout->add_signature(sig);
-			}
-		delete veh; // kill kill kill the vehicle. Later we can recycle.
-		}
-		return ok;
-	}	
-}
-    */

@@ -42,7 +42,6 @@ class Q;
 class Vehicle;
 class Signature;
 class ODpair;
-class Oaction;
 class Daction;
 class BOaction;
 class Busroute;
@@ -68,6 +67,7 @@ class Node
 	virtual ~Node();
 	virtual const int get_id();
 	virtual const string className(){return "Node";}
+	virtual void reset(); // resets the state variables to 0
 	void setxy(double x, double y);
 	const Coord getxy();
 #ifndef _NO_GUI
@@ -88,15 +88,15 @@ class Origin : public Node
 public:
 	Origin (int id_);
 	virtual ~Origin();
+	virtual void reset(); // resets the state variables to 0
+
 	virtual const string className(){return "Origin";}
 	virtual bool transfer_veh(Link* link, double time); // transfers the vehicle from InputQueue to one of the
 																				//outgoing links
 	virtual bool insert_veh(Vehicle* veh, double time); // inserts the vehicle into the InputQueue
 	virtual void add_odpair(ODpair* odpair);
 	virtual void register_links(vector<Link*> links); // registers the outgoing links
-	virtual void initialise(); // initialises the OServers for each outgoing link based on rates from ODpairs
-	virtual bool execute(Eventlist* eventlist, double time);
-	virtual void get_link_rates(); // gets the link rates from the ODpairs
+
 	virtual vector<Link*> get_links() {return outgoing;}
 	
 	// Broadcast functions are only there for the DYNAMO test cases
@@ -105,14 +105,11 @@ public:
 
 	void write_v_queues(ostream& out);
 
-
-	protected:
+protected:
 	vector <OServer*> servers;
 	InputLink* inputqueue;
 	vector <Link*>  outgoing;	
 	vector <ODpair*> odpairs;
-	vector <Oaction*> oactions;
-	vector<linkrate> link_rates;
 	bool incident; // flag that indicates incident behaviour
 	int incident_link;
 	vector <double> incident_parameters;
@@ -221,21 +218,6 @@ class BoundaryIn : public Origin
 
 
 
-
-class Oaction : public Action   // loads the link outward from the Origin with traffic from the origins inputqueue.
-{
-	public:
-		Oaction(Link* link_, Origin* origin_, OServer* server_);
-		virtual ~Oaction();
-		bool execute(Eventlist* eventlist, double time);
-		bool process_veh(double time);
-  private:
-    Link* link;
-    Origin* origin;
-    OServer* server;
-};
-
-
 class Daction : public Action
 {
  public:
@@ -249,15 +231,5 @@ class Daction : public Action
   Server* server;
 } ;
 
-/*
-class BOaction : public Daction
-{
- public:
- 	BOaction (Link* link_, BoundaryOut* boundaryout_, Server* server_);
- 	~BOaction();
- 	bool process_veh(double time);
- protected:
- 	BoundaryOut* boundaryout;
- };
- */
+
 #endif

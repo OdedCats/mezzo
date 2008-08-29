@@ -3357,13 +3357,6 @@ bool Network::init()
 		}
 	}
 
-/* // OLD INIT, redundant, put it together with the cleaning up of non-connected OD pairs.
-	for(vector<ODpair*>::iterator iter1=odpairs.begin(); iter1<odpairs.end(); iter1++)
-	{
-	 	(*iter1)->execute(eventlist,initvalue);
-		initvalue += 0.00001;
-	}
-	*/
 #ifdef _DEBUG_NETWORK	
 	cout << "odpairs initialised" << endl;
 	cout << "number of destinations " <<destinations.size() <<endl;
@@ -3375,16 +3368,6 @@ bool Network::init()
 		(*iter2)->execute(eventlist,initvalue);
 		initvalue += 0.00001;
 	}
-	// initialise origin events
-	// 2004-01-10: take out the origin actions
-	// 2005-11-28: If we put back the origin actions, we need to put back the route generation before the input reading.
-  /*
-	for (vector<Origin*>::iterator iter=origins.begin(); iter<origins.end();iter++)
-	{
-		(*iter)->initialise();
-		(*iter)->execute(eventlist,0.1);
-	}
-	*/
 
 	// Initialise the communication
 #ifdef _MIME
