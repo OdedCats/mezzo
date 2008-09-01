@@ -47,6 +47,7 @@ class Q
 
   Q(double maxcap_, double freeflowtime_);
   ~Q();
+  void reset(); // resets the queue for re-start of simulation
  // Accessors -> made inline so they are faster....
 //  inline const bool full() {return (calc_total_space() >= maxcap);}           // for some reason this doesnt work. check later...
   inline const bool full() {return (vehicles.size() >= maxcap);}
@@ -69,15 +70,15 @@ class Q
   void switchroute(Vehicle* veh, Route* curr_route, Route* alt_route, vector <double> parameters);
   double calc_space(double time);
   double calc_total_space();
-  private:
-   double maxcap;
-   double freeflowtime;
+private:
+  double maxcap;
+  double freeflowtime;
    // help vars
   bool ok;   // used to indicate whether an exit_veh has been successful
   double next_action; // when the next turn action should be scheduled.
   							 // used when a vehicle hasn't arrived at the stopline yet.
   list <Veh_in_Q>::iterator viter; // iterator for the vehicles
-   double ttime;
+  double ttime;
   int n, nextid,vnextid;
   Vehicle* vehicle;
   Veh_in_Q value;

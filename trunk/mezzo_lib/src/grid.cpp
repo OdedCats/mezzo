@@ -4,7 +4,10 @@
 Grid::Grid(int nr_fields_,vector<string> names_):nr_fields(nr_fields_),fnames(names_)
 {}
 
-
+void Grid::reset()
+{
+	grid.clear();
+}
 bool Grid::insert_row(list <double> & values)
 {
     grid.insert(grid.end(), values);
@@ -70,7 +73,7 @@ MOE::MOE (double val_update)
 	scale=1.0;
 }
 
-MOE::	MOE (double val_update, double scale_)
+MOE::MOE (double val_update, double scale_)
 {
   	values.push_back(0.0);
 	value_iter=values.begin();
@@ -80,6 +83,14 @@ MOE::	MOE (double val_update, double scale_)
 	scale=scale_;
 }
 
+void MOE::reset()
+{	
+	values.clear();
+	values.push_back(0.0);
+	value_iter=values.begin();
+	value_period=1;
+	value_obs=0;
+}
 void MOE::report_value(double value, double time)
 {
 	 	if (time > (value_period*value_update))

@@ -7,9 +7,7 @@
 Link::Link(int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* sdfunc_): id(id_), in_node (in_),
 		out_node(out_), length(length_), nr_lanes(nr_lanes_), sdfunc(sdfunc_)
 {
-//	maxcap=static_cast <int> (sdfunc->get_romax()*length*nr_lanes/1000);
 	maxcap=static_cast<int> (length*nr_lanes/theParameters->standard_veh_length);
-//  maxcap=length*nr_lanes;      // now maxcap is the total space that is available for vehicles
 #ifdef _DEBUG_LINK	
 	cout << "link " << id << " maxcap " << maxcap << endl;
 #endif //_DEBUG_LINK
@@ -36,12 +34,6 @@ Link::Link(int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* s
 	moe_speed=new MOE(theParameters->moe_speed_update, 3.6);
 	moe_inflow=new MOE(theParameters->moe_inflow_update, (3600.0/theParameters->moe_inflow_update));
 	moe_outflow=new MOE(theParameters->moe_outflow_update, (3600.0/theParameters->moe_outflow_update));
-
-//	moe_inflow=new MOE(theParameters->moe_inflow_update, ((3600.0/theParameters->moe_inflow_update)/nr_lanes));
-//	moe_outflow=new MOE(theParameters->moe_outflow_update, ((3600.0/theParameters->moe_outflow_update)/nr_lanes));
-//	moe_inflow=new MOE(theParameters->moe_inflow_update);
-//	moe_outflow=new MOE(theParameters->moe_outflow_update);
-	
 	moe_queue=new MOE(theParameters->moe_queue_update);
 	moe_density=new MOE(theParameters->moe_density_update);
   blocked_until=-1.0; // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
@@ -89,6 +81,34 @@ Link::~Link()
     if (avgtimes!=NULL)
       delete (avgtimes);
 	
+}
+
+void Link::reset()
+{
+	avg_time=0.0;
+	curr_period=0;
+	tmp_avg=0.0;
+	tmp_passed=0;
+	// Reset avgtimes
+	avgtimes->reset();
+	nr_passed=0;
+	running_percentage=0.0;
+	queue_percentage=0.0;
+	blocked=false;
+	moe_speed->reset();
+	moe_inflow->reset();
+	moe_outflow->reset();
+	moe_queue->reset();
+	moe_density->reset();
+	blocked_until=-1.0; // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
+	nr_exits_blocked=0; // set by the turning movements if they are blocked
+	freeflowtime=(length/(sdfunc->speed(0.0)));
+	if (freeflowtime < 1.0)
+      freeflowtime=1.0;
+	queue->reset();    
+	use_ass_matrix = false;
+	selected = false;
+	ass_matrix.clear();
 }
 
 

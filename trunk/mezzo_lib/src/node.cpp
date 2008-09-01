@@ -67,22 +67,24 @@ Origin::~Origin()
 {
 	if (inputqueue)
 		delete inputqueue;
-
+/*
 	for (vector <OServer*>::iterator iter1=servers.begin(); iter1<servers.end(); )
 	{
 	
 	  delete (*iter1);
 	  iter1=servers.erase(iter1);
 	}
+	*/
 	currentperiod = 0;
 }
 
 void Origin::reset()
 {
-	//inputqueue->reset(); // to be implemented
-	// reset Oactions (how??)
+	inputqueue->reset(); 
 	currentperiod = 0;
-
+	v_queue_lengths.clear();
+	incident = false;
+	incident_link=-1;
 
 }
 
@@ -91,10 +93,7 @@ void Origin::reset()
 
 void Origin::register_links(vector <Link*> links)
 /*
- 	Registers all links that are outgoing from this origin, creates the Oservers with the right rates
-	which are provided by the OD pairs for each route, and creates the Oactions that will transfer the
-	vehicles from the InputQueue to the outgoing links, hopefully in a somewhat realistic manner (one action per
-	link, so there'll be ' a whole lotta action' going on with actions creating vehicles, actions inserting vehicles &c
+ 	Registers all links that are outgoing from this origin
 */
 {
 	// register the links
@@ -627,7 +626,7 @@ bool Daction::execute(Eventlist* eventlist, double time)
 	if (!exec_ok)
 		new_time=link->next_action(time);
 	else
-	  new_time=server->next(time);
+		new_time=server->next(time);
 #ifdef _DEBUG_NODE
 	  cout <<"Daction::execute...result: " << exec_ok;
    	  cout << " ...next Daction @ " << new_time << endl;
@@ -647,7 +646,7 @@ bool Daction::process_veh(double time)
  #ifdef _DEBUG_NODE
  	cout << "Daction::process_veh detete veh" << endl;
  	cout << "Vehicle exit time " << (veh->get_exit_time());
-   cout << "link exit ok?: " << link-> exit_ok() << endl;
+	cout << "link exit ok?: " << link-> exit_ok() << endl;
  	cout << "link id "<<link->get_id()<< endl;
  #endif //_DEBUG_NODE
  		veh->report(time);

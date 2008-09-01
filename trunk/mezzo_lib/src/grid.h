@@ -21,16 +21,17 @@ class Grid
 {
     public:
       Grid(int nr_fields_, vector<string> names_);
-    	bool insert_row(list <double> & values); // reference to a list of values so theres no needless copying
-       bool write_empty(ostream& out);
-       double sum (int column);
-       double average (int column);
-       int size() {return grid.size();}
-	   vector <string> get_fieldnames () {return fnames;}
+	  void reset(); // resets the values NOT the fieldnames!
+      bool insert_row(list <double> & values); // reference to a list of values so theres no needless copying
+      bool write_empty(ostream& out);
+      double sum (int column);
+      double average (int column);
+      int size() {return grid.size();}
+	  vector <string> get_fieldnames () {return fnames;}
      private:
-        int nr_fields;
-        vector<string> fnames;
-		 list < list <double> > grid;
+      int nr_fields;
+      vector<string> fnames;
+	  list < list <double> > grid;
 };
 
 class MOE
@@ -38,6 +39,7 @@ class MOE
  public:
  	MOE (double val_update);
  	MOE (double val_update, double scale_);
+	void reset(); // resets the value list, NOT the scale_ or value_update
  	void report_value(double value, double time); // used to report values that are averaged
  	void report_value(double time); // used to report counts such as flows
   double get_value(int index);

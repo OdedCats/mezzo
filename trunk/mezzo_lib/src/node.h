@@ -88,7 +88,7 @@ class Origin : public Node
 public:
 	Origin (int id_);
 	virtual ~Origin();
-	virtual void reset(); // resets the state variables to 0
+	virtual void reset(); // resets the state variables to restart
 
 	virtual const string className(){return "Origin";}
 	virtual bool transfer_veh(Link* link, double time); // transfers the vehicle from InputQueue to one of the
@@ -97,16 +97,15 @@ public:
 	virtual void add_odpair(ODpair* odpair);
 	virtual void register_links(vector<Link*> links); // registers the outgoing links
 
-	virtual vector<Link*> get_links() {return outgoing;}
+	virtual vector<Link*> get_links() {return outgoing;} // returns all outgoing links
 	
-	// Broadcast functions are only there for the DYNAMO test cases
-	virtual void broadcast_incident_start(int lid, vector <double> parameters);
-	virtual void broadcast_incident_stop(int lid);
+	virtual void broadcast_incident_start(int lid, vector <double> parameters); // broadcasts incident to all vehicles starting from this origin
+	virtual void broadcast_incident_stop(int lid); // stops broadcast of incident
 
 	void write_v_queues(ostream& out);
 
 protected:
-	vector <OServer*> servers;
+	//vector <OServer*> servers;
 	InputLink* inputqueue;
 	vector <Link*>  outgoing;	
 	vector <ODpair*> odpairs;
@@ -207,8 +206,7 @@ class BoundaryIn : public Origin
 	bool newvehicle(Signature* sig);
 #endif // _MIME	
 
-
-	private:
+private:
 	vector <VirtualLink*> vlinks;
 	vector <Route*> * routes;
 	vector <Busroute*> * busroutes; 

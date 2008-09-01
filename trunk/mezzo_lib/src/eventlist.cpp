@@ -8,4 +8,29 @@ bool Action::execute(Eventlist*, double)        // unused Eventlist* eventlist, 
 {
 	return true;
 }
+
+// Eventlist implementation
+Eventlist::~Eventlist()
+{
+	multimap <double, Action*> :: iterator iter = thelist.begin();
+	for (iter; iter != thelist.end(); iter)
+	{
+		delete (*iter).second;
+		iter = thelist.erase(iter);
+
+	}
+
+}
+
+void Eventlist::reset()
+{
+	multimap <double, Action*> :: iterator iter = thelist.begin();
+	for (iter; iter != thelist.end(); iter)
+	{
+		delete (*iter).second;
+		iter = thelist.erase(iter);
+
+	}
+	lastupdate=thelist.end();
+}
 	

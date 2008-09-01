@@ -196,6 +196,32 @@ Network::~Network()
     }
 }
 
+void Network::reset()
+{	
+	time=0.0;
+	// reset eventlist
+	eventlist->reset();
+	
+	// reset all the network objects
+	for (vector <Origin*>::iterator iter=origins.begin();iter<origins.end();)
+	{			
+		(*iter)->reset();	
+	}
+	for (vector <Destination*>::iterator iter1=destinations.begin();iter1<destinations.end();)
+	{			
+		(*iter1)->reset();
+	}
+	for (vector <Junction*>::iterator iter2=junctions.begin();iter2<junctions.end();)
+	{			
+		(*iter2)->reset();
+	}
+	for (vector <Link*>::iterator iter4=links.begin();iter4<links.end();)
+	{			
+		(*iter4)->reset();
+	}
+
+}
+
 // define all the inputfunctions according to the rules in the
 // grammar . Each production rule has its own function
 

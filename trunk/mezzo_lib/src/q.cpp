@@ -14,21 +14,44 @@ Q::Q(double maxcap_, double freeflowtime_):maxcap(maxcap_), freeflowtime(freeflo
 
 Q::~Q()
 {
- delete random;
- for (vector <Route*>::iterator iter=routes.begin();iter<routes.end();)
+	delete random;
+	for (vector <Route*>::iterator iter=routes.begin();iter<routes.end();)
 	{			
 		delete (*iter); // calls automatically destructor
-		iter=routes.erase(iter);	
+		iter=routes.erase(iter);
+		// delete the vehicles:
+	}
+	list  <Veh_in_Q>::iterator veh_iter=vehicles.begin();
+	for (veh_iter; veh_iter!=vehicles.end(); )
+	{
+		delete (*veh_iter).second;
+		veh_iter=vehicles.erase(veh_iter);
 	}
 }
+
+void Q::reset()
+{
+	ok = false;
+	next_action = 0.0;
+	// delete the vehicles:
+	list  <Veh_in_Q>::iterator veh_iter=vehicles.begin();
+	for (veh_iter; veh_iter!=vehicles.end(); )
+	{
+		delete (*veh_iter).second;
+		veh_iter=vehicles.erase(veh_iter);
+	}
+	viter = vehicles.begin();
+	ttime=1.0;
+	vehicle = NULL;
+}
+
 
 bool Q::enter_veh(Vehicle* veh)
 {
 	if (!full())
 	{
 	   ttime=veh->get_exit_time();
-		//list <Veh_in_Q> :: iterator iter=(find_if (vehicles.begin(),vehicles.end(), compare_time (time) ) );
- 		//vehicles.insert(iter,Veh_in_Q(time , veh));
+
  		if (empty())
 		{
 		   vehicles.insert(vehicles.end(),Veh_in_Q(ttime , veh));
@@ -102,49 +125,7 @@ void Q::update_exit_times(double time, Link* nextlink, int lookback, double v_ex
    }
 }
 
-/*
-{
-  int n=0; // number of vehicles looked back in queue.
-  double t0=time, t1=1.0, t2=0.0, newtime=time;
-	if (!empty())
-	{
-		list <Veh_in_Q>::iterator iter=vehicles.begin();
-    int nextid=nextlink->get_id();
-    while (iter != vehicles.end())
-    {
-      if (iter->first > t0)
-        return; // exit when first vehicle with earliest exit time larger than t0 is reached
-      Vehicle* vehicle=iter->second;
-      if (n < lookback) // for all vehicles within the lookback: update if going to nextlink, otherwise not
-      {  
-        n++;
-        int vnextid=(vehicle->nextlink())->get_id();
-        if (vnextid==nextid)
-        {
-          // DO IT
-          t2=n*6.3/v_exit; // time it takes to drive to the stopline
-          newtime=t0+t1+t2;
-          iter->first=newtime;
-          vehicle->set_exit_time(newtime);
-          t0=newtime; // new 'earliest exit time' for next vehicle           
-        }
-      }
-      else  // for all vehicles past the lookback, update the times
-      {
-        n++;
-        // DO IT
-        t2=n*6.3/v_exit; // time it takes to drive to the stopline
-        newtime=t0+t1+t2;
-        iter->first=newtime;
-        vehicle->set_exit_time(newtime);
-        t0=newtime; // new 'earliest exit time' for next vehicle    
-      }
-      iter++;      
-    }
-  }
-  
-}
-*/
+
 
 Vehicle* Q::exit_veh(double time, Link* nextlink, int lookback)
 
@@ -208,60 +189,6 @@ Vehicle* Q::exit_veh(double time, Link* nextlink, int lookback)
 }
 
   
-
-/*
-{
-	ok=false;
-	next_action=time;
-	n=0; // number of vehicles looked back in queue.
-	if (!empty())
-	{
-      viter=vehicles.begin();
-      nextid=nextlink->get_id();
-      while (!ok && (viter!=vehicles.end()) && (n<lookback))
-		{
-    // look for n vehicles back for anyone in the right direction, that can have made it to the stopline.
-	 		if (viter->first<=time )
-	 		{
-		   	vehicle=viter->second;
-	   		vnextid=(vehicle->nextlink())->get_id();
-#ifdef _DEBUG_Q
-	   		cout << "current time: " << time;
-	   		cout << "Earliest exit time for vehicle: " << iter->first << endl;
-	   		cout << "Nextlink " << nextid << " , vehicles nextlink " <<
-	   		vnextid << endl;
-#endif //_DEBUG_Q
-	 		
-		 		if (vnextid==nextid)
-		 		{
-		    		vehicles.erase(viter);
-	  		  		ok=true;
-	 	  			return vehicle;
-               }
-               else
-               {
-                 n++;
-                 viter++;
-               }	
-		   }
-		   else // so the current vehicle has an exit time > time
-		   {
-           n=lookback; // there can't be another vehicle further back that comes earlier than this one;
-           next_action=viter->first; // the next action is to be when this guy has made it to the stopline
-           ok=false;
-           return NULL; // No vehicle exited.
-		   }
-		}
-        // if it gets here, it must mean that until the lookback there is no vehicle for this direction
-        next_action=viter->first; // so next action for this direction is to be when the last vehicle
-        ok=false;
-        return NULL;
- 	}
-    // so the queue is empty -> return NULL
-    ok=false;
-    return NULL;
-}
-*/
 
 
 Vehicle* Q::exit_veh(double time)
