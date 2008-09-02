@@ -91,17 +91,17 @@ void Origin::reset()
 
 
 
-void Origin::register_links(vector <Link*> links)
+void Origin::register_links(map <int,Link*> linkmap)
 /*
  	Registers all links that are outgoing from this origin
 */
 {
 	// register the links
-	for (vector <Link*>::iterator iter=links.begin(); iter < links.end(); iter++)
+	for (map <int,Link*>::iterator iter=linkmap.begin(); iter != linkmap.end(); iter++)
  	{
-      	if ((*iter)->get_in_node_id()==id)
+		if ((*iter).second->get_in_node_id()==id)
  		{
-			outgoing.insert(outgoing.begin(), *iter);
+			outgoing.insert(outgoing.begin(), (*iter).second);
    		#ifdef _DEBUG_NODE
  	 			cout << "Registered link " << (*iter)->get_id() << " @ origin " << id << endl;
  	 		#endif //_DEBUG_NODE
@@ -269,23 +269,23 @@ void Origin::add_odpair(ODpair* odpair)
 	odpairs.insert(odpairs.begin(),odpair);
 }
 
-void Junction::register_links(vector <Link*> links)
+void Junction::register_links(map <int,Link*> linkmap)
 {
 	// register the links
-	for (vector <Link*>::iterator iter=links.begin(); iter < links.end(); iter++)
+	for (map <int,Link*>::iterator iter=linkmap.begin(); iter != linkmap.end(); iter++)
  	{
-      	if ((*iter)->get_in_node_id()==id)
+		if ((*iter).second->get_in_node_id()==id)
  		{
-			outgoing.insert(outgoing.begin(), *iter);
+			outgoing.insert(outgoing.begin(), (*iter).second);
            #ifdef _DEBUG_NODE
- 	 			cout << "Registered outgoing link " << (*iter)->get_id() << " @ junction " << id << endl;
+ 	 			cout << "Registered outgoing link " << (*iter).second->get_id() << " @ junction " << id << endl;
  	 		#endif //_DEBUG_NODE
 		}
-		else if ((*iter)->get_out_node_id()==id)
+		else if ((*iter).second->get_out_node_id()==id)
 		{
-			incoming.insert(incoming.begin(), *iter);
+			incoming.insert(incoming.begin(), (*iter).second);
            #ifdef _DEBUG_NODE
- 	 			cout << "Registered incoming link " << (*iter)->get_id() << " @ junction " << id << endl;
+ 	 			cout << "Registered incoming link " << (*iter).second->get_id() << " @ junction " << id << endl;
  	 		#endif //_DEBUG_NODE
 		}
  	 }	

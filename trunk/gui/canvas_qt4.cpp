@@ -244,9 +244,14 @@ void MainForm::on_showhandle_triggered(bool triggered)
 {
 	//update all linkicons property on handler 
 	if(this->initialised){
-		vector<Link*> alllinks=theNetwork.get_links();
-		for( unsigned i=0; i<alllinks.size(); i++)
-			alllinks[i]->get_icon()->setHandler(triggered);
+		map <int, Link*> alllinks=theNetwork.get_links();
+		//for( unsigned i=0; i<alllinks.size(); i++)
+		//	alllinks[i]->get_icon()->setHandler(triggered);
+		map <int,Link*>::iterator l_iter=alllinks.begin();
+		for(l_iter;l_iter!=alllinks.end();l_iter++)
+		{
+			(*l_iter).second->get_icon()->setHandler(triggered);
+		}
 		updateCanvas();
 	}
 }
@@ -712,9 +717,19 @@ void MainForm::selectLinks(QPoint pos)
 	// remove nodes selected
 	unselectNodes();
 
-	vector<Link*> alllinks=theNetwork.get_links();
+	map <int, Link*> alllinks=theNetwork.get_links();
 	int rad=5;
-
+	
+	map <int,Link*>::iterator l_iter = alllinks.begin();
+	for (l_iter;l_iter != alllinks.end(); l_iter++)
+	{
+		if ((*l_iter).second->get_icon()->within_boundary(pos.x(),pos.y(),rad))
+		{
+			links_sel_.push_back((*l_iter).second);
+			break;
+		}
+	}
+	/*
 	for( unsigned i=0; i<alllinks.size(); i++){
 		if (alllinks[i]->get_icon()->within_boundary(pos.x(),pos.y(),rad))
 		{
@@ -722,7 +737,7 @@ void MainForm::selectLinks(QPoint pos)
 			break;
 		}
 	}
-
+*/
 	QString mesg;
 	for( unsigned i=0; i<links_sel_.size();i++){
 		links_sel_[i]->set_selected(true);

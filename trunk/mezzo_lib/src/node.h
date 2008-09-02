@@ -95,7 +95,7 @@ public:
 																				//outgoing links
 	virtual bool insert_veh(Vehicle* veh, double time); // inserts the vehicle into the InputQueue
 	virtual void add_odpair(ODpair* odpair);
-	virtual void register_links(vector<Link*> links); // registers the outgoing links
+	virtual void register_links(map <int,Link*> linkmap); // registers the outgoing links
 
 	virtual vector<Link*> get_links() {return outgoing;} // returns all outgoing links
 	
@@ -136,7 +136,7 @@ class Junction : public Node
 	public:	
 	 Junction (int id_);
 	 virtual const string className(){return "Junction";}
-	 void register_links(vector <Link*> links) ;
+	 void register_links(map <int,Link*> linkmap) ;
    	 vector <Link*> get_incoming() {return incoming;}
 	 vector <Link*> get_outgoing() {return outgoing;}
 	private:

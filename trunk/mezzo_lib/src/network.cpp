@@ -587,7 +587,7 @@ bool Network::readlink(istream& in)
   link->set_icon(icon);
 #endif //_NO_GUI 
   linkmap [lid] = link;
-  links.insert(links.end(),link);
+  //links.insert(links.end(),link);
 #ifdef _DEBUG_NETWORK
   cout << " read a link"<<endl;
 #endif //_DEBUG_NETWORK
@@ -734,7 +734,7 @@ bool Network::readvirtuallink(istream& in)
   linkmap [lid] = link;
   virtuallinkmap [lid] = link;
 
-  links.insert(links.end(),link);
+ // links.insert(links.end(),link);
   virtuallinks.insert(virtuallinks.end(),link);
   biptr->register_virtual(link);
   boptr->register_virtual(link);
@@ -1588,12 +1588,12 @@ bool Network::register_links()
 	//register all the outgoing links at the origins
 	for (map<int, Origin*>::iterator iter1=originmap.begin(); iter1!=originmap.end();iter1++)
 	{
-		(*iter1).second->register_links(links);
+		(*iter1).second->register_links(linkmap);
 	}
 	//register all the incoming & outgoing links at the junctions
 	for (map<int, Junction*>::iterator iter2=junctionmap.begin(); iter2!=junctionmap.end();iter2++)
 	{
-		(*iter2).second->register_links(links);
+		(*iter2).second->register_links(linkmap);
 	}
 	return true;
 }
@@ -2061,8 +2061,8 @@ bool Network::writeheadways(string name)
 
 bool Network::setlinktimes()
 {
-	for (vector<Link*>::iterator iter=links.begin();iter<links.end();iter++)
-		(*iter)->set_hist_time((*iter)->get_freeflow_time());
+	for (map <int,Link*>::iterator iter=linkmap.begin();iter!=linkmap.end();iter++)
+		(*iter).second->set_hist_time((*iter).second->get_freeflow_time());
 	return true;
 }
 
@@ -2070,12 +2070,12 @@ bool Network::writelinktimes(string name)
 {
 	ofstream out(name.c_str());
 	assert(out);
-	out << "links:\t" << links.size() << endl;
+	out << "links:\t" << linkmap.size() << endl;
 	out << "periods:\t" << nrperiods << endl;
 	out << "periodlength:\t" << periodlength << endl;
-  for (vector<Link*>::iterator iter=links.begin();iter<links.end();iter++)
+	for (map <int,Link*>::iterator iter=linkmap.begin();iter!=linkmap.end();iter++)
 	{
-		(*iter)->write_time(out);
+		(*iter).second->write_time(out);
 	}
 	return true;
 }
@@ -2131,24 +2131,23 @@ bool Network::readtimes(istream& in)
 	 cout << " creating linktimes from freeflow times " << endl;
 #ifdef _DEBUG_NETWORK
   cout << " creating linktimes from freeflow times " << endl;
-  cout << " links.size() " << links.size() << endl;
+  cout << " linkmap.size() " << linkmap.size() << endl;
   cout << " virtuallinks.size() " << virtuallinks.size() << endl;
 #endif _DEBUG_NETWORK
-   for (vector<Link*>::iterator iter=links.begin();iter<links.end();iter++)
+   for (map<int,Link*>::iterator iter=linkmap.begin();iter!=linkmap.end();iter++)
    {
-     double linktime= (*iter)->get_freeflow_time();
-   	 LinkTime* ltime=new LinkTime();
-		 ltime->periodlength=periodlength;
- 	 	 ltime->nrperiods=nrperiods;
-   	 ltime->id=(*iter)->get_id();
-     for (int i=0;i < nrperiods;i++)
-        (ltime->times).push_back(linktime);
-     (*iter)->set_hist_time(linktime);
-	   (*iter)->set_histtimes(ltime);
-  	 //linkinfo->times.push_back(ltime);   
-	   linkinfo->times.insert(pair <int,LinkTime*> ((*iter)->get_id(),ltime )); 
+	   double linktime= (*iter).second->get_freeflow_time();
+	   LinkTime* ltime=new LinkTime();
+	   ltime->periodlength=periodlength;
+	   ltime->nrperiods=nrperiods;
+	   ltime->id=(*iter).second->get_id();
+	   for (int i=0;i < nrperiods;i++)
+		   (ltime->times).push_back(linktime);
+	   (*iter).second->set_hist_time(linktime);
+	   (*iter).second->set_histtimes(ltime);
+	   linkinfo->times.insert(pair <int,LinkTime*> ((*iter).second->get_id(),ltime )); 
    }
-	} 
+ } 
  
  return true;
 }
@@ -2175,20 +2174,19 @@ bool Network::readtime(istream& in)
     in >> linktime;
     (ltime->times).push_back(linktime);
     }
-    vector <Link*>::iterator l_iter=links.begin();
-    l_iter =  find_if (links.begin(),links.end(), compare <Link> (lid));
-   assert  ( l_iter < links.end() );     // lid exists
+    map <int,Link*>::iterator l_iter;
+    l_iter = linkmap.find(lid);
+//   assert  ( l_iter < links.end() );     // lid exists
+	assert (l_iter!=linkmap.end());
 	assert ( linktime >= 0.0 );
-   in >> bracket;
+	in >> bracket;
    if (bracket != '}')
   {
   	cout << "readfile::readtimes scanner jammed at " << bracket;
   	return false;
   }
-  //Link* lptr= (*l_iter );
-  (*l_iter)->set_hist_time(linktime);
-  (*l_iter)->set_histtimes(ltime);
-//  linkinfo->times.push_back(ltime);
+   (*l_iter).second->set_hist_time(linktime);
+   (*l_iter).second->set_histtimes(ltime);
    linkinfo->times.insert(pair<int,LinkTime*> (lid,ltime));
 #ifdef _DEBUG_NETWORK
   cout << " read a linktime"<<endl;
@@ -2211,8 +2209,10 @@ bool Network::readincident (istream & in)
 
   }
    in  >> lid  >> sid >> penalty >> start >> stop >> info_start >> info_stop >> blocked;
-    assert  ( (find_if (links.begin(),links.end(), compare <Link> (lid))) < links.end() );     // lid exists
-    assert  ( (find_if (sdfuncs.begin(),sdfuncs.end(), compare <Sdfunc> (sid))) < sdfuncs.end() );     // sid exists
+    //assert  ( (find_if (links.begin(),links.end(), compare <Link> (lid))) < links.end() );     // lid exists
+   assert (linkmap.count(lid)); 
+   // assert  ( (find_if (sdfuncs.begin(),sdfuncs.end(), compare <Sdfunc> (sid))) < sdfuncs.end() );     // sid exists
+   assert (sdfuncmap.count(sid));
 	assert ( (penalty >= 0.0 ) && (start>0.0) && (stop>start) );
    in >> bracket;
    if (bracket != '}')
@@ -2385,13 +2385,13 @@ bool Network::readassignmentlinksfile(string name)
 	in >> nr;
 	in >> temp;
 	assert (temp=="{");
-	vector<Link*>::iterator iter;
+	map <int, Link*>::iterator iter;
 	for (int i=0; i<nr;i++)
 	{
 	  in >> lid;
-	  iter = find_if (links.begin(),links.end(), compare <Link> (lid)) ;  
-	  assert (iter!=links.end()); // assert it exists
-	  (*iter)->set_use_ass_matrix(true);
+	  iter = linkmap.find(lid);
+	  assert (iter!=linkmap.end()); // assert it exists
+	  (*iter).second->set_use_ass_matrix(true);
 	  no_ass_links++;
 	}
 	in >> temp;
@@ -2419,49 +2419,49 @@ bool Network::init_shortest_path()
 	routenr=routes.size();
 	double cost, mu, sd;
 	random=new (Random);
-		/**********test***/
+	/**********test***/
 	if (randseed != 0)
-	   random->seed(randseed);
+		random->seed(randseed);
 	else
 		random->randomize();
 
-	 #ifdef _DEBUG_SP
-	cout << "network::init_shortest path, routes.size  " << routenr << ", links.size " << links.size() << ", nodes.size " << nodes.size() << endl;
-	#endif //_DEBUG_SP
-  // CREATE THE GRAPH
-   #ifndef _USE_VAR_TIMES
-       graph=new Graph<double, GraphNoInfo<double> > (nodes.size() /* 50000*/, links.size(), 9999999.0);
-   #else
-       graph=new Graph<double, LinkTimeInfo > (/*nodes.size()*/ 50000, links.size()*10, 9999999.0);
-   #endif
-   // ADD THE LINKS AND NODES
+#ifdef _DEBUG_SP
+	cout << "network::init_shortest path, routes.size  " << routenr << ", linkmap.size " << linkmap.size() << ", nodemap.size " << nodemap.size() << endl;
+#endif //_DEBUG_SP
+	// CREATE THE GRAPH
+#ifndef _USE_VAR_TIMES
+	graph=new Graph<double, GraphNoInfo<double> > (nodemap.size() /* 50000*/, linkmap.size(), 9999999.0);
+#else
+	graph=new Graph<double, LinkTimeInfo > (/*nodemap.size()*/ 50000, linkmap.size()*10, 9999999.0);
+#endif
+	// ADD THE LINKS AND NODES
 
-  for (vector<Link*>::iterator iter=links.begin(); iter<links.end();iter++) // create the link graph for shortest path
+	for (map<int,Link*>::iterator iter=linkmap.begin(); iter!=linkmap.end();iter++) // create the link graph for shortest path
 	{
-		lid=(*iter)->get_id();
-		in=(*iter)->get_in_node_id();
-		out=(*iter)->get_out_node_id();
-		mu=(*iter)->get_hist_time();
+		lid=(*iter).second->get_id();
+		in=(*iter).second->get_in_node_id();
+		out=(*iter).second->get_out_node_id();
+		mu=(*iter).second->get_hist_time();
 		sd=disturbance*mu;
 		cost=mu;
-		 #ifdef _DEBUG_SP
+#ifdef _DEBUG_SP
 		cout << " graph->addlink: link " << lid << ", innode " << in << ", outnode " << out << ", cost " << cost << endl;
-    	#endif //_DEBUG_SP
-    	graph->addLink(lid,in,out,cost);
+#endif //_DEBUG_SP
+		graph->addLink(lid,in,out,cost);
 	}
-  // ADD THE TURNPENALTIES;
+	// ADD THE TURNPENALTIES;
 
-  // first set all the indices
-  graph->set_downlink_indices();
-  
-  for(vector <TurnPenalty*>::iterator iter1=turnpenalties.begin();iter1<turnpenalties.end();iter1++)
-  {
+	// first set all the indices
+	graph->set_downlink_indices();
 
-     //graph->penalty((*iter1)->from_link, (*iter1)->to_link,(*iter1)->cost);
-     graph->set_turning_prohibitor((*iter1)->from_link, (*iter1)->to_link);
-  }
-	
-  theParameters->shortest_paths_initialised= true;
+	for(vector <TurnPenalty*>::iterator iter1=turnpenalties.begin();iter1<turnpenalties.end();iter1++)
+	{
+
+		//graph->penalty((*iter1)->from_link, (*iter1)->to_link,(*iter1)->cost);
+		graph->set_turning_prohibitor((*iter1)->from_link, (*iter1)->to_link);
+	}
+
+	theParameters->shortest_paths_initialised= true;
 
 	return true;
 }
@@ -2469,36 +2469,38 @@ bool Network::init_shortest_path()
 
 vector<Link*> Network::get_path(int destid)  // get the path from
 {
-	 #ifdef _DEBUG_SP
+#ifdef _DEBUG_SP
 	cout << "shortest path to " << destid << endl << " with " ;
-	#endif //_DEBUG_SP
+#endif //_DEBUG_SP
 	//cout << "...calling  shortest_path_vector...." << endl;
 	vector <int> linkids=graph->shortest_path_vector(destid);  // get out the shortest path current root link to Destination (*iter3)
 	//cout << "...exited shortest path vector call" << endl;
-	 #ifdef _DEBUG_SP
+#ifdef _DEBUG_SP
 	cout << linkids.size() << " links " << endl << "  : " ;
-	#endif //_DEBUG_SP
+#endif //_DEBUG_SP
+	vector <Link*> rlinks;
 
 	if (linkids.empty())
 	{
-   	cout << "Shortest path: get_path : PROBLEM OBTAINING links in path to  dest " << destid << endl;
-	vector <Link*> rlinks;
-	return rlinks;
+		cout << "Shortest path: get_path : PROBLEM OBTAINING links in path to  dest " << destid << endl;
+		return rlinks;
 	}	
-	vector <Link*> rlinks;
 	//linkids.insert(linkids.begin(),(*iter2)->get_id()); // add the root link to the path
 	for (vector<int>::iterator iter4=linkids.begin();iter4<linkids.end();iter4++) // find all the links
 	{
-					int lid=(*iter4);
-					#ifdef _DEBUG_SP					
-					cout << lid << " , ";
-          #endif //_DEBUG_SP
-					Link* linkptr=(*(find_if (links.begin(),links.end(), compare <Link> (lid)))) ;
-					assert ( (find_if (links.begin(),links.end(), compare <Link> (lid))) < links.end() ); // the link exists
-				   rlinks.insert(rlinks.end(),linkptr);
+		int lid=(*iter4);
+#ifdef _DEBUG_SP					
+		cout << lid << " , ";
+#endif //_DEBUG_SP
+		//Link* linkptr=(*(find_if (links.begin(),links.end(), compare <Link> (lid)))) ;
+		//assert ( (find_if (links.begin(),links.end(), compare <Link> (lid))) < links.end() ); // the link exists
+		map <int,Link*>::iterator l_iter;
+		l_iter=linkmap.find(lid);
+		assert (l_iter!=linkmap.end());
+		rlinks.insert(rlinks.end(),(*l_iter).second);
 	}
-  assert (rlinks.size() > 0);
-  return rlinks;
+	assert (rlinks.size() > 0);
+	return rlinks;
 }	
 
 /* OLD WAY***
@@ -3232,26 +3234,26 @@ bool Network::writeallmoes(string name)
 /****** TEMPORARY TO CUT OUT THE ALL MOES THAT ARE NOT USED NOW
 	int maxindex=0;
 	
-	for (vector<Link*>::iterator iter=links.begin();iter<links.end();iter++)
+	for (map<int, Link*>::iterator iter=linkmap.begin();iter!=linkmap.end();iter++)
 	{
-		out << (*iter)->get_id() << "\t\t\t\t\t";
-		maxindex=_MAX (maxindex, (*iter)-> max_moe_size());
+		out << (*iter).second->get_id() << "\t\t\t\t\t";
+		maxindex=_MAX (maxindex, (*iter).second-> max_moe_size());
 	}
    out << endl;
-   for (vector<Link*>::iterator iter1=links.begin();iter1<links.end();iter1++)
+   for (map<int,Link*>::iterator iter1=linkmap.begin();iter1!=linkmap.end();iter1++)
 	{
 		out << "speed"<< "\t" << "density" << "\t" << "inflow" <<"\t" << "outflow" <<"\t" << "queue" << "\t";
 	}
 	out << endl;
    for (int index=0;index <maxindex; index++)
    {
-   		for (vector<Link*>::iterator iter=links.begin();iter<links.end();iter++)
+   		for (map<int,Link*>::iterator iter=linkmap.begin();iter!=linkmap.end();iter++)
 		{
-			(*iter)->write_speed(out,index);
-		 	(*iter)->write_density(out,index);
-		  	(*iter)->write_inflow(out,index);
-		  	(*iter)->write_outflow(out,index);
-		  	(*iter)->write_queue(out,index);
+			(*iter).second->write_speed(out,index);
+		 	(*iter).second->write_density(out,index);
+		  	(*iter).second->write_inflow(out,index);
+		  	(*iter).second->write_outflow(out,index);
+		  	(*iter).second->write_queue(out,index);
 		}
 		out << endl;
    }
@@ -3262,10 +3264,10 @@ bool Network::writeallmoes(string name)
 double Network::calc_diff_input_output_linktimes ()
 {
 	double total =0.0;
-	for (vector<Link*>::iterator iter1=links.begin();iter1<links.end();iter1++)
+	for (map <int, Link*>::iterator iter1=linkmap.begin();iter1!=linkmap.end();iter1++)
 	{	
-		if ((*iter1)->get_nr_passed() > 0 )
-			total+=(*iter1)->calc_diff_input_output_linktimes();
+		if ((*iter1).second->get_nr_passed() > 0 )
+			total+=(*iter1).second->calc_diff_input_output_linktimes();
 	}
 	return total;
 }
@@ -3273,10 +3275,10 @@ double Network::calc_diff_input_output_linktimes ()
 double Network::calc_sumsq_input_output_linktimes ()
 {
 	double total =0.0;
-	for (vector<Link*>::iterator iter1=links.begin();iter1<links.end();iter1++)
+	for (map <int, Link*>::iterator iter1=linkmap.begin();iter1!=linkmap.end();iter1++)
 	{
-		if ((*iter1)->get_nr_passed() > 0 )
-			total+=(*iter1)->calc_sumsq_input_output_linktimes();
+		if ((*iter1).second->get_nr_passed() > 0 )
+			total+=(*iter1).second->calc_sumsq_input_output_linktimes();
 	}
 	return total;
 }
@@ -3287,46 +3289,46 @@ bool Network::writemoes()
 	ofstream out(name.c_str());
 	assert(out);
 	
-	for (vector<Link*>::iterator iter=links.begin();iter<links.end();iter++)
+	for (map<int,Link*>::iterator iter=linkmap.begin();iter!=linkmap.end();iter++)
 	{
 
-		(*iter)->write_speeds(out);
+		(*iter).second->write_speeds(out);
 	}
 	out.close();
 	name=filenames[14]; // inflows
 	out.open(name.c_str());
 	assert(out);
 	
-	for (vector<Link*>::iterator iter1=links.begin();iter1<links.end();iter1++)
+	for (map<int,Link*>::iterator iter1=linkmap.begin();iter1!=linkmap.end();iter1++)
 	{
-		(*iter1)->write_inflows(out);
+		(*iter1).second->write_inflows(out);
 	}
 	out.close();
 	name=filenames[15]; // outflows
 	out.open(name.c_str());
 	assert(out);
 	
-	for (vector<Link*>::iterator iter2=links.begin();iter2<links.end();iter2++)
+	for (map<int,Link*>::iterator iter2=linkmap.begin();iter2!=linkmap.end();iter2++)
 	{
-		(*iter2)->write_outflows(out);
+		(*iter2).second->write_outflows(out);
 	}
 	out.close();
 	name=filenames[16]; // queues
 	out.open(name.c_str());
 	assert(out);
 	
-	for (vector<Link*>::iterator iter3=links.begin();iter3<links.end();iter3++)
+	for (map<int,Link*>::iterator iter3=linkmap.begin();iter3!=linkmap.end();iter3++)
 	{
-		(*iter3)->write_queues(out);
+		(*iter3).second->write_queues(out);
 	}
 	out.close();
 	name=filenames[17]; // densities
 	out.open(name.c_str());
 	assert(out);
 	
-	for (vector<Link*>::iterator iter4=links.begin();iter4<links.end();iter4++)
+	for (map<int,Link*>::iterator iter4=linkmap.begin();iter4!=linkmap.end();iter4++)
 	{
-		(*iter4)->write_densities(out);
+		(*iter4).second->write_densities(out);
 	}
 	out.close();
 	return true;
@@ -3355,9 +3357,9 @@ bool Network::writeassmatrices(string name)
 	for (int i=0; i < nr_periods; i++)
 	{
 		out << "link_period: " << i << endl;
-		for (vector<Link*>::iterator iter1=links.begin();iter1<links.end(); iter1++)
+		for (map <int,Link*>::iterator iter1=linkmap.begin();iter1!=linkmap.end(); iter1++)
 		{
-			(*iter1)->write_ass_matrix(out,i);
+			(*iter1).second->write_ass_matrix(out,i);
 		}
 		//out << endl;
 	}

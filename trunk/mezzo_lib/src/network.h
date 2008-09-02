@@ -186,8 +186,8 @@ class Network
   map <int, Destination*>& get_destinations() {return destinationmap;}
   //vector <Node*>& get_nodes(){return nodes;}
   map <int, Node*>& get_nodes() {return nodemap;}
-  vector <Link*>& get_links(){return links;}
-  
+  //vector <Link*>& get_links(){return links;}
+  map <int,Link*>& get_links() {return linkmap;}
   double calc_diff_input_output_linktimes (); //!< calculates the sum of the differences in output-input link travel times
   double calc_sumsq_input_output_linktimes (); //!< calculates the sum square of the differences in output-input link travel times
 // SET's
@@ -220,7 +220,7 @@ protected:
   map <int, BoundaryOut*> boundaryoutmap; //!< 
   vector <BoundaryIn*> boundaryins; // Remove Later...
   map <int, BoundaryIn*> boundaryinmap; //!< 
-  vector <Link*> links;
+//  vector <Link*> links;
   map <int, Link*> linkmap; //!< 
   vector <Sdfunc*> sdfuncs;
   map <int, Sdfunc*> sdfuncmap; //!< 
