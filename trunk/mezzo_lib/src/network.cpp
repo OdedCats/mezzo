@@ -485,7 +485,7 @@ bool Network::readsdfunc(istream& in)
   }
   assert (sdptr);
   sdfuncmap [sdid] = sdptr;
-  sdfuncs.insert(sdfuncs.begin(),sdptr );
+//  sdfuncs.insert(sdfuncs.begin(),sdptr );
 
 #ifdef _DEBUG_NETWORK
   cout << " read a sdfunc"<<endl;
@@ -802,7 +802,7 @@ bool Network::readserver(istream& in)
   		sptr = new DetServer(sid,stype,mu,sd,delay);
 	assert (sptr);
 	servermap [sid] = sptr;
-	servers.insert(servers.begin(),new ConstServer(sid,stype,mu,sd,delay));
+//	servers.insert(servers.begin(),new ConstServer(sid,stype,mu,sd,delay));
 #ifdef _DEBUG_NETWORK
   cout << " read a server"<<endl;
 #endif //_DEBUG_NETWORK
@@ -906,7 +906,7 @@ bool Network::readturning(istream& in)
 #endif // _UNSAFE
   Turning* tptr = new Turning(tid, nptr, sptr, inlinkptr, outlinkptr,size);
   turningmap [tid] = tptr;
-  turnings.insert(turnings.begin(),tptr);
+//  turnings.insert(turnings.begin(),tptr);
 #ifdef _DEBUG_NETWORK
   cout << " read a turning"<<endl;
 #endif //_DEBUG_NETWORK
@@ -951,7 +951,7 @@ void Network::create_turnings()
 				//assert  ( (find_if (turningmap.begin(),turningmap.end(), compare <Turning> (tid))) == turnings.end() );  // there exists no turning with tid
 				Turning* t_ptr= new Turning(tid, (*iter1).second, sptr, (*iter2), (*iter3),size);
 				turningmap [tid]=t_ptr;
-				turnings.insert(turnings.begin(),t_ptr);
+				//turnings.insert(turnings.begin(),t_ptr);
   				tid++;
 			}
 		}
@@ -963,10 +963,10 @@ bool Network::writeturnings(string name)
 {
 	ofstream out(name.c_str());
 	assert(out);
-	out << "turnings: " << turnings.size() << endl;
-	for (vector<Turning*>::iterator iter=turnings.begin();iter<turnings.end();iter++)
+	out << "turnings: " << turningmap.size() << endl;
+	for (map<int,Turning*>::iterator iter=turningmap.begin();iter!=turningmap.end();iter++)
 	{
-		(*iter)->write(out);
+		(*iter).second->write(out);
 	}
 	return true;
 }
@@ -1537,10 +1537,14 @@ bool Network::readstage(istream& in, SignalPlan* sp)
    {
 	   in >> turnid;
 	   // find turning in turnings list
-	   vector <Turning*>::iterator turn = find_if(turnings.begin(), turnings.end(), compare<Turning>(turnid));
-	   assert (turn != turnings.end());
+	   map <int,Turning*>::iterator t_iter;
+	   t_iter=turningmap.find(turnid);
+	   assert (t_iter!=turningmap.end());
+	   Turning* turn=t_iter->second;
+	   //vector <Turning*>::iterator turn = find_if(turnings.begin(), turnings.end(), compare<Turning>(turnid));
+	   //assert (turn != turnings.end());
 	   // add to stage
-	   stageptr->add_turning(*turn);
+	   stageptr->add_turning(turn);
    }
    in >> bracket;
    if (bracket != '}') // once for the turnings
@@ -3373,9 +3377,9 @@ bool Network::init()
 {
 	// initialise the turining events
 	double initvalue =0.1;
-	for(vector<Turning*>::iterator iter=turnings.begin(); iter<turnings.end(); iter++)
+	for(map<int,Turning*>::iterator iter=turningmap.begin(); iter!=turningmap.end(); iter++)
 	{
-	 	(*iter)->init(eventlist,initvalue);
+		(*iter).second->init(eventlist,initvalue);
 		initvalue += 0.00001;
 	}
     // initialise the signal controllers (they will init the plans and stages)

@@ -222,11 +222,11 @@ protected:
   map <int, BoundaryIn*> boundaryinmap; //!< 
 //  vector <Link*> links;
   map <int, Link*> linkmap; //!< 
-  vector <Sdfunc*> sdfuncs;
+// vector <Sdfunc*> sdfuncs;
   map <int, Sdfunc*> sdfuncmap; //!< 
-  vector <Turning*> turnings;
+//  vector <Turning*> turnings;
   map <int, Turning*> turningmap; //!< 
-  vector <Server*> servers;
+ // vector <Server*> servers;
   map <int, Server*> servermap; //!< 
   vector <Route*> routes;	
   map <int, Route*> routemap; //!< 

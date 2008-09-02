@@ -7,23 +7,23 @@ Turning::Turning(int id_, Node* node_, Server* server_, Link* inlink_, Link* out
 
   // one turnaction for MIN (nr_lanes_in, nr_lanes_out).
 
-{
-  int nr_servers= _MIN(outlink->get_nr_lanes(),inlink->get_nr_lanes());
-   for (int i=0; i < nr_servers; i++)
+	{
+		int nr_servers= _MIN(outlink->get_nr_lanes(),inlink->get_nr_lanes());
+		for (int i=0; i < nr_servers; i++)
 			turnactions.push_back(new TurnAction(this));
-	delay=server->get_delay();
+		delay=server->get_delay();
 #ifdef _DEBUG_TURNING	
-	cout << "new turning: tid,nid,sid,in,out " << id << node->get_id();
-	cout << server->get_id() << inlink->get_id() << outlink->get_id() << endl;
+		cout << "new turning: tid,nid,sid,in,out " << id << node->get_id();
+		cout << server->get_id() << inlink->get_id() << outlink->get_id() << endl;
 #endif //_DEBUG_TURNING
- blocked=false;
- active = true; // turning is active by default
- out_full = false;
-}
+		blocked=false;
+		active = true; // turning is active by default
+		out_full = false;
+	}
 
 Turning::~Turning()
 {
- // !!! SHOULD WE DO THIS HERE? IS ALSO DELETED IN ~Eventlist !!
+ // !!! SHOULD WE DO THIS HERE? IS ALSO DELETED IN ~Eventlist ?!
  for (vector <TurnAction*>::iterator iter=turnactions.begin();iter<turnactions.end();)
 	{
 		delete (*iter); // calls automatically destructor

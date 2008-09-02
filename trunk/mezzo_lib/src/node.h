@@ -140,7 +140,7 @@ class Junction : public Node
    	 vector <Link*> get_incoming() {return incoming;}
 	 vector <Link*> get_outgoing() {return outgoing;}
 	private:
-	 vector <Turning*> turnings;
+	 vector <Turning*> turnings; // This seems to be unused at the moment!
 	 vector <Link*>  incoming;
 	 vector <Link*>  outgoing;
 };
