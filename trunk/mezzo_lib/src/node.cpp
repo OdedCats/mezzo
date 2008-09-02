@@ -315,15 +315,15 @@ Destination::~Destination()
 	}
 }
 
-void Destination::register_links(vector <Link*> links)
+void Destination::register_links(map <int,Link*> linkmap)
 {
-		for (vector <Link*>::iterator iter=links.begin(); iter < links.end(); iter++)
+	for (map <int, Link*>::iterator iter=linkmap.begin(); iter != linkmap.end(); iter++)
  	{
- 	      	if ((*iter)->get_out_node_id()==id)
+		if ((*iter).second->get_out_node_id()==id)
  		{
- 			incoming.insert(incoming.begin(), *iter);
-      for (int i=0; i< (*iter)->get_nr_lanes(); i++)
-	    	dactions.insert(dactions.begin(),new Daction((*iter),this,server)); // CHANGED 2003-10-10: 1 for each lane
+			incoming.insert(incoming.begin(), (*iter).second);
+			for (int i=0; i< (*iter).second->get_nr_lanes(); i++)
+				dactions.insert(dactions.begin(),new Daction((*iter).second,this,server)); // CHANGED 2003-10-10: 1 for each lane
  		#ifdef _DEBUG_NODE
  	 		cout << "Registered link " << (*iter)->get_id() << " @ dest " << id << endl;
  	 	#endif //_DEBUG_NODE

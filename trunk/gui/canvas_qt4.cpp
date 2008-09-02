@@ -680,13 +680,15 @@ void MainForm::selectNodes(QPoint pos)
 	// remove links selected
 	unselectLinks();
 
-	vector<Node*> allnodes=theNetwork.get_nodes();
-	int rad=theParameters->node_radius/mod2stdViewMat_.m11();
+	//vector<Node*> allnodes=theNetwork.get_nodes();
+	map<int,Node*> allnodes=theNetwork.get_nodes();
 
-	for( unsigned i=0; i<allnodes.size(); i++){
-		if (allnodes[i]->get_icon()->within_boundary(pos.x(),pos.y(),rad))
+	int rad=theParameters->node_radius/mod2stdViewMat_.m11();
+	map<int,Node*>::iterator n_iter = allnodes.begin();
+	for( n_iter; n_iter!=allnodes.end(); n_iter++){
+		if ((*n_iter).second->get_icon()->within_boundary(pos.x(),pos.y(),rad))
 		{
-			nodes_sel_.push_back(allnodes[i]);
+			nodes_sel_.push_back((*n_iter).second);
 			break;
 		}
 	}

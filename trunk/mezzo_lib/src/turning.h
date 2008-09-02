@@ -22,51 +22,52 @@ class Turning;
 class TurnAction : public Action
 {
  	public:
- 	   TurnAction(Turning* turning_);
+ 		TurnAction(Turning* turning_);
  		virtual bool execute(Eventlist* eventlist, double time);
  	private:
  		Turning* turning;
-   double new_time;
+		double new_time;
 
 } ;
 
 
 class Turning
 {
-  public:
-  	Turning(int id_, Node* node_, Server* server_, Link* inlink_, Link* outlink_, int size_);
-  	~Turning();
+public:
+	Turning(int id_, Node* node_, Server* server_, Link* inlink_, Link* outlink_, int size_);
+	~Turning();
+	void reset ();
 	void activate (Eventlist* eventlist,double time); // green light
 	void stop() { active = false;} // red light
 	bool is_active() {return active;}
-   bool is_blocked() { return blocked;}
-   void block() {blocked=true;}
-   void unblock() {blocked=false;}
-   bool process_veh(double time);
-   double next_time(double time);
-   double link_next_time(double time);
-   bool init(Eventlist* eventlist, double time);
-   bool execute(Eventlist* eventlist, double time);
+	bool is_blocked() { return blocked;}
+	void block() {blocked=true;}
+	void unblock() {blocked=false;}
+	bool process_veh(double time);
+	double next_time(double time);
+	double link_next_time(double time);
+	bool init(Eventlist* eventlist, double time);
+	bool execute(Eventlist* eventlist, double time);
 	double nexttime;
 	const int get_id() {return id;}
 	void write(ostream& out);
-  private:
+private:
 	//TurnAction* turnaction;    // performs the action of transferring vehicles at the right times
 	vector <TurnAction*> turnactions; // multiple turnactions per turning. One for each lane...
-  int id;
- 	Node* node;
- 	Server* server;
-  Link* inlink;
- 	Link* outlink;
-  int size;  // size of the turning pocket (=nr cars that can be treated before other directions might block:also called lookback)
-  vector <Turning*> conflicting;
-  double delay;
-  bool blocked;   // true if blocked
-  // help vars
-  bool ok; // true if processing went fine
-  bool out_full; // true if outlink full
-  bool active; // true if turning is active (has green light in signalised crossing), false if red light.
-  
+	int id;
+	Node* node;
+	Server* server;
+	Link* inlink;
+	Link* outlink;
+	int size;  // size of the turning pocket (=nr cars that can be treated before other directions might block:also called lookback)
+	vector <Turning*> conflicting;
+	double delay;
+	bool blocked;   // true if blocked
+	// help vars
+	bool ok; // true if processing went fine
+	bool out_full; // true if outlink full
+	bool active; // true if turning is active (has green light in signalised crossing), false if red light.
+
 };
 
 

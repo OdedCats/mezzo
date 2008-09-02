@@ -123,7 +123,7 @@ public:
 	 Destination (int id_);
 	 virtual const string className(){return "Destination";}
 	 virtual ~Destination();
-	 virtual void register_links(vector<Link*> links);
+	 virtual void register_links(map <int,Link*> linkmap);
 	 virtual bool execute(Eventlist* eventlist, double time);
 protected:
 	 vector <Link*>  incoming;

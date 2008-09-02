@@ -129,60 +129,66 @@ Network::~Network()
   #ifdef _MIME
 	delete communicator;
   #endif //_MIME
-	for (vector <Origin*>::iterator iter=origins.begin();iter<origins.end();)
+	for (map <int, Origin*>::iterator iter=originmap.begin();iter!=originmap.end();)
 	{			
-		delete (*iter); // calls automatically destructor
-		iter=origins.erase(iter);	
+		delete (iter->second); // calls automatically destructor
+		iter=originmap.erase(iter);	
 	}
-	for (vector <Destination*>::iterator iter1=destinations.begin();iter1<destinations.end();)
+	for (map <int, Destination*>::iterator iter1=destinationmap.begin();iter1!=destinationmap.end();)
 	{			
-		delete (*iter1); // calls automatically destructor
-		iter1=destinations.erase(iter1);	
+		delete (iter1->second); // calls automatically destructor
+		iter1=destinationmap.erase(iter1);	
 	}
-	for (vector <Junction*>::iterator iter2=junctions.begin();iter2<junctions.end();)
+	for (map <int, Junction*>::iterator iter2=junctionmap.begin();iter2!=junctionmap.end();)
 	{			
-		delete (*iter2); // calls automatically destructor
-		iter2=junctions.erase(iter2);	
+		delete (iter2->second); // calls automatically destructor
+		iter2=junctionmap.erase(iter2);	
 	}
-	for (vector <Node*>::iterator iter3=nodes.begin();iter3<nodes.end();)
+	for (map <int,Node*>::iterator iter3=nodemap.begin();iter3!=nodemap.end();)
 	{			
-		//delete (*iter); // calls automatically destructor
-		iter3=nodes.erase(iter3);	
+		iter3=nodemap.erase(iter3);	
 	}
-	for (vector <Link*>::iterator iter4=links.begin();iter4<links.end();)
+	for (map <int,Link*>::iterator iter4=linkmap.begin();iter4!=linkmap.end();)
 	{			
-		delete (*iter4); // calls automatically destructor
-		iter4=links.erase(iter4);	
+		delete (iter4->second); // calls automatically destructor
+		iter4=linkmap.erase(iter4);	
 	}
 	for (vector <Incident*>::iterator iter5=incidents.begin();iter5<incidents.end();)
 	{			
 		delete (*iter5); // calls automatically destructor
 		iter5=incidents.erase(iter5);	
 	}	
-	for (vector <ODpair*>::iterator iter6=odpairs.begin();iter6<odpairs.end();)
+	/*
+	for (map <int, ODpair*>::iterator iter6=odpairmap.begin();iter6!=odpairmap.end();)
 	{			
-		delete (*iter6); // calls automatically destructor
-		iter6=odpairs.erase(iter6);	
+		delete (iter6->second); // calls automatically destructor
+		iter6=odpairmap.erase(iter6);	
+	}*/
+	// for now keep OD pairs in vector
+	for (vector <ODpair*>::iterator iter6=odpairs.begin();iter6!=odpairs.end();)
+	{
+		delete (*iter6);
+		iter6=odpairs.erase(iter6);
 	}
-	for (vector <Route*>::iterator iter7=routes.begin();iter7<routes.end();)
+	for (map <int, Route*>::iterator iter7=routemap.begin();iter7!=routemap.end();)
 	{			
-		delete (*iter7); // calls automatically destructor
-		iter7=routes.erase(iter7);	
+		delete (iter7->second); // calls automatically destructor
+		iter7=routemap.erase(iter7);	
 	}
-	for (vector <Sdfunc*>::iterator iter8=sdfuncs.begin();iter8<sdfuncs.end();)
+	for (map <int, Sdfunc*>::iterator iter8=sdfuncmap.begin();iter8!=sdfuncmap.end();)
 	{			
-		delete (*iter8); // calls automatically destructor
-		iter8=sdfuncs.erase(iter8);	
+		delete (iter8->second); // calls automatically destructor
+		iter8=sdfuncmap.erase(iter8);	
 	}
-	for (vector <Server*>::iterator iter9=servers.begin();iter9<servers.end();)
+	for (map <int, Server*>::iterator iter9=servermap.begin();iter9!=servermap.end();)
 	{			
-		delete (*iter9); // calls automatically destructor
-		iter9=servers.erase(iter9);	
+		delete (iter9->second); // calls automatically destructor
+		iter9=servermap.erase(iter9);	
 	}
-	for (vector <Turning*>::iterator iter10=turnings.begin();iter10<turnings.end();)
+	for (map <int, Turning*>::iterator iter10=turningmap.begin();iter10!=turningmap.end();)
 	{			
-		delete (*iter10); // calls automatically destructor
-		iter10=turnings.erase(iter10);	
+		delete (iter10->second); // calls automatically destructor
+		iter10=turningmap.erase(iter10);	
 	}
 	for (vector <Vtype*>::iterator iter11=vehtypes.vtypes.begin();iter11<vehtypes.vtypes.end();)
 	{			
@@ -203,22 +209,29 @@ void Network::reset()
 	eventlist->reset();
 	
 	// reset all the network objects
-	for (vector <Origin*>::iterator iter=origins.begin();iter<origins.end();)
+	for (map <int, Origin*>::iterator iter=originmap.begin();iter!=originmap.end();)
 	{			
-		(*iter)->reset();	
+		(iter->second)->reset();	
 	}
-	for (vector <Destination*>::iterator iter1=destinations.begin();iter1<destinations.end();)
+	for (map <int, Destination*>::iterator iter1=destinationmap.begin();iter1!=destinationmap.end();)
 	{			
-		(*iter1)->reset();
+		(iter1->second)->reset();
 	}
-	for (vector <Junction*>::iterator iter2=junctions.begin();iter2<junctions.end();)
+	for (map <int,Junction*>::iterator iter2=junctionmap.begin();iter2!=junctionmap.end();)
 	{			
-		(*iter2)->reset();
+		(iter2->second)->reset();
 	}
-	for (vector <Link*>::iterator iter4=links.begin();iter4<links.end();)
+	for (map <int, Link*>::iterator iter4=linkmap.begin();iter4!=linkmap.end();)
 	{			
-		(*iter4)->reset();
+		(iter4->second)->reset();
 	}
+
+	// turnings
+
+	// incidents
+
+	// routes
+
 
 }
 
@@ -281,8 +294,8 @@ bool Network::readnode(istream& in)
 #endif // _NO_GUI
 	nodemap [nid] = optr; // later on take out the vectors. Now we use both map and old vectors
 	originmap [nid] = optr;
-  	nodes.insert(nodes.begin(),optr);
-  	origins.insert(origins.begin(),optr);
+//  	nodes.insert(nodes.begin(),optr);
+//  	origins.insert(origins.begin(),optr);
 #ifdef _DEBUG_NETWORK
   	cout << " origin " << nid;
 #endif //_DEBUG_NETWORK
@@ -319,8 +332,8 @@ bool Network::readnode(istream& in)
 #endif //_NO_GUI
 	nodemap [nid] = dptr; // later on take out the vectors. Now we use both map and old vectors
 	destinationmap [nid] = dptr;
-  	nodes.insert(nodes.begin(),dptr);
-  	destinations.insert(destinations.begin(),dptr);
+ // 	nodes.insert(nodes.begin(),dptr);
+  //	destinations.insert(destinations.begin(),dptr);
 #ifdef _DEBUG_NETWORK  	
   	 cout << " destination " << nid ;
 
@@ -340,8 +353,8 @@ bool Network::readnode(istream& in)
 #endif // _NO_GUI
 	nodemap [nid] = jptr; // later on take out the vectors. Now we use both map and old vectors
 	junctionmap [nid] = jptr;
-	nodes.insert(nodes.begin(),jptr);
-	junctions.insert(junctions.begin(),jptr);
+//	nodes.insert(nodes.begin(),jptr);
+//	junctions.insert(junctions.begin(),jptr);
 #ifdef _DEBUG_NETWORK
    	 cout << " junction " << nid ;
 #endif //_DEBUG_NETWORK   	
@@ -362,9 +375,9 @@ bool Network::readnode(istream& in)
 	boundaryinmap [nid] = biptr;
 	originmap [nid] = biptr;
 
- 	nodes.insert(nodes.begin(),biptr);
+ //	nodes.insert(nodes.begin(),biptr);
  	boundaryins.insert(boundaryins.begin(),biptr);
- 	origins.insert(origins.begin(),biptr);
+// 	origins.insert(origins.begin(),biptr);
 #ifdef _DEBUG_NETWORK  	
   	 cout << " boundaryin "  << nid;
 #endif //_DEBUG_NETWORK  	
@@ -387,9 +400,9 @@ bool Network::readnode(istream& in)
 	boundaryoutmap [nid] = jptr;
 	junctionmap [nid] = jptr;
 
- 	nodes.insert(nodes.begin(),jptr);
+ //	nodes.insert(nodes.begin(),jptr);
  	boundaryouts.insert(boundaryouts.begin(),jptr);
- 	junctions.insert(junctions.begin(),jptr);
+ //	junctions.insert(junctions.begin(),jptr);
 #ifdef _DEBUG_NETWORK  	
   	 cout << " boundaryout " << nid ;
 #endif //_DEBUG_NETWORK  	
@@ -906,20 +919,20 @@ void Network::create_turnings()
 */
 {
 	cout << "network::create turnings :" << endl;
-	int tid=turnings.size();
+	int tid=turningmap.size();
 	int size= theParameters->default_lookback_size;
 	vector<Link*> incoming;
 	vector<Link*> outgoing;
 	//Server* sptr=servers.back(); // Why was this the back? Front makes more sense, since there the standard servers are placed.
 	Server* sptr = (*servermap.begin()).second; // safest way, since servermap [0] may not exist (if someone starts numbering their servers at 1 for instance)
 	// for all junctions
-	for (vector<Junction*>::iterator iter1=junctions.begin();iter1<junctions.end();iter1++)
+	for (map <int, Junction*>::iterator iter1=junctionmap.begin();iter1!=junctionmap.end();iter1++)
 	{
-		cout << " junction id " << (*iter1)->get_id() << endl;
-		incoming=(*iter1)->get_incoming();
+		cout << " junction id " << (*iter1).second->get_id() << endl;
+		incoming=(*iter1).second->get_incoming();
 		cout << " nr incoming links "<< incoming.size() << endl;
 			
-		outgoing=(*iter1)->get_outgoing();
+		outgoing=(*iter1).second->get_outgoing();
 		cout << " nr outgoing links "<< outgoing.size() << endl;
 		// for all incoming links
 		for (vector<Link*>::iterator iter2=incoming.begin();iter2<incoming.end();iter2++)
@@ -930,9 +943,15 @@ void Network::create_turnings()
 			{
 				cout << "outcoming link id "<< (*iter3)->get_id() << endl;
 				cout << "turning id "<< tid << endl;
-			
-				assert  ( (find_if (turnings.begin(),turnings.end(), compare <Turning> (tid))) == turnings.end() );  // there exists no turning with tid
-  				turnings.insert(turnings.begin(),new Turning(tid, (*iter1), sptr, (*iter2), (*iter3),size));
+				
+				map<int,Turning*>::iterator t_iter;
+				t_iter=	turningmap.find(tid);
+				assert (t_iter != turningmap.end());
+
+				//assert  ( (find_if (turningmap.begin(),turningmap.end(), compare <Turning> (tid))) == turnings.end() );  // there exists no turning with tid
+				Turning* t_ptr= new Turning(tid, (*iter1).second, sptr, (*iter2), (*iter3),size);
+				turningmap [tid]=t_ptr;
+				turnings.insert(turnings.begin(),t_ptr);
   				tid++;
 			}
 		}
@@ -1056,7 +1075,7 @@ bool Network::readroute(istream& in)
 	*/
 	map <int, Destination*>::iterator d_iter; 
 	d_iter = destinationmap.find(did);
-  assert (d_iter != destinationmap.end());
+	assert (d_iter != destinationmap.end());
 	Destination* dptr = d_iter->second;
 #ifdef _DEBUG_NETWORK
   cout << "found o&d for route" << endl;
@@ -1130,11 +1149,12 @@ bool Network::readbusroute(istream& in)
   for (int i=0; i<lnr; i++)
   {
    in >> lid;
-   vector <Link*>::iterator iter=links.begin();
-   iter= find_if (links.begin(),links.end(), compare <Link> (lid));
-   //Link* linkptr=(*iter) ;
-	assert ( iter < links.end() ); // the link exists
-   rlinks.insert(rlinks.end(),(*iter));
+
+    map <int, Link*>::iterator l_iter; 
+	l_iter = linkmap.find(lid);
+	assert (l_iter != linkmap.end());
+ 
+	rlinks.insert(rlinks.end(),l_iter->second);
 #ifdef _DEBUG_NETWORK
    cout << " inserted link " << lid << " into busroute " << rid << endl;
 #endif //_DEBUG_NETWORK
@@ -1153,19 +1173,18 @@ bool Network::readbusroute(istream& in)
   	return false;
   }
   // find the origin & dest  pointers
-  vector <Origin*>::iterator o_iter=origins.begin();
-  o_iter =  find_if (origins.begin(),origins.end(), compare <Origin> (oid));
-  //Origin* optr=(*o_iter) ;
+  map <int, Origin*>::iterator o_iter; 
+  o_iter = originmap.find(oid);
+  assert (o_iter != originmap.end());
 
-  assert ( o_iter < origins.end() ); // the origin exists
-  vector <Destination*>::iterator d_iter=destinations.begin();
-  d_iter= find_if (destinations.begin(),destinations.end(), compare <Destination> (did));
-  //Destination* dptr=(*d_iter) ;
-	assert ( d_iter < destinations.end() );  // the destination exists
+  map <int, Destination*>::iterator d_iter; 
+  d_iter = destinationmap.find(did);
+  assert (d_iter != destinationmap.end());
+  
 #ifdef _DEBUG_NETWORK
   cout << "found o&d for route" << endl;
 #endif //_DEBUG_NETWORK
-  busroutes.insert(busroutes.end(),new Busroute(rid, *o_iter, *d_iter, rlinks));
+  busroutes.insert(busroutes.end(),new Busroute(rid, o_iter->second, d_iter->second, rlinks));
 #ifdef _DEBUG_NETWORK
   cout << " read a route"<<endl;
 #endif //_DEBUG_NETWORK
@@ -1562,19 +1581,19 @@ bool Network::readnetwork(string name)
 bool Network::register_links()
 {
 	// register all the incoming links @ the destinations
-	for (vector<Destination*>::iterator iter=destinations.begin(); iter<destinations.end();iter++)
+	for (map<int,Destination*>::iterator iter=destinationmap.begin(); iter!=destinationmap.end();iter++)
 	{
-		(*iter)->register_links(links);
+		(*iter).second->register_links(linkmap);
 	}
 	//register all the outgoing links at the origins
-	for (vector<Origin*>::iterator iter1=origins.begin(); iter1<origins.end();iter1++)
+	for (map<int, Origin*>::iterator iter1=originmap.begin(); iter1!=originmap.end();iter1++)
 	{
-		(*iter1)->register_links(links);
+		(*iter1).second->register_links(links);
 	}
 	//register all the incoming & outgoing links at the junctions
-	for (vector<Junction*>::iterator iter2=junctions.begin(); iter2<junctions.end();iter2++)
+	for (map<int, Junction*>::iterator iter2=junctionmap.begin(); iter2!=junctionmap.end();iter2++)
 	{
-		(*iter2)->register_links(links);
+		(*iter2).second->register_links(links);
 	}
 	return true;
 }
@@ -1641,20 +1660,32 @@ bool Network::readod(istream& in, double scale)
   	return false;
   }
   // find oid, did
-  vector <Origin*>::iterator o_iter=origins.begin();
+     // find the origin & dest  pointers
+  map <int, Origin*>::iterator o_iter; 
+  o_iter = originmap.find(oid);
+  assert (o_iter != originmap.end());
+
+  map <int, Destination*>::iterator d_iter; 
+  d_iter = destinationmap.find(did);
+  assert (d_iter != destinationmap.end());
+/*  
+   
+   vector <Origin*>::iterator o_iter=origins.begin();
   o_iter= find_if (origins.begin(),origins.end(), compare <Origin> (oid));
 //  Origin* optr=(*o_iter) ;
 	assert ( o_iter < origins.end() ); // origin exists
-   vector <Destination*>::iterator d_iter=destinations.begin();
+   
+	vector <Destination*>::iterator d_iter=destinations.begin();
    d_iter=  find_if (destinations.begin(),destinations.end(), compare <Destination> (did));
   //Destination* dptr=(*d_iter) ;
 	assert ( d_iter < destinations.end() ); //destination exists
+*/
 #ifdef _DEBUG_NETWORK
   cout << "found o and d " << oid << "," << did << endl;
 #endif //_DEBUG_NETWORK
   // create odpair
 
-  ODpair* odpair=new ODpair (*o_iter, *d_iter, rate,&vehtypes); // later the vehtypes can be defined PER OD
+  ODpair* odpair=new ODpair (o_iter->second, d_iter->second, rate,&vehtypes); // later the vehtypes can be defined PER OD
   
   //comment out the addroutes and do it in the executemaster() proc instead, so that only routes are generated
   //for existing OD pairs...
@@ -1662,7 +1693,7 @@ bool Network::readod(istream& in, double scale)
   
   //add odpair to origin and general list
   odpairs.insert(odpairs.begin(),odpair);
-  (*o_iter)->add_odpair(odpair);
+  (o_iter->second)->add_odpair(odpair);
   // set od list
 #ifdef _DEBUG_NETWORK
   cout << " read an od"<<endl;
@@ -3306,9 +3337,9 @@ bool Network::write_v_queues(string name)
 {
 	ofstream out(name.c_str());
 	assert(out);
-	for (vector<Origin*>::iterator iter = origins.begin();iter != origins.end(); iter++)
+	for (map <int, Origin*>::iterator iter = originmap.begin();iter != originmap.end(); iter++)
 	{
-		(*iter)->write_v_queues(out);
+		(*iter).second->write_v_queues(out);
 	}
 	return true;
 }
@@ -3389,9 +3420,9 @@ bool Network::init()
 #endif //_DEBUG_NETWORK	
 	// initialise the destination events
 //	register_links();
-	for (vector<Destination*>::iterator iter2=destinations.begin(); iter2<destinations.end();iter2++)
+	for (map <int, Destination*>::iterator iter2=destinationmap.begin(); iter2!=destinationmap.end();iter2++)
 	{
-		(*iter2)->execute(eventlist,initvalue);
+		(*iter2).second->execute(eventlist,initvalue);
 		initvalue += 0.00001;
 	}
 
@@ -3596,14 +3627,14 @@ void Network::broadcast_incident_start(int lid)
 {
  // for all links inform and if received, apply switch algorithm
 	//cout << "BROADCAST incident on link  "<< lid << endl;
- 	for (vector <Link*>::iterator iter=links.begin();iter<links.end();iter++)
+ 	for (map <int,Link*>::iterator iter=linkmap.begin();iter!=linkmap.end();iter++)
  	{
- 	 (*iter)->broadcast_incident_start(lid,incident_parameters);  	
+		(*iter).second->broadcast_incident_start(lid,incident_parameters);  	
 	}
 	// for all origins : start the automatic switiching algorithm
-	for (vector <Origin*>::iterator iter1=origins.begin();iter1<origins.end();iter1++)
+	for (map <int,Origin*>::iterator iter1=originmap.begin();iter1!=originmap.end();iter1++)
  	{
- 	 (*iter1)->broadcast_incident_start(lid,incident_parameters);  	
+		(*iter1).second->broadcast_incident_start(lid,incident_parameters);  	
 	}
 
 }
@@ -3612,9 +3643,9 @@ void Network::broadcast_incident_start(int lid)
 void Network::broadcast_incident_stop(int lid)
 {	//cout << "BROADCAST END of incident on link  "<< lid << endl;
 	// for all origins: stop the automatic switching stuff
-   for (vector <Origin*>::iterator iter=origins.begin();iter<origins.end();iter++)
+   for (map <int,Origin*>::iterator iter=originmap.begin();iter!=originmap.end();iter++)
  	{
- 	 (*iter)->broadcast_incident_stop(lid);  	
+		(*iter).second->broadcast_incident_stop(lid);  	
 	}
 }
 

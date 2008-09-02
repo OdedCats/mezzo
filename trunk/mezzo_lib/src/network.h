@@ -178,10 +178,14 @@ class Network
   // GET's
   double get_currenttime(){return time;}
   Parameters* get_parameters () {return theParameters;} 
-  vector <ODpair*>& get_odpairs () {return odpairs;}
-  vector <Origin*>& get_origins(){return origins;}
-  vector <Destination*>& get_destinations(){return destinations;}
-  vector <Node*>& get_nodes(){return nodes;}
+  vector <ODpair*>& get_odpairs () {return odpairs;} // keep as vector
+
+  //vector <Origin*>& get_origins(){return origins;}
+  map <int, Origin*>& get_origins() {return originmap;}
+  //vector <Destination*>& get_destinations(){return destinations;}
+  map <int, Destination*>& get_destinations() {return destinationmap;}
+  //vector <Node*>& get_nodes(){return nodes;}
+  map <int, Node*>& get_nodes() {return nodemap;}
   vector <Link*>& get_links(){return links;}
   
   double calc_diff_input_output_linktimes (); //!< calculates the sum of the differences in output-input link travel times
@@ -204,33 +208,37 @@ class Network
 #endif // _NO_GUI 
   
 protected:
- vector <Node*> nodes;
-  map <int, Node*> nodemap; //!< alternative storage, MUCH faster (log seek time, log insert time)
-  vector <Origin*> origins;
-  map <int, Origin*> originmap; //!< alternative storage, MUCH faster (log seek time, log insert time)
-  vector <Destination*> destinations;
-  map <int, Destination*> destinationmap; //!< alternative storage, MUCH faster (log seek time, log insert time)
-  vector <Junction*> junctions;
-  map <int, Junction*> junctionmap; //!< alternative storage, MUCH faster (log seek time, log insert time)
-  vector <BoundaryOut*> boundaryouts;
-  map <int, BoundaryOut*> boundaryoutmap; //!< alternative storage, MUCH faster (log seek time, log insert time)
-  vector <BoundaryIn*> boundaryins;
-  map <int, BoundaryIn*> boundaryinmap; //!< alternative storage, MUCH faster (log seek time, log insert time)
+  //vector <Node*> nodes;
+  map <int, Node*> nodemap; //!< 
+  //vector <Origin*> origins;
+  map <int, Origin*> originmap; //!< 
+  //vector <Destination*> destinations;
+  map <int, Destination*> destinationmap; //!< 
+//  vector <Junction*> junctions;
+  map <int, Junction*> junctionmap; //!< 
+  vector <BoundaryOut*> boundaryouts; // Remove Later...
+  map <int, BoundaryOut*> boundaryoutmap; //!< 
+  vector <BoundaryIn*> boundaryins; // Remove Later...
+  map <int, BoundaryIn*> boundaryinmap; //!< 
   vector <Link*> links;
-  map <int, Link*> linkmap; //!< alternative storage, MUCH faster (log seek time, log insert time)
+  map <int, Link*> linkmap; //!< 
   vector <Sdfunc*> sdfuncs;
-  map <int, Sdfunc*> sdfuncmap; //!< alternative storage, MUCH faster (log seek time, log insert time)
+  map <int, Sdfunc*> sdfuncmap; //!< 
   vector <Turning*> turnings;
-  map <int, Turning*> turningmap; //!< alternative storage, MUCH faster (log seek time, log insert time)
+  map <int, Turning*> turningmap; //!< 
   vector <Server*> servers;
-  map <int, Server*> servermap; //!< alternative storage, MUCH faster (log seek time, log insert time)
+  map <int, Server*> servermap; //!< 
   vector <Route*> routes;	
-  map <int, Route*> routemap; //!< alternative storage, MUCH faster (log seek time, log insert time)
-  vector <ODpair*> odpairs;
-  map <int, ODpair*> odpairmap; //!< alternative storage, MUCH faster (log seek time, log insert time)
+  map <int, Route*> routemap; //!< 
+  vector <ODpair*> odpairs; //!< keep using OD pair vector for now, as map is too much of a hassle with two indices.
+ // map <int, ODpair*> odpairmap; 
   vector <Incident*> incidents;
   vector <VirtualLink*> virtuallinks;
-  map <int, VirtualLink*> virtuallinkmap; //!< alternative storage, MUCH faster (log seek time, log insert time)
+  map <int, VirtualLink*> virtuallinkmap; //!< 
+   // Turning penalties
+   vector <TurnPenalty*> turnpenalties;
+   // Vehicle types
+   Vtypes vehtypes;
 
   vector <double> incident_parameters; // yes this is very ugly, as is the web of functions added, but I'll take them out asap
   vector <Stage*> stages;
@@ -304,10 +312,6 @@ protected:
    int nrperiods; //!< number of linktime periods
    double periodlength; //!< length of each period in seconds.
    LinkTimeInfo* linkinfo;
-   // Turning penalties
-   vector <TurnPenalty*> turnpenalties;
-   // Vehicle types
-   Vtypes vehtypes;
    // PVM communicator
 #ifdef _PVM   
    PVM * communicator;

@@ -9,15 +9,7 @@
 #include "parameters.h"
 
 
- /*
-
-   -NEW implementation sorts vehicles by their exit times when inserted
-   - used list instead of vector due to linear find, constant insertion and
-      retrieval times
-
-
- */
-
+ 
 //#define _DEBUG_Q
 
 class Route;

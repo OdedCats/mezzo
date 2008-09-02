@@ -5,8 +5,7 @@
 Turning::Turning(int id_, Node* node_, Server* server_, Link* inlink_, Link* outlink_, int size_):
 	id(id_), node(node_), server(server_), inlink(inlink_), outlink(outlink_), size(size_)
 
-	// modified 2003-10-10: multiple turnactions: one for each OUTGOING lane.
-  // modified 2004-06-07: one turnaction for MIN (nr_lanes_in, nr_lanes_out).
+  // one turnaction for MIN (nr_lanes_in, nr_lanes_out).
 
 {
   int nr_servers= _MIN(outlink->get_nr_lanes(),inlink->get_nr_lanes());
@@ -19,11 +18,12 @@ Turning::Turning(int id_, Node* node_, Server* server_, Link* inlink_, Link* out
 #endif //_DEBUG_TURNING
  blocked=false;
  active = true; // turning is active by default
+ out_full = false;
 }
 
 Turning::~Turning()
 {
-
+ // !!! SHOULD WE DO THIS HERE? IS ALSO DELETED IN ~Eventlist !!
  for (vector <TurnAction*>::iterator iter=turnactions.begin();iter<turnactions.end();)
 	{
 		delete (*iter); // calls automatically destructor
@@ -32,45 +32,16 @@ Turning::~Turning()
 
 }
 
-bool Turning::process_veh(double time)
-// added 2002-03-11: DELAY for entering the vehicle.
-// 2003-11-25: added blocking /unblocking
- /************************ old stuff. clean up later**************
+
+void Turning::reset()
 {
-#ifdef _DEBUG_TURNING	
-	 	cout << " Turning " << id << " from link " << inlink->get_id() <<
-	 		" to " << outlink->get_id() << endl;	
-#endif //_DEBUG_TURNING	
-   ok=false;	
-   nexttime=0.0;
-	if ( !(outlink->full(time)) && !(inlink->empty()) )
-		{      
-          Vehicle* veh=inlink->exit_veh(time, outlink, size);
-          if (inlink->exit_ok())
-          {
-			   ok=outlink->enter_veh(veh, time+delay);
-               if (is_blocked()) // IF this turning was blocked and becomes unblocked, update the exit times for the vehicles in queue
-               {
-                 inlink->update_exit_times(time,outlink,size); // update the exit times
-                 unblock(); // unblock this turning
-                 inlink->remove_blocked_exit(); // tell the link that this turning is not blocked anymore.
-               }
-			}
-          else
-				nexttime=inlink->next_action(time);
-	   }
-  else
-  {
-      if(outlink->full(time) && !(is_blocked()))
-      {
-       block(); // block this turning
-       inlink->add_blocked_exit(); // tell the link
-      }
-  }
-  
-	return ok;
+	blocked = false;
+	active = true;
+	ok = false;
+	out_full = false;
 }
-*********************************************************/
+bool Turning::process_veh(double time)
+
 {
   ok=true;
   out_full=outlink->full(time);
@@ -169,6 +140,8 @@ double Turning::link_next_time(double time)
 {
 	return inlink->next_action(time);
 }
+
+// TurnAction methods
 
 TurnAction::TurnAction(Turning* turning_):Action(), turning(turning_) {}
 

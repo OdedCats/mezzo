@@ -549,14 +549,25 @@ void ODCheckerDlg::loadInitOD()
 	destcomb->addItem("None");
 
 	// get the list of origins and destinations
-	vector<Origin*>& origs=mezzonet_->get_origins();
-	vector<Destination*>& dests=mezzonet_->get_destinations();
-	
+	map<int,Origin*>& origs=mezzonet_->get_origins();
+	//vector<Destination*>& dests=mezzonet_->get_destinations();
+	map <int, Destination*>& dests=mezzonet_->get_destinations();
 	// attach string lists to the combo box for OD
-	for(unsigned i=0; i<origs.size(); i++)
-		origcomb->addItem(QString::number(origs[i]->get_id()));
-	for(unsigned i=0; i<dests.size(); i++)
-		destcomb->addItem(QString::number(dests[i]->get_id()));
+	//for(unsigned i=0; i<origs.size(); i++)
+	//	origcomb->addItem(QString::number(origs[i]->get_id()));
+	map <int, Origin*>::iterator o_iter=origs.begin();
+	for (o_iter;o_iter!=origs.end();o_iter++)
+	{
+		origcomb->addItem(QString::number(o_iter->first));
+	}
+
+	map <int, Destination*>::iterator d_iter=dests.begin();
+	for (d_iter;d_iter!=dests.end();d_iter++)
+	{
+		destcomb->addItem(QString::number(d_iter->first));
+	}
+	//for(unsigned i=0; i<dests.size(); i++)
+	//	destcomb->addItem(QString::number(dests[i]->get_id()));
 }
 
 /**

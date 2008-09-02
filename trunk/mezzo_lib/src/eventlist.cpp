@@ -11,13 +11,15 @@ bool Action::execute(Eventlist*, double)        // unused Eventlist* eventlist, 
 
 // Eventlist implementation
 Eventlist::~Eventlist()
+
 {
+	
 	multimap <double, Action*> :: iterator iter = thelist.begin();
 	for (iter; iter != thelist.end(); iter)
 	{
-		delete (*iter).second;
-		iter = thelist.erase(iter);
-
+		
+			//delete (*iter).second; // All the objects clean up their own actions
+			iter = thelist.erase(iter);
 	}
 
 }
