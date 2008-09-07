@@ -149,13 +149,13 @@ void ODpair::add_route(Route* route)
 /**
 * a heuristic to delete spurious route
 */
-vector <int> ODpair::delete_spurious_routes(double time)
+vector <Route*> ODpair::delete_spurious_routes(double time)
 // finds routes that are more than 
 {
 
 	unsigned int maxroutes=10;
 	double threshold =0.0;
-	vector <int> thrown;
+	vector <Route*> thrown;
 	string reason ="";
 	vector <Route*>::iterator iter1=routes.begin();
 	vector <Route*>::iterator shortest_route=routes.begin();
@@ -197,7 +197,7 @@ vector <int> ODpair::delete_spurious_routes(double time)
 		  cout << " erased route " << (*iter1)->get_id() << " from route choice set for OD pair ("
 			  << odids().first << "," << odids().second << ") because: " << reason << ", cost: "<< (*iter1)->cost(time) << 
 			  ", mincost: " << min_cost << ", rate: " << rate << endl;
-		  thrown.push_back((*iter1)->get_id());
+		  thrown.push_back((*iter1));
 		  iter1=routes.erase(iter1);
 	  }
 	  else iter1++;
@@ -223,20 +223,10 @@ vector <int> ODpair::delete_spurious_routes(double time)
 			cout << " erased route " << (*r)->get_id() << " from route choice set for OD pair ("
 			  << odids().first << "," << odids().second << ") because: " << reason << ", cost: "<< (*r)->cost(time) << 
 			  ", mincost: " << min_cost << ", rate: " << rate << endl;
-			 thrown.push_back((*r)->get_id());
+			 thrown.push_back((*r));
 			 routes.erase(r);
 		}
-		/*
-		for (int k=maxroutes; k < routes.size(); )
-		{
-			 cout << " erased route " << routes[k]->get_id() << " from route choice set for OD pair ("
-			  << odids().first << "," << odids().second << ") because: " << reason << ", cost: "<< routes[k]->cost(time) << 
-			  ", mincost: " << min_cost << ", rate: " << rate << endl;
-			 thrown.push_back(routes[k]->get_id());
-			
-			 routes.erase(&(routes.at(k)));
 
-		}*/
 	}
 	return thrown;
 }
