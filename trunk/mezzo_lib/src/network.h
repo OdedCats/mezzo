@@ -131,7 +131,7 @@ public:
 	vector<Link*> get_path(int destid); //!<gives the links on the shortest path to destid (from current rootlink)
 	bool shortest_paths_all(); //!< calculates shortest paths and generates the routes
 	bool find_alternatives_all (int lid, double penalty, Incident* incident); //!< finds the alternative paths 'without' link lid.
-	void delete_spurious_routes(); //!< deletes all routes that have no OD pair.
+	//void delete_spurious_routes(); //!< deletes all routes that have no OD pair.
 	void renum_routes (); //!< renumerates the routes, to keep a consecutive series after deletions & additions
 	bool run(int period); //!< RUNS the network for 'period' seconds
 	bool addroutes (int oid, int did, ODpair* odpair); //!< adds routes to an ODpair
@@ -188,6 +188,10 @@ public:
 	map <int, Node*>& get_nodes() {return nodemap;}
 	//vector <Link*>& get_links(){return links;}
 	map <int,Link*>& get_links() {return linkmap;}
+	multimap<odval, Route*>::iterator find_route (int id, odval val);
+	bool exists_route (int id, odval val); // checks if route with this ID exists for OD pair val
+	bool exists_same_route (Route* route); // checks if a similar route with the same links already exists
+
 	double calc_diff_input_output_linktimes (); //!< calculates the sum of the differences in output-input link travel times
 	double calc_sumsq_input_output_linktimes (); //!< calculates the sum square of the differences in output-input link travel times
 	// SET's

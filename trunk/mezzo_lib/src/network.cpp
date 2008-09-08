@@ -235,6 +235,38 @@ void Network::reset()
 
 }
 
+multimap<odval, Route*>::iterator Network::find_route (int id, odval val)
+{
+	multimap<odval, Route*>::iterator upper, lower, r_iter;
+	lower = routemap.lower_bound(val);
+	upper = routemap.upper_bound(val);
+	for (r_iter=lower; r_iter!=upper; r_iter++)
+	{
+		if ((*r_iter).second->get_id() == id)
+			return r_iter;
+	}
+	return routemap.end(); // in case none found
+}
+
+bool Network::exists_route (int id, odval val)
+{
+	return find_route(id,val) != routemap.end();
+}
+
+bool Network::exists_same_route (Route* route)
+{
+	multimap<odval, Route*>::iterator upper, lower, r_iter;
+	odval val = route->get_oid_did();
+	lower = routemap.lower_bound(val);
+	upper = routemap.upper_bound(val);
+	for (r_iter=lower; r_iter!=upper; r_iter++)
+	{
+		if ((*r_iter).second->equals(*route))
+			return true;
+	}
+	return false;
+}
+
 // define all the inputfunctions according to the rules in the
 // grammar . Each production rule has its own function
 
@@ -1018,7 +1050,7 @@ bool Network::readroute(istream& in)
 	in  >> rid >> oid >> did >> lnr;
 #ifndef _UNSAFE
 	assert (!routemap.count(rid));
-	assert ( (find_if (routes.begin(),routes.end(), compare <Route> (rid))) == routes.end() ); // no route exists  with rid
+	//assert ( (find_if (routes.begin(),routes.end(), compare <Route> (rid))) == routes.end() ); // no route exists  with rid
 #endif // _UNSAFE
 	// check
 	in >> bracket;
@@ -1747,14 +1779,6 @@ bool Network::add_od_routes()
 				break;
 			}
 		}
-
-
-
-
-
-
-		//route = find_if(routes.begin(),routes.end(),compare <Route>(*del));
-		//routes.erase(route);
 	}
 
 
@@ -1763,7 +1787,7 @@ bool Network::add_od_routes()
 
 bool Network::addroutes (int oid, int did, ODpair* odpair)
 {
-
+/*
 	//find routes from o to d and add
 	vector<Route*>::iterator iter=routes.begin();
 	odval odvalue(oid, did);
@@ -1780,6 +1804,24 @@ bool Network::addroutes (int oid, int did, ODpair* odpair)
 			iter++;
 		}
 	}
+	*/
+	// for each OD pair, give the range of routes
+	vector <ODpair*>::iterator od_iter=odpairs.begin();
+	multimap <odval,Route*>::iterator r_iter, r_lower, r_upper;
+	for (od_iter; od_iter != odpairs.end(); od_iter++)
+	{
+		odval od_v= (*od_iter)->odids();
+		r_lower = routemap.lower_bound(od_v); // get lower boundary of all routes with this OD
+		r_upper = routemap.upper_bound(od_v); // get upper boundary
+		for (r_iter=r_lower; r_iter != r_upper; r_iter++) // add all routes to OD pair
+		{
+			(*od_iter)->add_route((*r_iter).second);
+#ifdef _DEBUG_NETWORK	
+			cout << "added route " << ((*r_iter).first)<< endl;
+#endif //_DEBUG_NETWORK		
+		}
+	}
+
 	return true;
 }
 
@@ -2359,10 +2401,11 @@ bool Network::writepathfile(string name)
 {
 	ofstream out(name.c_str());
 	assert(out);
-	out << "routes: " << routes.size() << endl;
-	for (vector<Route*>::iterator iter=routes.begin();iter<routes.end();iter++)
+	out << "routes:" << '\t'<< routemap.size() << endl;
+	multimap <odval,Route*>::iterator r_iter = routemap.begin();
+	for (r_iter=routemap.begin();r_iter!=routemap.end();r_iter++)
 	{
-		(*iter)->write(out);
+		(*r_iter).second->write(out);
 	}
 	return true;
 }
@@ -2415,7 +2458,7 @@ bool Network::init_shortest_path()
 */
 {
 	int lid,in,out,routenr;
-	routenr=routes.size();
+	routenr=routemap.size();
 	double cost, mu, sd;
 	random=new (Random);
 	/**********test***/
@@ -2507,7 +2550,7 @@ bool Network::shortest_paths_all()
 	double entrytime=0.0;    // entry time for time-variant shortest path search
 	int nr_reruns=static_cast<int> (runtime/theParameters->update_interval_routes)-1; // except for last period
 	// determines the number of reruns of the shortest path alg.
-	int routenr=routes.size();
+	int routenr=routemap.size();
 	for (int i=0; i<nr_reruns; i++)
 	{
 		entrytime= i*theParameters->update_interval_routes;
@@ -2580,17 +2623,20 @@ bool Network::shortest_paths_all()
 #ifdef _DEBUG_SP
 							cout << " checking if the routenr does not already exist " << endl;
 #endif //_DEBUG_SP
-							assert ( (find_if (routes.begin(),routes.end(), compare <Route> (routenr))) == routes.end() ); // No route with routenr exists
+							odval val = odval(ori->get_id(), (*iter3)->get_id());
+							assert (!exists_route(routenr,val)); // Check that no route exists with same routeid, at least for this OD pair
+							//assert ( (find_if (routes.begin(),routes.end(), compare <Route> (routenr))) == routes.end() ); // No route with routenr exists
 #ifdef _DEBUG_SP
 							cout << " making route " << endl;
 #endif //_DEBUG_SP
 							Route* rptr=new  Route(routenr, ori, (*iter3), rlinks);
 							bool not_exists=false;
 							if (rptr)
-								not_exists= ( (find_if (routes.begin(),routes.end(), equalmembers <Route> (*rptr))) == routes.end() ); // find if there's a route with the same links
+								//not_exists= ( (find_if (routes.begin(),routes.end(), equalmembers <Route> (*rptr))) == routes.end() ); // find if there's a route with the same links
+								not_exists = exists_same_route(rptr);
 							if (not_exists)
 							{	
-								routes.insert(routes.end(),rptr); // add the newly found route
+								routemap.insert(routemap.end(),pair <odval, Route*> (val,rptr)); // add the newly found route
 							}
 							else
 								routenr--;  	
@@ -2724,39 +2770,18 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 	return true;
 }
 
+/*
 void Network::delete_spurious_routes()
 {
-	/******** OLD
-	// CHECK THAT ONLY ROUTES FOR EXISTING ODPAIRS ARE GENERATED
-	for (vector<Route*>::iterator iter1=routes.begin();iter1<routes.end();)
-	{
-	bool odpair_exists=false;
-	int dest=(*iter1)->get_oid_did().first;
-	int org=(*iter1)->get_oid_did().second;
-	cout << "testing  org " << org <<",dest " << dest << endl;
-	for (vector <ODpair*>::iterator iter2=odpairs.begin();iter2 < odpairs.end();iter2++)
-	{
-	if (((*iter2)->odids().first == org) && ((*iter2)->odids().second == dest))
-	odpair_exists = true;
-	}
-	if (odpair_exists == false) // delete found routes that have no OD pair
-	{
-	delete (*iter1); // calls automatically destructor
-	iter1=routes.erase(iter1);	
-	}
-	else
-	iter1++;
-	}
-	*/	
 }
-
+*/
 void Network::renum_routes ()
 {
-	vector<Route*>::iterator route;
+	multimap <odval, Route*>::iterator route;
 	int counter=0;
-	for (route=routes.begin(); route < routes.end(); route++, counter++)
+	for (route=routemap.begin(); route != routemap.end(); route++, counter++)
 	{
-		(*route)->set_id(counter);
+		(*route).second->set_id(counter);
 
 	}
 
@@ -2999,16 +3024,17 @@ double Network::executemaster(QPixmap * pm_,QMatrix * wm_)
 			cout << "Problem calculating shortest paths for all OD pairs " << endl; // see if there are new routes based on shortest path
 	}
 	// Sort the routes by OD pair
-	sort(routes.begin(), routes.end(), route_less_than);
-	// add the routes to the OD pairs
-	add_od_routes();
-	// temporary
+	// NOTE: Obsolete, routemap is always sorted by OD pair
+	// sort(routes.begin(), routes.end(), route_less_than);
+
+	// add the routes to the OD pairs AND delete the 'bad routes'
+	add_od_routes(); 
 	renum_routes (); // renum the routes
 	writepathfile(filenames[4]); // write back the routes.
 	// end temporary
 	if (calc_paths)
 	{
-		delete_spurious_routes();
+		//delete_spurious_routes();
 		writepathfile(filenames[4]); // write back the routes.
 	}
 
@@ -3081,7 +3107,7 @@ double Network::executemaster()
 			cout << "Problem calculating shortest paths for all OD pairs " << endl; // see if there are new routes based on shortest path
 	}
 	// Sort the routes by OD pair
-	sort(routes.begin(), routes.end(), route_less_than);
+	//sort(routes.begin(), routes.end(), route_less_than);
 	// add the routes to the OD pairs
 	add_od_routes();
 	renum_routes ();
@@ -3090,7 +3116,7 @@ double Network::executemaster()
 	// end temporary
 	if (calc_paths)
 	{
-		delete_spurious_routes();
+		//delete_spurious_routes();
 		writepathfile(filenames[4]); // write back the routes.
 	}
 
@@ -3565,12 +3591,17 @@ void Network::broadcast_incident_stop(int lid)
 }
 
 void Network::removeRoute(Route* theroute)
-{
-	for(vector<Route*>::iterator it=routes.begin(); it!=routes.end(); it++)
+{	
+	odval val = theroute->get_oid_did();
+
+	multimap<odval,Route*>::iterator it, lower, upper;
+	lower = routemap.lower_bound(val);
+	upper = routemap.upper_bound(val);
+	for(it=lower; it!=upper; it++)
 	{
-		if((*it)==theroute)
+		if((*it).second==theroute)
 		{
-			routes.erase(it);
+			routemap.erase(it);
 			break;
 		}
 	}
