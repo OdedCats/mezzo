@@ -1049,7 +1049,7 @@ bool Network::readroute(istream& in)
 	}
 	in  >> rid >> oid >> did >> lnr;
 #ifndef _UNSAFE
-	assert (!routemap.count(rid));
+	assert (!exists_route(rid,odval(oid,did)));
 	//assert ( (find_if (routes.begin(),routes.end(), compare <Route> (rid))) == routes.end() ); // no route exists  with rid
 #endif // _UNSAFE
 	// check
@@ -1172,7 +1172,7 @@ bool Network::readbusroute(istream& in)
 	}
 	in  >> rid >> oid >> did >> lnr;
 #ifndef _UNSAFE
-	assert (!routemap.count(rid));
+	//assert (!exists_route(rid,odval(oid,did)));
 	assert ( (find_if (busroutes.begin(),busroutes.end(), compare <Busroute> (rid))) == busroutes.end() ); // no route exists  with rid
 #endif // _UNSAFE
 	// check
@@ -1772,7 +1772,7 @@ bool Network::add_od_routes()
 		route_u  = routemap.upper_bound(val);
 		for (route_m=route_l;route_m != route_u; route_m++) // check all routes  for given odval
 		{
-			if ((*route_m).second== *del)
+			if ((*route_m).second->get_id() == (*del)->get_id())
 			{
 				routemap.erase(route_m);
 				delete (*del);
@@ -1805,22 +1805,20 @@ bool Network::addroutes (int oid, int did, ODpair* odpair)
 		}
 	}
 	*/
-	// for each OD pair, give the range of routes
-	vector <ODpair*>::iterator od_iter=odpairs.begin();
+	
+	//vector <ODpair*>::iterator od_iter=odpairs.begin();
+	odval od_v(oid, did);
 	multimap <odval,Route*>::iterator r_iter, r_lower, r_upper;
-	for (od_iter; od_iter != odpairs.end(); od_iter++)
+	r_lower = routemap.lower_bound(od_v); // get lower boundary of all routes with this OD
+	r_upper = routemap.upper_bound(od_v); // get upper boundary
+	for (r_iter=r_lower; r_iter != r_upper; r_iter++) // add all routes to OD pair
 	{
-		odval od_v= (*od_iter)->odids();
-		r_lower = routemap.lower_bound(od_v); // get lower boundary of all routes with this OD
-		r_upper = routemap.upper_bound(od_v); // get upper boundary
-		for (r_iter=r_lower; r_iter != r_upper; r_iter++) // add all routes to OD pair
-		{
-			(*od_iter)->add_route((*r_iter).second);
+		odpair->add_route((*r_iter).second);
 #ifdef _DEBUG_NETWORK	
-			cout << "added route " << ((*r_iter).first)<< endl;
+		cout << "added route " << ((*r_iter).first)<< endl;
 #endif //_DEBUG_NETWORK		
-		}
 	}
+	
 
 	return true;
 }
@@ -3029,7 +3027,7 @@ double Network::executemaster(QPixmap * pm_,QMatrix * wm_)
 
 	// add the routes to the OD pairs AND delete the 'bad routes'
 	add_od_routes(); 
-	renum_routes (); // renum the routes
+//	renum_routes (); // renum the routes
 	writepathfile(filenames[4]); // write back the routes.
 	// end temporary
 	if (calc_paths)
@@ -3110,7 +3108,7 @@ double Network::executemaster()
 	//sort(routes.begin(), routes.end(), route_less_than);
 	// add the routes to the OD pairs
 	add_od_routes();
-	renum_routes ();
+//	renum_routes ();
 	// temporary
 	writepathfile(filenames[4]); // write back the routes.
 	// end temporary
@@ -3602,7 +3600,7 @@ void Network::removeRoute(Route* theroute)
 		if((*it).second==theroute)
 		{
 			routemap.erase(it);
-			break;
+			return;
 		}
 	}
 }
