@@ -18,7 +18,8 @@ struct compare
 
 Route::Route(int id_, Origin* origin_, Destination* destination_, vector <Link*> links_):	id(id_), origin(origin_), destination(destination_),sumcost(0.0)
 {
- 	links=links_;
+ 	last_calc_time=0.0;
+	links=links_;
 	vector <Link*>::iterator iter = links.begin();
 	for (iter; iter < links.end(); iter++)
 	{
@@ -42,6 +43,7 @@ Route::Route(int id_, Origin* origin_, Destination* destination_, vector <Link*>
 Route::Route(int id_, Route* route, vector<Link*> links_): id(id_)
 {
 	sumcost=0.0;
+	last_calc_time=0.0;
 	links=links_;
 	origin=route->get_origin();
 	destination=route->get_destination();
@@ -58,6 +60,12 @@ Route::Route(int id_, Route* route, vector<Link*> links_): id(id_)
 		links.insert(links.begin(),  oldlinks.front() );
 }
 
+void Route::reset()
+{
+	sumcost=0.0;
+	last_calc_time=0.0;
+
+}
 
 odval Route::get_oid_did()
   {return odval(origin->get_id(), destination->get_id());}		

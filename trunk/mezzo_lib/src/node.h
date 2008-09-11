@@ -1,3 +1,21 @@
+/*
+	Mezzo Mesoscopic Traffic Simulation 
+	Copyright (C) 2008  Wilco Burghout
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 /**
  * modification:
  *   add bounding box to the node object
@@ -45,6 +63,7 @@ class ODpair;
 class Daction;
 class BOaction;
 class Busroute;
+
 
 #ifdef _PVM
 class PVM;
@@ -179,6 +198,8 @@ class BoundaryOut : public Junction
 	bool blocked_;
 } ;
 
+typedef pair <int,int> odval;
+
 class BoundaryIn : public Origin
 /* BoundaryIn is a special Origin, in the sense that vehicles that are generated here are generated from a stream (PVM or other)
 	that is connected to a microscopic model
@@ -188,10 +209,12 @@ class BoundaryIn : public Origin
 	BoundaryIn (int id_);
 	~BoundaryIn ();
 	void register_virtual(VirtualLink* vl) { vlinks.insert(vlinks.begin(),vl);}
-	void register_routes(vector<Route*> * routes_){routes=routes_;}
+	//void register_routes(vector<Route*> * routes_){routes=routes_;}
+	void register_routes (multimap<odval,Route*> * routemap_) {routemap=routemap_;}
 	void register_busroutes (vector<Busroute*> * busroutes_) {busroutes=busroutes_;}
 	void register_ods(vector<ODpair*> *ods_){ods=ods_;}
     vector <VirtualLink*> & get_virtual_links() {return vlinks;}
+	Route* find_route(odval val, int id);
 #ifdef _PVM	 // PVM specific functions
 	bool receive_message(PVM* com);
 	int send_message (PVM* com, double time);   // sends messages. returns nr of sigs that are sent 
@@ -208,7 +231,8 @@ class BoundaryIn : public Origin
 
 private:
 	vector <VirtualLink*> vlinks;
-	vector <Route*> * routes;
+	//vector <Route*> * routes;
+	multimap <odval,Route*> * routemap;
 	vector <Busroute*> * busroutes; 
 	vector <ODpair*> * ods;
 	Vehicle* lastveh;

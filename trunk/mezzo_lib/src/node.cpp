@@ -546,6 +546,19 @@ bool BoundaryIn::receive_message(PVM* com)
 }
 #endif //_PVM
 
+Route* BoundaryIn::find_route(odval val, int id)
+{
+	multimap<odval,Route*>::iterator r_upper, r_lower, r_iter;
+	r_lower=routemap->lower_bound(val);
+	r_upper=routemap->upper_bound(val);
+	for (r_iter=r_lower; r_iter != r_upper; r_iter++)
+	{
+		if ((*r_iter).second->get_id() == id)
+			return (*r_iter).second;
+	}
+	return NULL;
+}
+
 #ifdef _MIME
 bool BoundaryIn::newvehicle(Signature* sig)
  
@@ -564,8 +577,11 @@ bool BoundaryIn::newvehicle(Signature* sig)
 			  // find the route
 			  if (odptr)
 			  {
-			  		//cout << "BoundaryIn:: found od" << endl;
-			  		Route* rptr=*(find_if(routes->begin(), routes->end(), compare <Route> (sig->path)));
+			  		
+					//cout << "BoundaryIn:: found od" << endl;
+			  		//Route* rptr=*(find_if(routes->begin(), routes->end(), compare <Route> (sig->path)));
+					odval val = odptr->odids();
+					Route* rptr= find_route(val, sig->path);
 			  		if (rptr)
 			  		{
 			  			//create vehicle

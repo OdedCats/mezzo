@@ -1030,7 +1030,8 @@ bool Network::readroutes(istream& in)
 	// TO DO: Check out why ALL routes are registered at the boundaryIn nodes!
 	for (vector<BoundaryIn*>::iterator iter=boundaryins.begin(); iter < boundaryins.end(); iter++)
 	{
-		(*iter)->register_routes(&routes);
+		//(*iter)->register_routes(&routes);
+		(*iter)->register_routes(&routemap);
 	}
 	return true;
 }
@@ -1116,7 +1117,7 @@ bool Network::readroute(istream& in)
 	cout << "found o&d for route" << endl;
 #endif //_DEBUG_NETWORK
 	Route* rptr = new Route(rid, optr, dptr, rlinks);
-	routes.insert(routes.end(), rptr);
+//	routes.insert(routes.end(), rptr);
 	//routemap [rid] = rptr;
 	routemap.insert(pair <odval, Route*> (odval(oid,did),rptr));
 #ifdef _DEBUG_NETWORK
