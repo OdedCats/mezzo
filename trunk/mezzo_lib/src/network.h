@@ -99,6 +99,7 @@ class  ODMatrix
 public:
 	ODMatrix ();
 	void add_slice(double time, ODSlice* slice);
+	void reset(Eventlist* eventlist,vector <ODpair*> * odpairs); // rebooks all the MatrixActions
 private:
 	vector < pair <double,ODSlice*> > slices;	
 

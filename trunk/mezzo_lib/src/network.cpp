@@ -209,28 +209,50 @@ void Network::reset()
 	eventlist->reset();
 
 	// reset all the network objects
-	for (map <int, Origin*>::iterator iter=originmap.begin();iter!=originmap.end();)
+	//Origins
+	for (map <int, Origin*>::iterator iter1=originmap.begin();iter1!=originmap.end();iter1++)
 	{			
-		(iter->second)->reset();	
+		(iter1->second)->reset();	
 	}
-	for (map <int, Destination*>::iterator iter1=destinationmap.begin();iter1!=destinationmap.end();)
-	{			
-		(iter1->second)->reset();
-	}
-	for (map <int,Junction*>::iterator iter2=junctionmap.begin();iter2!=junctionmap.end();)
+	//Destinations
+	for (map <int, Destination*>::iterator iter2=destinationmap.begin();iter2!=destinationmap.end();iter2++)
 	{			
 		(iter2->second)->reset();
 	}
-	for (map <int, Link*>::iterator iter4=linkmap.begin();iter4!=linkmap.end();)
+	//Junctions
+	for (map <int,Junction*>::iterator iter3=junctionmap.begin();iter3!=junctionmap.end();iter3++)
+	{			
+		(iter3->second)->reset();
+	}
+	//Links
+	for (map <int, Link*>::iterator iter4=linkmap.begin();iter4!=linkmap.end();iter4++)
 	{			
 		(iter4->second)->reset();
 	}
-
+	//Routes
+	for (multimap <odval, Route*>::iterator iter5=routemap.begin();iter5!=routemap.end();iter5++)
+	{			
+		(iter5->second)->reset();
+	}
+	//OD pairs
+	for (vector <ODpair*>::iterator iter6=odpairs.begin();iter6!=odpairs.end();iter6++)
+	{			
+		(*iter6)->reset();
+	}
+	// OD Matrix rates : re-book all MatrixActions
+	odmatrix.reset(eventlist,&odpairs);
 	// turnings
+	for (map<int,Turning*>::iterator iter7=turningmap.begin(); iter7!=turningmap.end(); iter7++)
+	{
+		(iter7->second)->reset();
+	}
 
 	// incidents
 
-	// routes
+	//traffic signals
+
+	
+	
 
 
 }
@@ -1710,28 +1732,13 @@ bool Network::readod(istream& in, double scale)
 	map <int, Destination*>::iterator d_iter; 
 	d_iter = destinationmap.find(did);
 	assert (d_iter != destinationmap.end());
-	/*  
 
-	vector <Origin*>::iterator o_iter=origins.begin();
-	o_iter= find_if (origins.begin(),origins.end(), compare <Origin> (oid));
-	//  Origin* optr=(*o_iter) ;
-	assert ( o_iter < origins.end() ); // origin exists
-
-	vector <Destination*>::iterator d_iter=destinations.begin();
-	d_iter=  find_if (destinations.begin(),destinations.end(), compare <Destination> (did));
-	//Destination* dptr=(*d_iter) ;
-	assert ( d_iter < destinations.end() ); //destination exists
-	*/
 #ifdef _DEBUG_NETWORK
 	cout << "found o and d " << oid << "," << did << endl;
 #endif //_DEBUG_NETWORK
 	// create odpair
 
 	ODpair* odpair=new ODpair (o_iter->second, d_iter->second, rate,&vehtypes); // later the vehtypes can be defined PER OD
-
-	//comment out the addroutes and do it in the executemaster() proc instead, so that only routes are generated
-	//for existing OD pairs...
-	//addroutes (oid,did,odpair);
 
 	//add odpair to origin and general list
 	odpairs.insert(odpairs.begin(),odpair);
@@ -3705,6 +3712,21 @@ void Incident::broadcast_incident_stop(int lid)
 // ODMATRIX CLASSES
 
 ODMatrix::ODMatrix (){}
+
+void ODMatrix::reset(Eventlist* eventlist, vector <ODpair*> * odpairs)
+{
+	vector < pair <double,ODSlice*> >::iterator s_iter=slices.begin();
+	for (s_iter;s_iter != slices.end(); s_iter++)
+	{
+		//create and book the MatrixAction
+		double loadtime = (*s_iter).first;
+		ODSlice* odslice = (*s_iter).second;
+		MatrixAction* mptr=new MatrixAction(eventlist, loadtime, odslice, odpairs);
+		assert (mptr != NULL);
+
+	}
+}
+
 
 void ODMatrix::add_slice(double time, ODSlice* slice)
 {

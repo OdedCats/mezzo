@@ -52,6 +52,18 @@ ODaction::~ODaction()
 	delete server;
 }
 
+void ODaction::reset(double rate_)
+{
+	if (rate_ < 1)
+	{
+		active = false;
+	}
+	else
+	{
+		server->set_rate((3600/rate_),theParameters->odserver_sigma);
+		active=true;
+	}
+}
 
 bool ODaction::execute(Eventlist* eventlist, double time)
 {
@@ -68,12 +80,11 @@ bool ODaction::execute(Eventlist* eventlist, double time)
 	   // 2002_12_18 recycling the vehicles
 	  Vehicle* veh=recycler.newVehicle(); // get a _normal_ vehicle
 	  veh->init(vid,vehtype->id, vehtype->length,route,odpair,time);  
-	  if ( (odpair->get_origin())->insert_veh(veh,time))
+	  if ( (odpair->get_origin())->insert_veh(veh,time)) // insert vehicle in the input queue
   		ok=true;
 	  else
   		{
-  			ok=false; // so what to do if there's no room on first link? For now just drop the vehicle.
-			// update: at Origin an inputqueue is taking care of the waiting vehicles, and has unlimited capacity.
+  			ok=false; // if there's no room on the inputqueue (should never happen) we just drop the vehicle.
   			cout << "OD action:: dropped a vehicle " << veh->get_id() << endl;
   			//delete veh; // so we're not creating memory leaks...
   			recycler.addVehicle(veh);
@@ -297,6 +308,7 @@ ODpair::ODpair(Origin* origin_, Destination* destination_, int rate_, Vtypes* vt
 {
  	odaction=new ODaction(this);
  	random=new Random();
+	start_rate=rate;
 #ifndef _DETERMINISTIC_ROUTE_CHOICE
  	if (randseed != 0)
 	   random->seed(randseed);
@@ -312,7 +324,7 @@ ODpair::ODpair(Origin* origin_, Destination* destination_, int rate_, Vtypes* vt
 }
 
 ODpair::ODpair(): id (-1), odaction (NULL), origin (NULL), destination (NULL), 
-                  rate (-1), random (NULL)
+                  rate (-1), random (NULL), start_rate(-1)
 {
 
 }
@@ -323,6 +335,14 @@ ODpair::~ODpair()
 		delete odaction;
 	if (random)
 		delete random;	
+}
+
+void ODpair::reset()
+{
+	rate=start_rate;
+	odaction->reset(rate);
+	
+	grid->reset();
 }
  	
 bool ODpair::execute(Eventlist* eventlist, double time)
