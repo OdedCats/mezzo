@@ -23,8 +23,8 @@
  *
  *  latest changes: 
  * 1)add the mezzo analyzer dialog
- * 2)solve the zooming problems
- * 3)GUI changes
+ * 2)solve the zooming problems by the qmatrix approach 
+ * 3)GUI development
  * last modified: Xiaoliang Ma 
  * 2007-10-22
  */
