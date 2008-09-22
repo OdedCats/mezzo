@@ -117,6 +117,7 @@ void MainForm::activateToolbars(bool activated)
 	savescreenshot->setEnabled(activated);
     run->setEnabled(activated);
     breakoff->setEnabled(activated);
+	stop->setEnabled(activated);
     zoomin->setEnabled(activated);
     zoomout->setEnabled(activated);
 	zoombywin->setEnabled(activated);
@@ -127,9 +128,9 @@ void MainForm::activateToolbars(bool activated)
     saveresults->setEnabled(activated);
     inspectdialog->setEnabled(activated);
 	if(activated)
-		status_label->setText("network loaded");
+		status_label->setText("Network initialized");
 	else
-		status_label->setText("uninitialized");
+		status_label->setText("No network loaded");
 
 }
 
@@ -151,12 +152,39 @@ void MainForm::updateCanvas()
 }
 
 // AUTOCONNECTED SLOTS
+void MainForm::on_stop_activated()
+{
+	//break current simulation
+	breaknow = true;
+
+	// stop and init the network
+	runtime = theNetwork.reset();
+
+	// Reset all the internal variables
+	
+	currtime =0.0;
+	lmouse_pressed_=false;
+	inselection_=false;
+	keyN_pressed_=false;
+	keyL_pressed_=false;
+	nodes_sel_.clear();
+	links_sel_.clear();
+	// !!! I AM SURE THIS IS INCOMPLETE !!!
+
+
+	//updat the canvas
+	updateCanvas();
+
+
+}
+
 void MainForm::on_quit_activated()
 {
 	theNetwork.~Network(); 
 	od_analyser_->~ODCheckerDlg();
 	close();
 }
+
 
 void MainForm::on_openmasterfile_activated()
 {
@@ -191,6 +219,7 @@ void MainForm::on_openmasterfile_activated()
 		updateCanvas();
 		//statusbar->message("Initialised");
 	}	
+	
 }
 
 void MainForm::on_zoomin_activated()

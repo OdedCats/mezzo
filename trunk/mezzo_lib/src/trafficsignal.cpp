@@ -21,6 +21,18 @@ bool SignalControl::execute(Eventlist* eventlist, double time)
 	return true;
 }
 
+void  SignalControl::reset()
+{
+	active = false;
+	vector<SignalPlan*>::iterator sp_iter=signalplans.begin();
+	for (sp_iter; sp_iter != signalplans.end(); sp_iter++)
+	{
+		(*sp_iter)->reset();
+	}
+
+}
+
+//Signalplan functions
 bool SignalPlan::execute(Eventlist* eventlist, double time)
 {
 	if (!active)
@@ -62,6 +74,16 @@ bool SignalPlan::execute(Eventlist* eventlist, double time)
 	}
 	
 	return true;
+}
+
+void SignalPlan::reset()
+{
+	active = false;
+	vector <Stage*>::iterator s_iter=stages.begin();
+	for (s_iter;s_iter != stages.end(); s_iter++)
+	{
+		(*s_iter)->reset();
+	}
 }
 
 

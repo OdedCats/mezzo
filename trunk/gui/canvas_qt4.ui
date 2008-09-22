@@ -668,7 +668,7 @@
    <addaction name="separator" />
    <addaction name="run" />
    <addaction name="breakoff" />
-   <addaction name="quit" />
+   <addaction name="stop" />
    <addaction name="zoomin" />
    <addaction name="zoomout" />
    <addaction name="zoombywin" />
@@ -708,6 +708,7 @@
     <addaction name="savescreenshot" />
     <addaction name="separator" />
     <addaction name="saveresults" />
+    <addaction name="stop" />
     <addaction name="quit" />
    </widget>
    <widget class="QMenu" name="EditMenu" >
@@ -726,6 +727,7 @@
     </property>
     <addaction name="run" />
     <addaction name="breakoff" />
+    <addaction name="stop" />
    </widget>
    <addaction name="fileMenu" />
    <addaction name="EditMenu" />
@@ -759,12 +761,12 @@
     <string>Ctrl+S</string>
    </property>
   </action>
-  <action name="quit" >
+  <action name="stop" >
    <property name="icon" >
     <iconset resource="canvas_qt4.qrc" >:/images/bt_stop.png</iconset>
    </property>
    <property name="text" >
-    <string>Quit</string>
+    <string>Stop</string>
    </property>
    <property name="iconText" >
     <string>Quit</string>
@@ -918,6 +920,14 @@
    </property>
    <property name="toolTip" >
     <string>Selction mode</string>
+   </property>
+  </action>
+  <action name="quit" >
+   <property name="icon" >
+    <iconset resource="canvas_qt4.qrc" >:/images/exit.png</iconset>
+   </property>
+   <property name="text" >
+    <string>Close</string>
    </property>
   </action>
  </widget>

@@ -202,7 +202,7 @@ Network::~Network()
 	}
 }
 
-void Network::reset()
+int Network::reset()
 {	
 	time=0.0;
 	// reset eventlist
@@ -247,14 +247,25 @@ void Network::reset()
 		(iter7->second)->reset();
 	}
 
+	//traffic signals
+	for (vector <SignalControl*>::iterator sc_iter = signalcontrols.begin(); sc_iter != signalcontrols.end(); sc_iter++)
+	{
+		(*sc_iter)->reset();
+	}
+
+	//TO DO
+
+	
 	// incidents
 
-	//traffic signals
+	// buslines, busstops etc etc etc!
 
-	
-	
+	// all the Hybrid functions: BoundaryIn, BoundaryOut etc.
 
+	// AND FINALLY Init the next run
+	bool ok = init();
 
+	return runtime;
 }
 
 multimap<odval, Route*>::iterator Network::find_route (int id, odval val)

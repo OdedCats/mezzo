@@ -95,7 +95,7 @@ public:
 	Link (int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* sdfunc_);
 	Link();
 	virtual ~Link();
-	void reset();  // resets the link for restart
+	virtual void reset();  // resets the link for restart
 	// accessors, they are inline where possible, but inline keyword not necessary
 	const int get_id () {return id;}
 	const int get_out_node_id () ;
@@ -251,6 +251,8 @@ class InputLink : public Link
 	public:
 		InputLink(int id_, Origin* out_);
 		~InputLink();
+		virtual void reset();  // resets the link for restart
+
     	bool enter_veh(Vehicle* veh, double time);
     	
 		Vehicle* exit_veh(double time, Link* link, int lookback);

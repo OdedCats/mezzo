@@ -32,6 +32,7 @@ class SignalControl : public Action
 {
 public:
 	SignalControl (int id_):id(id_) {active = false;}
+	void reset() ;
 	void add_signal_plan (SignalPlan* signalplan_) { signalplans.push_back(signalplan_);}
 	virtual bool execute(Eventlist* eventlist, double time);
 protected:
@@ -47,6 +48,7 @@ public:
 	SignalPlan (int id_, double start_, double stop_, double cycletime_, double offset_)  :
 	  id(id_), cycletime(cycletime_), offset(offset_), start(start_), stop(stop_)
 			{active=false;}
+	void reset() ;
 	virtual bool execute(Eventlist* eventlist, double time);
 	double get_start() {return start;}
 	void add_stage(Stage* stage_) {stages.push_back(stage_);}
@@ -66,6 +68,7 @@ class Stage : public Action
 public:
 	Stage (int id_, double start_, double duration_): id(id_), start(start_), duration(duration_) { active = false;}
 	int get_id() {return id;}
+	void reset() {stop();} //already implemented in void stop(), but reset is universal
 	double get_start() {return start;}
 	double get_duration() {return duration;}
 	void stop (); // stops the stage (turns it to red).

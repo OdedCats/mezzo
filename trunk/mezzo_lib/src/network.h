@@ -139,7 +139,7 @@ public:
 	double get_scale() {return scale;} //!< returns the scale of the drawing
 #endif //_NO_GUI
 	double executemaster(); //!< without GUI
-	void reset(); //!< resets the simulation to 0, clears all the state variables.
+	int reset(); //!< resets the simulation to 0, clears all the state variables. returns runtime
 	double step(double timestep); //!< executes one step of simulation, called by the gui, returns current value of time
 	bool writeall();
 	bool readnetwork(string name); //!< reads the network and creates the appropriate structures

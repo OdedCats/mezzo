@@ -763,6 +763,14 @@ InputLink::InputLink(int id_, Origin* out_)
     avgtimes=NULL;
 }
 
+void InputLink::reset()
+{
+	blocked_until=-1.0; // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
+	nr_exits_blocked=0; // set by the turning movements if they are blocked
+
+	queue->reset();
+}
+
 InputLink::~InputLink()
 {
 	//delete queue;

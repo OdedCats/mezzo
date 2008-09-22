@@ -56,6 +56,7 @@ public:
 private slots: 
 	// Using the Auto-Connect feature with the on_<signal>_<event>() syntax
 	void on_quit_activated(); //!< Quits the program
+	void on_stop_activated(); //!< Stops and resets the simulation
 	void on_openmasterfile_activated();  //!< Opens a 'Open master file' dialog
 	void on_zoomin_activated();  //!< Zooms in on the network
 	void on_zoomout_activated();  //!< Zooms out on the network
