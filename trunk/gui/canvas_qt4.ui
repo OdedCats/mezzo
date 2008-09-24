@@ -653,7 +653,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="openmasterfile" />
-   <addaction name="savescreenshot" />
+   <addaction name="closenetwork" />
    <addaction name="saveresults" />
    <addaction name="separator" />
    <addaction name="run" />
@@ -694,11 +694,11 @@
      <string>&amp;File</string>
     </property>
     <addaction name="openmasterfile" />
+    <addaction name="closenetwork" />
     <addaction name="separator" />
     <addaction name="savescreenshot" />
     <addaction name="saveresults" />
     <addaction name="separator" />
-    <addaction name="closenetwork" />
     <addaction name="quit" />
    </widget>
    <widget class="QMenu" name="EditMenu" >
@@ -718,6 +718,8 @@
     <addaction name="run" />
     <addaction name="breakoff" />
     <addaction name="stop" />
+    <addaction name="separator" />
+    <addaction name="savescreenshot" />
    </widget>
    <addaction name="fileMenu" />
    <addaction name="EditMenu" />
@@ -765,7 +767,7 @@
     <string>Quit</string>
    </property>
    <property name="statusTip" >
-    <string>Quit</string>
+    <string/>
    </property>
   </action>
   <action name="run" >
@@ -790,7 +792,7 @@
     <string>Pause</string>
    </property>
    <property name="statusTip" >
-    <string>Pause simulation</string>
+    <string/>
    </property>
    <property name="shortcut" >
     <string/>

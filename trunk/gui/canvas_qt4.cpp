@@ -53,6 +53,7 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 	viewMat_=QWMatrix(1,0,0,1,0,0);
 	viewSize_=QSize(panelx,panely);
 	pm1=QPixmap(viewSize_);
+	pm1.fill();
 	pm2=pm1;
 	//xiaoliang
 	
@@ -122,6 +123,7 @@ void MainForm::activateToolbars(bool activated)
     run->setEnabled(activated);
     breakoff->setEnabled(activated);
 	stop->setEnabled(activated);
+	closenetwork->setEnabled(activated);
     zoomin->setEnabled(activated);
     zoomout->setEnabled(activated);
 	zoombywin->setEnabled(activated);
@@ -131,6 +133,7 @@ void MainForm::activateToolbars(bool activated)
     loadbackground->setEnabled(activated);
     saveresults->setEnabled(activated);
     inspectdialog->setEnabled(activated);
+	openmasterfile->setEnabled(!activated); // should be only be enabled when everything else is not
 	if(activated)
 		status_label->setText("Network initialized");
 	else
@@ -156,6 +159,47 @@ void MainForm::updateCanvas()
 }
 
 // AUTOCONNECTED SLOTS
+void MainForm::on_closenetwork_activated()
+{
+	//break current simulation
+	breaknow = true;
+	// Reset all the internal variables
+	runtime=1.0; 
+	currtime =0.0;
+	initialised=false;
+	lmouse_pressed_=false;
+	inselection_=false;
+	keyN_pressed_=false;
+	keyL_pressed_=false;
+	nodes_sel_.clear();
+	links_sel_.clear();
+
+	mod2stdViewMat_=QWMatrix(1,0,0,1,0,0);
+	viewMat_=QWMatrix(1,0,0,1,0,0);
+	viewSize_=QSize(panelx,panely);
+	pm1=QPixmap(viewSize_);
+	pm1.fill();
+	pm2=pm1;
+
+	exited = false;
+	theParameters=theNetwork->get_parameters();
+	zoomrect_=0;
+	zoombywin_triggered_=false;
+
+	activateToolbars(false);
+	simprogress_widget->setVisible(false);
+
+	// Delete the current network 
+	delete theNetwork;
+
+	// Create a new Network
+	theNetwork = new Network();
+
+	//display empty pixmap
+	copyPixmap();
+}
+
+
 void MainForm::on_stop_activated()
 {
 	//break current simulation
@@ -173,6 +217,8 @@ void MainForm::on_stop_activated()
 	keyL_pressed_=false;
 	nodes_sel_.clear();
 	links_sel_.clear();
+	zoomrect_=0;
+	zoombywin_triggered_=false;
 	// !!! I AM SURE THIS IS INCOMPLETE !!!
 
 
@@ -184,7 +230,8 @@ void MainForm::on_stop_activated()
 
 void MainForm::on_quit_activated()
 {
-	theNetwork->~Network(); 
+	//theNetwork->~Network(); 
+	delete theNetwork;
 	od_analyser_->~ODCheckerDlg();
 	close();
 }
@@ -193,8 +240,6 @@ void MainForm::on_quit_activated()
 void MainForm::on_openmasterfile_activated()
 {
 	QString fn = "";
-	//fn = (Q3FileDialog::getOpenFileName(QString::null,"mezzo and MiMe Files (*.mime *.mezzo)", this ) );
-	// move to QT4 equivalent:
 	fn = (QFileDialog::getOpenFileName(this, "Select a MEZZO master file", QString::null,"Mezzo Files (*.mime *.mezzo)") );
 	// Open master file
 	if ( !fn.isEmpty() ) 
