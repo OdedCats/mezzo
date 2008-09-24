@@ -705,10 +705,11 @@
      <string>&amp;File</string>
     </property>
     <addaction name="openmasterfile" />
-    <addaction name="savescreenshot" />
     <addaction name="separator" />
+    <addaction name="savescreenshot" />
     <addaction name="saveresults" />
-    <addaction name="stop" />
+    <addaction name="separator" />
+    <addaction name="closenetwork" />
     <addaction name="quit" />
    </widget>
    <widget class="QMenu" name="EditMenu" >
@@ -738,7 +739,7 @@
     <iconset resource="canvas_qt4.qrc" >:/images/fileopen2.png</iconset>
    </property>
    <property name="text" >
-    <string>&amp;Open Master file...</string>
+    <string>&amp;Open Network</string>
    </property>
    <property name="iconText" >
     <string>&amp;Open Master file...</string>
@@ -927,7 +928,15 @@
     <iconset resource="canvas_qt4.qrc" >:/images/exit.png</iconset>
    </property>
    <property name="text" >
-    <string>Close</string>
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="closenetwork" >
+   <property name="icon" >
+    <iconset resource="canvas_qt4.qrc" >:/images/close.png</iconset>
+   </property>
+   <property name="text" >
+    <string>Close Network</string>
    </property>
   </action>
  </widget>

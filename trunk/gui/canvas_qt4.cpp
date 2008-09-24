@@ -21,6 +21,10 @@ MainForm::MainForm(QWidget *parent): Q3MainWindow(parent)
 	setupUi(this);
 	
 	// INITIALIZATION
+
+	// first create a Network object
+	theNetwork = new Network();
+
 	panelx=Canvas->width();
 	panely=Canvas->height();
 	start_x=Canvas->x();
@@ -63,7 +67,7 @@ MainForm::MainForm(QWidget *parent): Q3MainWindow(parent)
 	//statusbar = this->statusBar();
 	//statusbar->showMessage("Load a master file");
 	exited = false;
-	theParameters=theNetwork.get_parameters();
+	theParameters=theNetwork->get_parameters();
 	
 	// need to figure out if this affect the simulation
 	// COMMENT WILCO: this is to slow down the simulation
@@ -147,7 +151,7 @@ void MainForm::showCanvasinfo()
 
 void MainForm::updateCanvas()
 {
-	theNetwork.redraw();
+	theNetwork->redraw();
 	copyPixmap();
 }
 
@@ -158,7 +162,7 @@ void MainForm::on_stop_activated()
 	breaknow = true;
 
 	// stop and init the network
-	runtime = theNetwork.reset();
+	runtime = theNetwork->reset();
 
 	// Reset all the internal variables
 	
@@ -180,7 +184,7 @@ void MainForm::on_stop_activated()
 
 void MainForm::on_quit_activated()
 {
-	theNetwork.~Network(); 
+	theNetwork->~Network(); 
 	od_analyser_->~ODCheckerDlg();
 	close();
 }
@@ -198,11 +202,11 @@ void MainForm::on_openmasterfile_activated()
 		// strip the dir from the filename and give to the Network
 		int pos = fn.lastIndexOf ('/');
 		QString workingdir = fn.left(pos+1);
-		theNetwork.set_workingdir (workingdir.latin1());
+		theNetwork->set_workingdir (workingdir.latin1());
 		// make a STL compatible string
 		string name=fn.latin1();
-		if (theNetwork.readmaster(name))
-			runtime=theNetwork.executemaster(&pm2,&wm);
+		if (theNetwork->readmaster(name))
+			runtime=theNetwork->executemaster(&pm2,&wm);
 		else
 		{
 			cout << "ERROR READING THE MASTER FILE: " << name.c_str() << " Exiting" << endl;
@@ -214,7 +218,7 @@ void MainForm::on_openmasterfile_activated()
 		activateToolbars(initialised);
 
 		// initialize the network graphic
-		mod2stdViewMat_=theNetwork.netgraphview_init();
+		mod2stdViewMat_=theNetwork->netgraphview_init();
 		wm=mod2stdViewMat_;
 		updateCanvas();
 		//statusbar->message("Initialised");
@@ -273,7 +277,7 @@ void MainForm::on_showhandle_triggered(bool triggered)
 {
 	//update all linkicons property on handler 
 	if(this->initialised){
-		map <int, Link*> alllinks=theNetwork.get_links();
+		map <int, Link*> alllinks=theNetwork->get_links();
 		//for( unsigned i=0; i<alllinks.size(); i++)
 		//	alllinks[i]->get_icon()->setHandler(triggered);
 		map <int,Link*>::iterator l_iter=alllinks.begin();
@@ -303,7 +307,7 @@ void MainForm::on_loadbackground_activated()
     if (!fn.isEmpty())
     {
 		string haha=fn.latin1();
-		theNetwork.set_background (haha);
+		theNetwork->set_background (haha);
     }
 }
 
@@ -316,7 +320,7 @@ void MainForm::on_run_activated()
 {
 	simprogress_widget->setVisible(true);
 	breaknow=false;
-	theNetwork.reset_link_icons();
+	theNetwork->reset_link_icons();
 	loop();
 }
 
@@ -333,7 +337,7 @@ void MainForm::on_panfactor_valueChanged( int value )
 
 void MainForm::on_parametersdialog_activated()
 {
-	pmdlg->set_parameters(theNetwork.get_parameters());
+	pmdlg->set_parameters(theNetwork->get_parameters());
     pmdlg->show();
 	pmdlg->raise();
 	pmdlg->activateWindow();
@@ -349,7 +353,7 @@ void MainForm::on_inspectdialog_activated()
 
 		// set the network if necessary
 		if(!od_analyser_->getNetworkState()){
-			od_analyser_->setNetwork(&theNetwork);
+			od_analyser_->setNetwork(theNetwork);
 			od_analyser_->setNetworkState(true); 
 		}
 		
@@ -369,7 +373,7 @@ void MainForm::on_inspectdialog_activated()
 
 void MainForm::on_saveresults_activated()
 {
-	 theNetwork.writeall();
+	 theNetwork->writeall();
 }
 
 ////////////////////////////////////////////////
@@ -383,7 +387,7 @@ void MainForm::loop()
 	int updatefac (pmdlg->updatefactor->value());
 	if (!breaknow)
 	timer->start( msecs, TRUE ); // ... mseconds single-shot timer 
-	currtime=theNetwork.step(((updatefac/100)*msecs/1000.0));
+	currtime=theNetwork->step(((updatefac/100)*msecs/1000.0));
 	progressbar->setProgress(static_cast<int>(100.0*currtime/runtime));
 	//LCDNumber1->display(static_cast<int>(currtime));
 	displaytime(currtime);
@@ -428,7 +432,7 @@ void MainForm::paintEvent(QPaintEvent *  event )
 
 void MainForm::seed(int sd )
 {
-   theNetwork.seed(sd);
+   theNetwork->seed(sd);
 }
 
 void MainForm::on_simspeed_valueChanged( int  value)
@@ -714,8 +718,8 @@ void MainForm::selectNodes(QPoint pos)
 	// remove links selected
 	unselectLinks();
 
-	//vector<Node*> allnodes=theNetwork.get_nodes();
-	map<int,Node*> allnodes=theNetwork.get_nodes();
+	//vector<Node*> allnodes=theNetwork->get_nodes();
+	map<int,Node*> allnodes=theNetwork->get_nodes();
 
 	int rad=theParameters->node_radius/mod2stdViewMat_.m11();
 	map<int,Node*>::iterator n_iter = allnodes.begin();
@@ -746,7 +750,7 @@ void MainForm::selectLinks(QPoint pos)
 	// remove nodes selected
 	unselectNodes();
 
-	map <int, Link*> alllinks=theNetwork.get_links();
+	map <int, Link*> alllinks=theNetwork->get_links();
 	int rad=5;
 	
 	map <int,Link*>::iterator l_iter = alllinks.begin();
@@ -816,7 +820,7 @@ void MainForm::resizeEvent(QResizeEvent* event)
 
 	if (!initialised) return; 
 	// update the matrix and redraw
-	//mod2stdViewMat_=theNetwork.netgraphview_init();
+	//mod2stdViewMat_=theNetwork->netgraphview_init();
 	//wm=mod2stdViewMat_;
 	//updateCanvas();
 

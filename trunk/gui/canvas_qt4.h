@@ -51,7 +51,7 @@ public:
 	void seed(int sd ); //!< sets the seed
 
 	// access ports
-	Network* getMezzoNet(){return (&theNetwork);}
+	Network* getMezzoNet(){return (theNetwork);}
 
 private slots: 
 	// Using the Auto-Connect feature with the on_<signal>_<event>() syntax
@@ -133,7 +133,7 @@ private:
 	bool keyL_pressed_;   //!< link selection
 
 	// network 
-	Network theNetwork;  //!< The main Network object, in which is the entire simulation engine
+	Network* theNetwork;  //!< The main Network object, in which is the entire simulation engine
 	vector<Node*> nodes_sel_;  //!< nodes currently selected
 	vector<Link*> links_sel_;  //!< links currently selected
 
