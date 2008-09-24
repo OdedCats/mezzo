@@ -16,7 +16,7 @@
 #include <qmessagebox.h>
 #include "canvas_qt4.h"
 
-MainForm::MainForm(QWidget *parent): Q3MainWindow(parent)
+MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 {
 	setupUi(this);
 	
@@ -388,7 +388,7 @@ void MainForm::loop()
 	if (!breaknow)
 	timer->start( msecs, TRUE ); // ... mseconds single-shot timer 
 	currtime=theNetwork->step(((updatefac/100)*msecs/1000.0));
-	progressbar->setProgress(static_cast<int>(100.0*currtime/runtime));
+	progressbar->setValue(static_cast<int>(100.0*currtime/runtime));
 	//LCDNumber1->display(static_cast<int>(currtime));
 	displaytime(currtime);
 	if (currtime>=runtime)

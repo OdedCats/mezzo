@@ -12,15 +12,27 @@
   <property name="windowTitle" >
    <string>Parameters</string>
   </property>
+  <property name="windowIcon" >
+   <iconset resource="canvas_qt4.qrc" >:/images/icon-tool.png</iconset>
+  </property>
   <property name="sizeGripEnabled" >
    <bool>true</bool>
   </property>
   <layout class="QVBoxLayout" >
-   <property name="margin" >
-    <number>11</number>
-   </property>
    <property name="spacing" >
     <number>6</number>
+   </property>
+   <property name="leftMargin" >
+    <number>11</number>
+   </property>
+   <property name="topMargin" >
+    <number>11</number>
+   </property>
+   <property name="rightMargin" >
+    <number>11</number>
+   </property>
+   <property name="bottomMargin" >
+    <number>11</number>
    </property>
    <item>
     <widget class="QTabWidget" name="tabWidget" >
@@ -404,11 +416,11 @@
        <property name="whatsThis" >
         <string>Updatefactor determines how much time is reserved for simulation and how much for updating the screen. 100% means fastest simulation. 99% is already much slower, but the GUI responds much nicer.</string>
        </property>
-       <property name="maximum" >
-        <number>2000</number>
-       </property>
        <property name="minimum" >
         <number>0</number>
+       </property>
+       <property name="maximum" >
+        <number>2000</number>
        </property>
        <property name="singleStep" >
         <number>10</number>
@@ -499,11 +511,11 @@
        <property name="whatsThis" >
         <string>Updatefactor determines how much time is reserved for simulation and how much for updating the screen. 100% means fastest simulation. 99% is already much slower, but the GUI responds much nicer.</string>
        </property>
-       <property name="maximum" >
-        <number>100</number>
-       </property>
        <property name="minimum" >
         <number>1</number>
+       </property>
+       <property name="maximum" >
+        <number>100</number>
        </property>
        <property name="singleStep" >
         <number>1</number>
@@ -546,11 +558,11 @@
        <property name="whatsThis" >
         <string>Updatefactor determines how much time is reserved for simulation and how much for updating the screen. 100% means fastest simulation. 99% is already much slower, but the GUI responds much nicer.</string>
        </property>
-       <property name="maximum" >
-        <number>200</number>
-       </property>
        <property name="minimum" >
         <number>1</number>
+       </property>
+       <property name="maximum" >
+        <number>200</number>
        </property>
        <property name="singleStep" >
         <number>1</number>
@@ -577,11 +589,11 @@
        <property name="whatsThis" >
         <string/>
        </property>
-       <property name="maximum" >
-        <number>200</number>
-       </property>
        <property name="minimum" >
         <number>1</number>
+       </property>
+       <property name="maximum" >
+        <number>200</number>
        </property>
        <property name="singleStep" >
         <number>10</number>
@@ -595,11 +607,20 @@
    </item>
    <item>
     <layout class="QHBoxLayout" >
-     <property name="margin" >
-      <number>0</number>
-     </property>
      <property name="spacing" >
       <number>6</number>
+     </property>
+     <property name="leftMargin" >
+      <number>0</number>
+     </property>
+     <property name="topMargin" >
+      <number>0</number>
+     </property>
+     <property name="rightMargin" >
+      <number>0</number>
+     </property>
+     <property name="bottomMargin" >
+      <number>0</number>
      </property>
      <item>
       <widget class="QPushButton" name="buttonHelp" >
@@ -664,12 +685,14 @@
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11" />
- <pixmapfunction>qPixmapFromMimeSource</pixmapfunction>
+ <pixmapfunction></pixmapfunction>
  <includes>
   <include location="global" >qcolordialog.h</include>
   <include location="global" >qmatrix.h</include>
  </includes>
- <resources/>
+ <resources>
+  <include location="canvas_qt4.qrc" />
+ </resources>
  <connections>
   <connection>
    <sender>buttonOk</sender>

@@ -33,7 +33,7 @@
 #ifndef MAINFORM
 #define MAINFORM
 
-#include <Qt3Support>
+//#include <Qt3Support>
 #include <Qfiledialog>
 #include <QWMatrix>
 #include "ui_canvas_qt4.h"
@@ -42,7 +42,7 @@
 #include "../mezzoAnalyzer/src/odcheckerdlg.h"
 #include "../mezzo_lib/src/network.h"
 
-class MainForm : public Q3MainWindow, private Ui::MainForm
+class MainForm : public QMainWindow, private Ui::MainForm
 {
 	Q_OBJECT
 
