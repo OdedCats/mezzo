@@ -12,6 +12,9 @@
   <property name="windowTitle" >
    <string>Mezzo Analyzer</string>
   </property>
+  <property name="windowIcon" >
+   <iconset resource="../../gui/canvas_qt4.qrc" >:/images/inspect.png</iconset>
+  </property>
   <layout class="QGridLayout" >
    <property name="margin" >
     <number>9</number>
@@ -195,7 +198,9 @@
   <tabstop>cancelButton</tabstop>
   <tabstop>CheckButton</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="../../gui/canvas_qt4.qrc" />
+ </resources>
  <connections>
   <connection>
    <sender>cancelButton</sender>

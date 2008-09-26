@@ -1,3 +1,28 @@
+/*
+	Mezzo Mesoscopic Traffic Simulation 
+	Copyright (C) 2008  Wilco Burghout
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/**
+ * modification:
+ *   add bounding box to the node object
+ *
+ * Xiaoliang Ma 
+ * last change: 2007-10-20 
+ */
 
 #ifndef NODE_HH
 #define NODE_HH
@@ -5,6 +30,7 @@
 
 #include "link.h"
 #include <vector>
+#include <string>
 #include "turning.h"
 #include "q.h"
 #include "vehicle.h"
@@ -34,10 +60,10 @@ class Q;
 class Vehicle;
 class Signature;
 class ODpair;
-class Oaction;
 class Daction;
 class BOaction;
 class Busroute;
+
 
 #ifdef _PVM
 class PVM;
@@ -56,52 +82,52 @@ class Coord
 class Node
 {
   public:
-   Node(int id_);
-   virtual ~Node();
-   virtual const int get_id();
-   void setxy(double x, double y);
-   const Coord getxy();
+	Node(int id_);
+	virtual ~Node();
+	virtual const int get_id();
+	virtual const string className(){return "Node";}
+	virtual void reset(); // resets the state variables to 0
+	void setxy(double x, double y);
+	const Coord getxy();
 #ifndef _NO_GUI
-   void set_icon(NodeIcon* icon_);
+	Icon* get_icon(){return icon;}
+	void set_icon(NodeIcon* icon_);
 #endif // _NO_GUI   
-  virtual bool  process_veh(Vehicle* veh, double time);
-  protected:
-  int id;
-  Coord position;
+	virtual bool  process_veh(Vehicle* veh, double time);
+ protected:
+	int id;
+	Coord position;
 #ifndef _NO_GUI  
-  NodeIcon* icon;
+	NodeIcon* icon;
 #endif // _NO_GUI  
 };
 
 class Origin : public Node
 {
-	public:
-	 Origin (int id_);
-	 virtual ~Origin();
+public:
+	Origin (int id_);
+	virtual ~Origin();
+	virtual void reset(); // resets the state variables to restart
+
+	virtual const string className(){return "Origin";}
 	virtual bool transfer_veh(Link* link, double time); // transfers the vehicle from InputQueue to one of the
 																				//outgoing links
 	virtual bool insert_veh(Vehicle* veh, double time); // inserts the vehicle into the InputQueue
 	virtual void add_odpair(ODpair* odpair);
-	virtual void register_links(vector<Link*> links); // registers the outgoing links
-	virtual void initialise(); // initialises the OServers for each outgoing link based on rates from ODpairs
-	virtual bool execute(Eventlist* eventlist, double time);
-	virtual void get_link_rates(); // gets the link rates from the ODpairs
-	virtual vector<Link*> get_links() {return outgoing;}
+	virtual void register_links(map <int,Link*> linkmap); // registers the outgoing links
+
+	virtual vector<Link*> get_links() {return outgoing;} // returns all outgoing links
 	
-	// Broadcast functions are only there for the DYNAMO test cases
-	virtual void broadcast_incident_start(int lid, vector <double> parameters);
-	virtual void broadcast_incident_stop(int lid);
+	virtual void broadcast_incident_start(int lid, vector <double> parameters); // broadcasts incident to all vehicles starting from this origin
+	virtual void broadcast_incident_stop(int lid); // stops broadcast of incident
 
 	void write_v_queues(ostream& out);
 
-
-	protected:
-	vector <OServer*> servers;
+protected:
+	//vector <OServer*> servers;
 	InputLink* inputqueue;
 	vector <Link*>  outgoing;	
 	vector <ODpair*> odpairs;
-	vector <Oaction*> oactions;
-	vector<linkrate> link_rates;
 	bool incident; // flag that indicates incident behaviour
 	int incident_link;
 	vector <double> incident_parameters;
@@ -111,29 +137,31 @@ class Origin : public Node
 
 class Destination : public Node
 {
-	public:
-	Destination (int id_, Server* server_);
+public:
+	 Destination (int id_, Server* server_);
 	 Destination (int id_);
+	 virtual const string className(){return "Destination";}
 	 virtual ~Destination();
-	 virtual void register_links(vector<Link*> links);
+	 virtual void register_links(map <int,Link*> linkmap);
 	 virtual bool execute(Eventlist* eventlist, double time);
-	protected:
-		vector <Link*>  incoming;
-		vector <Daction*> dactions;
-		Server* server;		
+protected:
+	 vector <Link*>  incoming;
+	 vector <Daction*> dactions;
+	 Server* server;		
 };
 
 class Junction : public Node
 {
 	public:	
 	 Junction (int id_);
-	 void register_links(vector <Link*> links) ;
+	 virtual const string className(){return "Junction";}
+	 void register_links(map <int,Link*> linkmap) ;
    	 vector <Link*> get_incoming() {return incoming;}
 	 vector <Link*> get_outgoing() {return outgoing;}
 	private:
-	vector <Turning*> turnings;
-	vector <Link*>  incoming;
-	vector <Link*>  outgoing;
+	 vector <Turning*> turnings; // This seems to be unused at the moment!
+	 vector <Link*>  incoming;
+	 vector <Link*>  outgoing;
 };
 
 class BoundaryOut : public Junction
@@ -141,6 +169,7 @@ class BoundaryOut : public Junction
  public:
  	BoundaryOut (int id_);
  	~BoundaryOut();
+	virtual const string className(){return "BoundaryOut";}
  	void block(int code,double speed); // spread the news to the virtual links (setting full to true/false)
  	void register_virtual(VirtualLink* vl) { vlinks.insert(vlinks.begin(),vl);}
 	vector <VirtualLink*> & get_virtual_links() {return vlinks;}
@@ -169,6 +198,8 @@ class BoundaryOut : public Junction
 	bool blocked_;
 } ;
 
+typedef pair <int,int> odval;
+
 class BoundaryIn : public Origin
 /* BoundaryIn is a special Origin, in the sense that vehicles that are generated here are generated from a stream (PVM or other)
 	that is connected to a microscopic model
@@ -178,10 +209,12 @@ class BoundaryIn : public Origin
 	BoundaryIn (int id_);
 	~BoundaryIn ();
 	void register_virtual(VirtualLink* vl) { vlinks.insert(vlinks.begin(),vl);}
-	void register_routes(vector<Route*> * routes_){routes=routes_;}
+	//void register_routes(vector<Route*> * routes_){routes=routes_;}
+	void register_routes (multimap<odval,Route*> * routemap_) {routemap=routemap_;}
 	void register_busroutes (vector<Busroute*> * busroutes_) {busroutes=busroutes_;}
 	void register_ods(vector<ODpair*> *ods_){ods=ods_;}
     vector <VirtualLink*> & get_virtual_links() {return vlinks;}
+	Route* find_route(odval val, int id);
 #ifdef _PVM	 // PVM specific functions
 	bool receive_message(PVM* com);
 	int send_message (PVM* com, double time);   // sends messages. returns nr of sigs that are sent 
@@ -196,30 +229,15 @@ class BoundaryIn : public Origin
 	bool newvehicle(Signature* sig);
 #endif // _MIME	
 
-
-	private:
+private:
 	vector <VirtualLink*> vlinks;
-	vector <Route*> * routes;
+	//vector <Route*> * routes;
+	multimap <odval,Route*> * routemap;
 	vector <Busroute*> * busroutes; 
 	vector <ODpair*> * ods;
 	Vehicle* lastveh;
 };
 
-
-
-
-class Oaction : public Action   // loads the link outward from the Origin with traffic from the origins inputqueue.
-{
-	public:
-		Oaction(Link* link_, Origin* origin_, OServer* server_);
-		virtual ~Oaction();
-		bool execute(Eventlist* eventlist, double time);
-		bool process_veh(double time);
-  private:
-    Link* link;
-    Origin* origin;
-    OServer* server;
-};
 
 
 class Daction : public Action
@@ -235,15 +253,5 @@ class Daction : public Action
   Server* server;
 } ;
 
-/*
-class BOaction : public Daction
-{
- public:
- 	BOaction (Link* link_, BoundaryOut* boundaryout_, Server* server_);
- 	~BOaction();
- 	bool process_veh(double time);
- protected:
- 	BoundaryOut* boundaryout;
- };
- */
+
 #endif

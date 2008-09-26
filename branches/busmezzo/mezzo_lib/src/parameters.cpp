@@ -45,8 +45,13 @@ Parameters::Parameters ()
    update_interval_routes= 600.0;
    mnl_theta = -0.00417;
    kirchoff_alpha = -1.0;
-   max_rel_route_cost = 2.0;
    delete_bad_routes= false;
+   max_rel_route_cost = 2.0;
+   small_od_rate = 3.0;
+   
+	//state var
+   shortest_paths_initialised = false;
+
 // #mime_parameters
    mime_comm_step= 0.5;
    mime_min_queue_length= 20;
@@ -366,6 +371,14 @@ bool Parameters::read_parameters (istream & in )
 	}
 	in >> kirchoff_alpha;
 
+	in >> keyword;
+	if (keyword!= "delete_bad_routes=")
+	{
+		cout << "ERROR reading Parameters file, expecting: delete_bad_routes=, read: " << keyword << endl;
+		return false;
+	}
+	in >> delete_bad_routes;
+
     in >> keyword;
 	if (keyword!= "max_rel_route_cost=")
 	{
@@ -374,6 +387,15 @@ bool Parameters::read_parameters (istream & in )
 	}
 	in >> max_rel_route_cost;
 
+	in >> keyword;
+	if (keyword!= "small_od_rate=")
+	{
+		cout << "ERROR reading Parameters file, expecting: small_od_rate=, read: " << keyword << endl;
+		return false;
+	}
+	in >> small_od_rate;
+
+	
 	in >> keyword;
 	if (keyword!= "#mime_parameters")
 	{
@@ -464,6 +486,11 @@ void Parameters::write_parameters(ostream & out)
    out << "  standard_veh_length= " << standard_veh_length << endl;
    out << "#route_parameters" << endl;
    out << "  update_interval_routes= " << update_interval_routes << endl;
+   out << "  mnl_theta= " << mnl_theta << endl;
+   out << "  kirchoff_alpha= " << kirchoff_alpha << endl;
+   out << "  delete_bad_routes= " << delete_bad_routes << endl;
+   out << "  max_rel_route_cost= " << max_rel_route_cost << endl;
+   out << "  small_od_rate= " << small_od_rate << endl;
    out << "#mime_parameters" << endl;
    out << "  mime_comm_step= " << mime_comm_step << endl;
    out << "  mime_min_queue_length= " << mime_min_queue_length << endl;

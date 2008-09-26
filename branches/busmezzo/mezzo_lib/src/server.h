@@ -1,10 +1,20 @@
-// At this moment the standard time headway server creates N(mu,sd) distributed headways which are
-// to be bigger than min_hdway. In the case the random draw generates a number smaller than min_hdway,
-// the min_hdway value is returned.  I wonder how this affects the randomness and the spread
-// of the generated numbers. Maybe a redraw would be better.
-//
-// The random number generator is initialised and randomised at the creation of the object
+/*
+	Mezzo Mesoscopic Traffic Simulation 
+	Copyright (C) 2008  Wilco Burghout
 
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #ifndef SERVER_HH
 #define SERVER_HH
@@ -17,18 +27,17 @@
 
 /*******************************************************************************
 THis class defines the random time-headway servers that are used throughout the 
-program. This means that any optimisation should start here :-)
-
-Also, for the fun of it I'll start here to get things slightly correct, regarding
-the c++ programming style. to do:
-1. get const-correctness for both data members and functions
-2. inspector functions are const as well.
-3. put in try-catch bocks to get exceptions. Maybe not here though (performance)
-
-Of course this will need to be done everywhere (when I have some months of spare time)
+program. 
 *******************************************************************************/
 
 
+
+// At this moment the standard time headway server creates N(mu,sd) distributed headways which are
+// to be bigger than min_hdway. In the case the random draw generates a number smaller than min_hdway,
+// the min_hdway value is returned.  I wonder how this affects the randomness and the spread
+// of the generated numbers. Maybe a redraw would be better.
+//
+// The random number generator is initialised and randomised at the creation of the object
 
 class Server  // standard n(mu,sd2) server  type: 1
 {
@@ -89,12 +98,14 @@ public:
 };
 
 class OServer : public Server
-/* specially designed for input flows. Designed to be a combination of a N(mu,sd) and EXP(beta) server,
+/*   NOTE not in use anymore, traffic is generated directly onto inputqueue by OD pairs.
+
+   Especially designed for input flows. Designed to be a combination of a N(mu,sd) and EXP(beta) server,
 	: output=alpha(N(mu_bound,sd_bound)) + (1-alpha)Exp(mu_unbound)
 	- alpha: proportion of carfollowing headways
 	- 1-alpha: proportion of non carfollowing headways
 	- mu= alpha*mu_bound+(1-alpha)mu_unbound
-	- 1 O server per lane!
+	- One O server per lane!
 */
 
 {
@@ -115,8 +126,8 @@ class StochasticDelayServer : public Server
   */
 {
 public:
-	StochasticDelayServer (const int id_, const int type_, const double mu_, const double sd_, const double delay_, const double delay_std) :
-	  Server (id_,type_,mu_,sd_,delay_) {}
+	StochasticDelayServer (const int id_, const int type_, const double mu_, const double sd_, const double delay_, const double delay_std_) :
+	  Server (id_,type_,mu_,sd_,delay_), delay_std (delay_std_){}
 	double next (const double time);
 	double get_delay_std () {return delay_std;}
 	void set_delay_std (double delay_std_) {delay_std = delay_std_;}

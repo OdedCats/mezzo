@@ -8,9 +8,7 @@
 Link::Link(int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* sdfunc_): id(id_), in_node (in_),
 		out_node(out_), length(length_), nr_lanes(nr_lanes_), sdfunc(sdfunc_)
 {
-//	maxcap=static_cast <int> (sdfunc->get_romax()*length*nr_lanes/1000);
 	maxcap=static_cast<int> (length*nr_lanes/theParameters->standard_veh_length);
-//  maxcap=length*nr_lanes;      // now maxcap is the total space that is available for vehicles
 #ifdef _DEBUG_LINK	
 	cout << "link " << id << " maxcap " << maxcap << endl;
 #endif //_DEBUG_LINK
@@ -29,20 +27,14 @@ Link::Link(int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* s
 #endif //_COLLECT_ALL	
 	avg_time=0.0;
 	avgtimes=new LinkTime();
-   histtimes=NULL;
-  nr_passed=0;
+	histtimes=NULL;
+	nr_passed=0;
 	running_percentage=0.0;
 	queue_percentage=0.0;
 	blocked=false;
 	moe_speed=new MOE(theParameters->moe_speed_update, 3.6);
 	moe_inflow=new MOE(theParameters->moe_inflow_update, (3600.0/theParameters->moe_inflow_update));
 	moe_outflow=new MOE(theParameters->moe_outflow_update, (3600.0/theParameters->moe_outflow_update));
-
-//	moe_inflow=new MOE(theParameters->moe_inflow_update, ((3600.0/theParameters->moe_inflow_update)/nr_lanes));
-//	moe_outflow=new MOE(theParameters->moe_outflow_update, ((3600.0/theParameters->moe_outflow_update)/nr_lanes));
-//	moe_inflow=new MOE(theParameters->moe_inflow_update);
-//	moe_outflow=new MOE(theParameters->moe_outflow_update);
-	
 	moe_queue=new MOE(theParameters->moe_queue_update);
 	moe_density=new MOE(theParameters->moe_density_update);
   blocked_until=-1.0; // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
@@ -63,10 +55,10 @@ Link::Link()
 	moe_outflow=new MOE(theParameters->moe_outflow_update);
 	moe_queue=new MOE(theParameters->moe_queue_update);
 	moe_density=new MOE(theParameters->moe_density_update);
-  blocked_until=-1.0; // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
-  nr_exits_blocked=0; // set by the turning movements if they are blocked
-  freeflowtime=1.0;	
-  selected = false;
+	blocked_until=-1.0; // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
+	nr_exits_blocked=0; // set by the turning movements if they are blocked
+	freeflowtime=1.0;	
+	selected = false;
 }		
 
 Link::~Link()
@@ -90,6 +82,34 @@ Link::~Link()
     if (avgtimes!=NULL)
       delete (avgtimes);
 	
+}
+
+void Link::reset()
+{
+	avg_time=0.0;
+	curr_period=0;
+	tmp_avg=0.0;
+	tmp_passed=0;
+	// Reset avgtimes
+	avgtimes->reset();
+	nr_passed=0;
+	running_percentage=0.0;
+	queue_percentage=0.0;
+	blocked=false;
+	moe_speed->reset();
+	moe_inflow->reset();
+	moe_outflow->reset();
+	moe_queue->reset();
+	moe_density->reset();
+	blocked_until=-1.0; // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
+	nr_exits_blocked=0; // set by the turning movements if they are blocked
+	freeflowtime=(length/(sdfunc->speed(0.0)));
+	if (freeflowtime < 1.0)
+      freeflowtime=1.0;
+	queue->reset();    
+	use_ass_matrix = false;
+	selected = false;
+	ass_matrix.clear();
 }
 
 
@@ -116,8 +136,7 @@ const bool Link::full(double time)
    {    
      if (nr_exits_blocked >0)     // IF one of the turning movements is blocked
          blocked_until=-2.0; // blocked until further notice.
-         //cout <<" on link "<< id << " the queue has become full and density = " << density() << " and space occupied ";
-         //cout << queue->calc_total_space() << " and total space available: " <<length*nr_lanes << endl;
+         // TO DO: make turnings unblock when the specific queue for that exit < lookback for other turnings
          
      return true; // IF the queue is full this returns true. IF ALSO at least one exit is blocked, blocked_until=-2.0 and this will stay blocked untill a shockwave.
    }
@@ -156,9 +175,24 @@ const int Link::size()
 	
 void Link::add_alternative(int dest, vector<Link*> route)
 	{queue->add_alternative(dest, route);}	
+void Link::add_alternative_route(Route* route) 
+{
+	queue->add_alternative_route(route);
+	vector<Link*> route_v = route->get_downstream_links (id);
+	int dest =route->get_destination()->get_id(); 
+	queue->add_alternative (dest, route_v);
+}
+
+void Link::register_route (Route* route) 
+{
+	int dest_id = route->get_destination()->get_id();
+	routemap.insert(pair<int,Route*>(dest_id,route));
+
+} // STUB to be implemented later 2008-01-29
 
 void Link::set_selected (const bool sel) 
-{	selected = sel;
+{	
+	selected = sel;
 #ifndef _NO_GUI	
 	icon->set_selected(selected);
 #endif // _NO_GUI	
@@ -185,6 +219,8 @@ void Link::update_exit_times(double time,Link* nextlink, int lookback)
 
    if (v_shockwave >= v_exit) // due to the limited domain of the speed/density functions we need to check
        v_shockwave=v_exit - 1.0;
+   if (v_shockwave==0.0)
+	   v_shockwave = v_exit;
    
    /*
     v_exit=sdfunc->speed(k_dnstr);
@@ -644,18 +680,50 @@ void Link::update_icon(double time)
 	cout << "  queueingsize " << queuesize << endl;
 #endif //_DEBUG_LINK	
 }
+// INCIDENT FUNCTIONS
 
-void Link::set_incident(Sdfunc* sdptr, bool blocked_)
+vector <Route*> Link::get_routes_to_dest(int dest) 
+{
+	multimap <int, Route*>::iterator start,stop; // CHECK OUT if we can simply pass the iterators...
+	start = routemap.lower_bound(dest);
+	stop = routemap.upper_bound(dest);
+	vector <Route*> return_routes;
+	for (start; start != stop; start++)
+	{
+		return_routes.push_back((*start).second);
+	}
+ return return_routes;
+
+}
+unsigned int Link::nr_alternative_routes(int dest, int incidentlink_id)
+{
+	unsigned int count = 0;
+	vector <Route*> routes_to_dest=get_routes_to_dest(dest);
+	vector <Route*>::iterator route_iter= routes_to_dest.begin();
+	for (route_iter; route_iter!=routes_to_dest.end();route_iter++)
+	{	
+		if ( ! ((*route_iter)->has_link(incidentlink_id)) )
+		{
+			 count++;
+			 add_alternative_route(*route_iter);
+		}
+	}
+  return count;
+}
+void Link::set_incident(Sdfunc* sdptr, bool blocked_, double blocked_until_)
 {
 	temp_sdfunc=sdfunc;
 	sdfunc=sdptr;
 	blocked=blocked_;
+	blocked_until=-2.0; 
+	// NOTE : Check why blocked_until_ is ignored!
 }
 
 void Link::unset_incident()
 {
 	sdfunc=temp_sdfunc;
 	blocked=false;
+	blocked_until=-1.0; // unblocked
 	cout << "the incident on link " << id << " is over. " << endl;
 }
 
@@ -726,6 +794,14 @@ InputLink::InputLink(int id_, Origin* out_)
     queue=new Q(maxcap, 1.0);
     histtimes=NULL;
     avgtimes=NULL;
+}
+
+void InputLink::reset()
+{
+	blocked_until=-1.0; // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
+	nr_exits_blocked=0; // set by the turning movements if they are blocked
+
+	queue->reset();
 }
 
 InputLink::~InputLink()

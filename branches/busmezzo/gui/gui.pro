@@ -7,6 +7,7 @@ INCLUDEPATH += $(QTDIR)/include $(QTDIR)/include/QtCore $(QTDIR)/include/QtGui $
 
 CONFIG(debug, debug|release) {
      LIBS +=  -L../mezzo_lib/Debug -lmezzo_lib -L../mezzoAnalyzer/Debug -lmezzoAnalyzer 
+     DEPENDS += ../mezzo_lib/Debug/mezzo_lib.lib ../mezzoAnalyzer/Debug/mezzoAnalyzer.lib
  } else {
      LIBS +=  -L../mezzo_lib/Release -lmezzo_lib -L../mezzoAnalyzer/Release -lmezzoAnalyzer 
  }
@@ -15,10 +16,10 @@ LIBS += -L$(QTDIR)/lib -lQtCore -lQtGui -lQtNetwork -lQt3Support -lQtDesigner
 
 QT+= core gui qt3support 
 #activeqt xml network svg
-CONFIG += uic4
+CONFIG += uic4 debug
 
 # Input
-HEADERS += canvas_qt4.h parametersdialog_qt4.h
-FORMS += canvas_qt4.ui parametersdialog_qt4.ui
-SOURCES += canvas_qt4.cpp main.cpp parametersdialog_qt4.cpp
+HEADERS += canvas_qt4.h parametersdialog_qt4.h src/nodedlg.h
+FORMS += canvas_qt4.ui parametersdialog_qt4.ui ui/nodedlg.ui
+SOURCES += canvas_qt4.cpp main.cpp parametersdialog_qt4.cpp src/nodedlg.cpp
 RESOURCES += canvas_qt4.qrc

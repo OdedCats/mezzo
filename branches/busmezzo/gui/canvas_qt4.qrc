@@ -1,16 +1,23 @@
 <RCC>
     <qresource prefix="/" >
-        <file>images/1rightarrow.png</file>
         <file>images/background.png</file>
+        <file>images/bt_pause.png</file>
+        <file>images/bt_play.png</file>
+        <file>images/bt_stop.png</file>
+        <file>images/close.png</file>
         <file>images/dvi.png</file>
         <file>images/exit.png</file>
+        <file>images/file_edit.png</file>
+        <file>images/file_explore.png</file>
         <file>images/fileopen2.png</file>
         <file>images/filesave.png</file>
         <file>images/icon-tool.png</file>
         <file>images/inspect.png</file>
         <file>images/mime.png</file>
+        <file>images/penmark.png</file>
         <file>images/player_pause.png</file>
         <file>images/viewmag-.png</file>
-        <file>images/zoomin.png</file>
+        <file>images/zoom_in.png</file>
+        <file>images/zoom_out.png</file>
     </qresource>
 </RCC>

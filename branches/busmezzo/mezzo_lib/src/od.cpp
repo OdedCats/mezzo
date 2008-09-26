@@ -52,6 +52,18 @@ ODaction::~ODaction()
 	delete server;
 }
 
+void ODaction::reset(double rate_)
+{
+	if (rate_ < 1)
+	{
+		active = false;
+	}
+	else
+	{
+		server->set_rate((3600/rate_),theParameters->odserver_sigma);
+		active=true;
+	}
+}
 
 bool ODaction::execute(Eventlist* eventlist, double time)
 {
@@ -68,12 +80,11 @@ bool ODaction::execute(Eventlist* eventlist, double time)
 	   // 2002_12_18 recycling the vehicles
 	  Vehicle* veh=recycler.newVehicle(); // get a _normal_ vehicle
 	  veh->init(vid,vehtype->id, vehtype->length,route,odpair,time);  
-	  if ( (odpair->get_origin())->insert_veh(veh,time))
+	  if ( (odpair->get_origin())->insert_veh(veh,time)) // insert vehicle in the input queue
   		ok=true;
 	  else
   		{
-  			ok=false; // so what to do if there's no room on first link? For now just drop the vehicle.
-			// update: at Origin an inputqueue is taking care of the waiting vehicles, and has unlimited capacity.
+  			ok=false; // if there's no room on the inputqueue (should never happen) we just drop the vehicle.
   			cout << "OD action:: dropped a vehicle " << veh->get_id() << endl;
   			//delete veh; // so we're not creating memory leaks...
   			recycler.addVehicle(veh);
@@ -146,13 +157,16 @@ void ODpair::add_route(Route* route)
    		return NULL;
  }
 
-vector <int> ODpair::delete_spurious_routes(double time)
+/**
+* a heuristic to delete spurious route
+*/
+vector <Route*> ODpair::delete_spurious_routes(double time)
 // finds routes that are more than 
 {
 
 	unsigned int maxroutes=10;
 	double threshold =0.0;
-	vector <int> thrown;
+	vector <Route*> thrown;
 	string reason ="";
 	vector <Route*>::iterator iter1=routes.begin();
 	vector <Route*>::iterator shortest_route=routes.begin();
@@ -166,16 +180,16 @@ vector <int> ODpair::delete_spurious_routes(double time)
 	  }
 	}
 	
-	if (rate < small_od_rate ) // if the rate is small there should be no route choice
+	if (rate < theParameters->small_od_rate ) // if the rate is small there should be no route choice
 	{
 		threshold = 1.5; // all other routes will be deleted
-		maxroutes = 2;
+		maxroutes = 5;
 		reason = " small OD ";
 	}
 	else
 	{
 		
-		double r = (rate/small_od_rate); // even for larger OD pairs, limit nr of routes by rate
+		double r = (rate/theParameters->small_od_rate); // even for larger OD pairs, limit nr of routes by rate
 		//if (routes.size() > r)
 	//		threshold = 1.50; // only good routes 
 	//	else
@@ -194,7 +208,7 @@ vector <int> ODpair::delete_spurious_routes(double time)
 		  cout << " erased route " << (*iter1)->get_id() << " from route choice set for OD pair ("
 			  << odids().first << "," << odids().second << ") because: " << reason << ", cost: "<< (*iter1)->cost(time) << 
 			  ", mincost: " << min_cost << ", rate: " << rate << endl;
-		  thrown.push_back((*iter1)->get_id());
+		  thrown.push_back((*iter1));
 		  iter1=routes.erase(iter1);
 	  }
 	  else iter1++;
@@ -203,6 +217,7 @@ vector <int> ODpair::delete_spurious_routes(double time)
 	
 	sort (routes.begin(), routes.end(), compare_route_cost);
 	cout << "cost of sorted routes " << endl;
+	reason = " Max nr routes reached ";
 	vector <Route*>::iterator r_iter = routes.begin();
 	for (r_iter; r_iter < routes.end(); r_iter++)
 	{
@@ -214,24 +229,15 @@ vector <int> ODpair::delete_spurious_routes(double time)
 		vector<Route*>::iterator r=routes.end();
 		for (unsigned int k = routes.size(); k > maxroutes; k--)
 		{
+			r=routes.end();
 			r--;
 			cout << " erased route " << (*r)->get_id() << " from route choice set for OD pair ("
 			  << odids().first << "," << odids().second << ") because: " << reason << ", cost: "<< (*r)->cost(time) << 
 			  ", mincost: " << min_cost << ", rate: " << rate << endl;
-			 thrown.push_back((*r)->get_id());
+			 thrown.push_back((*r));
 			 routes.erase(r);
 		}
-		/*
-		for (int k=maxroutes; k < routes.size(); )
-		{
-			 cout << " erased route " << routes[k]->get_id() << " from route choice set for OD pair ("
-			  << odids().first << "," << odids().second << ") because: " << reason << ", cost: "<< routes[k]->cost(time) << 
-			  ", mincost: " << min_cost << ", rate: " << rate << endl;
-			 thrown.push_back(routes[k]->get_id());
-			
-			 routes.erase(&(routes.at(k)));
 
-		}*/
 	}
 	return thrown;
 }
@@ -297,11 +303,12 @@ odval ODpair::odids ()
 	return odval(origin->get_id(), destination->get_id());
 }
 
-ODpair::ODpair(Origin* origin_, Destination* destination_, int rate_, Vtypes* vtypes_):
- 	origin(origin_), destination(destination_), rate(rate_), vtypes (vtypes_)
+ODpair::ODpair(Origin* origin_, Destination* destination_, int rate_, Vtypes* vtypes_)
+	:origin(origin_), destination(destination_), rate(rate_), vtypes (vtypes_)
 {
  	odaction=new ODaction(this);
  	random=new Random();
+	start_rate=rate;
 #ifndef _DETERMINISTIC_ROUTE_CHOICE
  	if (randseed != 0)
 	   random->seed(randseed);
@@ -316,7 +323,8 @@ ODpair::ODpair(Origin* origin_, Destination* destination_, int rate_, Vtypes* vt
 	grid=new Grid(nr_fields,fields);	
 }
 
-ODpair::ODpair(): id (-1), odaction (NULL), origin (NULL), destination (NULL), rate (-1), random (NULL)
+ODpair::ODpair(): id (-1), odaction (NULL), origin (NULL), destination (NULL), 
+                  rate (-1), random (NULL), start_rate(-1)
 {
 
 }
@@ -327,6 +335,14 @@ ODpair::~ODpair()
 		delete odaction;
 	if (random)
 		delete random;	
+}
+
+void ODpair::reset()
+{
+	rate=start_rate;
+	odaction->reset(rate);
+	
+	grid->reset();
 }
  	
 bool ODpair::execute(Eventlist* eventlist, double time)
@@ -395,3 +411,11 @@ bool ODpair::less_than(ODpair* od)
 		}
 	 }
  }
+
+Route* ODpair::filteredRoute(int index)
+{
+	Route* theroute=routes[index];
+	filtered_routes_.push_back(theroute);
+	routes.erase(routes.begin()+index);
+	return theroute;
+}

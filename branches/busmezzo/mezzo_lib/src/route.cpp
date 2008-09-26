@@ -18,7 +18,15 @@ struct compare
 
 Route::Route(int id_, Origin* origin_, Destination* destination_, vector <Link*> links_):	id(id_), origin(origin_), destination(destination_),sumcost(0.0)
 {
- 	links=links_;
+ 	last_calc_time=0.0;
+	links=links_;
+	vector <Link*>::iterator iter = links.begin();
+	for (iter; iter < links.end(); iter++)
+	{
+			Link* link=(*iter);
+			link->register_route(this);
+			linkmap [link->get_id()]=link;
+	}
 #ifdef _DEBUG_ROUTE 	
  	cout << "new route: rid,oid,did : lid* " << id << ","<< origin->get_id();
 	cout << "," << destination->get_id() << " : ";
@@ -35,6 +43,7 @@ Route::Route(int id_, Origin* origin_, Destination* destination_, vector <Link*>
 Route::Route(int id_, Route* route, vector<Link*> links_): id(id_)
 {
 	sumcost=0.0;
+	last_calc_time=0.0;
 	links=links_;
 	origin=route->get_origin();
 	destination=route->get_destination();
@@ -51,6 +60,12 @@ Route::Route(int id_, Route* route, vector<Link*> links_): id(id_)
 		links.insert(links.begin(),  oldlinks.front() );
 }
 
+void Route::reset()
+{
+	sumcost=0.0;
+	last_calc_time=0.0;
+
+}
 
 odval Route::get_oid_did()
   {return odval(origin->get_id(), destination->get_id());}		
@@ -79,6 +94,17 @@ odval Route::get_oid_did()
 		}
 	 }
  }
+
+ vector<Link*> Route::get_upstream_links(int link_id)
+ {
+		return (vector <Link*> (links.begin(), find_if (links.begin(),links.end(), compare <Link> (link_id))));
+ }
+
+ vector<Link*> Route::get_downstream_links(int link_id)
+ {
+	    return (vector <Link*> (find_if (links.begin(),links.end(), compare <Link> (link_id)),links.end()  ));
+ }
+
 
  void Route::set_selected(bool selected) // sets the links' selected attribute
  {
@@ -127,7 +153,11 @@ Link* Route::nextlink(Link* currentlink)
 
 bool Route::has_link(int lid)
 {
- return ( (find_if (links.begin(),links.end(), compare <Link> (lid))) < links.end() ); // the link exists
+  //return ( (find_if (links.begin(),links.end(), compare <Link> (lid))) < links.end() ); // the link exists
+	if (linkmap.count(lid))
+		return true;
+	else
+		return false;
 }
 
 

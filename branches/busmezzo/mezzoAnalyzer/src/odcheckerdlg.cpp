@@ -14,6 +14,8 @@ ODCheckerDlg::ODCheckerDlg(QWidget* parent):QDialog(parent)
    odsel_=0;
    orgId_=-1;
    destId_=-1;
+   rowCnt_=0;
+   colCnt_=0;
    networkset_=false;
    allroutesdrawn_=false;
    paintrouteseq_=new vector<std::pair<int,QString>>(0);	
@@ -84,32 +86,50 @@ ODCheckerDlg::~ODCheckerDlg()
 bool ODCheckerDlg::eventFilter(QObject *obj, QEvent *evt)
 {
 	// handling event for table view
-	if (obj == ODTableView) {
-		if (evt->type() == QEvent::KeyPress) {
+	if (obj == ODTableView) 
+	{
+		// handling key event for the table view
+		if (evt->type() == QEvent::KeyPress) 
+		{
 		  QKeyEvent* kevt = static_cast<QKeyEvent*>(evt);
 		  // if Control + A is pressed
-		  if ((kevt->key ()==Qt::Key_A)&&(kevt->modifiers()&Qt::ControlModifier)){
+		  if ((kevt->key ()==Qt::Key_A)&&(kevt->modifiers()&Qt::ControlModifier))
+		  {
 			// clear routes drawn previously
 			unselectRoutes();
 			drawAllRoutes();
 			updateGraph();
 		  }
+		  else if ((kevt->key()==Qt::Key_D)&&(kevt->modifiers()&Qt::ControlModifier))
+		  {
+			QMessageBox::warning(this, "Delete route", 
+					          "do you really want to delete the selected routes?", 
+						QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
+			if (odsel_)
+			{
+				rmselectedRoutes();
+				updateGraph();
+				ODTableView->update();
+			}
+		  }
 		  return true;
-		} 
+		}
 		else {
             return QDialog::eventFilter(obj, evt);
         }
     } 
-	else {
+	else
+	{
          // pass the event on to the parent class
          return QDialog::eventFilter(obj, evt);
     }
 }
 
+
 // implement the virtual public slot "reject" function
 void ODCheckerDlg::reject()
 {	
-	//trigger the checkbutton
+	// trigger the checkbutton
 	CheckButton->setChecked(false);
 	loadInitOD();
 	clearTableView();
@@ -125,6 +145,83 @@ void ODCheckerDlg::setNetwork(Network* mezzonet)
 	networkset_=true;
 	mezzonet_=mezzonet;
 	loadInitOD();
+}
+
+/**
+* load selected OD nodes to the combox 
+*/
+void ODCheckerDlg::loadSelectOD(vector<Node*>& selnodes)
+{
+	int selnodes_size=selnodes.size();
+	
+	if (selnodes_size<1) 
+		return;
+	else
+		loadInitOD();
+
+	// handle the selected nodes
+	if(selnodes_size==1)
+	{
+		QString id1str=QString::number(selnodes[0]->get_id());
+		int origid=origcomb->findText(id1str, Qt::MatchExactly);
+		int destid=destcomb->findText(id1str, Qt::MatchExactly);
+		if (origid==-1 && destid==-1)
+		{
+			//QMessageBox::warning(this, "Not Found", "no OD match!", 
+			//QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
+			return;
+		}
+		else if(origid!=-1)
+		{
+			origcomb->setCurrentIndex(origid);
+			loadDestCombwithO(origcomb->currentText());
+		}
+		else
+		{	
+			destcomb->setCurrentIndex(destid);
+			loadOrigCombwithD(destcomb->currentText());			
+		}
+	}
+	else // if more than one node are selected
+	{
+		QString id1str=QString::number(selnodes[0]->get_id());
+		int origid=origcomb->findText(id1str, Qt::MatchExactly);
+		QString id2str=QString::number(selnodes[1]->get_id());
+		int destid=destcomb->findText(id2str, Qt::MatchExactly);
+
+		if (origid==-1 && destid==-1)
+		{
+			return;
+		}
+		else if(origid!=-1 && destid!=-1)
+		{
+			//QMessageBox::warning(this, "OD input", "no OD match 2!", 
+			//QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
+			origcomb->setCurrentIndex(origid);
+			loadDestCombwithO(origcomb->currentText());
+			// search the dest id in the current list
+			destid=destcomb->findText(id2str, Qt::MatchExactly);
+			if (destid!=-1)
+				destcomb->setCurrentIndex(destid);
+		}
+		else
+		{	
+			if (origid!=-1)
+			{
+				//QMessageBox::warning(this, "OD input", "no OD match case 3!", 
+				//QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
+				origcomb->setCurrentIndex(origid);
+				loadDestCombwithO(origcomb->currentText());
+			}
+			else
+			{
+				//QMessageBox::warning(this, "OD input", "no OD match 4!", 
+				//QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
+				destcomb->setCurrentIndex(destid);
+				loadOrigCombwithD(destcomb->currentText());			
+			}
+		}
+	}
 }
 
 /**
@@ -300,32 +397,34 @@ void ODCheckerDlg::selectionHandle(	const QItemSelection& sel,
 								    const QItemSelection& unsel)
 {
 	// initialize a row and column counter for the selection area
-	const int rowCnt=itemmodel_->rowCount();
-	const int colCnt=itemmodel_->columnCount();
-	vector<int> rowcounterlist;
-	for(int i=0; i<rowCnt; i++){
-		rowcounterlist.push_back(0);
+	rowCnt_=itemmodel_->rowCount();
+	colCnt_=itemmodel_->columnCount();
+	rowcounterlist_.clear();
+
+	//vector<int> rowcounterlist;
+	for(int i=0; i<rowCnt_; i++){
+		rowcounterlist_.push_back(0);
 	}
 
-	// there is a bug for using ItemSelection of selected items
+	// there is a bug in QT for using QItemSelection of selected items
 	// so I use a more complicated way to determine the case
 	QItemSelectionModel *selmodel = ODTableView->selectionModel();
 	const QItemSelection selitems= selmodel->selection();
-	for (int rowi=0; rowi<rowCnt; rowi++){
-		for (int colj=0; colj<colCnt; colj++){
+	for (int rowi=0; rowi<rowCnt_; rowi++){
+		for (int colj=0; colj<colCnt_; colj++){
 			QModelIndex ind=itemmodel_->index(rowi, colj, QModelIndex());
 			if (selitems.contains(ind)){
-				(rowcounterlist[rowi])++;
+				(rowcounterlist_[rowi])++;
 			}
 		}
 	}
 
 	// determine the truth of selecting all
 	bool allselected=true;
-	for(unsigned i=0; i<rowcounterlist.size(); i++){
+	for(unsigned i=0; i<rowcounterlist_.size(); i++){
 		//QMessageBox::warning(this, "Notice", QString::number(rowcounterlist[i]), 
 		//	QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
-		if(rowcounterlist[i]!=colCnt){
+		if(rowcounterlist_[i]!=colCnt_){
 			allselected=false;
 			break;
 		}
@@ -450,14 +549,25 @@ void ODCheckerDlg::loadInitOD()
 	destcomb->addItem("None");
 
 	// get the list of origins and destinations
-	vector<Origin*>& origs=mezzonet_->get_origins();
-	vector<Destination*>& dests=mezzonet_->get_destinations();
-	
+	map<int,Origin*>& origs=mezzonet_->get_origins();
+	//vector<Destination*>& dests=mezzonet_->get_destinations();
+	map <int, Destination*>& dests=mezzonet_->get_destinations();
 	// attach string lists to the combo box for OD
-	for(unsigned i=0; i<origs.size(); i++)
-		origcomb->addItem(QString::number(origs[i]->get_id()));
-	for(unsigned i=0; i<dests.size(); i++)
-		destcomb->addItem(QString::number(dests[i]->get_id()));
+	//for(unsigned i=0; i<origs.size(); i++)
+	//	origcomb->addItem(QString::number(origs[i]->get_id()));
+	map <int, Origin*>::iterator o_iter=origs.begin();
+	for (o_iter;o_iter!=origs.end();o_iter++)
+	{
+		origcomb->addItem(QString::number(o_iter->first));
+	}
+
+	map <int, Destination*>::iterator d_iter=dests.begin();
+	for (d_iter;d_iter!=dests.end();d_iter++)
+	{
+		destcomb->addItem(QString::number(d_iter->first));
+	}
+	//for(unsigned i=0; i<dests.size(); i++)
+	//	destcomb->addItem(QString::number(dests[i]->get_id()));
 }
 
 /**
@@ -465,15 +575,42 @@ void ODCheckerDlg::loadInitOD()
  */
 void ODCheckerDlg::clearTableView()
 {
-	int rowcount=itemmodel_->rowCount();
-	if (rowcount>0){
+	rowCnt_=itemmodel_->rowCount();
+	if (rowCnt_>0){
+		// clear the table view
 		ODTableView->setVisible(false);
-		itemmodel_->removeRows(0,rowcount);
+		itemmodel_->removeRows(0,rowCnt_);
+		
 		// clear routes drawn previously
 		unselectRoutes();
 		updateGraph();
+
+		// reinitialize the parameters
+		rowCnt_=0;
+		rowcounterlist_.clear();
 	}
 	CheckButton->setChecked(false);
+}
+
+/**
+* funciton to remove selected routes for an OD pair
+*/
+void ODCheckerDlg::rmselectedRoutes()
+{
+	// not necessary but to make sure the row and column number is updated
+	rowCnt_=itemmodel_->rowCount();
+	colCnt_=itemmodel_->columnCount();
+
+	for(int i=0; i<rowCnt_; i++) 
+	{
+		// for selected rows
+		if(rowcounterlist_[i]==colCnt_)
+		{
+			itemmodel_->removeRows(i,1);
+			Route* temproute=odsel_->filteredRoute(i);
+			mezzonet_->removeRoute(temproute);
+		}
+	}
 }
 
 /**

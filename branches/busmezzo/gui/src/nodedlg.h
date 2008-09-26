@@ -16,35 +16,33 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "network.h"
+/*
+ * this is the definition of the node dialog
+ *
+ * Xiaoliang Ma
+ * Last modification: 2007-11-20
+ *
+ */
 
+#ifndef  NODEDLG_H
+#define  NODEDLG_H
 
-int main ( int argc, char **argv)
+#include <QDialog>
+// use the generated ui form header  
+#include "../ui_nodedlg.h"
+// node definition
+#include "../mezzo_lib/src/node.h"
+
+class NodeDlg : public QDialog, public Ui::NodeDlg
 {
-  if (argc < 2)
-  {
-	cout << "at least one argument needed (*.mezzo filename) " << endl;
-	return -1;
-  }
-  Network* theNetwork= new Network();
-  if (argc > 2)
-  {
-      theNetwork->seed(atoi (argv[2]));
-	  //Network theNetwork = Network(atoi(argv[2]));
-	  theNetwork->readmaster(argv[1]);
-	  double runtime=theNetwork->executemaster();
-	  theNetwork->step(runtime);
-	  theNetwork->writeall();
-  }
-  else
-  {
-	  
-	  theNetwork->readmaster(argv[1]);
-	  double runtime=theNetwork->executemaster();
-	  theNetwork->step(runtime);
-	  theNetwork->writeall();
-  }
-  return 0;
-}
+	Q_OBJECT
+public:
+	NodeDlg(Node* curnode, QWidget* parent=0);
+	~NodeDlg(){}
+	
+private:		 
+	Node* curnode_;
+};
 
+#endif
 
