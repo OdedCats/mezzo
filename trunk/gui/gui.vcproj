@@ -87,6 +87,10 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\src\batchrundlg.h"
+				>
+			</File>
+			<File
 				RelativePath=".\canvas_qt4.h"
 				>
 			</File>
@@ -121,6 +125,10 @@
 			Name="Forms"
 			>
 			<File
+				RelativePath=".\ui\batchrundlg.ui"
+				>
+			</File>
+			<File
 				RelativePath=".\canvas_qt4.ui"
 				>
 			</File>
@@ -137,7 +145,15 @@
 			Name="Generated"
 			>
 			<File
+				RelativePath=".\ui_batchrundlg.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ui_canvas_qt4.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_nodedlg.h"
 				>
 			</File>
 			<File
