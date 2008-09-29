@@ -12,6 +12,9 @@
   <property name="windowTitle" >
    <string>Batch Run</string>
   </property>
+  <property name="windowIcon" >
+   <iconset resource="../canvas_qt4.qrc" >:/images/batchrun.gif</iconset>
+  </property>
   <widget class="QDialogButtonBox" name="buttonBox" >
    <property name="geometry" >
     <rect>
@@ -185,7 +188,9 @@
    </widget>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="../canvas_qt4.qrc" />
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

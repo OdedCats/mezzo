@@ -81,6 +81,30 @@ const double LinkTime::cost(const double time)
     
 }
 
+const double LinkTime::mean ()
+{
+	totaltime=0.0;
+	vector<double>::iterator t_iter = times.begin();
+	for (t_iter;t_iter<times.end();t_iter++)
+	{
+		totaltime+=(*t_iter);	
+	}
+	return (totaltime / nrperiods);
+
+}
+
+const double LinkTimeInfo::mean()
+{	
+	double totaltime = 0.0;
+	map <int,LinkTime*>::iterator iter = times.begin();
+	for (iter;iter!=times.end();iter++)
+	{
+		totaltime+=(*iter).second->mean();
+	}
+	return (totaltime / times.size()); // we can do this since all linktimes have same nr of periods
+
+}
+
 const double LinkTimeInfo::cost (const int i, const double time)  // to be repaired. It caused crashes in the Graph.cc routines (which contain some archaic C-style array magic)
 
 
@@ -95,5 +119,7 @@ const double LinkTimeInfo::cost (const int i, const double time)  // to be repai
  		return 0.1; // NEVER RETURN 0
    }
 }
+
+
    
 

@@ -41,8 +41,9 @@ class BatchrunDlg : public QDialog, public Ui::Batchrun
 {
 	Q_OBJECT
 public:
-	BatchrunDlg(Network* net, QWidget* parent=0);
+	BatchrunDlg(QWidget* parent=0);
 	~BatchrunDlg(){}
+	void setNetwork(Network* net);
 	
 private:		 
 	Network* theNetwork;

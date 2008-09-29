@@ -749,6 +749,31 @@ double Link::calc_sumsq_input_output_linktimes ()
 	else return 0.0;
 }
 
+bool Link::copy_linktimes_out_in()
+{
+	// 'safe' way of copying the output to input travel times. 
+	// If no value in output (for certain time period), input value is kept. 
+	// If no value in input, no value is copied from output. (to preserve same length)
+	if (avgtimes->times.size() > 0)
+	{
+		vector <double>::iterator newtime=avgtimes->times.begin();
+		vector <double>::iterator oldtime=histtimes->times.begin();
+		for (newtime, oldtime; (newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()); newtime++, oldtime++)
+		{
+			if ((newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()))
+			{
+				(*oldtime) = (*newtime) ;
+			}
+		}
+		return true;
+	}
+	else 
+		return false;
+
+	
+
+}
+
 
 // InputLink functions
 InputLink::InputLink(int id_, Origin* out_)

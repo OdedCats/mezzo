@@ -155,7 +155,8 @@ public:
 	bool add_od_routes()	; //!< adds routes to all ODpairs
 	bool readinput(string name);  //!< reads the OD matrix and creates the ODpairs
 	bool readlinktimes(string name); //!< reads historical link travel times
-	bool setlinktimes();
+	bool set_freeflow_linktimes();
+	bool copy_linktimes_out_in(); //!< copies output link travel times to input
 	bool readpathfile(string name); //!< reads the routes
 	bool readincidentfile(string name); //!< reads the file with the incident (for now only 1)
 	bool writepathfile (string name); //!< appends the routes found to the route file
@@ -211,6 +212,9 @@ public:
 
 	double calc_diff_input_output_linktimes (); //!< calculates the sum of the differences in output-input link travel times
 	double calc_sumsq_input_output_linktimes (); //!< calculates the sum square of the differences in output-input link travel times
+	double calc_rms_input_output_linktimes();//!< calculates the root mean square of the differences in output-input link travel times
+	double calc_rmsn_input_output_linktimers();//!< calculates the Normalized (by mean) root mean square differences in output-input link travel times
+	double calc_mean_input_linktimes(); //!< calculates the mean of the input link travel times;
 	// SET's
 	void set_workingdir (const string dir) {workingdir = dir;}
 

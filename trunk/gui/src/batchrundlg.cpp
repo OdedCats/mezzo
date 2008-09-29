@@ -1,10 +1,16 @@
 #include <QtGui>
 #include "batchrundlg.h"
 
-BatchrunDlg::BatchrunDlg(Network* net, QWidget* parent)
+BatchrunDlg::BatchrunDlg( QWidget* parent)
+{
+	theNetwork=NULL;
+	setupUi(this);
+
+}
+
+void BatchrunDlg::setNetwork(Network* net)
 {
 	theNetwork=net;
-
 }
 
 	

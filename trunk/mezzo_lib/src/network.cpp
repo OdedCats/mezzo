@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <sstream>
 #include <set>
+#include <math.h>
 //#include <strstream> // OLD include for gcc2
 
 #include "od.h"
@@ -2117,7 +2118,7 @@ bool Network::writeheadways(string name)
 }
 
 
-bool Network::setlinktimes()
+bool Network::set_freeflow_linktimes()
 {
 	for (map <int,Link*>::iterator iter=linkmap.begin();iter!=linkmap.end();iter++)
 		(*iter).second->set_hist_time((*iter).second->get_freeflow_time());
@@ -2250,6 +2251,17 @@ bool Network::readtime(istream& in)
 	cout << " read a linktime"<<endl;
 #endif //_DEBUG_NETWORK
 	return true;
+}
+
+bool Network::copy_linktimes_out_in()
+{
+	bool ok=true;
+	map<int,Link*>::iterator l_iter=linkmap.begin();
+	for (l_iter;l_iter!=linkmap.end();l_iter++)
+	{
+		ok = ok  && ((*l_iter).second->copy_linktimes_out_in());
+	}
+	return ok;
 }
 
 bool Network::readincident (istream & in)
@@ -3018,7 +3030,7 @@ double Network::executemaster(QPixmap * pm_,QMatrix * wm_)
 	if (!(readlinktimes(filenames[3])))
 	{
 		cout << "no linktimes read, taking freeflow times... " << endl;
-		setlinktimes();  //read the historical link times if exist, otherwise set them to freeflow link times.
+		set_freeflow_linktimes();  //read the historical link times if exist, otherwise set them to freeflow link times.
 	}
 
 	// 2005-11-28 put the reading of OD matrix before the paths...
@@ -3102,7 +3114,7 @@ double Network::executemaster()
 	if (!(readlinktimes(filenames[3])))
 	{
 		cout << "no linktimes read, taking freeflow times... " << endl;
-		setlinktimes();  //read the historical link times if exist, otherwise set them to freeflow link times.
+		set_freeflow_linktimes();  //read the historical link times if exist, otherwise set them to freeflow link times.
 	}
 	// New 2005-11-28 put the reading of OD matrix before the paths...
 	if (!readinput(filenames[5]))
@@ -3237,6 +3249,25 @@ double Network::calc_sumsq_input_output_linktimes ()
 			total+=(*iter1).second->calc_sumsq_input_output_linktimes();
 	}
 	return total;
+}
+
+double Network::calc_mean_input_linktimes()
+{
+	return this->linkinfo->mean();
+
+}
+
+double Network::calc_rms_input_output_linktimes()
+{
+	double n = linkmap.size() * nrperiods;
+	double ssq = calc_sumsq_input_output_linktimes();
+	double result= sqrt(ssq/n);
+	return result;
+}
+
+double Network::calc_rmsn_input_output_linktimers()
+{
+	return (calc_rms_input_output_linktimes() / calc_mean_input_linktimes());
 }
 
 bool Network::writemoes()

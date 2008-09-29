@@ -659,6 +659,7 @@
    <addaction name="run" />
    <addaction name="breakoff" />
    <addaction name="stop" />
+   <addaction name="batch_run" />
    <addaction name="separator" />
    <addaction name="zoomin" />
    <addaction name="zoomout" />
@@ -716,6 +717,7 @@
      <string>Simulation</string>
     </property>
     <addaction name="run" />
+    <addaction name="batch_run" />
     <addaction name="breakoff" />
     <addaction name="stop" />
     <addaction name="separator" />
@@ -928,6 +930,14 @@
    </property>
    <property name="text" >
     <string>Close Network</string>
+   </property>
+  </action>
+  <action name="batch_run" >
+   <property name="icon" >
+    <iconset resource="canvas_qt4.qrc" >:/images/batchrun.gif</iconset>
+   </property>
+   <property name="text" >
+    <string>Batch Run</string>
    </property>
   </action>
  </widget>

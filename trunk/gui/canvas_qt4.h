@@ -41,6 +41,7 @@
 #include "../mezzo_lib/src/parameters.h"
 #include "../mezzoAnalyzer/src/odcheckerdlg.h"
 #include "../mezzo_lib/src/network.h"
+#include "src/batchrundlg.h"
 
 class MainForm : public QMainWindow, private Ui::MainForm
 {
@@ -68,6 +69,7 @@ private slots:
 	void on_loadbackground_activated();  //!< Opens a Load background dialog
 	void on_breakoff_activated ();  //!< Pauses the simulation
 	void on_run_activated();	 //!< Starts the simulation
+	void on_batch_run_activated(); //!< Shows the Batch Run dialog
 	void on_parametersdialog_activated();  //!< Shows parameters dialog
 	void on_inspectdialog_activated();  //!< Shows Route inspect dialog
 	void on_simspeed_valueChanged(int value);  //!< changes the simspeed
@@ -150,6 +152,7 @@ private:
 	// sub dialogs
 	ParametersDialog* pmdlg;
 	ODCheckerDlg* od_analyser_;
+	BatchrunDlg* brdlg;
 
 };
 

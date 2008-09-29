@@ -74,8 +74,9 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 	// COMMENT WILCO: this is to slow down the simulation
 	//simspeed->setValue(static_cast<int> (  theParameters->sim_speed_factor * 100 ));
 	
-	// Parameters dialog
+	// dialogs
 	pmdlg = new ParametersDialog (this);
+	brdlg = new BatchrunDlg(this);
 	
 	// construction of the MezzoAnalyzer dialog 
 	od_analyser_=new ODCheckerDlg();
@@ -133,6 +134,7 @@ void MainForm::activateToolbars(bool activated)
     loadbackground->setEnabled(activated);
     saveresults->setEnabled(activated);
     inspectdialog->setEnabled(activated);
+	batch_run->setEnabled(activated);
 	openmasterfile->setEnabled(!activated); // should be only be enabled when everything else is not
 	if(activated)
 		status_label->setText("Network initialized");
@@ -382,11 +384,27 @@ void MainForm::on_panfactor_valueChanged( int value )
 
 void MainForm::on_parametersdialog_activated()
 {
-	pmdlg->set_parameters(theNetwork->get_parameters());
-    pmdlg->show();
-	pmdlg->raise();
-	pmdlg->activateWindow();
+	if (initialised)
+	{
+		pmdlg->set_parameters(theNetwork->get_parameters());
+		pmdlg->show();
+		pmdlg->raise();
+		pmdlg->activateWindow();
+	}
 } 
+
+void MainForm::on_batch_run_activated()
+{
+	if (initialised)
+	{	
+		brdlg->setNetwork(theNetwork);
+		brdlg->show();
+		brdlg->raise();
+		brdlg->activateWindow();
+
+	}
+}
+
 
 /**
 * if the mezzoAnalyzer is triggered

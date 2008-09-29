@@ -113,6 +113,7 @@ public:
 		tmp_avg=0.0;
 		tmp_passed=0;
 		}
+	bool copy_linktimes_out_in(); //!< copies the output travel times to input (historical) travel times
 	const double get_hist_time() {return hist_time;}
 	double get_cost (double time) {
 		if (histtimes)	
