@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>399</height>
+    <height>514</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -19,7 +19,7 @@
    <property name="geometry" >
     <rect>
      <x>40</x>
-     <y>360</y>
+     <y>480</y>
      <width>341</width>
      <height>32</height>
     </rect>
@@ -37,7 +37,7 @@
      <x>16</x>
      <y>19</y>
      <width>381</width>
-     <height>341</height>
+     <height>461</height>
     </rect>
    </property>
    <property name="currentIndex" >
@@ -63,13 +63,13 @@
       <bool>true</bool>
      </property>
     </widget>
-    <widget class="QGroupBox" name="groupBox" >
+    <widget class="QGroupBox" name="convergence_gb" >
      <property name="geometry" >
       <rect>
-       <x>20</x>
-       <y>190</y>
-       <width>331</width>
-       <height>111</height>
+       <x>10</x>
+       <y>220</y>
+       <width>351</width>
+       <height>81</height>
       </rect>
      </property>
      <property name="title" >
@@ -78,7 +78,7 @@
      <widget class="QSpinBox" name="max_iterations_val" >
       <property name="geometry" >
        <rect>
-        <x>251</x>
+        <x>250</x>
         <y>20</y>
         <width>51</width>
         <height>22</height>
@@ -106,12 +106,15 @@
       <property name="text" >
        <string>Max Nr Iterations</string>
       </property>
+      <property name="checked" >
+       <bool>true</bool>
+      </property>
      </widget>
      <widget class="QCheckBox" name="max_rmsn_cb" >
       <property name="geometry" >
        <rect>
         <x>20</x>
-        <y>80</y>
+        <y>50</y>
         <width>221</width>
         <height>18</height>
        </rect>
@@ -130,7 +133,7 @@
       <property name="geometry" >
        <rect>
         <x>250</x>
-        <y>80</y>
+        <y>50</y>
         <width>48</width>
         <height>20</height>
        </rect>
@@ -145,35 +148,100 @@
        <number>4</number>
       </property>
      </widget>
-     <widget class="QRadioButton" name="and_rb" >
-      <property name="geometry" >
-       <rect>
-        <x>50</x>
-        <y>40</y>
-        <width>83</width>
-        <height>18</height>
-       </rect>
-      </property>
-      <property name="text" >
-       <string>AND</string>
-      </property>
-     </widget>
-     <widget class="QRadioButton" name="or_rb" >
-      <property name="geometry" >
-       <rect>
-        <x>50</x>
-        <y>60</y>
-        <width>83</width>
-        <height>18</height>
-       </rect>
-      </property>
-      <property name="text" >
-       <string>OR</string>
-      </property>
-      <property name="checked" >
+    </widget>
+    <widget class="QGroupBox" name="progress_gb" >
+     <property name="geometry" >
+      <rect>
+       <x>0</x>
+       <y>350</y>
+       <width>371</width>
+       <height>80</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Progress</string>
+     </property>
+     <widget class="QProgressBar" name="progressBar" >
+      <property name="enabled" >
        <bool>true</bool>
       </property>
+      <property name="geometry" >
+       <rect>
+        <x>20</x>
+        <y>50</y>
+        <width>331</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="value" >
+       <number>0</number>
+      </property>
      </widget>
+     <widget class="QLabel" name="label" >
+      <property name="geometry" >
+       <rect>
+        <x>60</x>
+        <y>30</y>
+        <width>51</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Iteration</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="cur_iter" >
+      <property name="geometry" >
+       <rect>
+        <x>110</x>
+        <y>30</y>
+        <width>21</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>0</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_3" >
+      <property name="geometry" >
+       <rect>
+        <x>130</x>
+        <y>30</y>
+        <width>16</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>of</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="total_iter" >
+      <property name="geometry" >
+       <rect>
+        <x>150</x>
+        <y>30</y>
+        <width>21</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>10</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QPushButton" name="run" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>320</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Run</string>
+     </property>
     </widget>
    </widget>
    <widget class="QWidget" name="ReplicationsTab" >

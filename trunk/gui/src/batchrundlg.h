@@ -36,6 +36,7 @@
 #include "../ui_batchrundlg.h"
 // network definition
 #include "../mezzo_lib/src/network.h"
+#include "../mezzo_lib/src/linktimes.h"
 
 class BatchrunDlg : public QDialog, public Ui::Batchrun
 {
@@ -45,8 +46,15 @@ public:
 	~BatchrunDlg(){}
 	void setNetwork(Network* net);
 	
-private:		 
+	//SLOTS
+	void on_run_clicked();
+
+
+	
+private:
+	void run_iterations(int nr_iterations, double max_rmsn);
 	Network* theNetwork;
+	LinkTimeInfo* linktimes;
 };
 
 #endif

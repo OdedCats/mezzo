@@ -223,7 +223,8 @@ void MainForm::on_stop_activated()
 	zoombywin_triggered_=false;
 	// !!! I AM SURE THIS IS INCOMPLETE !!!
 
-
+	run->setEnabled(true);
+	batch_run->setEnabled(true);
 	//updat the canvas
 	updateCanvas();
 
@@ -361,11 +362,14 @@ void MainForm::on_loadbackground_activated()
 void MainForm::on_breakoff_activated()
 {
 	breaknow=true;
+	run->setEnabled(true);
 }
 
 void MainForm::on_run_activated()
 {
 	simprogress_widget->setVisible(true);
+	run->setEnabled(false);
+	batch_run->setEnabled(false);
 	breaknow=false;
 	theNetwork->reset_link_icons();
 	loop();

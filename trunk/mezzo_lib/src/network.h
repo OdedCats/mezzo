@@ -195,6 +195,7 @@ public:
 
 	// GET's
 	double get_currenttime(){return time;}
+	double get_runtime(){return runtime;}
 	Parameters* get_parameters () {return theParameters;} 
 	vector <ODpair*>& get_odpairs () {return odpairs;} // keep as vector
 
@@ -206,6 +207,7 @@ public:
 	map <int, Node*>& get_nodes() {return nodemap;}
 	//vector <Link*>& get_links(){return links;}
 	map <int,Link*>& get_links() {return linkmap;}
+	
 	multimap<odval, Route*>::iterator find_route (int id, odval val);
 	bool exists_route (int id, odval val); // checks if route with this ID exists for OD pair val
 	bool exists_same_route (Route* route); // checks if a similar route with the same links already exists
