@@ -3206,8 +3206,10 @@ bool Network::writeallmoes(string name)
 
 	out << "CONVERGENCE" << endl;
 
-	out << "SumDiff_InputOutputLinkTimes : " << calc_diff_input_output_linktimes () << endl << endl;
-	out << "SumSquare_InputOutputLinkTimes : " << calc_sumsq_input_output_linktimes () << endl << endl;
+	out << "SumDiff_InputOutputLinkTimes : " << calc_diff_input_output_linktimes () << endl;
+	out << "SumSquare_InputOutputLinkTimes : " << calc_sumsq_input_output_linktimes () << endl;
+	out << "Root Mean Square Linktimes : " <<this->calc_rms_input_output_linktimes() << endl;
+	out << "Root Mean Square Normalized Linktimes : " <<this->calc_rmsn_input_output_linktimes() << endl;
 	out << "MOES" << endl;
 	/****** TEMPORARY TO CUT OUT THE ALL MOES THAT ARE NOT USED NOW
 	int maxindex=0;
