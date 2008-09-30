@@ -5,6 +5,7 @@ BatchrunDlg::BatchrunDlg( QWidget* parent)
 {
 	theNetwork=NULL;
 	setupUi(this);
+	//progress_gb->setEnabled(false);
 
 }
 
@@ -13,7 +14,13 @@ void BatchrunDlg::setNetwork(Network* net)
 	theNetwork=net;
 }
 
-void BatchrunDlg::on_run_clicked()
+void BatchrunDlg::on_max_iterations_val_valueChanged(int i)
+{	
+	total_iter->setNum(i);
+
+}
+
+void BatchrunDlg::on_runButton_clicked()
 {
 	// check what type of iteration is to be done
 
@@ -21,6 +28,7 @@ void BatchrunDlg::on_run_clicked()
 	{
 		int max_iter=max_iterations_val->value();
 		double max_rmsn=0.1;
+		//progress_gb->setEnabled(true);
 		run_iterations(max_iter,max_rmsn);
 	}
 
@@ -30,20 +38,39 @@ void BatchrunDlg::on_run_clicked()
 void BatchrunDlg::run_iterations(int nr_iterations, double max_rmsn)
 {
 	int i=1;
+	total_iter->setNum(nr_iterations);
 	double runtime=theNetwork->get_runtime();
-	theNetwork->step(runtime);
+	double curtime=0.0;
+	double rmsn_=1.0;
+	while (curtime < runtime)
+	{
+		curtime=theNetwork->step(0.1);
+		int progress = static_cast<int>(100*curtime/runtime);
+		currIterPb->setValue(progress);
+		update();
+	}
 	if (nr_iterations ==1)
 		return;
 	i++;
 	for (i; i<=nr_iterations;i++)
 	{
-		int progress = 100*static_cast<int>(i/nr_iterations);
-		progressBar->setValue(progress);
+		cur_iter->setNum(i);
+		rmsn_ = theNetwork->calc_rmsn_input_output_linktimes();
+		rmsn->setNum(rmsn_);
+		repaint();
+		int progress = static_cast<int>(100*i/nr_iterations);
+		totalPb->setValue(progress);
 		theNetwork->copy_linktimes_out_in();
 		theNetwork->reset();
-		theNetwork->step(runtime);
-	}
-	
+		curtime=0.0;
+		while (curtime < runtime)
+		{
+			curtime=theNetwork->step(0.1);
+			int progress = static_cast<int>(100*curtime/runtime);
+			currIterPb->setValue(progress);
+			update();
+		}
+	}	
 }
 
 	

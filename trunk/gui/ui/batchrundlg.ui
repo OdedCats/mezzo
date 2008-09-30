@@ -5,7 +5,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>415</width>
     <height>514</height>
    </rect>
   </property>
@@ -67,7 +67,7 @@
      <property name="geometry" >
       <rect>
        <x>10</x>
-       <y>220</y>
+       <y>200</y>
        <width>351</width>
        <height>81</height>
       </rect>
@@ -153,24 +153,24 @@
      <property name="geometry" >
       <rect>
        <x>0</x>
-       <y>350</y>
+       <y>319</y>
        <width>371</width>
-       <height>80</height>
+       <height>111</height>
       </rect>
      </property>
      <property name="title" >
       <string>Progress</string>
      </property>
-     <widget class="QProgressBar" name="progressBar" >
+     <widget class="QProgressBar" name="totalPb" >
       <property name="enabled" >
        <bool>true</bool>
       </property>
       <property name="geometry" >
        <rect>
-        <x>20</x>
-        <y>50</y>
-        <width>331</width>
-        <height>23</height>
+        <x>110</x>
+        <y>80</y>
+        <width>241</width>
+        <height>20</height>
        </rect>
       </property>
       <property name="value" >
@@ -180,7 +180,7 @@
      <widget class="QLabel" name="label" >
       <property name="geometry" >
        <rect>
-        <x>60</x>
+        <x>120</x>
         <y>30</y>
         <width>51</width>
         <height>16</height>
@@ -193,20 +193,20 @@
      <widget class="QLabel" name="cur_iter" >
       <property name="geometry" >
        <rect>
-        <x>110</x>
+        <x>170</x>
         <y>30</y>
         <width>21</width>
         <height>16</height>
        </rect>
       </property>
       <property name="text" >
-       <string>0</string>
+       <string/>
       </property>
      </widget>
      <widget class="QLabel" name="label_3" >
       <property name="geometry" >
        <rect>
-        <x>130</x>
+        <x>190</x>
         <y>30</y>
         <width>16</width>
         <height>16</height>
@@ -219,7 +219,7 @@
      <widget class="QLabel" name="total_iter" >
       <property name="geometry" >
        <rect>
-        <x>150</x>
+        <x>210</x>
         <y>30</y>
         <width>21</width>
         <height>16</height>
@@ -229,12 +229,80 @@
        <string>10</string>
       </property>
      </widget>
+     <widget class="QProgressBar" name="currIterPb" >
+      <property name="enabled" >
+       <bool>true</bool>
+      </property>
+      <property name="geometry" >
+       <rect>
+        <x>110</x>
+        <y>50</y>
+        <width>241</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="value" >
+       <number>0</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_2" >
+      <property name="geometry" >
+       <rect>
+        <x>20</x>
+        <y>50</y>
+        <width>82</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Current Iteration</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_4" >
+      <property name="geometry" >
+       <rect>
+        <x>20</x>
+        <y>80</y>
+        <width>82</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Total</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_5" >
+      <property name="geometry" >
+       <rect>
+        <x>240</x>
+        <y>10</y>
+        <width>71</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Current RMSN</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="rmsn" >
+      <property name="geometry" >
+       <rect>
+        <x>320</x>
+        <y>10</y>
+        <width>41</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string/>
+      </property>
+     </widget>
     </widget>
-    <widget class="QPushButton" name="run" >
+    <widget class="QPushButton" name="runButton" >
      <property name="geometry" >
       <rect>
-       <x>10</x>
-       <y>320</y>
+       <x>20</x>
+       <y>290</y>
        <width>75</width>
        <height>23</height>
       </rect>

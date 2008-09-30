@@ -47,7 +47,9 @@ public:
 	void setNetwork(Network* net);
 	
 	//SLOTS
-	void on_run_clicked();
+	private slots:
+	void on_runButton_clicked();
+	void on_max_iterations_val_valueChanged(int i);
 
 
 	

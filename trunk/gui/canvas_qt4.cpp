@@ -702,7 +702,6 @@ void MainForm::mouseReleaseEvent(QMouseEvent* mev)
 
 void MainForm::mouseDoubleClickEvent(QMouseEvent* mev)
 {
-
 }
 
 /*

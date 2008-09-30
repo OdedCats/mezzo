@@ -3265,7 +3265,7 @@ double Network::calc_rms_input_output_linktimes()
 	return result;
 }
 
-double Network::calc_rmsn_input_output_linktimers()
+double Network::calc_rmsn_input_output_linktimes()
 {
 	return (calc_rms_input_output_linktimes() / calc_mean_input_linktimes());
 }

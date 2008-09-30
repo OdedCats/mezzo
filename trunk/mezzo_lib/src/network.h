@@ -215,7 +215,7 @@ public:
 	double calc_diff_input_output_linktimes (); //!< calculates the sum of the differences in output-input link travel times
 	double calc_sumsq_input_output_linktimes (); //!< calculates the sum square of the differences in output-input link travel times
 	double calc_rms_input_output_linktimes();//!< calculates the root mean square of the differences in output-input link travel times
-	double calc_rmsn_input_output_linktimers();//!< calculates the Normalized (by mean) root mean square differences in output-input link travel times
+	double calc_rmsn_input_output_linktimes();//!< calculates the Normalized (by mean) root mean square differences in output-input link travel times
 	double calc_mean_input_linktimes(); //!< calculates the mean of the input link travel times;
 	// SET's
 	void set_workingdir (const string dir) {workingdir = dir;}
