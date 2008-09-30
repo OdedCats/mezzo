@@ -42,13 +42,18 @@ void BatchrunDlg::run_iterations(int nr_iterations, double max_rmsn)
 	double runtime=theNetwork->get_runtime();
 	double curtime=0.0;
 	double rmsn_=1.0;
+	cur_iter->setNum(i);
+	update();
 	while (curtime < runtime)
 	{
-		curtime=theNetwork->step(0.1);
+		curtime=theNetwork->step(1.0);
 		int progress = static_cast<int>(100*curtime/runtime);
 		currIterPb->setValue(progress);
 		update();
 	}
+	rmsn_ = theNetwork->calc_rmsn_input_output_linktimes();
+	rmsn->setNum(rmsn_);
+	repaint();
 	if (nr_iterations ==1)
 		return;
 	i++;
@@ -57,15 +62,15 @@ void BatchrunDlg::run_iterations(int nr_iterations, double max_rmsn)
 		cur_iter->setNum(i);
 		rmsn_ = theNetwork->calc_rmsn_input_output_linktimes();
 		rmsn->setNum(rmsn_);
-		repaint();
-		int progress = static_cast<int>(100*i/nr_iterations);
+		int progress = static_cast<int>(100*(i-1)/nr_iterations);
 		totalPb->setValue(progress);
+		repaint();
 		theNetwork->copy_linktimes_out_in();
 		theNetwork->reset();
 		curtime=0.0;
 		while (curtime < runtime)
 		{
-			curtime=theNetwork->step(0.1);
+			curtime=theNetwork->step(1.0);
 			int progress = static_cast<int>(100*curtime/runtime);
 			currIterPb->setValue(progress);
 			update();

@@ -65,6 +65,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\batchrundlg.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\canvas_qt4.cpp"
 				>
 			</File>

@@ -380,7 +380,8 @@ Vehicle* Link::exit_veh(double time, Link* nextlink, int lookback)
 			avg_time=(nr_passed*avg_time + traveltime)/(nr_passed+1); // update of the average
 			if ((curr_period+1)*(avgtimes->periodlength) < entrytime )
 			{			 	
-			 	
+			 	if (tmp_avg==0.0)
+					tmp_avg=freeflowtime;
 			 	avgtimes->times.push_back(tmp_avg);
 			 	curr_period++;
 			 	tmp_avg=0.0;
@@ -441,7 +442,9 @@ Vehicle* Link::exit_veh(double time)
 			double traveltime=(time-entrytime);
 			avg_time=(nr_passed*avg_time + traveltime)/(nr_passed+1); // update of the average
 			if ((curr_period+1)*(avgtimes->periodlength) < entrytime )
-			{			 	
+			{		
+				if (tmp_avg==0.0)
+					tmp_avg=freeflowtime;
 			 	avgtimes->times.push_back(tmp_avg);
 			 	curr_period++;
 			 	tmp_avg=0.0;
@@ -718,7 +721,7 @@ double Link::calc_diff_input_output_linktimes ()
 		
 		for (newtime, oldtime; (newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()); newtime++, oldtime++)
 		{
-			if ((newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()))
+			if ((newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()) &&((*newtime) > 0))
 			{
 				total+= (*newtime) - (*oldtime);
 			}
@@ -738,7 +741,7 @@ double Link::calc_sumsq_input_output_linktimes ()
 		vector <double>::iterator oldtime=histtimes->times.begin();
 		for (newtime, oldtime; (newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()); newtime++, oldtime++)
 		{
-			if ((newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()))
+			if ((newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()) && ((*newtime) > 0))
 			{
 				total+= ((*newtime) - (*oldtime)) * ((*newtime) - (*oldtime)) ;
 		
@@ -760,7 +763,7 @@ bool Link::copy_linktimes_out_in()
 		vector <double>::iterator oldtime=histtimes->times.begin();
 		for (newtime, oldtime; (newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()); newtime++, oldtime++)
 		{
-			if ((newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()))
+			if ((newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()) && ((*newtime) > 0))
 			{
 				(*oldtime) = (*newtime) ;
 			}
@@ -887,7 +890,9 @@ const  bool VirtualLink::full()
 			//cout << "virtuallink::exit_veh: entrytime: " << entrytime << " exittime " << time << endl;
 			avg_time=(nr_passed*avg_time + traveltime)/(nr_passed+1); // update of the average
 			if ((curr_period+1)*(avgtimes->periodlength) < entrytime )
-			{			 	
+			{	
+				if (tmp_avg==0.0)
+					tmp_avg=freeflowtime;
 			 	avgtimes->times.push_back(tmp_avg);
 			 	curr_period++;
 			 	tmp_avg=0.0;
