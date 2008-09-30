@@ -39,7 +39,7 @@ LinkTimeInfo contains the LinkTime for all links in the network. It is used by t
 					times.resize(nrperiods);
 				}
   void reset () {	times.clear();
-					times.resize(nrperiods); 
+					//times.resize(nrperiods); 
 				}
   int id;   // link id
   const int get_id() {return id;}

@@ -26,6 +26,7 @@ Link::Link(int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* s
 #endif //_COLLECT_ALL	
 	avg_time=0.0;
 	avgtimes=new LinkTime();
+	avgtimes->id=id;
 	histtimes=NULL;
 	nr_passed=0;
 	running_percentage=0.0;
@@ -111,6 +112,13 @@ void Link::reset()
 	ass_matrix.clear();
 }
 
+void Link::end_of_simulation(double time)
+{	
+	if (tmp_avg==0.0)
+			tmp_avg=freeflowtime;
+	avgtimes->times.push_back(tmp_avg); // push back the temp_average for the current period
+
+}
 
 const int Link::get_out_node_id ()
 	{return out_node->get_id();}

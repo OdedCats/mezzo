@@ -95,6 +95,7 @@ public:
 	Link (int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* sdfunc_);
 	Link();
 	virtual ~Link();
+	void end_of_simulation(double time); // consolidates all temp values in their containers
 	virtual void reset();  // resets the link for restart
 	// accessors, they are inline where possible, but inline keyword not necessary
 	const int get_id () {return id;}

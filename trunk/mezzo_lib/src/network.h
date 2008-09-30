@@ -140,6 +140,7 @@ public:
 #endif //_NO_GUI
 	double executemaster(); //!< without GUI
 	int reset(); //!< resets the simulation to 0, clears all the state variables. returns runtime
+	void end_of_simulation(double time); //!< finalise all the temp values into containers (linktimes)
 	double step(double timestep); //!< executes one step of simulation, called by the gui, returns current value of time
 	bool writeall();
 	bool readnetwork(string name); //!< reads the network and creates the appropriate structures

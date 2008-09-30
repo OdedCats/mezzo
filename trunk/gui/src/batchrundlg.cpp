@@ -51,6 +51,7 @@ void BatchrunDlg::run_iterations(int nr_iterations, double max_rmsn)
 		currIterPb->setValue(progress);
 		update();
 	}
+	theNetwork->end_of_simulation(runtime);
 	rmsn_ = theNetwork->calc_rmsn_input_output_linktimes();
 	rmsn->setNum(rmsn_);
 	repaint();
@@ -75,6 +76,7 @@ void BatchrunDlg::run_iterations(int nr_iterations, double max_rmsn)
 			currIterPb->setValue(progress);
 			update();
 		}
+		theNetwork->end_of_simulation(runtime);
 	}	
 }
 

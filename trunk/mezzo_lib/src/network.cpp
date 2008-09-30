@@ -269,6 +269,15 @@ int Network::reset()
 	return runtime;
 }
 
+void Network::end_of_simulation(double time)
+{
+	for (map<int,Link*>::iterator iter=linkmap.begin();iter != linkmap.end();iter++)
+	{
+		(*iter).second->end_of_simulation(time);
+	}
+}
+
+
 multimap<odval, Route*>::iterator Network::find_route (int id, odval val)
 {
 	multimap<odval, Route*>::iterator upper, lower, r_iter;
@@ -3172,6 +3181,7 @@ double Network::executemaster()
 
 bool Network::writeall()
 {
+	end_of_simulation(runtime);
 	writelinktimes(filenames[10]);
 	// NEW: Write also the non-smoothed times
 	string cleantimes=filenames[10]+".clean";
