@@ -273,7 +273,7 @@ void Network::end_of_simulation(double time)
 {
 	for (map<int,Link*>::iterator iter=linkmap.begin();iter != linkmap.end();iter++)
 	{
-		(*iter).second->end_of_simulation(time);
+		(*iter).second->end_of_simulation();
 	}
 }
 
@@ -2210,7 +2210,8 @@ bool Network::readtimes(istream& in)
 			ltime->nrperiods=nrperiods;
 			ltime->id=(*iter).second->get_id();
 			for (int i=0;i < nrperiods;i++)
-				(ltime->times).push_back(linktime);
+		//		(ltime->times).push_back(linktime);
+			(ltime->times) [i] = linktime;
 			(*iter).second->set_hist_time(linktime);
 			(*iter).second->set_histtimes(ltime);
 			linkinfo->times.insert(pair <int,LinkTime*> ((*iter).second->get_id(),ltime )); 
@@ -2240,7 +2241,8 @@ bool Network::readtime(istream& in)
 	for (int i=0;i<nrperiods;i++)
 	{
 		in >> linktime;
-		(ltime->times).push_back(linktime);
+		//(ltime->times).push_back(linktime);
+		(ltime->times) [i] = linktime;
 	}
 	map <int,Link*>::iterator l_iter;
 	l_iter = linkmap.find(lid);

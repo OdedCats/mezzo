@@ -73,10 +73,10 @@ const double LinkTime::cost(const double time)
         return 0.1; // never return 0
     else
 	{
-		if (i < (times.size()-1))
+		if (times.count(i)) // if exists (should always be true, but still
 			return times[i];
 		else
-			return times.back();
+			return 0.1;
 	}
     
 }
@@ -84,12 +84,12 @@ const double LinkTime::cost(const double time)
 const double LinkTime::mean ()
 {
 	totaltime=0.0;
-	vector<double>::iterator t_iter = times.begin();
-	for (t_iter;t_iter<times.end();t_iter++)
+	map<int,double>::iterator t_iter = times.begin();
+	for (t_iter;t_iter!=times.end();t_iter++)
 	{
-		totaltime+=(*t_iter);	
+		totaltime+=(*t_iter).second;	
 	}
-	return (totaltime / nrperiods);
+	return (totaltime / times.size());
 
 }
 

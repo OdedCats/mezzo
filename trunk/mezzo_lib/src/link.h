@@ -95,7 +95,7 @@ public:
 	Link (int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* sdfunc_);
 	Link();
 	virtual ~Link();
-	void end_of_simulation(double time); // consolidates all temp values in their containers
+	void end_of_simulation(); // consolidates all temp values in their containers
 	virtual void reset();  // resets the link for restart
 	// accessors, they are inline where possible, but inline keyword not necessary
 	const int get_id () {return id;}
@@ -108,8 +108,12 @@ public:
 	void set_hist_time(double time) {	hist_time=time;}
 	void set_histtimes(LinkTime* ltime) {
 		histtimes=ltime;
+		/*
 		avgtimes->nrperiods=histtimes->nrperiods;
 		avgtimes->periodlength=histtimes->periodlength;
+		avgtimes->times = histtimes->times;
+		*/
+		avgtimes = new LinkTime(*histtimes);
 		curr_period=0;
 		tmp_avg=0.0;
 		tmp_passed=0;

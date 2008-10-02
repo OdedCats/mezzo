@@ -50,6 +50,7 @@ public:
 	private slots:
 	void on_runButton_clicked();
 	void on_max_iterations_val_valueChanged(int i);
+	
 
 
 	

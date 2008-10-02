@@ -91,7 +91,9 @@ void Link::reset()
 	tmp_avg=0.0;
 	tmp_passed=0;
 	// Reset avgtimes
-	avgtimes->reset();
+	//avgtimes->reset();
+	delete avgtimes;
+	avgtimes = new LinkTime(*histtimes);
 	nr_passed=0;
 	running_percentage=0.0;
 	queue_percentage=0.0;
@@ -112,11 +114,27 @@ void Link::reset()
 	ass_matrix.clear();
 }
 
-void Link::end_of_simulation(double time)
+void Link::end_of_simulation()
 {	
+	// store times for current(last) period in avgtimes and make sure all periods have values.
 	if (tmp_avg==0.0)
-			tmp_avg=freeflowtime;
-	avgtimes->times.push_back(tmp_avg); // push back the temp_average for the current period
+		tmp_avg=freeflowtime;
+	avgtimes->times[curr_period] = tmp_avg;
+	int i= 0;
+	for (i;i<histtimes->nrperiods;i++)
+	{
+		if (avgtimes->times.count(i)==0) // no avg time exists, should be impossible, but to be sure...
+		{
+			avgtimes->times[i] = histtimes->times[i];
+		}
+		else
+		{
+			if (avgtimes->times [i] == 0.0) // should be impossible
+				avgtimes->times[i] = histtimes->times[i];
+		}
+
+	}
+	
 
 }
 
@@ -390,7 +408,8 @@ Vehicle* Link::exit_veh(double time, Link* nextlink, int lookback)
 			{			 	
 			 	if (tmp_avg==0.0)
 					tmp_avg=freeflowtime;
-			 	avgtimes->times.push_back(tmp_avg);
+			 	//avgtimes->times.push_back(tmp_avg);
+				avgtimes->times [curr_period] = tmp_avg;
 			 	curr_period++;
 			 	tmp_avg=0.0;
 			 	tmp_passed=0;
@@ -453,7 +472,8 @@ Vehicle* Link::exit_veh(double time)
 			{		
 				if (tmp_avg==0.0)
 					tmp_avg=freeflowtime;
-			 	avgtimes->times.push_back(tmp_avg);
+			 	//avgtimes->times.push_back(tmp_avg);
+				avgtimes->times [curr_period] = tmp_avg;
 			 	curr_period++;
 			 	tmp_avg=0.0;
 
@@ -586,15 +606,21 @@ void Link::write_ass_matrix (ostream & out, int linkflowperiod)
 
 void Link::write_time(ostream& out)
 {
-//#ifdef _COLLECT_TRAVELTIMES
 	double newtime=0.0;
+	int i = 0;
+	this->end_of_simulation(); // check everything is stored as it should, including current temp values, no empty values in avg times, etc.
 	out << "{\t" << id ;
+	for (i; i<histtimes->nrperiods;i++)
+	{
+		newtime=time_alpha * (avgtimes->times[i]) + (1-time_alpha) * (histtimes->times[i]);
+		out << "\t"<< newtime;
+	}
+	out << "\t}" << endl;
 /* ************ Old crap
-#ifdef _AVERAGING	
-	newtime=(alpha*avg_time)+(1-alpha)*hist_time;
-#endif	
- ***************/
+//#ifdef _COLLECT_TRAVELTIMES
+
   // TEST IF THERE ARE ANY AVG TIMES,    
+
   if (avgtimes->times.size()==0) // to make sure the old times are rewritten, in case there are no avg times
   {
     if (histtimes) // test if the histtimes exist (they don't if there was a problem reading the file)
@@ -640,6 +666,8 @@ void Link::write_time(ostream& out)
       }
   }
   out << "\t}" << endl;
+  */
+	//TODO rewrite this procedure with new travel times
 //#endif _COLLECT_TRAVELTIMES	
 }
 
@@ -724,9 +752,9 @@ double Link::calc_diff_input_output_linktimes ()
 	if (avgtimes->times.size() > 0)
 		{
 		double total = 0.0;
-		vector <double>::iterator newtime=avgtimes->times.begin();
-		vector <double>::iterator oldtime=histtimes->times.begin();
-		
+//		map <int,double>::iterator newtime=avgtimes->times.begin();
+//		map <int,double>::iterator oldtime=histtimes->times.begin();
+		/*
 		for (newtime, oldtime; (newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()); newtime++, oldtime++)
 		{
 			if ((newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()) &&((*newtime) > 0))
@@ -734,6 +762,9 @@ double Link::calc_diff_input_output_linktimes ()
 				total+= (*newtime) - (*oldtime);
 			}
 		}
+		*/
+		for (int i=0; i<avgtimes->nrperiods; i++)
+			total += avgtimes->times [i] - histtimes->times [i];
 		return total;
 	}
 	else
@@ -745,6 +776,7 @@ double Link::calc_sumsq_input_output_linktimes ()
 	if (avgtimes->times.size() > 0)
 	{
 		double total = 0.0;
+		/*
 		vector <double>::iterator newtime=avgtimes->times.begin();
 		vector <double>::iterator oldtime=histtimes->times.begin();
 		for (newtime, oldtime; (newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()); newtime++, oldtime++)
@@ -755,6 +787,9 @@ double Link::calc_sumsq_input_output_linktimes ()
 		
 			}
 		}
+		*/
+		for (int i=0; i<avgtimes->nrperiods; i++)
+			total += (avgtimes->times [i] - histtimes->times [i])*(avgtimes->times [i] - histtimes->times [i]);
 		return total;
 	}
 	else return 0.0;
@@ -767,22 +802,26 @@ bool Link::copy_linktimes_out_in()
 	// If no value in input, no value is copied from output. (to preserve same length)
 	if (avgtimes->times.size() > 0)
 	{
+		/*
 		vector <double>::iterator newtime=avgtimes->times.begin();
 		vector <double>::iterator oldtime=histtimes->times.begin();
 		for (newtime, oldtime; (newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()); newtime++, oldtime++)
 		{
 			if ((newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()) && ((*newtime) > 0))
 			{
-				(*oldtime) = (*newtime) ;
+				(*oldtime) = time_alpha * (*newtime) + (1-time_alpha) * (*oldtime) ;
+				//newtime=(time_alpha)*avgtime+(1-time_alpha)*(histtimes->times[period]);
+				
+
 			}
 		}
+		*/
+		for (int i=0; i<avgtimes->nrperiods; i++)
+			avgtimes->times [i] =time_alpha*avgtimes->times [i] + (1-time_alpha)* histtimes->times [i];
 		return true;
 	}
 	else 
 		return false;
-
-	
-
 }
 
 
@@ -901,7 +940,8 @@ const  bool VirtualLink::full()
 			{	
 				if (tmp_avg==0.0)
 					tmp_avg=freeflowtime;
-			 	avgtimes->times.push_back(tmp_avg);
+//			 	avgtimes->times.push_back(tmp_avg);
+				avgtimes->times [curr_period] = tmp_avg;
 			 	curr_period++;
 			 	tmp_avg=0.0;
 			 	tmp_passed=0;

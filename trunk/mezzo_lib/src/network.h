@@ -197,6 +197,7 @@ public:
 	// GET's
 	double get_currenttime(){return time;}
 	double get_runtime(){return runtime;}
+	double get_time_alpha(){return time_alpha;}
 	Parameters* get_parameters () {return theParameters;} 
 	vector <ODpair*>& get_odpairs () {return odpairs;} // keep as vector
 
@@ -220,7 +221,7 @@ public:
 	double calc_mean_input_linktimes(); //!< calculates the mean of the input link travel times;
 	// SET's
 	void set_workingdir (const string dir) {workingdir = dir;}
-
+	void set_time_alpha(double val) {time_alpha=val;}
 
 	// Public transport
 	bool readbusroutes(string name); //!< reads the busroutes, similar to readroutes
