@@ -54,6 +54,7 @@ ODaction::~ODaction()
 
 void ODaction::reset(double rate_)
 {
+	server->reset();
 	if (rate_ < 1)
 	{
 		active = false;
@@ -340,8 +341,15 @@ ODpair::~ODpair()
 void ODpair::reset()
 {
 	rate=start_rate;
+#ifndef _DETERMINISTIC_ROUTE_CHOICE
+ 	if (randseed != 0)
+	   random->seed(randseed);
+	else
+		random->randomize();	
+#else
+	random->seed(42);
+#endif
 	odaction->reset(rate);
-	
 	grid->reset();
 }
  	

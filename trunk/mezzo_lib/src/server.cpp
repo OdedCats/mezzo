@@ -21,6 +21,13 @@ Server::~Server()
 	delete (random);
 }
 
+void Server::reset()
+{
+	if (randseed != 0)
+	   random->seed(randseed);
+	else
+		random->randomize();
+}
 double Server::next(const double time)
 {
  	double temp= _MAX(min_hdway,random->nrandom(mu,sd));

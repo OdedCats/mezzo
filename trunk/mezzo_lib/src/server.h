@@ -43,6 +43,7 @@ class Server  // standard n(mu,sd2) server  type: 1
 {
   public:
   Server(const int id_, const int type_, const double mu_, const double sd_, const double delay_);
+  void reset();
   virtual ~Server();
   const int get_id() const;
   virtual  double next(const double time);

@@ -50,7 +50,10 @@ class MainForm : public QMainWindow, private Ui::MainForm
 public:
 	MainForm(QWidget *parent = 0); //!< inits the main form
 	void seed(int sd ); //!< sets the seed
-
+	void set_filename(const QString fn_) {	
+			fn = QDir (fn_).path();
+			process_masterfile();}
+	void process_masterfile();
 	// access ports
 	Network* getMezzoNet(){return (theNetwork);}
 
@@ -145,7 +148,7 @@ private:
     QTimer* timer;
 	Parameters* theParameters;  //!< The parameters object, which contains the global parameters for the simulation and GUI
     QStringList files;
-    QString filename;
+    QString fn;
     bool breaknow;
     //QStatusBar* statusbar;
 	

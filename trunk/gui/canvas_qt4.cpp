@@ -24,6 +24,7 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 
 	// first create a Network object
 	theNetwork = new Network();
+	fn = "";
 
 	panelx=Canvas->width();
 	panely=Canvas->height();
@@ -196,6 +197,7 @@ void MainForm::on_closenetwork_activated()
 
 	// Create a new Network
 	theNetwork = new Network();
+	fn ="";
 
 	//display empty pixmap
 	copyPixmap();
@@ -242,9 +244,14 @@ void MainForm::on_quit_activated()
 
 void MainForm::on_openmasterfile_activated()
 {
-	QString fn = "";
+	fn = "";
 	fn = (QFileDialog::getOpenFileName(this, "Select a MEZZO master file", QString::null,"Mezzo Files (*.mime *.mezzo)") );
 	// Open master file
+	process_masterfile();	
+}
+
+void MainForm::process_masterfile()
+{
 	if ( !fn.isEmpty() ) 
 	{
 		// strip the dir from the filename and give to the Network
@@ -270,8 +277,7 @@ void MainForm::on_openmasterfile_activated()
 		wm=mod2stdViewMat_;
 		updateCanvas();
 		//statusbar->message("Initialised");
-	}	
-	
+	}
 }
 
 void MainForm::on_zoomin_activated()

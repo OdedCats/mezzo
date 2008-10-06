@@ -248,6 +248,11 @@ int Network::reset()
 		(iter7->second)->reset();
 	}
 
+	for (map <int, Server*>::iterator sv_iter=servermap.begin(); sv_iter!=servermap.end(); sv_iter++)
+	{
+		(*sv_iter).second->reset();
+	}
+
 	//traffic signals
 	for (vector <SignalControl*>::iterator sc_iter = signalcontrols.begin(); sc_iter != signalcontrols.end(); sc_iter++)
 	{
