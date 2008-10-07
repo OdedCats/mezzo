@@ -118,7 +118,8 @@ void Link::end_of_simulation()
 {	
 	// store times for current(last) period in avgtimes and make sure all periods have values.
 	if (tmp_avg==0.0)
-		tmp_avg=freeflowtime;
+		tmp_avg = histtimes->times [curr_period];
+		//tmp_avg=freeflowtime;
 	avgtimes->times[curr_period] = tmp_avg;
 	int i= 0;
 	for (i;i<histtimes->nrperiods;i++)
@@ -407,7 +408,8 @@ Vehicle* Link::exit_veh(double time, Link* nextlink, int lookback)
 			if ((curr_period+1)*(avgtimes->periodlength) < entrytime )
 			{			 	
 			 	if (tmp_avg==0.0)
-					tmp_avg=freeflowtime;
+					tmp_avg = histtimes->times [curr_period];
+					//tmp_avg=freeflowtime;
 			 	//avgtimes->times.push_back(tmp_avg);
 				avgtimes->times [curr_period] = tmp_avg;
 			 	curr_period++;
@@ -471,7 +473,8 @@ Vehicle* Link::exit_veh(double time)
 			if ((curr_period+1)*(avgtimes->periodlength) < entrytime )
 			{		
 				if (tmp_avg==0.0)
-					tmp_avg=freeflowtime;
+					tmp_avg = histtimes->times [curr_period];
+				//	tmp_avg=freeflowtime;
 			 	//avgtimes->times.push_back(tmp_avg);
 				avgtimes->times [curr_period] = tmp_avg;
 			 	curr_period++;
@@ -939,7 +942,8 @@ const  bool VirtualLink::full()
 			if ((curr_period+1)*(avgtimes->periodlength) < entrytime )
 			{	
 				if (tmp_avg==0.0)
-					tmp_avg=freeflowtime;
+					tmp_avg = histtimes->times [curr_period];
+					//tmp_avg=freeflowtime;
 //			 	avgtimes->times.push_back(tmp_avg);
 				avgtimes->times [curr_period] = tmp_avg;
 			 	curr_period++;
