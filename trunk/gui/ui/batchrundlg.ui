@@ -67,9 +67,9 @@
      <property name="geometry" >
       <rect>
        <x>10</x>
-       <y>200</y>
+       <y>140</y>
        <width>351</width>
-       <height>81</height>
+       <height>141</height>
       </rect>
      </property>
      <property name="title" >
@@ -142,10 +142,67 @@
        <string>0.00; </string>
       </property>
       <property name="text" >
-       <string>0.10</string>
+       <string>0.05</string>
       </property>
       <property name="maxLength" >
        <number>4</number>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="rmsn_link_tt" >
+      <property name="geometry" >
+       <rect>
+        <x>60</x>
+        <y>70</y>
+        <width>221</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="toolTip" >
+       <string>The maximum Root Mean Square Normalized error between Input-Output traveltimes. between 0.00 and 1.00</string>
+      </property>
+      <property name="text" >
+       <string>Link travel times</string>
+      </property>
+      <property name="checked" >
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="rmsn_od_tt" >
+      <property name="geometry" >
+       <rect>
+        <x>60</x>
+        <y>90</y>
+        <width>221</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="toolTip" >
+       <string>The maximum Root Mean Square Normalized error between Input-Output traveltimes. between 0.00 and 1.00</string>
+      </property>
+      <property name="text" >
+       <string>OD travel times</string>
+      </property>
+      <property name="checked" >
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="rmsn_link_flow" >
+      <property name="geometry" >
+       <rect>
+        <x>60</x>
+        <y>110</y>
+        <width>221</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="toolTip" >
+       <string>The maximum Root Mean Square Normalized error between Input-Output traveltimes. between 0.00 and 1.00</string>
+      </property>
+      <property name="text" >
+       <string>Link flows</string>
+      </property>
+      <property name="checked" >
+       <bool>false</bool>
       </property>
      </widget>
     </widget>
@@ -336,14 +393,14 @@
     <widget class="QLabel" name="label_6" >
      <property name="geometry" >
       <rect>
-       <x>111</x>
+       <x>81</x>
        <y>40</y>
-       <width>91</width>
+       <width>159</width>
        <height>20</height>
       </rect>
      </property>
      <property name="text" >
-      <string>Smoothing factor</string>
+      <string>Smoothing factor link travel times</string>
      </property>
     </widget>
    </widget>

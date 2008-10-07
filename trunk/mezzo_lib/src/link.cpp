@@ -805,22 +805,8 @@ bool Link::copy_linktimes_out_in()
 	// If no value in input, no value is copied from output. (to preserve same length)
 	if (avgtimes->times.size() > 0)
 	{
-		/*
-		vector <double>::iterator newtime=avgtimes->times.begin();
-		vector <double>::iterator oldtime=histtimes->times.begin();
-		for (newtime, oldtime; (newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()); newtime++, oldtime++)
-		{
-			if ((newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()) && ((*newtime) > 0))
-			{
-				(*oldtime) = time_alpha * (*newtime) + (1-time_alpha) * (*oldtime) ;
-				//newtime=(time_alpha)*avgtime+(1-time_alpha)*(histtimes->times[period]);
-				
-
-			}
-		}
-		*/
 		for (int i=0; i<avgtimes->nrperiods; i++)
-			avgtimes->times [i] =time_alpha*avgtimes->times [i] + (1-time_alpha)* histtimes->times [i];
+			histtimes->times [i] =time_alpha*avgtimes->times [i] + (1-time_alpha)* histtimes->times [i];
 		return true;
 	}
 	else 

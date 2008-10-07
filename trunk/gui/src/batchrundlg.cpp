@@ -11,13 +11,14 @@ BatchrunDlg::BatchrunDlg( QWidget* parent)
 	totalPb->setValue(0);
 	currIterPb->setValue(0);
 	//alpha->setText( QString::number(theNetwork->get_parameters()->linktime_alpha,'f',3));
-	alpha->setText( QString::number(theNetwork->get_parameters()->linktime_alpha,'f',3));
+
 //TODO: there is a linktime_alpha in the parameters file and a time_alpha in the Master file! where should it be?
 }
 
 void BatchrunDlg::setNetwork(Network* net)
 {
 	theNetwork=net;
+	alpha->setText( QString::number(theNetwork->get_parameters()->linktime_alpha,'f',3));
 }
 
 void BatchrunDlg::on_max_iterations_val_valueChanged(int i)
