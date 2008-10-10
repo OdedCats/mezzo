@@ -45,6 +45,8 @@ public:
 	BatchrunDlg(QWidget* parent=0);
 	~BatchrunDlg(){}
 	void setNetwork(Network* net);
+	void show();
+	
 	
 	//SLOTS
 	private slots:
@@ -55,7 +57,12 @@ public:
 
 	
 private:
-	void run_iterations(int nr_iterations, double max_rmsn);
+	
+	void run_iterations();
+	const bool checkConvergence(const int i, const double rmsn_ltt_, const double rmsn_odtt_);
+
+	int max_iter;
+	double max_rmsn;
 	Network* theNetwork;
 	LinkTimeInfo* linktimes;
 };

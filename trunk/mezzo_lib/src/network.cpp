@@ -259,6 +259,9 @@ int Network::reset()
 		(*sc_iter)->reset();
 	}
 
+	// vehicle types
+	vehtypes.initialize();
+
 	//TO DO
 
 	
@@ -3287,6 +3290,37 @@ double Network::calc_rms_input_output_linktimes()
 double Network::calc_rmsn_input_output_linktimes()
 {
 	return (calc_rms_input_output_linktimes() / calc_mean_input_linktimes());
+}
+
+double Network::calc_mean_input_odtimes()
+{
+	double n= odpairs.size();
+	double sum = 0.0;
+	for (vector<ODpair*>::iterator od_iter=odpairs.begin(); od_iter != odpairs.end(); od_iter++)
+	{
+		sum+=(*od_iter)->get_mean_old_odtimes();		
+	}
+	return sum / n;
+}
+
+double Network::calc_rms_input_output_odtimes()
+{
+	double n = odpairs.size();
+	double diff= 0.0;
+	double ssq = 0.0;
+	int nr_passed = 0;
+	for (vector<ODpair*>::iterator od_iter=odpairs.begin(); od_iter != odpairs.end(); od_iter++)
+	{
+		diff=(*od_iter)->get_diff_odtimes();
+		ssq += diff*diff;
+	}
+
+	return sqrt(ssq/n);
+}
+
+double Network::calc_rmsn_input_output_odtimes()
+{
+	return (calc_rms_input_output_odtimes() / calc_mean_input_odtimes());
 }
 
 bool Network::writemoes()

@@ -322,10 +322,11 @@ ODpair::ODpair(Origin* origin_, Destination* destination_, int rate_, Vtypes* vt
 	string names[nr_fields]={"origin_id","dest_id","veh_id","start_time","end_time","travel_time", "mileage","route_id","switched_route"};
     vector <string> fields(names,names+nr_fields);
 	grid=new Grid(nr_fields,fields);	
+	oldgrid =new Grid(nr_fields,fields);
 }
 
 ODpair::ODpair(): id (-1), odaction (NULL), origin (NULL), destination (NULL), 
-                  rate (-1), random (NULL), start_rate(-1)
+                  rate (-1), random (NULL), start_rate(-1), grid(NULL), oldgrid(NULL)
 {
 
 }
@@ -350,6 +351,8 @@ void ODpair::reset()
 	random->seed(42);
 #endif
 	odaction->reset(rate);
+	if (oldgrid)
+		*oldgrid = *grid;
 	grid->reset();
 }
  	

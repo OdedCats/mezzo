@@ -67,9 +67,9 @@
      <property name="geometry" >
       <rect>
        <x>10</x>
-       <y>140</y>
+       <y>120</y>
        <width>351</width>
-       <height>141</height>
+       <height>151</height>
       </rect>
      </property>
      <property name="title" >
@@ -85,7 +85,10 @@
        </rect>
       </property>
       <property name="minimum" >
-       <number>1</number>
+       <number>2</number>
+      </property>
+      <property name="maximum" >
+       <number>999</number>
       </property>
       <property name="value" >
        <number>10</number>
@@ -142,7 +145,7 @@
        <string>0.00; </string>
       </property>
       <property name="text" >
-       <string>0.05</string>
+       <string>0.02</string>
       </property>
       <property name="maxLength" >
        <number>4</number>
@@ -152,8 +155,8 @@
       <property name="geometry" >
        <rect>
         <x>60</x>
-        <y>70</y>
-        <width>221</width>
+        <y>100</y>
+        <width>131</width>
         <height>18</height>
        </rect>
       </property>
@@ -171,8 +174,8 @@
       <property name="geometry" >
        <rect>
         <x>60</x>
-        <y>90</y>
-        <width>221</width>
+        <y>120</y>
+        <width>131</width>
         <height>18</height>
        </rect>
       </property>
@@ -186,23 +189,65 @@
        <bool>false</bool>
       </property>
      </widget>
-     <widget class="QCheckBox" name="rmsn_link_flow" >
+     <widget class="QLabel" name="label_5" >
       <property name="geometry" >
        <rect>
-        <x>60</x>
-        <y>110</y>
-        <width>221</width>
-        <height>18</height>
+        <x>260</x>
+        <y>80</y>
+        <width>71</width>
+        <height>20</height>
        </rect>
       </property>
-      <property name="toolTip" >
-       <string>The maximum Root Mean Square Normalized error between Input-Output traveltimes. between 0.00 and 1.00</string>
+      <property name="text" >
+       <string>Current RMSN</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="rmsn_ltt" >
+      <property name="geometry" >
+       <rect>
+        <x>280</x>
+        <y>100</y>
+        <width>41</width>
+        <height>16</height>
+       </rect>
       </property>
       <property name="text" >
-       <string>Link flows</string>
+       <string/>
       </property>
-      <property name="checked" >
-       <bool>false</bool>
+      <property name="textFormat" >
+       <enum>Qt::PlainText</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="rmsn_odtt" >
+      <property name="geometry" >
+       <rect>
+        <x>280</x>
+        <y>120</y>
+        <width>41</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string/>
+      </property>
+      <property name="textFormat" >
+       <enum>Qt::PlainText</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="rmsn_lf" >
+      <property name="geometry" >
+       <rect>
+        <x>280</x>
+        <y>140</y>
+        <width>41</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string/>
+      </property>
+      <property name="textFormat" >
+       <enum>Qt::PlainText</enum>
       </property>
      </widget>
     </widget>
@@ -326,35 +371,6 @@
       </property>
       <property name="text" >
        <string>Total</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_5" >
-      <property name="geometry" >
-       <rect>
-        <x>240</x>
-        <y>10</y>
-        <width>71</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text" >
-       <string>Current RMSN</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="rmsn" >
-      <property name="geometry" >
-       <rect>
-        <x>320</x>
-        <y>10</y>
-        <width>41</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text" >
-       <string/>
-      </property>
-      <property name="textFormat" >
-       <enum>Qt::PlainText</enum>
       </property>
      </widget>
     </widget>

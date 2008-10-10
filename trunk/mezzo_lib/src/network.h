@@ -213,12 +213,17 @@ public:
 	multimap<odval, Route*>::iterator find_route (int id, odval val);
 	bool exists_route (int id, odval val); // checks if route with this ID exists for OD pair val
 	bool exists_same_route (Route* route); // checks if a similar route with the same links already exists
-
+// STATISTICS
+	//Linktimes
 	double calc_diff_input_output_linktimes (); //!< calculates the sum of the differences in output-input link travel times
 	double calc_sumsq_input_output_linktimes (); //!< calculates the sum square of the differences in output-input link travel times
 	double calc_rms_input_output_linktimes();//!< calculates the root mean square of the differences in output-input link travel times
 	double calc_rmsn_input_output_linktimes();//!< calculates the Normalized (by mean) root mean square differences in output-input link travel times
 	double calc_mean_input_linktimes(); //!< calculates the mean of the input link travel times;
+	// OD times
+	double calc_rms_input_output_odtimes();
+	double calc_mean_input_odtimes();
+	double calc_rmsn_input_output_odtimes();
 	// SET's
 	void set_workingdir (const string dir) {workingdir = dir;}
 	void set_time_alpha(double val) {time_alpha=val;}

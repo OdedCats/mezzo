@@ -38,7 +38,9 @@ using namespace std;
 class Grid
 {
     public:
+		Grid() {}
       Grid(int nr_fields_, vector<string> names_);
+	  Grid (const Grid & grid_): nr_fields(grid_.nr_fields), fnames(grid_.fnames), grid (grid_.grid) {}
 	  void reset(); // resets the values NOT the fieldnames!
       bool insert_row(list <double> & values); // reference to a list of values so theres no needless copying
       bool write_empty(ostream& out);

@@ -43,7 +43,10 @@ void Vtypes::initialize ()
 	else
 		random->randomize();
 #else
-	random->seed(42);
+	 if (randseed != 0)
+	   random->seed(randseed);
+	else
+		random->seed(42);
 #endif
 
 
