@@ -28,6 +28,10 @@ void BatchrunDlg::on_max_iterations_val_valueChanged(int i)
 {	
 	total_iter->setNum(i);
 }
+void BatchrunDlg::on_pauseButton_clicked()
+{
+	pause_pressed = true;
+}
 
 void BatchrunDlg::show()
 {		
@@ -36,13 +40,14 @@ void BatchrunDlg::show()
 	rmsn_ltt->setNum(0);
 	totalPb->setValue(0);
 	currIterPb->setValue(0);
+	pause_pressed = false;
 	QWidget::show();
 }
 
 void BatchrunDlg::on_runButton_clicked()
 {
 	// check what type of iteration is to be done
-
+	pause_pressed = false;
 	if (iterate_traveltimes_rb->isChecked())
 	{
 		
@@ -58,14 +63,27 @@ void BatchrunDlg::on_runButton_clicked()
 
 const bool BatchrunDlg::checkConvergence(const int i, const double rmsn_ltt_, const double rmsn_odtt_)
 {
+	// if more than max iterations, return true
 	if (i >= max_iter)
 		return true;
+	// if rmsn criterium is used
 	if (max_rmsn_cb->isChecked())
 	{
-		if ( (rmsn_link_tt->isChecked()) && (rmsn_ltt_ <= max_rmsn))
+		// if both link traveltimes and od traveltimes used
+		if ( (rmsn_link_tt->isChecked()) && (rmsn_od_tt->isChecked()))
+		{
+			if ((rmsn_ltt_ <= max_rmsn) && (rmsn_odtt_ <= max_rmsn)) // they both have to be true
 				return true;
-		if ( (rmsn_od_tt->isChecked()) && (rmsn_odtt_ <= max_rmsn))
+			else 
+				return false;
+		}
+		else // otherwise the one checked has to give 'true'
+		{
+			if ( ((rmsn_od_tt->isChecked()) && (rmsn_odtt_ <= max_rmsn)) || ((rmsn_link_tt->isChecked()) && (rmsn_ltt_ <= max_rmsn)) )
 				return true;	
+			else
+				return false;
+		}
 	}
 	
 	return false;
@@ -100,12 +118,13 @@ void BatchrunDlg::run_iterations()
 			theNetwork->reset();
 		}
 		curtime=0.0;
-		while (curtime < runtime)
+		while ((curtime < runtime))
 		{
 			curtime=theNetwork->step(1.0);
 			int progress = static_cast<int>(100*curtime/runtime);
 			currIterPb->setValue(progress);
 			update();
+			qApp->processEvents();
 			repaint();
 		}
 		theNetwork->end_of_simulation(runtime);

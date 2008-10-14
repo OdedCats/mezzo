@@ -109,6 +109,9 @@
       <property name="text" >
        <string>Max Nr Iterations</string>
       </property>
+      <property name="checkable" >
+       <bool>true</bool>
+      </property>
       <property name="checked" >
        <bool>true</bool>
       </property>
@@ -126,7 +129,7 @@
        <string>The maximum Root Mean Square Normalized error between Input-Output traveltimes. between 0.00 and 1.00</string>
       </property>
       <property name="text" >
-       <string>Max RMSN error</string>
+       <string>Max RMSN difference</string>
       </property>
       <property name="checked" >
        <bool>true</bool>
@@ -255,7 +258,7 @@
      <property name="geometry" >
       <rect>
        <x>0</x>
-       <y>319</y>
+       <y>320</y>
        <width>371</width>
        <height>111</height>
       </rect>
@@ -374,19 +377,6 @@
       </property>
      </widget>
     </widget>
-    <widget class="QPushButton" name="runButton" >
-     <property name="geometry" >
-      <rect>
-       <x>20</x>
-       <y>290</y>
-       <width>75</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text" >
-      <string>Run</string>
-     </property>
-    </widget>
     <widget class="QLineEdit" name="alpha" >
      <property name="geometry" >
       <rect>
@@ -417,6 +407,82 @@
      </property>
      <property name="text" >
       <string>Smoothing factor link travel times</string>
+     </property>
+    </widget>
+    <widget class="QToolButton" name="runButton" >
+     <property name="geometry" >
+      <rect>
+       <x>50</x>
+       <y>280</y>
+       <width>31</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="toolTip" >
+      <string>Run</string>
+     </property>
+     <property name="text" >
+      <string>...</string>
+     </property>
+     <property name="icon" >
+      <iconset resource="../canvas_qt4.qrc" >:/images/bt_play.png</iconset>
+     </property>
+    </widget>
+    <widget class="QToolButton" name="pauseButton" >
+     <property name="geometry" >
+      <rect>
+       <x>80</x>
+       <y>280</y>
+       <width>31</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="toolTip" >
+      <string>Pause</string>
+     </property>
+     <property name="text" >
+      <string>...</string>
+     </property>
+     <property name="icon" >
+      <iconset resource="../canvas_qt4.qrc" >:/images/bt_pause.png</iconset>
+     </property>
+    </widget>
+    <widget class="QToolButton" name="stopButton" >
+     <property name="geometry" >
+      <rect>
+       <x>110</x>
+       <y>280</y>
+       <width>31</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="toolTip" >
+      <string>Stop &amp; reset</string>
+     </property>
+     <property name="text" >
+      <string>...</string>
+     </property>
+     <property name="icon" >
+      <iconset resource="../canvas_qt4.qrc" >:/images/bt_stop.png</iconset>
+     </property>
+    </widget>
+    <widget class="QToolButton" name="saveButton" >
+     <property name="geometry" >
+      <rect>
+       <x>160</x>
+       <y>280</y>
+       <width>31</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="toolTip" >
+      <string>Stop &amp; reset</string>
+     </property>
+     <property name="text" >
+      <string>...</string>
+     </property>
+     <property name="icon" >
+      <iconset resource="../canvas_qt4.qrc" >:/images/filesave.png</iconset>
      </property>
     </widget>
    </widget>

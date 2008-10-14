@@ -763,10 +763,10 @@
     <string>Stop</string>
    </property>
    <property name="iconText" >
-    <string>Quit</string>
+    <string>Stop</string>
    </property>
    <property name="toolTip" >
-    <string>Quit</string>
+    <string>Stop &amp; reset</string>
    </property>
    <property name="statusTip" >
     <string/>
