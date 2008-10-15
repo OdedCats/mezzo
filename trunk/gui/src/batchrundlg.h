@@ -51,7 +51,7 @@ public:
 	//SLOTS
 	private slots:
 	void on_runButton_clicked();
-	void on_pauseButton_clicked();
+	void on_stopButton_clicked();
 	void on_max_iterations_val_valueChanged(int i);
 	
 
@@ -66,7 +66,7 @@ private:
 	double max_rmsn;
 	Network* theNetwork;
 	LinkTimeInfo* linktimes;
-	bool pause_pressed;
+	bool stop_pressed;
 };
 
 #endif

@@ -28,9 +28,9 @@ void BatchrunDlg::on_max_iterations_val_valueChanged(int i)
 {	
 	total_iter->setNum(i);
 }
-void BatchrunDlg::on_pauseButton_clicked()
+void BatchrunDlg::on_stopButton_clicked()
 {
-	pause_pressed = true;
+	stop_pressed = true;
 }
 
 void BatchrunDlg::show()
@@ -40,14 +40,14 @@ void BatchrunDlg::show()
 	rmsn_ltt->setNum(0);
 	totalPb->setValue(0);
 	currIterPb->setValue(0);
-	pause_pressed = false;
+	stop_pressed = false;
 	QWidget::show();
 }
 
 void BatchrunDlg::on_runButton_clicked()
 {
 	// check what type of iteration is to be done
-	pause_pressed = false;
+	stop_pressed = false;
 	if (iterate_traveltimes_rb->isChecked())
 	{
 		
@@ -102,7 +102,7 @@ void BatchrunDlg::run_iterations()
 	update();
 
 // iterations
-	for (i; !checkConvergence(i,rmsn_ltt_,rmsn_odtt_);i++)
+	for (i; !checkConvergence(i,rmsn_ltt_,rmsn_odtt_) && !stop_pressed;i++)
 	{
 		// update display widgets with correct values
 		cur_iter->setNum(i);
