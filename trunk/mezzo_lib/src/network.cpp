@@ -206,6 +206,7 @@ Network::~Network()
 int Network::reset()
 {	
 	time=0.0;
+	vid = 0;
 	// reset eventlist
 	eventlist->reset();
 
