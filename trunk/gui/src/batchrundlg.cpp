@@ -41,7 +41,16 @@ void BatchrunDlg::show()
 	totalPb->setValue(0);
 	currIterPb->setValue(0);
 	stop_pressed = false;
+	rmsn_ltt->setEnabled(false);
+	rmsn_odtt->setEnabled(false);
+
 	QWidget::show();
+}
+void BatchrunDlg::on_saveButton_clicked()
+{
+	if (theNetwork->writeall());
+		QMessageBox::information(this, "Saved", 
+					          "Results saved.");
 }
 
 void BatchrunDlg::on_runButton_clicked()
@@ -52,10 +61,22 @@ void BatchrunDlg::on_runButton_clicked()
 	{
 		
 		if (max_iterations_cb->isChecked())
+		{
 			max_iter=max_iterations_val->value();
+		}
 
 		if (max_rmsn_cb->isChecked())
+		{
 			max_rmsn = max_rmsn_val->text().toDouble();
+			if (rmsn_link_tt->isChecked())
+			{
+				rmsn_ltt->setEnabled(true);
+			}
+			if (rmsn_od_tt->isChecked())
+			{
+				rmsn_odtt->setEnabled(true);
+			}
+		}
 		//progress_gb->setEnabled(true);
 		run_iterations();
 	}	
