@@ -81,7 +81,7 @@ VISSIMCOM::VISSIMCOM(const string & configfile)
 	HRESULT hr;
 
 //	hr = CoInitialize(NULL);
-// NOTE DON*T KNOW HOW TO MAKE MULTITHREADED
+
 	hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	if (FAILED(hr))
 	{
