@@ -253,7 +253,11 @@ int Network::reset()
 	{
 		(*sv_iter).second->reset();
 	}
-
+	
+	for (vector <ChangeRateAction*>::iterator cr_iter=changerateactions.begin(); cr_iter != changerateactions.end(); cr_iter++)
+	{
+		(*cr_iter)->reset();
+	}	
 	//traffic signals
 	for (vector <SignalControl*>::iterator sc_iter = signalcontrols.begin(); sc_iter != signalcontrols.end(); sc_iter++)
 	{
@@ -2009,6 +2013,7 @@ bool Network::readserverrate(istream& in)
 	Server* sptr = servermap[sid];
 	ChangeRateAction* cptr=new ChangeRateAction(eventlist,time,sptr,mu,sd);
 	assert (cptr != NULL);
+	changerateactions.push_back(cptr);
 	return true;
 }
 

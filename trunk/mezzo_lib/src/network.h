@@ -262,6 +262,7 @@ protected:
 	map <int, Turning*> turningmap; //!< 
 	// vector <Server*> servers;
 	map <int, Server*> servermap; //!< 
+	vector <ChangeRateAction*> changerateactions; //!<
 //	vector <Route*> routes;	
 	multimap <odval, Route*> routemap; //!< 
 	vector <ODpair*> odpairs; //!< keep using OD pair vector for now, as map is too much of a hassle with two indices.

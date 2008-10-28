@@ -127,11 +127,14 @@ class ChangeRateAction: public Action
 
 {
 	public:
-		ChangeRateAction (Eventlist* eventlist, double time, Server* server_, double mu_, double sd_);
+		ChangeRateAction (Eventlist* eventlist_, double time_, Server* server_, double mu_, double sd_);
+		void reset();
 		bool execute(Eventlist* eventlist, double time);
 	private:
 		Server* server;
 		double mu, sd;
+		double time;
+		Eventlist* eventlist;
 };
 
 

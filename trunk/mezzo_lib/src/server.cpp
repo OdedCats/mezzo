@@ -111,11 +111,18 @@ double OServer::next(const double time)
 }
 
 
-ChangeRateAction::ChangeRateAction (Eventlist* eventlist, double time, Server* server_, double mu_, double sd_)
+ChangeRateAction::ChangeRateAction (Eventlist* eventlist_, double time_, Server* server_, double mu_, double sd_)
 {
    mu=mu_;
    sd=sd_;
    server=server_;
+   time=time_;
+   eventlist = eventlist_;
+   eventlist->add_event(time, this);
+}
+
+void ChangeRateAction::reset()
+{
 	eventlist->add_event(time, this);
 }
 		
