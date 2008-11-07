@@ -394,6 +394,9 @@ bool Link::enter_veh(Vehicle* veh, double time)
 	return queue->enter_veh(veh);
 }
 
+bool Link::veh_exiting(double time, Link* nextlink, int lookback)
+	{return queue->veh_exiting(time,nextlink,lookback);}
+
 Vehicle* Link::exit_veh(double time, Link* nextlink, int lookback)
 {
 	ok=false;

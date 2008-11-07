@@ -73,6 +73,7 @@ class Q
   bool enter_veh(Vehicle* veh);
   Vehicle* exit_veh(double time, Link* nextlink, int lookback);
   Vehicle* exit_veh(double time);
+  bool veh_exiting (double time, Link* nextlink, int lookback);
   void update_exit_times(double t0, Link* nextlink, int lookback, double v_exit, double v_shockwave);
   void broadcast_incident_start(int lid, vector <double> parameters);
   void receive_broadcast(Vehicle* veh, int lid, vector <double> parameters);

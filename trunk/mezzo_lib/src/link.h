@@ -134,6 +134,7 @@ public:
 	const bool empty();
 	const bool exit_ok() {	return ok;}
 	const double next_action (double time);
+	bool veh_exiting(double time, Link* nextlink, int lookback); 
 	void update_icon(double time);
 
 #ifndef _NO_GUI   
