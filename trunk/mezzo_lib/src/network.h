@@ -322,6 +322,8 @@ protected:
 	bool readservers(istream& in);
 	bool readserver(istream& in);
 	bool readturning(istream& in);
+	bool readgiveway(istream& in);
+	bool readgiveways(istream& in);
 	bool readroutes(istream& in);
 	bool readroute(istream& in);
 	bool readods(istream& in);

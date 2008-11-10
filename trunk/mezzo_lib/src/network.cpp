@@ -916,6 +916,8 @@ bool Network::readturnings(string name)
 		if (!readturning(inputfile))
 			return false;
 	}
+	readgiveways(inputfile);
+	inputfile.close();
 	return true;
 }
 
@@ -1056,6 +1058,63 @@ bool Network::writeturnings(string name)
 	{
 		(*iter).second->write(out);
 	}
+	return true;
+}
+
+bool Network::readgiveway(istream& in)
+{
+	char bracket;
+	int nid, tin, tcontr; // node id, turn in, controlling turning
+	in >> bracket;
+	if (bracket != '{')
+	{
+		cout << "readfile::readgiveway scanner jammed at " << bracket;
+		return false;
+	}
+
+	in  >>  nid >> tin >> tcontr;
+	// check
+	assert (nodemap.count(nid));
+	Node* node = nodemap [nid];
+	assert (turningmap.count(tin));
+	Turning * t_in = turningmap [tin];
+	assert (turningmap.count(tcontr));
+	Turning * t_contr = turningmap [tcontr];
+
+	in >> bracket;
+	if (bracket != '}')
+	{
+		cout << "readfile::readgiveway scanner jammed at " << bracket;
+		return false;
+	}
+
+	t_in->register_controlling_turn(t_contr);
+	return true;
+}
+bool Network::readgiveways(istream& in)
+{
+	string keyword;
+	in >> keyword;
+#ifdef _DEBUG_NETWORK
+	cout << keyword << endl;
+#endif //_DEBUG_NETWORK
+	if (keyword!="giveways:")
+	{
+		cout << " readgiveways: no << giveways: >> keyword " << endl;
+		return false;
+	}
+	int nr;
+	in >> nr;
+	for (int i=0; i<nr;i++)
+	{
+		if (!readgiveway(in))
+		{
+			cout << " readgiveways: readgiveway returned false for line nr " << (i+1) << endl;
+			return false;
+		} 
+	}
+
+
 	return true;
 }
 

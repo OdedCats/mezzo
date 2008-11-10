@@ -122,7 +122,7 @@ bool Turning::check_controlling(double time)
 bool Turning::giveway_can_pass(double time) // returns true if vehicle from minor turning can pass
 {
 	//TODO
-	// if there are no vehicles in the incoming link about to make the turn.
+	// implement a max waiting time
 	if (!active)// if turning is not active (red light)
 		return true;
 	else
