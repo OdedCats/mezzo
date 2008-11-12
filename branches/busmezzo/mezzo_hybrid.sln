@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual C++ Express 2005
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C++ Express 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gui", "gui\hybrid\gui_hybrid.vcproj", "{60259A8A-DDD3-4036-B4D1-C598A9F0B0E3}"
 	ProjectSection(ProjectDependencies) = postProject
 		{9AC6C523-2B36-463F-99E6-5A6ECE5D3A3B} = {9AC6C523-2B36-463F-99E6-5A6ECE5D3A3B}
