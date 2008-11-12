@@ -134,7 +134,7 @@ bool Q::veh_exiting (double time, Link* nextlink, int lookback)
 	{
 	    int i=0;
 		list <Veh_in_Q>::iterator v_it = vehicles.begin();
-		for (v_it; v_it != vehicles.end(), i<lookback;v_it++,i++)
+		for (v_it; (v_it != vehicles.end()) && (i<lookback);v_it++,i++)
 		{
 			next=v_it->second->nextlink()->get_id();
 			if (nextlink->get_id() == next)

@@ -116,6 +116,8 @@ bool Turning::check_controlling(double time)
 	{
 		can_pass = can_pass && (*gv)->giveway_can_pass(time);
 	}
+	if (!can_pass)
+		return false; // just for debugging
 	return can_pass;
 }
 
