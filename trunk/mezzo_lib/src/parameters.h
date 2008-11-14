@@ -119,7 +119,8 @@ public:
 //#turning_parameters
    int default_lookback_size; //!< default queue look-back
    double turn_penalty_cost;  //!< added penalty in shortest path alg. if a turn is forbidden
-
+   bool use_giveway; //!< if true, giveway logic is used
+   double max_wait; //!< default max waiting time for give_way
 // #server_parameters
    bool od_servers_deterministic; //!< if true the time headways in OD servers are determiunistic, otherwise neg_exp
    double odserver_sigma; //!< Obsolete since OD servers now have Mu=Sigma  (neg exp). Was for use with previous combined normal-neg_exp servers

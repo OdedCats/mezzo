@@ -90,7 +90,8 @@ private:
 	bool ok; // true if processing went fine
 	bool out_full; // true if outlink full
 	bool active; // true if turning is active (has green light in signalised crossing), false if red light.
-
+	bool waiting; // true if vehicle waiting to pass.
+	double waiting_since; // how many seconds a vehicle is waiting for gap in opposing stream. 
 };
 
 

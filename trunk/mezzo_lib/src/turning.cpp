@@ -16,6 +16,8 @@ Turning::Turning(int id_, Node* node_, Server* server_, Link* inlink_, Link* out
 		cout << "new turning: tid,nid,sid,in,out " << id << node->get_id();
 		cout << server->get_id() << inlink->get_id() << outlink->get_id() << endl;
 #endif //_DEBUG_TURNING
+		waiting_since = 0.0;
+		waiting = false;
 		blocked=false;
 		active = true; // turning is active by default
 		out_full = false;
@@ -108,7 +110,13 @@ bool Turning::process_veh(double time)
 }
 bool Turning::check_controlling(double time) 
 {
-	// TODO
+	if (!theParameters->use_giveway)
+		return true;
+	if (waiting && ((time-waiting_since) > theParameters->max_wait))
+	{	
+		waiting=false;
+		waiting_since = 0.0;
+	}
 	bool can_pass = true;
 	// Check all controlling turnings if vehicle can pass
 	vector <Turning*>::iterator gv = controlling_turnings.begin();
@@ -117,8 +125,17 @@ bool Turning::check_controlling(double time)
 		can_pass = can_pass && (*gv)->giveway_can_pass(time);
 	}
 	if (!can_pass)
+	{
+		waiting = true;
+		waiting_since=time;
 		return false; // just for debugging
-	return can_pass;
+	}
+	else
+	{
+		waiting=false;
+		waiting_since = 0.0;
+		return true;
+	}
 }
 
 bool Turning::giveway_can_pass(double time) // returns true if vehicle from minor turning can pass

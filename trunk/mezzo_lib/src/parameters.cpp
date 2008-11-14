@@ -36,6 +36,8 @@ Parameters::Parameters ()
 // #turning_parameters
    default_lookback_size= 20;
    turn_penalty_cost= 99999.0;
+   use_giveway = false;
+   max_wait = 5.0;
 // #server_parameters
    od_servers_deterministic= 1;
    odserver_sigma= 0.2;
