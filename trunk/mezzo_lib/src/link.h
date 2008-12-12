@@ -103,6 +103,8 @@ public:
 	const int get_in_node_id() ;
 	const int get_length() {return length;}	
 	const int get_nr_lanes() {return nr_lanes;}
+	const string get_name() {return name;}
+	void set_name(string name_) {name=name_;}
 	//const int Link::size();
 	const int size();
 	void set_hist_time(double time) {	hist_time=time;}
@@ -207,6 +209,7 @@ public:
 
 protected:
 	int id;
+	string name;
 	Node* in_node;
 	Node* out_node;
 	Q* queue;

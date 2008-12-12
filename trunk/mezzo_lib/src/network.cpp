@@ -607,15 +607,24 @@ bool Network::readlink(istream& in)
 {
 	char bracket;
 	int lid, innode, outnode, length,nrlanes,sdid;
+	string name;
 	in >> bracket;
 	if (bracket != '{')
 	{
 		cout << "readfile::readlinks scanner jammed at " << bracket;
 		return false;
 	}
-	in  >> lid >> innode >> outnode >> length >> nrlanes >> sdid;
-	// check lid, vmax, vmin, romax;
-	in >> bracket;
+	in  >> lid >> innode >> outnode >> length >> nrlanes >> sdid >> name;
+
+	if (name == "}")
+	{
+		bracket = '}';
+		name="";
+	}
+	else
+	{
+		in >> bracket;
+	}
 	if (bracket != '}')
 	{
 		cout << "readfile::readlinks scanner jammed at " << bracket;
@@ -628,26 +637,13 @@ bool Network::readlink(istream& in)
 	//assert  ( (find_if (links.begin(),links.end(), compare <Link> (lid))) == links.end() );    // no link with lid exists
 	assert (!linkmap.count(lid));
 #endif // _UNSAFE  
-	/*
-	vector <Node*>::iterator iter=nodes.begin();
-	iter= find_if (nodes.begin(),nodes.end(), compare <Node> (innode)) ;
-	assert  ( iter < nodes.end() ); // innode exists
-	Node* inptr=(*iter) ;   
-	*/
+	
 	assert (nodemap.count(innode));
 	Node* inptr = nodemap [innode];
-	/*
-	iter= find_if (nodes.begin(),nodes.end(), compare <Node> (outnode)) ;
-	assert  ( iter < nodes.end() ); // outnode exists
-	Node* outptr=(*iter) ; */
+	
 	assert (nodemap.count(outnode));
 	Node* outptr = nodemap [outnode];
-	/*
-	vector <Sdfunc*>::iterator iter2=sdfuncs.begin();
-	iter2= find_if (sdfuncs.begin(),sdfuncs.end(), compare <Sdfunc> (sdid));
-	assert  ( iter2 < sdfuncs.end() );  // sdfunc exists
-	Sdfunc* sdptr=(*iter2) ;    
-	*/
+	
 	assert (sdfuncmap.count(sdid));
 	Sdfunc* sdptr = sdfuncmap [sdid];
 	// make the drawable icon for the link
@@ -670,6 +666,7 @@ bool Network::readlink(istream& in)
 #endif // _NO_GUI  
 	// create the link
 	Link* link=new Link(lid, inptr, outptr, length,nrlanes,sdptr);
+	link->set_name(name);
 	// register the icon in the link
 #ifndef _NO_GUI
 	link->set_icon(icon);
