@@ -105,8 +105,8 @@ public:
 	{
 		occupancy = 0;
 		on_trip = false;
-		number_seats = 50;
-		capacity = 80;
+		number_seats = 45;
+		capacity = 75;
 		type = 4;
 		random = new (Random);
 		if (randseed != 0)

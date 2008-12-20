@@ -102,7 +102,7 @@ return false;
 
 Bustrip::Bustrip ()
 {
-	init_occupancy=0;
+	init_occupancy = 0;
 }
 
 Bustrip::Bustrip (int id_, double start_time_): id(id_), starttime(start_time_)
@@ -121,9 +121,9 @@ Bustrip::~Bustrip ()
 
 double Bustrip::calc_departure_time (double time) // calculates departure time from origin according to arrival time and schedule (including layover effect)
 {
-	double min_recovery = 2.00; 
-	double mean_error_recovery = 2.00;
-	double std_error_recovery = 1.00;
+	double min_recovery = 60.00; 
+	double mean_error_recovery = 60.00;
+	double std_error_recovery = 60.00;
 	// These three parameters should be used from the parameters input file
 	vector <Start_trip*>::iterator curr_trip; // find the pointer to the current trip
 	for (vector <Start_trip*>::iterator trip = driving_roster.begin(); trip < driving_roster.end(); trip++)
@@ -437,7 +437,8 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 	
 	bool crowded = 0;
 	double std_error = 10;
-	
+	set_nr_boarding (0);
+	set_nr_alighting (0);
 	/* Lin & Wilson version of dwell time function
 	double dwell_constant = 12.5; // Value of the constant component in the dwell time function. 
 	double boarding_coefficient = 0.55;	// Should be read as an input parameter. Would be different for low floor for example.
@@ -448,19 +449,42 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 	*/
 	
 	bool out_of_stop = check_out_of_stop(trip->get_busv());
-	
-	nr_waiting [trip->get_line()] += random -> poisson (((get_arrival_rates (trip)) * get_time_since_arrival (trip, time)) / 3600.0 );
+	stops_rate stops_rate_dwell, stops_rate_coming, stops_rate_waiting;
+
+	if (theParameters->demand_format == 1)
+	{
+		nr_waiting [trip->get_line()] += random -> poisson (((get_arrival_rates (trip)) * get_time_since_arrival (trip, time)) / 3600.0 );
 				//the arrival process follows a poisson distribution and the lambda is relative to the headway
 				// with arrival time and the headway as the duration
-
-	if (curr_occupancy == 0 || get_alighting_fractions (trip) == 0) 
-	{
-		set_nr_alighting (0);
-	}
-	else
-	{
-	set_nr_alighting (random -> binrandom (curr_occupancy, get_alighting_fractions (trip))); // the alighting process follows a binominal distribution 
+		if (curr_occupancy == 0 || get_alighting_fractions (trip) == 0) 
+		{
+			set_nr_alighting (0);
+		}
+		else
+		{
+			set_nr_alighting (random -> binrandom (curr_occupancy, get_alighting_fractions (trip))); // the alighting process follows a binominal distribution 
 					// the number of trials is the number of passengers on board with the probability of the alighting fraction
+		}
+		curr_occupancy -= get_nr_alighting(); 
+	}
+	if (theParameters->demand_format == 2)
+	{
+		stops_rate_dwell = multi_arrival_rates[trip->get_line()];
+		stops_rate_waiting = multi_nr_waiting[trip->get_line()];
+		for (vector <Busstop*>::iterator destination_stop = trip->get_line()->stops.begin(); destination_stop < trip->get_line()->stops.end(); destination_stop++)
+		{
+			if (stops_rate_dwell[(*destination_stop)] != 0 )
+			{
+				stops_rate_coming[(*destination_stop)] = (random -> poisson ((stops_rate_dwell[(*destination_stop)] * get_time_since_arrival (trip, time)) / 3600.0 )); // randomized the number of new-comers to board that the destination stop
+				trip->nr_expected_alighting[(*destination_stop)] += int (stops_rate_coming[(*destination_stop)]);
+				stops_rate_waiting[(*destination_stop)] += int(stops_rate_coming[(*destination_stop)]); // the total number of passengers waiting for the destination stop is updated by adding the new-comers
+				nr_waiting [trip->get_line()] += stops_rate_coming[(*destination_stop)];
+			}
+		}
+		multi_nr_waiting[trip->get_line()] = stops_rate_waiting;
+		set_nr_alighting (trip->nr_expected_alighting[this]); // passengers heading for this stop alight
+		curr_occupancy -= get_nr_alighting();
+		trip->nr_expected_alighting[this] = 0; 
 	}
 
 	if (curr_occupancy > trip->get_busv()->get_number_seats())	// Calculating alighting standees 
@@ -472,17 +496,50 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 		alighting_standees = 0;
 	}
 	
-	curr_occupancy -= get_nr_alighting(); 
-	if (curr_occupancy > 40)
+	if (curr_occupancy > 45)
 	{
 		crowded = 1;
 	}
-	set_nr_boarding (Min(nr_waiting [trip->get_line()] , trip->get_busv()->get_capacity() - curr_occupancy));  // The number of boarding passengers is limited by the capacity
-	nr_waiting [trip->get_line()] = Max(nr_waiting [trip->get_line()] - get_nr_boarding(), 0); // the number of waiting passenger is decreased by the number of passengers that went on the bus. 
+	// set_nr_boarding (Min(nr_waiting [trip->get_line()] , trip->get_busv()->get_capacity() - curr_occupancy));  // The number of boarding passengers is limited by the capacity
 	
+	if (trip->get_busv()->get_capacity() - curr_occupancy < nr_waiting [trip->get_line()]) // if the capcity determines the boarding process
+	{	
+		double ratio = double(nr_waiting [trip->get_line()])/(trip->get_busv()->get_capacity() - curr_occupancy);
+		if (theParameters->demand_format == 2)
+		{
+			for (vector <Busstop*>::iterator destination_stop = trip->get_line()->stops.begin(); destination_stop < trip->get_line()->stops.end(); destination_stop++)
+			{
+				if (stops_rate_dwell[(*destination_stop)] != 0 )
+				{	
+					int added_expected_passengers = Round(stops_rate_waiting[(*destination_stop)]/ratio);
+					set_nr_boarding(get_nr_boarding() + added_expected_passengers);
+					trip->nr_expected_alighting[(*destination_stop)] += added_expected_passengers;
+					trip->nr_expected_alighting[(*destination_stop)] -= stops_rate_coming[(*destination_stop)];
+					stops_rate_waiting[(*destination_stop)] -= added_expected_passengers;
+					nr_waiting[trip->get_line()] -= added_expected_passengers;
+				}
+			}
+			multi_nr_waiting[trip->get_line()] = stops_rate_waiting;
+		}
+	}
+	else 
+	{	
+		set_nr_boarding(nr_waiting [trip->get_line()]);
+		nr_waiting [trip->get_line()] = 0;
+		if (theParameters->demand_format == 2)
+		{
+			for (vector <Busstop*>::iterator destination_stop = trip->get_line()->stops.begin(); destination_stop < trip->get_line()->stops.end(); destination_stop++)
+			{
+				trip->nr_expected_alighting[(*destination_stop)] += stops_rate_waiting[(*destination_stop)];
+				trip->nr_expected_alighting[(*destination_stop)] -= stops_rate_coming[(*destination_stop)];
+				stops_rate_waiting[(*destination_stop)] = 0;
+			}
+			multi_nr_waiting[trip->get_line()] = stops_rate_waiting;
+		}
+	}
 	curr_occupancy += get_nr_boarding();
-
 	trip->get_busv()->set_occupancy(curr_occupancy); // Updating the occupancy. 
+	
 	if (curr_occupancy > trip->get_busv()->get_number_seats()) // Calculating the boarding standess
 	{
 		boarding_standees = curr_occupancy - trip->get_busv()->get_number_seats();
@@ -568,8 +625,10 @@ double Busstop::calc_exiting_time (Bustrip* trip, double time)
 	double ready_to_depart = time + dwelltime;
 	switch (trip->get_line()->get_holding_strategy())
 	{
+		// for no control:
 		case 0:
 			return time + dwelltime; // since it isn't a time-point stop, it will simply exit after dwell time
+		// for headway based:
 		case 1:
 			if (trip->get_line()->is_line_timepoint(this) == true) // if it is a time point
 			{

@@ -141,6 +141,10 @@ public:
    double mime_comm_step; //!< Communication step for MICRO-MESO information exchange
    int mime_min_queue_length; //!< min queue length for stopping / starting shockwaves
    double mime_queue_dis_speed; //!< queue dissipation speed if not calculated from flow & density data
+
+// demand parameters:
+   int demand_format;
+
 // TODO: Implement the use of the following paramaters
    double vissim_step; //!< time step for the VISSIM micro model
    double sim_speed_factor; //!< REALTIME factor to keep the hybrid model running at a fixed speed

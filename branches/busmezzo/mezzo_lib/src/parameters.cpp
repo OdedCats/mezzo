@@ -58,7 +58,9 @@ Parameters::Parameters ()
    mime_queue_dis_speed= 6.0;
    vissim_step= 0.1;
    sim_speed_factor= 2.0;
-   
+
+// demand parameters:
+   demand_format = 1;
 }
 
 bool Parameters::read_parameters (istream & in )
@@ -442,8 +444,19 @@ bool Parameters::read_parameters (istream & in )
 		return false;
 	}
 	in >> sim_speed_factor;
-
-
+	in >> keyword;
+	if (keyword!= "#demand_parameters")
+	{
+		cout << "ERROR reading Parameters file, expecting: #demand_parameters, read: " << keyword << endl;
+		return false;
+	}
+	in >> keyword;
+	if (keyword!= "demand_format=")
+	{
+		cout << "ERROR reading Parameters file, expecting: demand_format=, read: " << keyword << endl;
+		return false;
+	}
+	in >> demand_format;
 	return true;
 }
 

@@ -12,6 +12,7 @@
 #include "link.h"
 #include "sdfunc.h"
 #include "q.h"
+#include "MMath.h" 
 
 
 class Busroute;
@@ -48,12 +49,13 @@ public:
 	bool is_line_timepoint (Busstop* stop); //!< returns true if stops is a time point for this busline, otherwise it returns false
 	bool check_first_stop (Busstop* stop); // returns true if the stop is the first stop on the bus line, otherwise it returns false 
 	bool check_first_trip (Bustrip* trip); // returns true if the trip is the first trip on the bus line, otherwise it returns false  
+	vector <Busstop*>  stops; //!< contains all the stops on this line
 
 protected:
 	int id; //!< line ID
 	string name; //!< name of the busline "46 Sofia"
 //	int vtype; //!< vehicle type. There are usually multiple types of Busses
-	vector <Busstop*>  stops; //!< contains all the stops on this line
+
 	vector <Busstop*> line_timepoint;
 	vector <Start_trip> trips; //!< the trips that are to be made
 	Busroute* busroute; //!< the route (in terms of links) that the busses follow
@@ -86,6 +88,7 @@ public:
 	double get_starttime () {return starttime;}
 	int get_init_occupancy () {return init_occupancy;}
 	vector <Visit_stop*> :: iterator& get_next_stop() {return next_stop;} //!< returns pointer to next stop
+	
 
 // other functions:	
 //	bool is_trip_timepoint(Busstop* stop); //!< returns 1 if true, 0 if false, -1 if busstop not found
@@ -101,7 +104,8 @@ public:
 // public vectors
 	vector <Visit_stop*> stops; //!< contains all the busstops and the times that they are supposed to be served. NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
 	vector <Start_trip*> driving_roster; //!< trips assignment for each bus vehicle.
-	
+	map <Busstop*, int> nr_expected_alighting; //!< number of passengers expected to alight at the busline's stops
+
 protected:
 	int id; //!< course nr
 	Bus* busv; //!< pointer to the bus vehicle
@@ -110,11 +114,18 @@ protected:
 	int init_occupancy; //!< initial occupancy, usually 0
 	double starttime; //!< when the trip is starting from the origin
 	vector <Visit_stop*> :: iterator next_stop;
+
 // map <Bustrip*, double> driving_roster; 
 	Random* random;
 //	map <Busstop*,bool> trips_timepoint; //!< will be relevant only when time points are trip-specific. binary map with time point indicatons for stops on route only (according to the schedule input file)  
 	Eventlist* eventlist; //!< for use by busstops etc to book themselves.
+
 };
+
+typedef pair<Busstop*, double> stop_rate;
+typedef map <Busstop*, double> stops_rate;
+typedef pair <Busline*, stops_rate> multi_rate;
+typedef map <Busline*, stops_rate> multi_rates;
 
 class Busstop : public Action
 {
@@ -158,10 +169,11 @@ public:
 	double get_time_since_departure (Bustrip* trip, double time); //!< calculates the headway (defined as the differnece in time between sequential departures) 
 	void write_busstop_visit (string name, Bustrip* trip, double enter_time); //!< creates a log-file for stop-related info
 
-// Action for visits to stop
+	// Action for visits to stop
 	void book_bus_arrival(Eventlist* eventlist, double time, Bus* bus);  //!< add to expected arrivals
 	bool execute(Eventlist* eventlist, double time); //!< is executed by the eventlist and means a bus needs to be processed
 	
+	multi_rates multi_arrival_rates; //!< parameter lambda that defines the poission proccess of passengers arriving at the stop for each sequential stop
 
 protected:
 	int id; //!< stop id
@@ -179,6 +191,7 @@ protected:
 	
 	vector <Busline*> lines;
 	map <Busline*, int> nr_waiting; //!< number of waiting passengers for each of the bus lines that stops at the stop
+	multi_rates multi_nr_waiting; // for demant format is from type 2. 
 	map <Busline*, double> arrival_rates; //!< parameter lambda that defines the poission proccess of passengers arriving at the stop
 	map <Busline*, double> alighting_fractions; //!< parameter that defines the poission process of the alighting passengers (second contains the alighting fraction)
 	map <Busline*, double> last_arrivals; //!< contains the arrival time of the last bus from each line that stops at the stop (can result headways)

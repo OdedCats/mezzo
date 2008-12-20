@@ -222,7 +222,8 @@ public:
 	bool readbusstop (istream& in); //!< reads a busstop
 	bool readbusline(istream& in); //!< reads a busline
 	bool readbustrip(istream& in); //!< reads a trip
-  bool read_passenger_rates (istream& in); // reads the passenger rates for a specific line and stop
+  bool read_passenger_rates_format1 (istream& in); // reads the passenger rates in the format of arrival rate and alighting fraction per line and stop combination
+  bool read_passenger_rates_format2 (istream& in); // reads the passenger rates in the format of arrival rate per line, origin stop and destination stop combination
   bool read_bustype (istream& in); // reads a bus type
   bool read_busvehicle(istream& in); // reads a bus vehicle 
 #ifndef _NO_GUI
