@@ -26,43 +26,33 @@
 class Sdfunc
 {
   public:
-  	 Sdfunc(int id_,int vfree_, int vmin_, int romax_);
+  	 Sdfunc(int id_,double vfree_, double vmin_, double romax_, double romin_);
 	 virtual double speed(double ro);     // speed in m/s everywhere...
 	 const int get_id();
-	 int get_romax();
+	 double get_romax();
   protected:
   	 int id;
- 	 int vfree;
- 	 int vmin;
-	 int romax;
+ 	 double vfree;
+ 	 double vmin;
+	 double romax;
+	 double romin;
 };
 
-class GenSdfunc : public Sdfunc
-/*
-   Generic Speed-density function that can be derived from car-following relation ships.
-   V=Vfree*(1-(ro / romax)^alpha)^beta
+
+class DynamitSdfunc : public Sdfunc
+	/*
+   Generic Speed-density function that derived from car-following relation ships.
+   V=Vmin + (Vfree-Vmin)*(1-((ro-rmin)/(romax-romin))^alpha)^beta
    alpha and beta can be calculated from the car-following relationship. See May 1990
-   current values are 1.5 and 5.0 for alpha and beta
-
-
-*/
-
-{
-    public:
-		GenSdfunc (int id_, int vfree_, int vmin_, int romax_, double alpha_=1.5, double beta_=5.0);
-		virtual double speed (double ro);
-	protected:
-		double alpha;
-		double beta;
-} ;
-
-class DynamitSdfunc : public GenSdfunc
+ */
 {
 	public:
-		DynamitSdfunc (int id_, int vfree_, int vmin_, int romax_, int romin_, double alpha_=0.5, double beta_=1.5);
+		DynamitSdfunc (int id_, double vfree_, double vmin_, double romax_, double romin_, double alpha_=0.5, double beta_=1.5);
 		double speed (double ro);
 	private:
-		int romin;		
+		double alpha;
+		double beta;
+		
 };
 
 

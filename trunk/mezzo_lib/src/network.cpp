@@ -533,7 +533,8 @@ bool Network::readsdfunc(istream& in)
 
 {
 	char bracket;
-	int sdid=0, type=0, vmax=0, vmin=0, romax=0, romin=0;
+	int sdid=0, type=0; 
+	double vmax=0, vmin=0, romax=0, romin=0;
 	double alpha=0.0, beta=0.0;
 	in >> bracket;
 	if (bracket != '{')
@@ -541,16 +542,9 @@ bool Network::readsdfunc(istream& in)
 		cout << "readfile::readsdfuncs scanner jammed at " << bracket;
 		return false;
 	}
-	in  >> sdid >> type >> vmax >> vmin >> romax;
-	if (type ==1)
+	in  >> sdid >> type >> vmax >> vmin >> romax >> romin;
+	if ((type==1) ||(type ==2))
 		in >> alpha >> beta;
-	if (type==2)
-	{
-		in  >> romin >> alpha >> beta;
-		//cout << "Dynamit sd func: vmin "<< vmin << " vmax " << vmax << " romax " << romax << "romin " << romin << endl;
-	}
-
-	// assert  ( (find_if (sdfuncs.begin(),sdfuncs.end(), compare <Sdfunc> (sdid))) == sdfuncs.end() );
 	assert (!sdfuncmap.count(sdid));
 	assert ( (vmin>0) && (vmax>=vmin) && (romin >= 0) && (romax>=romin) );
 	assert ( (type==0) || (type==1) || (type==2));
@@ -563,17 +557,13 @@ bool Network::readsdfunc(istream& in)
 	Sdfunc* sdptr;
 	if (type==0)
 	{
-		sdptr = new Sdfunc(sdid,vmax,vmin,romax);
-	}	else if (type==1)	
-	{
-		sdptr = new GenSdfunc(sdid,vmax,vmin,romax,alpha,beta);
-	}	else if (type==2)
+		sdptr = new Sdfunc(sdid,vmax,vmin,romax, romin);
+	}	else if ((type==1)	|| (type == 2))
 	{
 		sdptr = new DynamitSdfunc(sdid,vmax,vmin,romax,romin,alpha,beta);
 	}
 	assert (sdptr);
 	sdfuncmap [sdid] = sdptr;
-	//  sdfuncs.insert(sdfuncs.begin(),sdptr );
 
 #ifdef _DEBUG_NETWORK
 	cout << " read a sdfunc"<<endl;

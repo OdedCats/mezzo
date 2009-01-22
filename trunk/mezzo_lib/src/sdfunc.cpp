@@ -2,16 +2,20 @@
 #include <math.h>
 #include "parameters.h"
 
-Sdfunc::Sdfunc(int id_, int vfree_, int vmin_, int romax_): id(id_), vfree(vfree_), vmin(vmin_),
-		romax(romax_)
+Sdfunc::Sdfunc(int id_, double vfree_, double vmin_, double romax_, double romin_): id(id_), vfree(vfree_), vmin(vmin_),
+		romax(romax_), romin(romin_)
 {
-	if (min_speed>0)
+	if (min_speed>0) // overrides the min speed if set
 		vmin=min_speed;
 }
 		
 double Sdfunc::speed(double ro)
 {
-	return (vmin+(((romax-ro)/romax)*(vfree-vmin)) );
+	if (ro <= romin)
+		return vfree;
+	else if (ro>romax)
+		return vmin;
+	return vmin+(vfree-vmin)*(1-((ro-romin)/(romax-romin)));
 }
 
 const int Sdfunc::get_id()
@@ -19,26 +23,11 @@ const int Sdfunc::get_id()
 	return id;
 }
 
-int Sdfunc::get_romax()
+double Sdfunc::get_romax()
 {
  	return romax;
 }
 
-// GenSdfunc functions
-
-
-GenSdfunc::GenSdfunc (int id_, int vfree_, int vmin_, int romax_, double alpha_, double beta_):Sdfunc(id_,vfree_,vmin_,romax_)
-{
-	alpha=alpha_;
-	beta=beta_;
-}
-		
-		
-		
-double GenSdfunc::speed (double ro)
-{
- return vmin+(vfree-vmin)*pow((1-pow((ro/romax),alpha)),beta);
-}
 
 // DynamitSdfunc functions
 /*	DynamitSdfunc, models the speed-density as in DYNAMIT. It is basically a GenSdfunc, with the addition of a kmin, a minimum
@@ -46,10 +35,11 @@ double GenSdfunc::speed (double ro)
 
 */
 
-DynamitSdfunc::DynamitSdfunc (int id_, int vfree_, int vmin_, int romax_, int romin_, double alpha_, double beta_):
-	GenSdfunc(id_,vfree_,vmin_,romax_,alpha_,beta_)
+DynamitSdfunc::DynamitSdfunc (int id_, double vfree_, double vmin_, double romax_, double romin_, double alpha_, double beta_):
+	Sdfunc(id_,vfree_,vmin_,romax_,romin_)
 {
- 	romin=romin_;
+	alpha=alpha_;
+	beta =beta_;
 }
 		
 double DynamitSdfunc::speed (double ro)
