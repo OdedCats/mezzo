@@ -156,14 +156,33 @@ double MOE::get_last_value()
    return -1.0;
 }
 
+void MOE::fill_missing (const int nr_periods, const double default_value)
+{
+	if (value_obs==0)
+	{
+		values.back()=default_value;
+	}
+	if ((int)values.size() < nr_periods)
+	{
+		list <double>::iterator iter=values.begin();
+		for (int i = values.size()-1; i != nr_periods; i++)
+		{	
+			values.push_back(default_value);
 
-void MOE::write_values(ostream & out)
+		}
+	}
+
+
+
+}
+
+void MOE::write_values(ostream & out, int nrperiods)
 {
   #ifdef _DEBUG_MOE
   cout << "values write size: " << values.size() << endl;
   #endif
   list <double>::iterator iter=values.begin();
-  while (iter!=values.end())
+  for  (int i = 0; (i < nrperiods) && (iter!=values.end()); i++)
   {
    out << (scale*(*iter)) << "\t";
    iter++;

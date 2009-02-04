@@ -60,11 +60,12 @@ class MOE
  	MOE (double val_update);
  	MOE (double val_update, double scale_);
 	void reset(); // resets the value list, NOT the scale_ or value_update
+	void fill_missing (const int nr_periods,const double default_value);
  	void report_value(double value, double time); // used to report values that are averaged
  	void report_value(double time); // used to report counts such as flows
   double get_value(int index);
   double get_last_value();
- 	void write_values(ostream & out);
+ 	void write_values(ostream & out, int nrperiods);
  	void write_value(ostream& out, int index);
  	int get_size() {return values.size();}
  private:

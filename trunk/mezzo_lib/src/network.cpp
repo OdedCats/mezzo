@@ -3380,11 +3380,11 @@ bool Network::writemoes()
 	string name=filenames[13]; // speeds
 	ofstream out(name.c_str());
 	assert(out);
-
+	
 	for (map<int,Link*>::iterator iter=linkmap.begin();iter!=linkmap.end();iter++)
 	{
 
-		(*iter).second->write_speeds(out);
+		(*iter).second->write_speeds(out,nrperiods);
 	}
 	out.close();
 	name=filenames[14]; // inflows
@@ -3393,7 +3393,7 @@ bool Network::writemoes()
 
 	for (map<int,Link*>::iterator iter1=linkmap.begin();iter1!=linkmap.end();iter1++)
 	{
-		(*iter1).second->write_inflows(out);
+		(*iter1).second->write_inflows(out,nrperiods);
 	}
 	out.close();
 	name=filenames[15]; // outflows
@@ -3402,7 +3402,7 @@ bool Network::writemoes()
 
 	for (map<int,Link*>::iterator iter2=linkmap.begin();iter2!=linkmap.end();iter2++)
 	{
-		(*iter2).second->write_outflows(out);
+		(*iter2).second->write_outflows(out,nrperiods);
 	}
 	out.close();
 	name=filenames[16]; // queues
@@ -3411,7 +3411,7 @@ bool Network::writemoes()
 
 	for (map<int,Link*>::iterator iter3=linkmap.begin();iter3!=linkmap.end();iter3++)
 	{
-		(*iter3).second->write_queues(out);
+		(*iter3).second->write_queues(out,nrperiods);
 	}
 	out.close();
 	name=filenames[17]; // densities
@@ -3420,7 +3420,7 @@ bool Network::writemoes()
 
 	for (map<int,Link*>::iterator iter4=linkmap.begin();iter4!=linkmap.end();iter4++)
 	{
-		(*iter4).second->write_densities(out);
+		(*iter4).second->write_densities(out,nrperiods);
 	}
 	out.close();
 	return true;

@@ -177,15 +177,20 @@ public:
 	// IO methods
 	bool write(ostream& out);
 	void write_time(ostream& out);	
-	void write_speeds(ostream & out ) {out << id << "\t" ; moe_speed->write_values(out);}
+	void write_speeds(ostream & out, int nrperiods ) {out << id << "\t" ; moe_speed->fill_missing(nrperiods,speed_density(0));
+														moe_speed->write_values(out, nrperiods);}
 	void write_speed(ostream & out, int index ) {moe_speed->write_value(out,index);}
-	void write_inflows(ostream & out ) {out << id << "\t" ; moe_inflow->write_values(out);}
+	void write_inflows(ostream & out, int nrperiods) {out << id << "\t" ; moe_inflow->fill_missing (nrperiods, 0); 
+														moe_inflow->write_values(out,nrperiods);}
 	void write_inflow(ostream & out, int index ) {moe_inflow->write_value(out,index);}
-	void write_outflows(ostream & out ) {out << id << "\t" ; moe_outflow->write_values(out);}
+	void write_outflows(ostream & out,int nrperiods ) {out << id << "\t" ; moe_outflow->fill_missing (nrperiods, 0);
+														moe_outflow->write_values(out,nrperiods);}
 	void write_outflow(ostream & out, int index ) {moe_outflow->write_value(out,index);}
-	void write_queues(ostream & out ) {out << id << "\t" ; moe_queue->write_values(out);}
+	void write_queues(ostream & out,int nrperiods ) {out << id << "\t" ; moe_queue->fill_missing (nrperiods, 0);
+														moe_queue->write_values(out,nrperiods);}
 	void write_queue(ostream & out, int index ) {moe_queue->write_value(out,index);}
-	void write_densities(ostream & out ) {out << id << "\t" ; moe_density->write_values(out);}
+	void write_densities(ostream & out,int nrperiods ) {out << id << "\t" ; moe_density->fill_missing (nrperiods, 0);
+														moe_density->write_values(out,nrperiods);}
 	void write_density(ostream & out, int index ) {moe_density->write_value(out,index);}
 	int max_moe_size() {return _MAX(moe_speed->get_size(), _MAX (moe_inflow->get_size(),_MAX(moe_outflow->get_size(),_MAX(moe_queue->get_size(),moe_density->get_size()))));}
 	void add_blocked_exit() {nr_exits_blocked++;}
