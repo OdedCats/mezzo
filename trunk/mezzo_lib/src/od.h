@@ -73,7 +73,7 @@ class ODpair
 {
 public:
 	ODpair();
-	ODpair(Origin* origin_, Destination* destination_, int rate_, Vtypes* vtypes_);
+	ODpair(Origin* origin_, Destination* destination_, double rate_, Vtypes* vtypes_);
 	~ODpair();
 	void reset();
 // GETS
@@ -82,7 +82,7 @@ public:
 	Route* get_route(int id);
 	Origin* get_origin();
 	Destination* get_destination();
-	const int get_rate();
+	const double get_rate();
 	vector <rateval> get_route_rates();
 	vector<Route*>& get_allroutes(){return routes;}
 	Vtypes* vehtypes() {return vtypes;}
@@ -99,7 +99,7 @@ public:
 	
 //SETS
 	void add_route(Route* route);
-	void set_rate(double rate_) {rate=static_cast<int>(rate_); odaction->set_rate(rate);}
+	void set_rate(double rate_) {rate=rate_; odaction->set_rate(rate);}
 	
 //OTHER	
 	bool execute(Eventlist* eventlist, double time);
@@ -116,8 +116,8 @@ private:
 	ODaction* odaction;
 	Origin* origin;
 	Destination* destination;
-	int rate;
-	int start_rate; // original OD rate, to be used when OD pair is reset.
+	double rate;
+	double start_rate; // original OD rate, to be used when OD pair is reset.
 	//double rate;
 	vector <Route*> routes;
 	vector <Route*> filtered_routes_;

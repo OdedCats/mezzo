@@ -304,7 +304,7 @@ odval ODpair::odids ()
 	return odval(origin->get_id(), destination->get_id());
 }
 
-ODpair::ODpair(Origin* origin_, Destination* destination_, int rate_, Vtypes* vtypes_)
+ODpair::ODpair(Origin* origin_, Destination* destination_, double rate_, Vtypes* vtypes_)
 	:origin(origin_), destination(destination_), rate(rate_), vtypes (vtypes_)
 {
  	odaction=new ODaction(this);
@@ -370,7 +370,7 @@ bool ODpair::execute(Eventlist* eventlist, double time)
 
 }
 
-const int ODpair::get_rate()
+const double ODpair::get_rate()
 {
 	return rate;
 }

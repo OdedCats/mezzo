@@ -1785,7 +1785,8 @@ bool Network::readods(istream& in)
 bool Network::readod(istream& in, double scale)
 {
 	char bracket;
-	int oid, did, rate;
+	int oid, did;
+	double rate;
 	in >> bracket;
 	if (bracket != '{')
 	{
@@ -1795,7 +1796,7 @@ bool Network::readod(istream& in, double scale)
 	in  >> oid >> did >> rate;
 	// check oid, did, rate;
 	// scale up/down the rate
-	rate=static_cast<int> (rate*scale);
+	rate=rate*scale;
 	//assert (rate > 0);
 	in >> bracket;
 	if (bracket != '}')
@@ -1847,7 +1848,8 @@ bool Network::add_od_routes()
 		}
 	}
 	nr_deleted = deleted_routes.size();
-	cout << nr_deleted << " routes deleted" << endl;
+	if (nr_deleted > 0 )
+		cout << nr_deleted << " routes deleted" << endl;
 
 	// write the new routes file.
 	vector <Route*>::iterator del=deleted_routes.begin();
