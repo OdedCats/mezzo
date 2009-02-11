@@ -686,7 +686,8 @@ void Link::update_icon(double time)
 	runningsize=queue->nr_running(time);
 	queuesize=totalsize-runningsize;
 	queue_percentage=(queuesize/cap);
-	running_percentage=(runningsize/cap);
+	//running_percentage=(runningsize/cap);
+	running_percentage = density_running_only(time)/140; // density as percentage of jamdensity
 #ifdef _DEBUG_LINK	
 	cout << " runningsize " << runningsize;
 	cout << "  queueingsize " << queuesize << endl;

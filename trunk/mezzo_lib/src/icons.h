@@ -28,10 +28,8 @@
 #define ICONS_HH
 //#undef _NO_GUI
 #ifndef _NO_GUI
-//Added by qt3to4:
 #include <QPixmap>
-#include <qt3support> // new in QT4 to port from QT3
-#include <qpixmap>
+//#include <qpixmap>
 #include <qpen>
 #include <qpainter>
 #include <list>

@@ -38,7 +38,6 @@ void Drawing::draw(QPixmap* pm,QMatrix * wm)
 	}
 	else	
 	{
-		//pm->resize(800,600); // standard width & height
 		pm->fill(theParameters->backgroundcolor); // fill with white background
 	}
 	for (list<Icon*>::iterator iter=icons.begin(); iter != icons.end(); iter++)
@@ -137,8 +136,6 @@ LinkIcon::LinkIcon(int x, int y, int tox, int toy ): Icon (x, y), stopx(tox), st
 	}
 
 	handler_on_=false;
-	//handlex=(2*startx+stopx)/3+shiftx;
-	//handley=(2*starty+stopy)/3+shifty;
 	
 	handlex=static_cast <int> ( 0.66 *vx+startx + shiftx + 0.5);
 	handley=static_cast <int> ( 0.66 *vy+starty + shifty  + 0.5);
@@ -161,40 +158,42 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
     
 	// set the world matrix that controls zoom and translation of  the drawn image
 	paint.setWorldMatrix(*wm);
-	int scale_ = 1;
+	double scale_ = 1;
 	if ( (wm->m11() > 0) && (wm->m11() < 1) ) 
-		scale_ = static_cast<int> (1/wm->m11()); // the horizontal scale factor
+		scale_ = (1/wm->m11()); // the horizontal scale factor
+
 	QPen pen1;
+	// set standard pen for link line, extra thick if selected
 	if (!selected)
-		pen1 =QPen( theParameters->linkcolor , theParameters->link_thickness*scale_); // pen for the link base
+		pen1 =QPen(theParameters->linkcolor , theParameters->link_thickness*scale_); // pen for the link base
 	else
 		pen1 =QPen( selected_color , theParameters->selected_thickness*scale_); // pen for the link base
-	
+	// set pen for queue
 	QPen pen2 ( theParameters->queuecolor , theParameters->queue_thickness*scale_); // pen for queue
-#ifdef FIXED_RUNNING
-	int r,g,b;
-	g=0;
-	b=0;
-	double perc_density=(*runningpercentage) / (1.0-(*queuepercentage));
-	if (perc_density > 80)
-	   b=255;
-	r=255;
-	int width=static_cast<int>((theParameters->link_thickness+theParameters->queue_thickness)*perc_density) ;
+	// Set pen for density (colour varies with density)
+	int r=0,g=0,b=0;
+	double perc_density = (*runningpercentage);
+	if (perc_density > 0.15) // under 0.15 just paint black
+		b=255;
+	r = static_cast <int> (perc_density*255); // add red when density goes up
+	if (perc_density > 0.90) // over 0.9 paint red
+	{
+		b=0;
+		r=255;
+	}	   
+	double width=((theParameters->queue_thickness)*perc_density) ;
 	QPen pen3 (QColor(r,g,b),width*scale_); // pen for variable (density)
-#else
-	QPen pen3 ( Qt::blue , theParameters->queue_thickness*scale_);
-#endif // FIXED_RUNNING
+
 
 	// draw the center line
 	paint.setPen(pen1);
 	paint.drawLine( startx+shiftx,starty+shifty, stopx+shiftx,stopy+shifty ); 
 		
-	// drawing the handler ( half arrow) 
+	// drawing the handle ( half arrow) 
 	if(handler_on_)
 	{
 		QPen pen_h(theParameters->linkcolor, 1.5*(theParameters->link_thickness)*scale_);
 		paint.setPen(pen_h);
-	//	paint.drawLine(handlex-shiftx/2,handley-shifty/2,handlex+shiftx/2,handley+shifty/2);
 		paint.drawLine(handlex,handley,handlex+shiftx,handley+shifty);
 		paint.drawLine(handlex+shiftx,handley+shifty, x2, y2); // draws a half-arrow
 	}
@@ -207,18 +206,14 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 
 	//draw the running part
 	paint.setPen(pen3);
-#ifdef FIXED_RUNNING
+
 	if (width>1)
 	{	
 		int sx=shiftx;
 		int sy=shifty;
 		paint.drawLine(startx+sx,starty+sy, x_1+sx,y_1+sy ); // draw the running segment
 	}
-#else
-	int x_2=static_cast <int> ((1.0-((*queuepercentage)+(*runningpercentage)))*(stopx-startx)+startx);   // x and y for running-part-end
-	int y_2=static_cast <int> ((1.0-((*queuepercentage)+(*runningpercentage)))*(stopy-starty)+starty);
-	paint.drawLine(x_2+shiftx,y_2+shifty, x_1+shiftx,y_1+shifty ); // draw the running segment
-#endif //FIXED_RUNNING
+	// draw the link IDs (or any other text)
 	if (theParameters->draw_link_ids)
 	{
 		paint.setFont(QFont ("Helvetica", theParameters->text_size));
@@ -256,11 +251,7 @@ void VirtualLinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pix
 
    paint.setPen(pen1);
    paint.drawLine( startx+shiftx,starty+shifty, stopx+shiftx,stopy+shifty ); // draw the center line
-   /*
-   QPen pen4 ( Qt::red , 1);
-   paint.setPen(pen4);
-   paint.drawText (((startx+stopx)/2)+5,((starty+stopy)/2)+5, text);
-   */
+
    paint.end();	
 }
 

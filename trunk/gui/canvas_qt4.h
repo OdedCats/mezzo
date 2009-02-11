@@ -19,14 +19,6 @@
 /*! Mainform is the main GUI class
  * It contains the main network graph display, and calls the Network->step() repeatedly to simulate
  *
- *
- *
- *  latest changes: 
- * 1)add the mezzo analyzer dialog
- * 2)solve the zooming problems by the qmatrix approach 
- * 3)GUI development
- * last modified: Xiaoliang Ma 
- * 2007-10-22
  */
 
 
@@ -35,7 +27,7 @@
 
 //#include <Qt3Support>
 #include <Qfiledialog>
-#include <QWMatrix>
+#include <QMatrix>
 #include "ui_canvas_qt4.h"
 #include "parametersdialog_qt4.h"
 #include "../mezzo_lib/src/parameters.h"
@@ -79,6 +71,7 @@ private slots:
 	void on_zoomfactor_valueChanged(int value);  //!< changes the zoom step for zooming in/out
 	void on_panfactor_valueChanged(int value );  //!< changes the pan step for panning the network
 	void on_saveresults_activated();  //!< Saves the results of the simulation 
+	void on_actionAnalyzeOutput_activated(); //!< Turns on output analysis
 		
 	// other slots	
 	void keyPressEvent(QKeyEvent* e);  //!< handler for key presses
@@ -116,9 +109,9 @@ private:
     bool exited;
 
 	// xiaoliang work variables on zooming
-	QWMatrix wm;			  //!< general world matrix from model to current view	
-    QWMatrix mod2stdViewMat_; //!< define transition from basic model to standard view
-	QWMatrix viewMat_;		  //!< define transition from standard view to current view
+	QMatrix wm;			  //!< general world matrix from model to current view	
+    QMatrix mod2stdViewMat_; //!< define transition from basic model to standard view
+	QMatrix viewMat_;		  //!< define transition from standard view to current view
 	QSize viewSize_;
 	QSize canvasOffset; // off set in X and Y of the Canvas to the Mainform
 	QPixmap pm1, pm2; //!< shared pixmaps on which the network is drawn off-screen

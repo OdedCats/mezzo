@@ -14,6 +14,7 @@
 */
 
 #include <qmessagebox.h>
+ #include <QKeyEvent>
 #include "canvas_qt4.h"
 
 MainForm::MainForm(QWidget *parent): QMainWindow(parent)
@@ -50,8 +51,8 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 
 	// implementation of view zooming and panning
 	//xiaoliang
-	mod2stdViewMat_=QWMatrix(1,0,0,1,0,0);
-	viewMat_=QWMatrix(1,0,0,1,0,0);
+	mod2stdViewMat_=QMatrix(1,0,0,1,0,0);
+	viewMat_=QMatrix(1,0,0,1,0,0);
 	viewSize_=QSize(panelx,panely);
 	pm1=QPixmap(viewSize_);
 	pm1.fill();
@@ -106,9 +107,9 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 	// deactive the actions except the open masterfile
 	activateToolbars(false);
     
-	// hide the status bar
+
 	// WILCO: move all the status widgets to the Statusbar
-	//statusBar()->hide();
+
 	statusBar()->addWidget (status_label);
 	statusBar()->addWidget(simprogress_widget);
 	statusBar()->addWidget(this->TextLabel12,10);
@@ -121,6 +122,7 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 
 void MainForm::activateToolbars(bool activated)
 {
+	actionAnalyzeOutput->setEnabled(activated);
 	savescreenshot->setEnabled(activated);
     run->setEnabled(activated);
     breakoff->setEnabled(activated);
@@ -177,8 +179,8 @@ void MainForm::on_closenetwork_activated()
 	nodes_sel_.clear();
 	links_sel_.clear();
 
-	mod2stdViewMat_=QWMatrix(1,0,0,1,0,0);
-	viewMat_=QWMatrix(1,0,0,1,0,0);
+	mod2stdViewMat_=QMatrix(1,0,0,1,0,0);
+	viewMat_=QMatrix(1,0,0,1,0,0);
 	viewSize_=QSize(panelx,panely);
 	pm1=QPixmap(viewSize_);
 	pm1.fill();
@@ -257,9 +259,9 @@ void MainForm::process_masterfile()
 		// strip the dir from the filename and give to the Network
 		int pos = fn.lastIndexOf ('/');
 		QString workingdir = fn.left(pos+1);
-		theNetwork->set_workingdir (workingdir.latin1());
+		theNetwork->set_workingdir (string(workingdir.toLatin1()));
 		// make a STL compatible string
-		string name=fn.latin1();
+		string name=fn.toLatin1();
 		if (theNetwork->readmaster(name))
 			runtime=theNetwork->executemaster(&pm2,&wm);
 		else
@@ -285,7 +287,7 @@ void MainForm::on_zoomin_activated()
 	// the view center
 	int xviewcenter=viewSize_.width()/2;
 	int yviewcenter=viewSize_.height()/2;
-	QWMatrix tempMat;
+	QMatrix tempMat;
 	scale*=scalefactor;
 
 	// transfer matrix
@@ -308,7 +310,7 @@ void MainForm::on_zoomout_activated()
 	// the view center
 	int xviewcenter=viewSize_.width()/2;
 	int yviewcenter=viewSize_.height()/2;
-	QWMatrix tempMat;
+	QMatrix tempMat;
 
 	scale/=scalefactor;
 	tempMat.reset();
@@ -360,7 +362,7 @@ void MainForm::on_loadbackground_activated()
 	QString fn( QFileDialog::getOpenFileName(this, "Open background image",QString::null,"PNG Files (*.png)" ) );
     if (!fn.isEmpty())
     {
-		string haha=fn.latin1();
+		string haha=fn.toLatin1();
 		theNetwork->set_background (haha);
     }
 }
@@ -459,7 +461,7 @@ void MainForm::loop()
 	int msecs (pmdlg->refreshrate->value());
 	int updatefac (pmdlg->updatefactor->value());
 	if (!breaknow)
-	timer->start( msecs, TRUE ); // ... mseconds single-shot timer 
+	timer->start( msecs ); // ... mseconds single-shot timer 
 	currtime=theNetwork->step(((updatefac/100)*msecs/1000.0));
 	progressbar->setValue(static_cast<int>(100.0*currtime/runtime));
 	//LCDNumber1->display(static_cast<int>(currtime));
@@ -532,25 +534,25 @@ void MainForm::keyPressEvent( QKeyEvent *e )
 		case (Qt::Key_Up):		// pan up
 			dy=panfactor;
 			wm.translate(0,dy);
-			viewMat_=mod2stdViewMat_.invert()*wm;
+			viewMat_=mod2stdViewMat_.inverted()*wm;
 			updateCanvas();
 			break;   
 		case (Qt::Key_Down):	// pan down
 			dy=-panfactor;
 			wm.translate(0,dy);	
-			viewMat_=mod2stdViewMat_.invert()*wm;
+			viewMat_=mod2stdViewMat_.inverted()*wm;
 			updateCanvas();
 			break;       
 		case (Qt::Key_Left):	// pan left
 			dx=panfactor;
 			wm.translate(dx,0);
-			viewMat_=mod2stdViewMat_.invert()*wm;
+			viewMat_=mod2stdViewMat_.inverted()*wm;
 			updateCanvas();
 			break; 
 		case (Qt::Key_Right):	// pan right
 			dx=-panfactor;
 			wm.translate(dx,0);
-			viewMat_=mod2stdViewMat_.invert()*wm;
+			viewMat_=mod2stdViewMat_.inverted()*wm;
 			updateCanvas();
 			break;
 		case (Qt::Key_C):		// return to initial view with a central image
@@ -768,7 +770,7 @@ void MainForm::zoomRectArea()
 	scale*=rect2view_factor;
 
 	// transfer matrix
-	QWMatrix tempMat;
+	QMatrix tempMat;
 	tempMat.reset();
 	tempMat.scale(rect2view_factor, rect2view_factor);
 	tempMat.translate(-zoomrect_->left(),-zoomrect_->top());
@@ -886,24 +888,25 @@ void MainForm::resizeEvent(QResizeEvent* event)
 	// resize the drawing widgets
 	QSize oldviewsize=viewSize_;
 	viewSize_=QSize(panelx,panely);
-	pm1.resize(viewSize_);
-	pm2.resize(viewSize_);
-	Canvas->resize(panelx,panely); // resize the canvas
+	pm1 = QPixmap (viewSize_);
+	pm2 = QPixmap (viewSize_);
+	Canvas->resize (panelx,panely); // resize the canvas
 
 	if (!initialised) return; 
-	// update the matrix and redraw
-	//mod2stdViewMat_=theNetwork->netgraphview_init();
-	//wm=mod2stdViewMat_;
-	//updateCanvas();
 
 	// the view center offset
 	int dxviewC=viewSize_.width()/2-oldviewsize.width()/2;
 	int dyviewC=viewSize_.height()/2-oldviewsize.height()/2;
 	wm.translate(dxviewC, dyviewC);
-	mod2stdViewMat_=wm*viewMat_.invert();
+	mod2stdViewMat_=wm*viewMat_.inverted();
 	//update the canvas
 	updateCanvas();
 	
 	// Call the parent's resizeEvent		
 	QWidget::resizeEvent(event);
+}
+
+void MainForm::on_actionAnalyzeOutput_activated()
+{
+
 }

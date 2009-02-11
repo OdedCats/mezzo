@@ -42,7 +42,7 @@
 #include <QComboBox>
 #include <QColor>
 #include <QString>
-#include <Qt3Support>
+//#include <Qt3Support>
 #include <vector>
 
 

@@ -60,9 +60,9 @@
 #ifndef _NO_GUI
 //Added by qt3to4:
 #include <QPixmap>
-#include <Qt3Support> // new in QT4 to port from QT3
+//#include <Qt3Support> // new in QT4 to port from QT3
 #include <qpixmap.h>
-#include <QWMatrix>
+#include <QMatrix>
 #endif // _NO_GUI
 
 //include the PVM communicator
@@ -190,7 +190,9 @@ public:
 	void reset_link_icons(); //!< makes sure all the link-icons are shown normally when the run button is pressed. This corrects the colours in case of an incident file (it colours show affected links)
 #ifndef _NO_GUI
 	void recenter_image();   //!< sets the image in the center and adapts zoom to fit window
-	QWMatrix netgraphview_init(); //!< scale the network graph to the view initialized by pixmaps
+	//QMatrix netgraphview_init(); //!< scale the network graph to the view initialized by pixmaps
+	QMatrix netgraphview_init(); //!< scale the network graph to the view initialized by pixmaps
+
 	void redraw(); //!< redraws the image
 #endif //_NO_GUI
 
@@ -297,8 +299,8 @@ protected:
 #ifndef _NO_GUI
 	Drawing* drawing; //!< the place where all the Icons live
 	QPixmap* pm; //!< the place where the drawing is drawn
-	QWMatrix* wm; //!< worldmatrix that contains all the transformations of the drawing (scaling, translation, rotation, &c)
-	QWMatrix initview_wm; //!< world matrix that transform the drawing to the inital view
+	QMatrix* wm; //!< worldmatrix that contains all the transformations of the drawing (scaling, translation, rotation, &c)
+	QMatrix initview_wm; //!< world matrix that transform the drawing to the inital view
 	double scale; //!< contains the scale of the drawing
 	double width_x; //!< width of boundaries of drawing in original coordinate system
 	double height_y; //!< height of boundaries of drawing in org. coord. sys.

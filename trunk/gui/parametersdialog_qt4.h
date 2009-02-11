@@ -21,7 +21,7 @@
 
 #include "ui_parametersdialog_qt4.h"
 #include "../mezzo_lib/src/parameters.h"
-#include <Qt3Support>
+//#include <Qt3Support>
 
 class ParametersDialog : public QDialog, public Ui::ParametersDialog
 {

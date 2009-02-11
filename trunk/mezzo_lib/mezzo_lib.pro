@@ -3,10 +3,13 @@ TEMPLATE = lib
 CONFIG += staticlib debug
 TARGET = mezzo_lib
 DEPENDPATH += . src
-INCLUDEPATH += $(QTDIR)/include $(QTDIR)/include/Qt3Support 
-LIBS+=  -L$(QTDIR)/lib -lQtCore -lQtGui -lQt3Support 
+INCLUDEPATH += $(QTDIR)/include 
+#$(QTDIR)/include/Qt3Support 
+LIBS+=  -L$(QTDIR)/lib -lQtCore -lQtGui 
+#-lQt3Support 
 #-lpthread $(SUBLIBS)
-QT+= core gui qt3support 
+QT+= core gui 
+#qt3support 
 #activeqt xml network svg
 QMAKE= $(QTDIR)/bin/qmake
 
