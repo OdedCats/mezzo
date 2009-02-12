@@ -64,11 +64,6 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 	connect( timer, SIGNAL(timeout()), this, SLOT(loop()) );
 	runtime=1.0; 
 	currtime=0.0;
-	
-	//canvas_center = QPoint(start_x + (panelx /2) , start_y + (panely / 2));
-	//wm.scale(scale,scale); 
-	//statusbar = this->statusBar();
-	//statusbar->showMessage("Load a master file");
 	exited = false;
 	theParameters=theNetwork->get_parameters();
 	
@@ -122,7 +117,7 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 
 void MainForm::activateToolbars(bool activated)
 {
-	actionAnalyzeOutput->setEnabled(activated);
+	//actionAnalyzeOutput->setEnabled(activated);
 	savescreenshot->setEnabled(activated);
     run->setEnabled(activated);
     breakoff->setEnabled(activated);
@@ -461,10 +456,12 @@ void MainForm::loop()
 	int msecs (pmdlg->refreshrate->value());
 	int updatefac (pmdlg->updatefactor->value());
 	if (!breaknow)
-	timer->start( msecs ); // ... mseconds single-shot timer 
+	{
+		timer->setSingleShot(true);
+		timer->start( msecs ); // ... mseconds single-shot timer 
+	}
 	currtime=theNetwork->step(((updatefac/100)*msecs/1000.0));
 	progressbar->setValue(static_cast<int>(100.0*currtime/runtime));
-	//LCDNumber1->display(static_cast<int>(currtime));
 	displaytime(currtime);
 	if (currtime>=runtime)
 	{

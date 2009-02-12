@@ -25,5 +25,6 @@ CONFIG += uic4 embed_manifest_exe
 HEADERS += canvas_qt4.h parametersdialog_qt4.h src/nodedlg.h src/batchrundlg.h
 FORMS += canvas_qt4.ui parametersdialog_qt4.ui ui/nodedlg.ui ui/batchrundlg.ui
 SOURCES += canvas_qt4.cpp main.cpp parametersdialog_qt4.cpp src/nodedlg.cpp src/batchrundlg.cpp
-RESOURCES += canvas_qt4.qrc
+RESOURCES += canvas_qt4.qrc 
+RC_FILE = mezzo.rc
 DEPENDPATH += . ./src ../mezzo_lib/src

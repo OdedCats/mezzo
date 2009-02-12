@@ -1100,23 +1100,12 @@ bool Network::readroute(istream& in)
 		cout << "readfile::readroutes scanner jammed at " << bracket;
 		return false;
 	}
-	// find the origin & dest  pointers
-	/*
-	vector <Origin*>::iterator o_iter=origins.begin();
-	o_iter =  find_if (origins.begin(),origins.end(), compare <Origin> (oid));
-	//Origin* optr=(*o_iter) ;
-	assert ( o_iter < origins.end() ); // the origin exists
-	*/
+
 	map <int, Origin*>::iterator o_iter; 
 	o_iter = originmap.find(oid);
 	assert (o_iter != originmap.end());
 	Origin* optr = o_iter->second;
-	/*
-	vector <Destination*>::iterator d_iter=destinations.begin();
-	d_iter= find_if (destinations.begin(),destinations.end(), compare <Destination> (did));
-	//Destination* dptr=(*d_iter) ;
-	assert ( d_iter < destinations.end() );  // the destination exists
-	*/
+	
 	map <int, Destination*>::iterator d_iter; 
 	d_iter = destinationmap.find(did);
 	assert (d_iter != destinationmap.end());
@@ -1125,8 +1114,6 @@ bool Network::readroute(istream& in)
 	cout << "found o&d for route" << endl;
 #endif //_DEBUG_NETWORK
 	Route* rptr = new Route(rid, optr, dptr, rlinks);
-//	routes.insert(routes.end(), rptr);
-	//routemap [rid] = rptr;
 	routemap.insert(pair <odval, Route*> (odval(oid,did),rptr));
 #ifdef _DEBUG_NETWORK
 	cout << " read a route"<<endl;
@@ -1181,7 +1168,6 @@ bool Network::readbusroute(istream& in)
 	}
 	in  >> rid >> oid >> did >> lnr;
 #ifndef _UNSAFE
-	//assert (!exists_route(rid,odval(oid,did)));
 	assert ( (find_if (busroutes.begin(),busroutes.end(), compare <Busroute> (rid))) == busroutes.end() ); // no route exists  with rid
 #endif // _UNSAFE
 	// check

@@ -44,7 +44,7 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="qmake&#x0D;&#x0A;nmake release"
+				BuildCommandLine="del .\release\mezzo_gui.exe&#x0D;&#x0A;qmake&#x0D;&#x0A;nmake release"
 				ReBuildCommandLine="qmake &#x0D;&#x0A;nmake clean&#x0D;&#x0A;nmake release"
 				CleanCommandLine="nmake clean"
 				Output="release\mezzo_gui.exe"
