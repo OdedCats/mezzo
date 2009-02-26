@@ -106,7 +106,7 @@ Network::Network()
 #ifndef _NO_GUI
 	drawing=new Drawing();
 #endif //_NO_GUI
-	//eventhandler=new EventHandler(*drawing);
+	//eventhandle=new Eventhandle(*drawing);
 #ifdef _PVM
 	communicator=new PVM ("Mezzo", MSG_TAG_ZOOM_MITSIM, MSG_TAG_ZOOM_MEZZO);
 #endif // _NO_PVM
@@ -3449,7 +3449,7 @@ bool Network::run(int period)
 #ifndef _NO_GUI
 	drawing->draw(pm,wm);
 #endif //_NO_GUI
-	//eventhandler->startup();
+	//eventhandle->startup();
 	double time=0.0;
 	while ((time>-1.0) && (time<period))       // the big loop
 	{
@@ -3461,7 +3461,7 @@ bool Network::run(int period)
 			{
 				tc=timestamp();
 			}
-			//	eventhandler->startup();     //update animation
+			//	eventhandle->startup();     //update animation
 #ifndef _NO_GUI
 			drawing->draw(pm,wm);
 #endif // _NO_GUI
@@ -3653,6 +3653,28 @@ void Network::removeRoute(Route* theroute)
 		}
 	}
 }
+
+void Network::set_output_moe_thickness ( unsigned int val ) // sets the output moe for the links
+{
+	map <int,Link*>::iterator iter = linkmap.begin();
+	for (iter;iter != linkmap.end(); iter++)
+	{
+		(*iter).second->set_output_moe_thickness(val);
+	}
+	
+}
+
+void Network::set_output_moe_colour ( unsigned int val ) // sets the output moe for the links
+{
+	map <int,Link*>::iterator iter = linkmap.begin();
+	for (iter;iter != linkmap.end(); iter++)
+	{
+		(*iter).second->set_output_moe_colour(val);
+	}
+	
+}
+
+	
 
 Incident::Incident (int lid_, int sid_, double start_, double stop_, double info_start_,double info_stop_, Eventlist* eventlist, Network* network_, bool blocked_):start(start_), stop(stop_),
 info_start(info_start_), info_stop(info_stop_), lid(lid_), sid(sid_),network(network_), blocked (blocked_)

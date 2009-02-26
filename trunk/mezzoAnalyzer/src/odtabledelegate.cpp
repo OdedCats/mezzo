@@ -31,7 +31,7 @@ QWidget* ODTableViewDelegate::createEditor(QWidget *parent,
 		comboboxeditor->addItem("red");
 		comboboxeditor->addItem("magenta");
 
-		// add an event handler to the item delegate
+		// add an event handle to the item delegate
 		comboboxeditor->installEventFilter(const_cast<ODTableViewDelegate*>(this));
 		return comboboxeditor;
 	}

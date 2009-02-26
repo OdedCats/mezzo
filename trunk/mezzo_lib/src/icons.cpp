@@ -90,7 +90,9 @@ const bool Icon::within_boundary(const double x, const double y, const int rad)
 
 LinkIcon::LinkIcon(int x, int y, int tox, int toy ): Icon (x, y), stopx(tox), stopy(toy)
 {
-	// link icon handler
+	moe_thickness = NULL;
+	moe_colour = NULL;
+	// link icon handle
 
 	int vx=stopx-startx;
 	int vy=stopy-starty;
@@ -135,7 +137,7 @@ LinkIcon::LinkIcon(int x, int y, int tox, int toy ): Icon (x, y), stopx(tox), st
 			shiftx=tempx;
 	}
 
-	handler_on_=false;
+	handle_on_=false;
 	
 	handlex=static_cast <int> ( 0.66 *vx+startx + shiftx + 0.5);
 	handley=static_cast <int> ( 0.66 *vy+starty + shifty  + 0.5);
@@ -190,7 +192,7 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 	paint.drawLine( startx+shiftx,starty+shifty, stopx+shiftx,stopy+shifty ); 
 		
 	// drawing the handle ( half arrow) 
-	if(handler_on_)
+	if(handle_on_)
 	{
 		QPen pen_h(theParameters->linkcolor, 1.5*(theParameters->link_thickness)*scale_);
 		paint.setPen(pen_h);

@@ -107,6 +107,8 @@ public:
 	void set_name(string name_) {name=name_;}
 	//const int Link::size();
 	const int size();
+	void set_output_moe_thickness(unsigned int val); // sets the output MOE for the link icon
+	void set_output_moe_colour(unsigned int val); // sets the output MOE for the link icon
 	void set_hist_time(double time) {	hist_time=time;}
 	void set_histtimes(LinkTime* ltime) {
 		histtimes=ltime;

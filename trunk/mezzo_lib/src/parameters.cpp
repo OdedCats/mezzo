@@ -5,6 +5,14 @@ Parameters::Parameters ()
 // Later this will be read from a file
 
 {
+   viewmode = 0; // show simulation run
+   max_thickness_value=1;
+   max_colour_value=1;
+   min_thickness_value=1;
+   min_colour_value=1;
+   show_period = 1; // maybe later start at 0 with empty results (everything 0)
+
+
    draw_link_ids = false;
    link_thickness = 3;
    node_thickness = 2;

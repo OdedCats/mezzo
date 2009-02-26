@@ -87,7 +87,7 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 					 SLOT(on_zoombywin_triggered(bool)));
 	QObject::connect(inselectmode, SIGNAL(toggled(bool)), this,
 					 SLOT(on_inselectmode_triggered(bool)));
-	// show link handlers
+	// show link handles
 	QObject::connect(linkhandlemark, SIGNAL(toggled(bool)), this,
 					 SLOT(on_showhandle_triggered(bool)));
 
@@ -101,7 +101,9 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 
 	// deactive the actions except the open masterfile
 	activateToolbars(false);
-    
+    // hide the slider for output analysis
+	horizontalSlider->hide();
+	actionAnalyzeOutput->setEnabled(false);
 
 	// WILCO: move all the status widgets to the Statusbar
 
@@ -117,7 +119,7 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 
 void MainForm::activateToolbars(bool activated)
 {
-	//actionAnalyzeOutput->setEnabled(activated);
+	
 	savescreenshot->setEnabled(activated);
     run->setEnabled(activated);
     breakoff->setEnabled(activated);
@@ -326,15 +328,15 @@ void MainForm::on_zoombywin_triggered(bool triggered)
 
 void MainForm::on_showhandle_triggered(bool triggered)
 {
-	//update all linkicons property on handler 
+	//update all linkicons property on handle 
 	if(this->initialised){
 		map <int, Link*> alllinks=theNetwork->get_links();
 		//for( unsigned i=0; i<alllinks.size(); i++)
-		//	alllinks[i]->get_icon()->setHandler(triggered);
+		//	alllinks[i]->get_icon()->sethandle(triggered);
 		map <int,Link*>::iterator l_iter=alllinks.begin();
 		for(l_iter;l_iter!=alllinks.end();l_iter++)
 		{
-			(*l_iter).second->get_icon()->setHandler(triggered);
+			(*l_iter).second->get_icon()->sethandle(triggered);
 		}
 		updateCanvas();
 	}
@@ -465,7 +467,9 @@ void MainForm::loop()
 	displaytime(currtime);
 	if (currtime>=runtime)
 	{
-		breaknow=false;
+		//breaknow=false;
+		breaknow=true;
+		actionAnalyzeOutput->setEnabled(true);
 	}
 }
 
@@ -905,5 +909,9 @@ void MainForm::resizeEvent(QResizeEvent* event)
 
 void MainForm::on_actionAnalyzeOutput_activated()
 {
+	horizontalSlider->show();
+	this->displaytime(0.0);
+	// default: select flow MOE as main variable, later make a dialogue for selecting MOE
+	//theNetwork->get_links().begin()->second->get_icon()->set_selected
 
 }

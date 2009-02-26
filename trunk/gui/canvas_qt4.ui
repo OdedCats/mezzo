@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>810</width>
-    <height>660</height>
+    <height>668</height>
    </rect>
   </property>
   <property name="sizePolicy" >
@@ -636,6 +636,37 @@
      </item>
     </layout>
    </widget>
+   <widget class="QSlider" name="horizontalSlider" >
+    <property name="enabled" >
+     <bool>true</bool>
+    </property>
+    <property name="geometry" >
+     <rect>
+      <x>20</x>
+      <y>550</y>
+      <width>761</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="autoFillBackground" >
+     <bool>false</bool>
+    </property>
+    <property name="maximum" >
+     <number>5</number>
+    </property>
+    <property name="pageStep" >
+     <number>2</number>
+    </property>
+    <property name="orientation" >
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="tickPosition" >
+     <enum>QSlider::TicksBelow</enum>
+    </property>
+    <property name="tickInterval" >
+     <number>1</number>
+    </property>
+   </widget>
   </widget>
   <widget class="QToolBar" name="toolBar1" >
    <property name="horizontallyStretchable" stdset="0" >
@@ -689,7 +720,7 @@
      <x>0</x>
      <y>0</y>
      <width>810</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu" >
@@ -909,7 +940,7 @@
     <string>Link marks</string>
    </property>
    <property name="toolTip" >
-    <string>Show link handlers</string>
+    <string>Show link handles</string>
    </property>
   </action>
   <action name="inselectmode" >

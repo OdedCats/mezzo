@@ -188,12 +188,16 @@ public:
 	void seed (long int seed_) {randseed=seed_; vehtypes.set_seed(seed_);}          //!< sets the random seed
 	void removeRoute(Route* theroute);
 	void reset_link_icons(); //!< makes sure all the link-icons are shown normally when the run button is pressed. This corrects the colours in case of an incident file (it colours show affected links)
+		
+	void set_output_moe_thickness ( unsigned int val ) ; // sets the output moe for the link thickness  for analysis
+	void set_output_moe_colour ( unsigned int val ) ; // sets the output moe for the link colours for analysis
+
 #ifndef _NO_GUI
 	void recenter_image();   //!< sets the image in the center and adapts zoom to fit window
-	//QMatrix netgraphview_init(); //!< scale the network graph to the view initialized by pixmaps
 	QMatrix netgraphview_init(); //!< scale the network graph to the view initialized by pixmaps
-
+	
 	void redraw(); //!< redraws the image
+
 #endif //_NO_GUI
 
 	// GET's
@@ -203,13 +207,9 @@ public:
 	Parameters* get_parameters () {return theParameters;} 
 	vector <ODpair*>& get_odpairs () {return odpairs;} // keep as vector
 
-	//vector <Origin*>& get_origins(){return origins;}
 	map <int, Origin*>& get_origins() {return originmap;}
-	//vector <Destination*>& get_destinations(){return destinations;}
 	map <int, Destination*>& get_destinations() {return destinationmap;}
-	//vector <Node*>& get_nodes(){return nodes;}
 	map <int, Node*>& get_nodes() {return nodemap;}
-	//vector <Link*>& get_links(){return links;}
 	map <int,Link*>& get_links() {return linkmap;}
 	
 	multimap<odval, Route*>::iterator find_route (int id, odval val);

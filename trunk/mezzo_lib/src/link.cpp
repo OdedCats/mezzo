@@ -224,6 +224,59 @@ void Link::set_selected (const bool sel)
 #endif // _NO_GUI	
 }
 
+void Link::set_output_moe_thickness(unsigned int val)// sets the output MOE for the link icon
+{
+#ifndef _NO_GUI	
+	switch (val)
+	{
+		case (1):
+			icon->setMOE_thickness(moe_outflow);
+			break;
+		case (2):
+			icon->setMOE_thickness(moe_inflow);
+			break;
+		case (3):
+			icon->setMOE_thickness(moe_speed);
+			break;
+		case (4):
+			icon->setMOE_thickness(moe_density);
+			break;
+		case (5):
+			icon->setMOE_thickness(moe_queue);
+			break;
+		case (0):
+			icon->setMOE_thickness(NULL);
+
+	}
+	#endif // _NO_GUI	
+
+}
+void Link::set_output_moe_colour(unsigned int val)// sets the output MOE for the link icon
+{
+#ifndef _NO_GUI	
+	switch (val)
+	{
+		case (1):
+			icon->setMOE_colour(moe_outflow);
+			break;
+		case (2):
+			icon->setMOE_colour(moe_inflow);
+			break;
+		case (3):
+			icon->setMOE_colour(moe_speed);
+			break;
+		case (4):
+			icon->setMOE_colour(moe_density);
+			break;
+		case (5):
+			icon->setMOE_colour(moe_queue);
+			break;
+		case (0):
+			icon->setMOE_colour(NULL);
+	}
+	#endif // _NO_GUI	
+
+}
 
 void Link::update_exit_times(double time,Link* nextlink, int lookback)
 {

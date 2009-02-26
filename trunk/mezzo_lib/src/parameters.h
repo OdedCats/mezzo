@@ -85,6 +85,15 @@ public:
 
 // THE (PUBLIC) PARAMETERS
 	// Drawing parameters
+		
+	// parameters for output analysis
+	unsigned int viewmode; //<! Sets the view mode for the graphics: 0 = simulation run (standard), 1= show output data (such as flows etc)
+	int max_thickness_value; // regulates scaling of values to thickness
+	int max_colour_value;
+	int min_thickness_value;
+	int min_colour_value;
+	int show_period;
+	
 	bool draw_link_ids; //!< If true link ID's are shown
 	int link_thickness; //!< Thickness with which links are drawn
 	int node_thickness; //!< Thickness with which nodes are drawn	

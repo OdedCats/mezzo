@@ -19,7 +19,7 @@
 
 /**
  * modification:
- *   add a handler to the linkicon
+ *   add a handle to the linkicon
  *   
  * Xiaoliang Ma 
  * last change: 2007-10-30 
@@ -34,6 +34,7 @@
 #include <qpainter>
 #include <list>
 #include "parameters.h"
+#include "grid.h"
 
 #define FIXED_RUNNING
 
@@ -89,11 +90,14 @@ class LinkIcon : public Icon
   	LinkIcon(int x, int y, int tox, int toy );
 	virtual ~LinkIcon(){};
 	void set_pointers(double * q, double * r);
-	void setHandler(bool handle){handler_on_=handle;}
-	bool getHandler(){return handler_on_;}
+	void sethandle(bool handle){handle_on_=handle;}
+	bool gethandle(){return handle_on_;}
 	int getLinkicon_leng(){return linkicon_leng_;}
 	virtual const bool within_boundary(const double x, const double y, const int rad);
   	virtual void draw(QPixmap * pm,QMatrix * wm);
+
+	void setMOE_thickness (MOE* moe_) {moe_thickness=moe_;} // sets the output MOE (such as flows, links etc.)	
+	void setMOE_colour (MOE* moe_) {moe_colour=moe_;} // sets the output MOE (such as flows, links etc.)
   protected:
   	int stopx, stopy;
 	int shiftx, shifty;
@@ -101,8 +105,10 @@ class LinkIcon : public Icon
     int x2,x3,y2,y3; // points for the arrowhead
   	double * queuepercentage;
   	double * runningpercentage;
-	bool handler_on_;
+	bool handle_on_;
 	int linkicon_leng_;
+	MOE* moe_thickness;
+	MOE* moe_colour;
 };
 
 class VirtualLinkIcon: public LinkIcon
