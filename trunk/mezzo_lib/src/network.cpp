@@ -2920,6 +2920,7 @@ bool Network::readmaster(string name)
 	if (temp!="stoptime=") // stoptime==runtime
 		return false;
 	inputfile >> runtime;
+	theParameters->running_time = runtime;
 	inputfile >> temp;
 	if (temp!="calc_paths=")
 	{
@@ -3656,21 +3657,34 @@ void Network::removeRoute(Route* theroute)
 
 void Network::set_output_moe_thickness ( unsigned int val ) // sets the output moe for the links
 {
+	double maxval = 0.0, minval=999999.0;
+	pair <double,double> minmax;
 	map <int,Link*>::iterator iter = linkmap.begin();
 	for (iter;iter != linkmap.end(); iter++)
 	{
-		(*iter).second->set_output_moe_thickness(val);
+		minmax = (*iter).second->set_output_moe_thickness(val);
+		minval = min (minval, minmax.first);
+		maxval = max(maxval, minmax.second);
+		
 	}
-	
+	theParameters->min_thickness_value=minval;
+	theParameters->max_thickness_value=maxval;
 }
 
 void Network::set_output_moe_colour ( unsigned int val ) // sets the output moe for the links
 {
+	double maxval = 0.0, minval=999999.0;
+	pair <double,double> minmax;
 	map <int,Link*>::iterator iter = linkmap.begin();
 	for (iter;iter != linkmap.end(); iter++)
 	{
-		(*iter).second->set_output_moe_colour(val);
+		minmax = (*iter).second->set_output_moe_colour(val);
+		minval = min (minval, minmax.first);
+		maxval = max(maxval, minmax.second);
+		
 	}
+	theParameters->min_colour_value=minval;
+	theParameters->max_colour_value=maxval;
 	
 }
 

@@ -92,16 +92,22 @@ LinkIcon::LinkIcon(int x, int y, int tox, int toy ): Icon (x, y), stopx(tox), st
 {
 	moe_thickness = NULL;
 	moe_colour = NULL;
-	// link icon handle
+	handle_on_=false;
+	calc_shift();
 
+}
+
+void LinkIcon::calc_shift()
+{
 	int vx=stopx-startx;
 	int vy=stopy-starty;
 	linkicon_leng_=sqrt(double(vx*vx+vy*vy));
 
-	double q=((theParameters->queue_thickness/2.0)+1.0);
+//	double q=((theParameters->queue_thickness/2.0)+1.0);
+	double q=theParameters->node_radius ;
 	// calculating the shift to make the links excentric 
 	// (start & end at the side of nodes)
-	if (vx==0)
+	if (vx==0) // to speed up in simple cases.
 	{
 		shifty=static_cast<int>(0.0);
 		if (vy>0)
@@ -120,12 +126,11 @@ LinkIcon::LinkIcon(int x, int y, int tox, int toy ): Icon (x, y), stopx(tox), st
 	}
 	else
 	{
-		double p=vy;
-		p=p/vx;
+		double p=vy/vx;
 		double move=(sqrt( (q*q)/(1+(p*p)) ) );
 		int tempy=abs(static_cast<int>  (move));
 		int tempx=abs(static_cast<int> (move*(p)));
-		//shift is the orhogonal vector to the link, used to shift the block
+
 		// take care of the sign for righthandtraffic
 		if (vx<0)
 			shifty=-tempy;
@@ -137,13 +142,13 @@ LinkIcon::LinkIcon(int x, int y, int tox, int toy ): Icon (x, y), stopx(tox), st
 			shiftx=tempx;
 	}
 
-	handle_on_=false;
-	
+// calc positions for start and end of handle
 	handlex=static_cast <int> ( 0.66 *vx+startx + shiftx + 0.5);
 	handley=static_cast <int> ( 0.66 *vy+starty + shifty  + 0.5);
 	x2=static_cast <int> ( 0.70 *vx+startx + shiftx  + 0.5);
 	y2=static_cast <int> ( 0.70 *vy+starty + shifty  + 0.5) ;
-  
+
+
 }
 
 void LinkIcon::set_pointers(double * q, double * r)
@@ -154,76 +159,142 @@ void LinkIcon::set_pointers(double * q, double * r)
 
 void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 {
-	// init the painter
-	QPainter paint(pm); // automatic paint.begin()
-	paint.setRenderHint(QPainter::Antialiasing);
-    
-	// set the world matrix that controls zoom and translation of  the drawn image
-	paint.setWorldMatrix(*wm);
-	double scale_ = 1;
-	if ( (wm->m11() > 0) && (wm->m11() < 1) ) 
-		scale_ = (1/wm->m11()); // the horizontal scale factor
-
-	QPen pen1;
-	// set standard pen for link line, extra thick if selected
-	if (!selected)
-		pen1 =QPen(theParameters->linkcolor , theParameters->link_thickness*scale_); // pen for the link base
-	else
-		pen1 =QPen( selected_color , theParameters->selected_thickness*scale_); // pen for the link base
-	// set pen for queue
-	QPen pen2 ( theParameters->queuecolor , theParameters->queue_thickness*scale_); // pen for queue
-	// Set pen for density (colour varies with density)
-	int r=0,g=0,b=0;
-	double perc_density = (*runningpercentage);
-	if (perc_density > 0.15) // under 0.15 just paint black
-		b=255;
-	r = static_cast <int> (perc_density*255); // add red when density goes up
-	if (perc_density > 0.90) // over 0.9 paint red
+	calc_shift();
+	if (theParameters->viewmode==0)
 	{
-		b=0;
-		r=255;
-	}	   
-	double width=((theParameters->queue_thickness)*perc_density) ;
-	QPen pen3 (QColor(r,g,b),width*scale_); // pen for variable (density)
+		// init the painter
+		QPainter paint(pm); // automatic paint.begin()
+		paint.setRenderHint(QPainter::Antialiasing);
+	    
+		// set the world matrix that controls zoom and translation of  the drawn image
+		paint.setWorldMatrix(*wm);
+		double scale_ = 1;
+		if ( (wm->m11() > 0) && (wm->m11() < 1) ) 
+			scale_ = (1/wm->m11()); // the horizontal scale factor
+
+		QPen pen1;
+		// set standard pen for link line, extra thick if selected
+		if (!selected)
+			pen1 =QPen(theParameters->linkcolor , theParameters->link_thickness*scale_); // pen for the link base
+		else
+			pen1 =QPen( selected_color , theParameters->selected_thickness*scale_); // pen for the link base
+		// set pen for queue
+		QPen pen2 ( theParameters->queuecolor , theParameters->queue_thickness*scale_); // pen for queue
+		// Set pen for density (colour varies with density)
+		int r=0,g=0,b=0;
+		double perc_density = (*runningpercentage);
+		if (perc_density > 0.15) // under 0.15 just paint black
+			b=255;
+		r = static_cast <int> (perc_density*255); // add red when density goes up
+		if (perc_density > 0.90) // over 0.9 paint red
+		{
+			b=0;
+			r=255;
+		}	   
+		double width=((theParameters->queue_thickness)*perc_density) ;
+		QPen pen3 (QColor(r,g,b),width*scale_); // pen for variable (density)
 
 
-	// draw the center line
-	paint.setPen(pen1);
-	paint.drawLine( startx+shiftx,starty+shifty, stopx+shiftx,stopy+shifty ); 
+		// draw the center line
+		paint.setPen(pen1);
+		paint.drawLine( startx+shiftx,starty+shifty, stopx+shiftx,stopy+shifty ); 
+			
+		// drawing the handle ( half arrow) 
+		if(handle_on_)
+		{
+			QPen pen_h(theParameters->linkcolor, 1.5*(theParameters->link_thickness)*scale_);
+			paint.setPen(pen_h);
+			paint.drawLine(handlex,handley,handlex+shiftx,handley+shifty);
+			paint.drawLine(handlex+shiftx,handley+shifty, x2, y2); // draws a half-arrow
+		}
+
+		// draw the queue part
+   		int x_1=static_cast <int> ((1.0-(*queuepercentage))*(stopx-startx)+startx);   // x and y for queue-end
+   		int y_1=static_cast <int> ((1.0-(*queuepercentage))*(stopy-starty)+starty);
+		paint.setPen(pen2);
+		paint.drawLine( x_1+shiftx,y_1+shifty, stopx+shiftx,stopy+shifty ); // draw the queue
+
+		//draw the running part
+		paint.setPen(pen3);
+
+		if (width>1)
+		{	
+			int sx=shiftx;
+			int sy=shifty;
+			paint.drawLine(startx+sx,starty+sy, x_1+sx,y_1+sy ); // draw the running segment
+		}
+		// draw the link IDs (or any other text)
+		if (theParameters->draw_link_ids)
+		{
+			paint.setFont(QFont ("Helvetica", theParameters->text_size));
+			QPen pen4 ( Qt::red , 1*scale_);
+			paint.setPen(pen4);
+			paint.drawText (((startx+stopx)/2)+shiftx*theParameters->text_size - 2*theParameters->text_size,((starty+stopy)/2)+shifty*theParameters->text_size, text);
+		}
+		paint.end();
+	}
+
+	else if (theParameters->viewmode ==1) // output view
+	{
+		// init the painter
+		QPainter paint(pm); // automatic paint.begin()
+		paint.setRenderHint(QPainter::Antialiasing);
+	    
+		// set the world matrix that controls zoom and translation of  the drawn image
+		paint.setWorldMatrix(*wm);
+		// set scale
+		double scale_ = 1;
+		if ( (wm->m11() > 0) && (wm->m11() < 1) ) 
+			scale_ = (1/wm->m11()); // the horizontal scale factor
+
+		// determine thickness from MOE and current period
+		 
+		double thickness_perc = moe_thickness->get_value(theParameters->show_period)/theParameters->max_thickness_value; // percentage of max value in data set
+		double thicknessval = 20*thickness_perc; // the width to be drawn, this should
+		if (thicknessval < 1.0)
+			thicknessval = 1.0;
+		  
+
+		// determine colour from MOE and current period
+		double colour_perc = moe_colour->get_value(theParameters->show_period)/theParameters->max_colour_value; // percentage of max value in data set
+	
+		QColor outputcolour;
+		int r,g,b;
+		if (thickness_perc < 0.05)
+			outputcolour = theParameters->linkcolor;
+		else
+		{
+			if (colour_perc <= 0.5)
+			{
+				b= 0;
+				g=255;
+				r=static_cast<int>(colour_perc*255);			
+			}
+			else
+			{
+				b=0;
+				r=255;
+				g=static_cast<int>((1-colour_perc)*255);
+
+			}
+			outputcolour = QColor(r,g,b);
 		
-	// drawing the handle ( half arrow) 
-	if(handle_on_)
-	{
-		QPen pen_h(theParameters->linkcolor, 1.5*(theParameters->link_thickness)*scale_);
-		paint.setPen(pen_h);
-		paint.drawLine(handlex,handley,handlex+shiftx,handley+shifty);
-		paint.drawLine(handlex+shiftx,handley+shifty, x2, y2); // draws a half-arrow
-	}
+		}
+		// set standard pen for link line,
+			QPen pen1 =QPen(outputcolour , theParameters->link_thickness*scale_*thicknessval); // pen for the link base		
 
-	// draw the queue part
-   	int x_1=static_cast <int> ((1.0-(*queuepercentage))*(stopx-startx)+startx);   // x and y for queue-end
-   	int y_1=static_cast <int> ((1.0-(*queuepercentage))*(stopy-starty)+starty);
-    paint.setPen(pen2);
-	paint.drawLine( x_1+shiftx,y_1+shifty, stopx+shiftx,stopy+shifty ); // draw the queue
+		// adjust shifts
+		shiftx+=thicknessval;
+		shifty+=thicknessval;
+		
+		// draw
+		paint.setPen(pen1);
+		paint.drawLine( startx+shiftx,starty+shifty, stopx+shiftx,stopy+shifty ); 
 
-	//draw the running part
-	paint.setPen(pen3);
 
-	if (width>1)
-	{	
-		int sx=shiftx;
-		int sy=shifty;
-		paint.drawLine(startx+sx,starty+sy, x_1+sx,y_1+sy ); // draw the running segment
+		// end
+		paint.end();
 	}
-	// draw the link IDs (or any other text)
-	if (theParameters->draw_link_ids)
-	{
-		paint.setFont(QFont ("Helvetica", theParameters->text_size));
-		QPen pen4 ( Qt::red , 1*scale_);
-		paint.setPen(pen4);
-		paint.drawText (((startx+stopx)/2)+shiftx*theParameters->text_size - 2*theParameters->text_size,((starty+stopy)/2)+shifty*theParameters->text_size, text);
-	}
-	paint.end();	
 }
 
 const bool LinkIcon::within_boundary(const double x, const double y, const int rad)

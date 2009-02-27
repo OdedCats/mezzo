@@ -190,6 +190,8 @@ void MainForm::on_closenetwork_activated()
 
 	activateToolbars(false);
 	simprogress_widget->setVisible(false);
+	actionAnalyzeOutput->setChecked(false);
+	actionAnalyzeOutput->setEnabled(false);
 
 	// Delete the current network 
 	delete theNetwork;
@@ -226,6 +228,9 @@ void MainForm::on_stop_activated()
 
 	run->setEnabled(true);
 	batch_run->setEnabled(true);
+	actionAnalyzeOutput->setChecked(false);
+	actionAnalyzeOutput->setEnabled(false);
+
 	//updat the canvas
 	updateCanvas();
 
@@ -448,6 +453,41 @@ void MainForm::on_saveresults_activated()
 	 theNetwork->writeall();
 }
 
+void MainForm::on_actionAnalyzeOutput_toggled()
+{
+	if (actionAnalyzeOutput->isChecked())
+	{
+		int nr_periods;
+		horizontalSlider->show();
+		displaytime(0.0);
+		// default: select flow MOE as main variable, later make a dialogue for selecting MOE
+		theNetwork->set_output_moe_thickness(1);
+		theNetwork->set_output_moe_colour (3);
+		nr_periods=static_cast<int>((theParameters->running_time/theParameters->moe_outflow_update)+0.5);
+		horizontalSlider->setRange(1,nr_periods);
+		theParameters->viewmode = 1; // set view mode to output
+		theParameters->show_period = 1; // show the first period
+	}
+	else
+	{
+		theParameters->viewmode = 0; // set view mode to output
+		horizontalSlider->hide();
+	}
+	updateCanvas();
+
+}
+
+void MainForm::on_horizontalSlider_valueChanged()
+{
+	theParameters->show_period = horizontalSlider->value();
+		updateCanvas();
+}
+
+void MainForm::on_simspeed_valueChanged( int  value)
+{
+    theParameters->sim_speed_factor =(value/100);
+}
+
 ////////////////////////////////////////////////
 // NORMAL PRIVATE METHODS
 ////////////////////////////////////////////////
@@ -511,10 +551,9 @@ void MainForm::seed(int sd )
    theNetwork->seed(sd);
 }
 
-void MainForm::on_simspeed_valueChanged( int  value)
-{
-    theParameters->sim_speed_factor =(value/100);
-}
+
+
+
 
 /**
 * key press event handling
@@ -907,11 +946,4 @@ void MainForm::resizeEvent(QResizeEvent* event)
 	QWidget::resizeEvent(event);
 }
 
-void MainForm::on_actionAnalyzeOutput_activated()
-{
-	horizontalSlider->show();
-	this->displaytime(0.0);
-	// default: select flow MOE as main variable, later make a dialogue for selecting MOE
-	//theNetwork->get_links().begin()->second->get_icon()->set_selected
 
-}

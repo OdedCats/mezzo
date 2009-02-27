@@ -65,6 +65,8 @@ class MOE
  	void report_value(double time); // used to report counts such as flows
   double get_value(int index);
   double get_last_value();
+  double get_min();
+  double get_max();
  	void write_values(ostream & out, int nrperiods);
  	void write_value(ostream& out, int index);
  	int get_size() {return values.size();}

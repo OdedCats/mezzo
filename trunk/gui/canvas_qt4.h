@@ -71,7 +71,8 @@ private slots:
 	void on_zoomfactor_valueChanged(int value);  //!< changes the zoom step for zooming in/out
 	void on_panfactor_valueChanged(int value );  //!< changes the pan step for panning the network
 	void on_saveresults_activated();  //!< Saves the results of the simulation 
-	void on_actionAnalyzeOutput_activated(); //!< Turns on output analysis
+	void on_actionAnalyzeOutput_toggled(); //!< Turns on output analysis
+	void on_horizontalSlider_valueChanged(); // !< changes output view period
 		
 	// other slots	
 	void keyPressEvent(QKeyEvent* e);  //!< handle for key presses

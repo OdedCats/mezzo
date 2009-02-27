@@ -224,58 +224,93 @@ void Link::set_selected (const bool sel)
 #endif // _NO_GUI	
 }
 
-void Link::set_output_moe_thickness(unsigned int val)// sets the output MOE for the link icon
+pair<double,double> Link::set_output_moe_thickness(unsigned int val)// sets the output MOE for the link icon
 {
 #ifndef _NO_GUI	
+	int nr_periods;
+	//double min, max;
 	switch (val)
 	{
 		case (1):
 			icon->setMOE_thickness(moe_outflow);
+			nr_periods= static_cast<int>(theParameters->moe_outflow_update/theParameters->running_time);
+			moe_outflow->fill_missing(nr_periods, 0.0);
+			return pair <double,double> ( moe_outflow->get_min(), moe_outflow->get_max());
 			break;
 		case (2):
 			icon->setMOE_thickness(moe_inflow);
+			nr_periods= static_cast<int>(theParameters->moe_inflow_update/theParameters->running_time);
+			moe_inflow->fill_missing(nr_periods, 0.0);
+			return pair <double,double> ( moe_inflow->get_min(), moe_inflow->get_max());
 			break;
 		case (3):
 			icon->setMOE_thickness(moe_speed);
+			nr_periods= static_cast<int>(theParameters->moe_speed_update/theParameters->running_time);
+			moe_speed->fill_missing(nr_periods, this->speed_density(0.0));
+			return pair <double,double> ( moe_speed->get_min(), moe_speed->get_max());
 			break;
 		case (4):
 			icon->setMOE_thickness(moe_density);
+			nr_periods= static_cast<int>(theParameters->moe_density_update/theParameters->running_time);
+			moe_density->fill_missing(nr_periods, 0.0);
+			return pair <double,double> ( moe_density->get_min(), moe_density->get_max());
 			break;
 		case (5):
 			icon->setMOE_thickness(moe_queue);
+			nr_periods= static_cast<int>(theParameters->moe_queue_update/theParameters->running_time);
+			moe_queue->fill_missing(nr_periods, 0.0);
+			return pair <double,double> ( moe_queue->get_min(), moe_queue->get_max());
 			break;
 		case (0):
 			icon->setMOE_thickness(NULL);
 
 	}
 	#endif // _NO_GUI	
-
+	return pair <double, double> (0,0);
 }
-void Link::set_output_moe_colour(unsigned int val)// sets the output MOE for the link icon
+pair <double,double> Link::set_output_moe_colour(unsigned int val)// sets the output MOE for the link icon
 {
 #ifndef _NO_GUI	
+	int nr_periods;
+	//double min, max;
 	switch (val)
 	{
 		case (1):
 			icon->setMOE_colour(moe_outflow);
+			nr_periods= static_cast<int>(theParameters->moe_outflow_update/theParameters->running_time);
+			moe_outflow->fill_missing(nr_periods, 0.0);
+			return pair <double,double> ( moe_outflow->get_min(), moe_outflow->get_max());
 			break;
 		case (2):
 			icon->setMOE_colour(moe_inflow);
+			nr_periods= static_cast<int>(theParameters->moe_inflow_update/theParameters->running_time);
+			moe_inflow->fill_missing(nr_periods, 0.0);
+			return pair <double,double> ( moe_inflow->get_min(), moe_inflow->get_max());
 			break;
 		case (3):
 			icon->setMOE_colour(moe_speed);
+			nr_periods= static_cast<int>(theParameters->moe_speed_update/theParameters->running_time);
+			moe_speed->fill_missing(nr_periods, this->speed_density(0.0));
+			return pair <double,double> ( moe_speed->get_min(), moe_speed->get_max());
 			break;
 		case (4):
 			icon->setMOE_colour(moe_density);
+			nr_periods= static_cast<int>(theParameters->moe_density_update/theParameters->running_time);
+			moe_density->fill_missing(nr_periods, 0.0);
+			return pair <double,double> ( moe_density->get_min(), moe_density->get_max());
 			break;
 		case (5):
 			icon->setMOE_colour(moe_queue);
+			nr_periods= static_cast<int>(theParameters->moe_queue_update/theParameters->running_time);
+			moe_queue->fill_missing(nr_periods, 0.0);
+			return pair <double,double> ( moe_queue->get_min(), moe_queue->get_max());
 			break;
 		case (0):
 			icon->setMOE_colour(NULL);
+
 	}
 	#endif // _NO_GUI	
-
+	return pair <double, double> (0,0);
 }
 
 void Link::update_exit_times(double time,Link* nextlink, int lookback)

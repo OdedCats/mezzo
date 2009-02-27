@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>810</width>
-    <height>668</height>
+    <width>815</width>
+    <height>674</height>
    </rect>
   </property>
   <property name="sizePolicy" >
@@ -607,6 +607,10 @@
          <bool>false</bool>
         </property>
        </widget>
+       <zorder>LCDNumber</zorder>
+       <zorder>progressbar</zorder>
+       <zorder>TextLabel12</zorder>
+       <zorder>horizontalSlider</zorder>
       </widget>
      </item>
      <item>
@@ -635,6 +639,10 @@
       </widget>
      </item>
     </layout>
+    <zorder>status_label</zorder>
+    <zorder>simprogress_widget</zorder>
+    <zorder>mouse_label</zorder>
+    <zorder>horizontalSlider</zorder>
    </widget>
    <widget class="QSlider" name="horizontalSlider" >
     <property name="enabled" >
@@ -643,19 +651,22 @@
     <property name="geometry" >
      <rect>
       <x>20</x>
-      <y>550</y>
-      <width>761</width>
+      <y>10</y>
+      <width>771</width>
       <height>20</height>
      </rect>
     </property>
     <property name="autoFillBackground" >
      <bool>false</bool>
     </property>
+    <property name="minimum" >
+     <number>1</number>
+    </property>
     <property name="maximum" >
      <number>5</number>
     </property>
     <property name="pageStep" >
-     <number>2</number>
+     <number>1</number>
     </property>
     <property name="orientation" >
      <enum>Qt::Horizontal</enum>
@@ -719,7 +730,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>810</width>
+     <width>815</width>
      <height>25</height>
     </rect>
    </property>
@@ -992,6 +1003,9 @@
    </property>
   </action>
   <action name="actionAnalyzeOutput" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
    <property name="icon" >
     <iconset resource="canvas_qt4.qrc" >
      <normaloff>:/images/dvi.png</normaloff>:/images/dvi.png</iconset>

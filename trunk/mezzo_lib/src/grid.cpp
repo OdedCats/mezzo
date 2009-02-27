@@ -156,6 +156,41 @@ double MOE::get_last_value()
    return -1.0;
 }
 
+double MOE::get_min()
+{
+	if (values.empty())
+		return -1.0;
+	else
+	{
+		double temp = values.front();
+		for (list<double>::iterator iter = values.begin(); iter!= values.end(); iter++)
+			{
+				if ((*iter) < temp)
+				{
+					temp = (*iter);
+				}
+			}			
+		return temp;
+	}
+}
+double MOE::get_max()
+{
+	if (values.empty())
+		return -1.0;
+	else
+	{
+		double temp = values.front();
+		for (list<double>::iterator iter = values.begin(); iter!= values.end(); iter++)
+			{
+				if ((*iter) > temp)
+				{
+					temp = (*iter);
+				}
+			}			
+		return temp;
+	}
+
+}
 void MOE::fill_missing (const int nr_periods, const double default_value)
 {
 	if (value_obs==0)
