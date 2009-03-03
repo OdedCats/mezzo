@@ -92,6 +92,7 @@ public:
 	double max_colour_value;
 	double min_thickness_value;
 	double min_colour_value;
+	bool inverse_colour_scale;
 	int show_period;
 	double running_time; // total running time
 	

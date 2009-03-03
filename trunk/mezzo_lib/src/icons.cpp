@@ -236,6 +236,7 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 
 	else if (theParameters->viewmode ==1) // output view
 	{
+		QPen pen1;
 		// init the painter
 		QPainter paint(pm); // automatic paint.begin()
 		paint.setRenderHint(QPainter::Antialiasing);
@@ -248,50 +249,57 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 			scale_ = (1/wm->m11()); // the horizontal scale factor
 
 		// determine thickness from MOE and current period
-		 
-		double thickness_perc = moe_thickness->get_value(theParameters->show_period)/theParameters->max_thickness_value; // percentage of max value in data set
-		double thicknessval = 20*thickness_perc; // the width to be drawn, this should
-		if (thicknessval < 1.0)
-			thicknessval = 1.0;
-		  
+		if (theParameters->show_period < 1) // at time 0, show simply the normal links, no data 
+		{
+		     // set pen for link line,
+			 pen1 =QPen(theParameters->linkcolor , theParameters->link_thickness*scale_); // pen for the link base		
 
-		// determine colour from MOE and current period
-		double colour_perc = moe_colour->get_value(theParameters->show_period)/theParameters->max_colour_value; // percentage of max value in data set
-	
-		QColor outputcolour;
-		int r,g,b;
-		if (thickness_perc < 0.05)
-			outputcolour = theParameters->linkcolor;
+		}
 		else
 		{
-			if (colour_perc <= 0.5)
-			{
-				b= 0;
-				g=255;
-				r=static_cast<int>(colour_perc*255);			
-			}
+			double thickness_perc = moe_thickness->get_value(theParameters->show_period-1)/theParameters->max_thickness_value; // percentage of max value in data set
+			double thicknessval = 20*thickness_perc; // the width to be drawn, this should
+			if (thicknessval < 1.0)
+				thicknessval = 1.0;
+			  
+
+			// determine colour from MOE and current period
+			double colour_perc = moe_colour->get_value(theParameters->show_period-1)/theParameters->max_colour_value; // percentage of max value in data set
+		    
+			QColor outputcolour;
+			int r,g,b;
+			if (colour_perc < 0.05)
+				outputcolour = theParameters->linkcolor;
 			else
 			{
-				b=0;
-				r=255;
-				g=static_cast<int>((1-colour_perc)*255);
+				if (theParameters->inverse_colour_scale)
+					colour_perc = 1- colour_perc;
+				if (colour_perc <= 0.5)
+				{
+					b= 0;
+					g=255;
+					r=static_cast<int>(colour_perc*255);			
+				}
+				else
+				{
+					b=0;
+					r=255;
+					g=static_cast<int>((1-colour_perc)*255);
 
+				}
+				outputcolour = QColor(r,g,b);
+			
 			}
-			outputcolour = QColor(r,g,b);
-		
+		    // set pen for link line,
+			pen1 =QPen(outputcolour , theParameters->link_thickness*scale_*thicknessval); // pen for the link base		
+			// adjust shifts
+			shiftx+=thicknessval;
+			shifty+=thicknessval;
 		}
-		// set standard pen for link line,
-			QPen pen1 =QPen(outputcolour , theParameters->link_thickness*scale_*thicknessval); // pen for the link base		
-
-		// adjust shifts
-		shiftx+=thicknessval;
-		shifty+=thicknessval;
-		
+	
 		// draw
 		paint.setPen(pen1);
 		paint.drawLine( startx+shiftx,starty+shifty, stopx+shiftx,stopy+shifty ); 
-
-
 		// end
 		paint.end();
 	}

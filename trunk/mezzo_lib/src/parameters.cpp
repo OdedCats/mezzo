@@ -10,6 +10,7 @@ Parameters::Parameters ()
    max_colour_value=1;
    min_thickness_value=1;
    min_colour_value=1;
+   inverse_colour_scale=false;
    show_period = 1; // maybe later start at 0 with empty results (everything 0)
 
 

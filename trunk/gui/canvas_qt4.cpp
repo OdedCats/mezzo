@@ -461,12 +461,13 @@ void MainForm::on_actionAnalyzeOutput_toggled()
 		horizontalSlider->show();
 		displaytime(0.0);
 		// default: select flow MOE as main variable, later make a dialogue for selecting MOE
-		theNetwork->set_output_moe_thickness(1);
-		theNetwork->set_output_moe_colour (3);
+		theNetwork->set_output_moe_thickness(1); // set flows as thickness
+		theNetwork->set_output_moe_colour (3); // set speeds as colour
+		theParameters->inverse_colour_scale = true; // so high speeds are green and low speeds red
 		nr_periods=static_cast<int>((theParameters->running_time/theParameters->moe_outflow_update)+0.5);
-		horizontalSlider->setRange(1,nr_periods);
+		horizontalSlider->setRange(0,nr_periods);
 		theParameters->viewmode = 1; // set view mode to output
-		theParameters->show_period = 1; // show the first period
+		theParameters->show_period = 0; // show the first period
 	}
 	else
 	{
@@ -480,6 +481,8 @@ void MainForm::on_actionAnalyzeOutput_toggled()
 void MainForm::on_horizontalSlider_valueChanged()
 {
 	theParameters->show_period = horizontalSlider->value();
+	double show_time = theParameters->moe_outflow_update * theParameters->show_period;
+	displaytime(show_time);
 		updateCanvas();
 }
 

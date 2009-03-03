@@ -607,10 +607,6 @@
          <bool>false</bool>
         </property>
        </widget>
-       <zorder>LCDNumber</zorder>
-       <zorder>progressbar</zorder>
-       <zorder>TextLabel12</zorder>
-       <zorder>horizontalSlider</zorder>
       </widget>
      </item>
      <item>
@@ -639,10 +635,6 @@
       </widget>
      </item>
     </layout>
-    <zorder>status_label</zorder>
-    <zorder>simprogress_widget</zorder>
-    <zorder>mouse_label</zorder>
-    <zorder>horizontalSlider</zorder>
    </widget>
    <widget class="QSlider" name="horizontalSlider" >
     <property name="enabled" >
@@ -660,10 +652,10 @@
      <bool>false</bool>
     </property>
     <property name="minimum" >
-     <number>1</number>
+     <number>0</number>
     </property>
     <property name="maximum" >
-     <number>5</number>
+     <number>4</number>
     </property>
     <property name="pageStep" >
      <number>1</number>
