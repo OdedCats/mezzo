@@ -11,6 +11,7 @@ Parameters::Parameters ()
    min_thickness_value=1;
    min_colour_value=1;
    inverse_colour_scale=false;
+   thickness_width=20;
    show_period = 1; // maybe later start at 0 with empty results (everything 0)
 
 

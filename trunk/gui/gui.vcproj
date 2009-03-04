@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="gui"
 	ProjectGUID="{60259A8A-DDD3-4036-B4D1-C598A9F0B0E3}"
 	RootNamespace="gui"
@@ -82,6 +82,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\outputview.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\parametersdialog_qt4.cpp"
 				>
 			</File>
@@ -101,6 +105,10 @@
 			</File>
 			<File
 				RelativePath=".\src\nodedlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\outputview.h"
 				>
 			</File>
 			<File
@@ -139,6 +147,10 @@
 			</File>
 			<File
 				RelativePath=".\ui\nodedlg.ui"
+				>
+			</File>
+			<File
+				RelativePath=".\outputview.ui"
 				>
 			</File>
 			<File

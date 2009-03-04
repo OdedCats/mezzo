@@ -257,39 +257,48 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 		}
 		else
 		{
-			double thickness_perc = moe_thickness->get_value(theParameters->show_period-1)/theParameters->max_thickness_value; // percentage of max value in data set
-			double thicknessval = 20*thickness_perc; // the width to be drawn, this should
-			if (thicknessval < 1.0)
-				thicknessval = 1.0;
-			  
+			double thicknessval =1.0;
+			if (moe_thickness)
+			{
+				double thickness_perc = moe_thickness->get_value(theParameters->show_period-1)/theParameters->max_thickness_value; // percentage of max value in data set
+				thicknessval = theParameters->thickness_width*thickness_perc; // the width to be drawn, this should
+				if (thicknessval < 1.0)
+					thicknessval = 1.0;
+			}
+			
 
 			// determine colour from MOE and current period
-			double colour_perc = moe_colour->get_value(theParameters->show_period-1)/theParameters->max_colour_value; // percentage of max value in data set
-		    
-			QColor outputcolour;
-			int r,g,b;
-			if (colour_perc < 0.05)
-				outputcolour = theParameters->linkcolor;
-			else
+			QColor outputcolour = theParameters->linkcolor;
+			if (moe_colour) // if an ColourMOE  is set
 			{
-				if (theParameters->inverse_colour_scale)
-					colour_perc = 1- colour_perc;
-				if (colour_perc <= 0.5)
-				{
-					b= 0;
-					g=255;
-					r=static_cast<int>(colour_perc*255);			
-				}
+				double colour_perc = moe_colour->get_value(theParameters->show_period-1)/theParameters->max_colour_value; // percentage of max value in data set
+			    
+				
+				int r,g,b;
+				if (colour_perc < 0.05)
+					outputcolour = theParameters->linkcolor;
 				else
 				{
-					b=0;
-					r=255;
-					g=static_cast<int>((1-colour_perc)*255);
+					if (theParameters->inverse_colour_scale)
+						colour_perc = 1- colour_perc;
+					if (colour_perc <= 0.5)
+					{
+						b= 0;
+						g=255;
+						r=static_cast<int>(colour_perc*255);			
+					}
+					else
+					{
+						b=0;
+						r=255;
+						g=static_cast<int>((1-colour_perc)*255);
 
+					}
+					outputcolour = QColor(r,g,b);
+				
 				}
-				outputcolour = QColor(r,g,b);
-			
 			}
+
 		    // set pen for link line,
 			pen1 =QPen(outputcolour , theParameters->link_thickness*scale_*thicknessval); // pen for the link base		
 			// adjust shifts

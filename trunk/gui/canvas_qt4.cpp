@@ -69,11 +69,12 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 	
 	// need to figure out if this affect the simulation
 	// COMMENT WILCO: this is to slow down the simulation
-	//simspeed->setValue(static_cast<int> (  theParameters->sim_speed_factor * 100 ));
+//	simspeed->setValue(static_cast<int> (  theParameters->sim_speed_factor * 100 ));
 	
 	// dialogs
 	pmdlg = new ParametersDialog (this);
 	brdlg = new BatchrunDlg(this);
+	outputview = new OutputView(this);
 	
 	// construction of the MezzoAnalyzer dialog 
 	od_analyser_=new ODCheckerDlg();
@@ -242,6 +243,8 @@ void MainForm::on_quit_activated()
 	//theNetwork->~Network(); 
 	delete theNetwork;
 	od_analyser_->~ODCheckerDlg();
+	outputview->~OutputView();
+	brdlg->~BatchrunDlg();
 	close();
 }
 
@@ -468,11 +471,14 @@ void MainForm::on_actionAnalyzeOutput_toggled()
 		horizontalSlider->setRange(0,nr_periods);
 		theParameters->viewmode = 1; // set view mode to output
 		theParameters->show_period = 0; // show the first period
+		outputview->setNetwork(theNetwork);
+		outputview->show();
 	}
 	else
 	{
 		theParameters->viewmode = 0; // set view mode to output
 		horizontalSlider->hide();
+		outputview->hide();
 	}
 	updateCanvas();
 

@@ -34,6 +34,7 @@
 #include "../mezzoAnalyzer/src/odcheckerdlg.h"
 #include "../mezzo_lib/src/network.h"
 #include "src/batchrundlg.h"
+#include "src/outputview.h"
 
 class MainForm : public QMainWindow, private Ui::MainForm
 {
@@ -150,6 +151,7 @@ private:
 	ParametersDialog* pmdlg;
 	ODCheckerDlg* od_analyser_;
 	BatchrunDlg* brdlg;
+	OutputView* outputview;
 
 };
 
