@@ -47,6 +47,8 @@ public:
 	void setThicknessRange(double min, double max);
 	void draw_colour_legend();
 	void draw_thickness_legend();
+	void set_thickness_unit(int val);
+	void set_colour_unit(int val);
 	
 	
 	//SLOTS

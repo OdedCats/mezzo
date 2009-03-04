@@ -50,6 +50,7 @@ void OutputView::on_ThicknessMOE_currentIndexChanged(int index)
 
 		// draw legend
 		draw_thickness_legend();
+		set_thickness_unit(index);
 	}
 }
 
@@ -79,6 +80,7 @@ void OutputView::on_ColourMOE_currentIndexChanged(int index)
 		colour_max->setText(QString::number(theParameters->max_colour_value,'f',1));
 		// draw legend
 		draw_colour_legend();
+		set_colour_unit(index);
 		
 	}
 }
@@ -133,6 +135,59 @@ void OutputView::draw_thickness_legend()
 	painter.end();
 	thickness_legend->setPixmap(thick);
 	this->repaint();
+}
+
+void OutputView::set_thickness_unit(int val)
+{
+	QString text;
+	switch (val)
+	{ 
+	case 0:
+		text="";
+		break;
+	case 1:
+		text="veh/h/lane";
+		break;
+	case 2:
+		text="veh/h/lane";
+		break;
+	case 3:
+		text="m/s";
+		break;
+	case 4:
+		text="veh/km/lane";
+		break;
+	case 5:
+		text="veh";
+		break;
+	}
+	thickness_unit->setText(text);
+}
+void OutputView::set_colour_unit(int val)
+{
+	QString text;
+	switch (val)
+	{ 
+	case 0:
+		text="";
+		break;
+	case 1:
+		text="veh/h/lane";
+		break;
+	case 2:
+		text="veh/h/lane";
+		break;
+	case 3:
+		text="m/s";
+		break;
+	case 4:
+		text="veh/km/lane";
+		break;
+	case 5:
+		text="veh";
+		break;
+	}
+	colour_unit->setText(text);
 }
 
 void OutputView::on_inverseColourScale_toggled()
