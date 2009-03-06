@@ -37,7 +37,10 @@ void Drawing::draw(QPixmap* pm,QMatrix * wm)
 		//*pm = *bpm;	
 		pm->fill(theParameters->backgroundcolor); // fill with white background
 		QPainter paint (pm);
-		paint.setWorldMatrix(*wm);
+		bwm=*wm;
+		bwm.translate(theParameters->background_x,theParameters->background_y);
+		bwm.scale(theParameters->background_scale,theParameters->background_scale);
+		paint.setWorldMatrix(bwm);
 		paint.drawPixmap(0,0,*bpm);
 		paint.end();
 		

@@ -35,6 +35,7 @@
 #include "../mezzo_lib/src/network.h"
 #include "src/batchrundlg.h"
 #include "src/outputview.h"
+#include "src/positionbackground.h"
 
 class MainForm : public QMainWindow, private Ui::MainForm
 {
@@ -72,8 +73,9 @@ private slots:
 	void on_zoomfactor_valueChanged(int value);  //!< changes the zoom step for zooming in/out
 	void on_panfactor_valueChanged(int value );  //!< changes the pan step for panning the network
 	void on_saveresults_activated();  //!< Saves the results of the simulation 
-	void on_actionAnalyzeOutput_toggled(); //!< Turns on output analysis
+	void on_actionAnalyzeOutput_toggled(); //!< Turns on output analysis dialogue
 	void on_horizontalSlider_valueChanged(); // !< changes output view period
+	void on_actionPositionBackground_activated();//!< opens Position Background Dialogue
 		
 	// other slots	
 	void keyPressEvent(QKeyEvent* e);  //!< handle for key presses
@@ -152,6 +154,7 @@ private:
 	ODCheckerDlg* od_analyser_;
 	BatchrunDlg* brdlg;
 	OutputView* outputview;
+	PositionBackground* posbackground;
 
 };
 

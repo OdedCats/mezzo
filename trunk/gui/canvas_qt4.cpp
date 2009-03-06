@@ -75,6 +75,7 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 	pmdlg = new ParametersDialog (this);
 	brdlg = new BatchrunDlg(this);
 	outputview = new OutputView(this);
+	posbackground = new PositionBackground(this);
 	
 	// construction of the MezzoAnalyzer dialog 
 	od_analyser_=new ODCheckerDlg();
@@ -495,6 +496,13 @@ void MainForm::on_horizontalSlider_valueChanged()
 void MainForm::on_simspeed_valueChanged( int  value)
 {
     theParameters->sim_speed_factor =(value/100);
+}
+
+void MainForm::on_actionPositionBackground_activated()
+{
+	posbackground->set_network(theNetwork);
+	posbackground->show();
+	updateCanvas();
 }
 
 ////////////////////////////////////////////////

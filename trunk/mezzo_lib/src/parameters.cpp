@@ -25,6 +25,9 @@ Parameters::Parameters ()
    selected_thickness = 6;
    text_size = 12;
    show_background = true;
+   background_x=0;
+   background_y=0;
+   background_scale=5;
 #ifndef _NO_GUI
    linkcolor=Qt::gray;
    nodecolor=Qt::gray;

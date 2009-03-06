@@ -89,6 +89,10 @@
 				RelativePath=".\parametersdialog_qt4.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\positionbackground.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -113,6 +117,10 @@
 			</File>
 			<File
 				RelativePath=".\parametersdialog_qt4.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\positionbackground.h"
 				>
 			</File>
 		</Filter>
@@ -155,6 +163,10 @@
 			</File>
 			<File
 				RelativePath=".\parametersdialog_qt4.ui"
+				>
+			</File>
+			<File
+				RelativePath=".\ui\positionbackground.ui"
 				>
 			</File>
 		</Filter>

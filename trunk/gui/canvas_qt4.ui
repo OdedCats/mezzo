@@ -744,24 +744,45 @@
     </property>
     <addaction name="linkhandlemark" />
     <addaction name="inselectmode" />
-    <addaction name="parametersdialog" />
-    <addaction name="loadbackground" />
-    <addaction name="inspectdialog" />
    </widget>
    <widget class="QMenu" name="menuSimulation" >
     <property name="title" >
      <string>Simulation</string>
     </property>
     <addaction name="run" />
-    <addaction name="batch_run" />
     <addaction name="breakoff" />
     <addaction name="stop" />
     <addaction name="separator" />
+    <addaction name="batch_run" />
+   </widget>
+   <widget class="QMenu" name="menuTools" >
+    <property name="title" >
+     <string>Tools</string>
+    </property>
+    <widget class="QMenu" name="menuBackground" >
+     <property name="title" >
+      <string>Background</string>
+     </property>
+     <addaction name="loadbackground" />
+     <addaction name="actionPositionBackground" />
+    </widget>
+    <addaction name="menuBackground" />
+    <addaction name="separator" />
+    <addaction name="parametersdialog" />
     <addaction name="savescreenshot" />
+   </widget>
+   <widget class="QMenu" name="menuAnalysis" >
+    <property name="title" >
+     <string>Analyze</string>
+    </property>
+    <addaction name="actionAnalyzeOutput" />
+    <addaction name="inspectdialog" />
    </widget>
    <addaction name="fileMenu" />
    <addaction name="EditMenu" />
    <addaction name="menuSimulation" />
+   <addaction name="menuTools" />
+   <addaction name="menuAnalysis" />
   </widget>
   <action name="openmasterfile" >
    <property name="icon" >
@@ -799,7 +820,7 @@
      <normaloff>:/images/bt_stop.png</normaloff>:/images/bt_stop.png</iconset>
    </property>
    <property name="text" >
-    <string>Stop</string>
+    <string>Stop/Reset</string>
    </property>
    <property name="iconText" >
     <string>Stop</string>
@@ -818,6 +839,9 @@
    <property name="icon" >
     <iconset resource="canvas_qt4.qrc" >
      <normaloff>:/images/bt_play.png</normaloff>:/images/bt_play.png</iconset>
+   </property>
+   <property name="text" >
+    <string>Run/Continue</string>
    </property>
    <property name="iconText" >
     <string>Run</string>
@@ -883,7 +907,7 @@
   <action name="loadbackground" >
    <property name="icon" >
     <iconset resource="canvas_qt4.qrc" >
-     <normaloff>:/images/background.png</normaloff>:/images/background.png</iconset>
+     <normaloff>:/images/background_map.jpg</normaloff>:/images/background_map.jpg</iconset>
    </property>
    <property name="text" >
     <string>Load &amp;Background</string>
@@ -913,7 +937,7 @@
      <normaloff>:/images/inspect.png</normaloff>:/images/inspect.png</iconset>
    </property>
    <property name="text" >
-    <string>Inspect</string>
+    <string>Inspect Routes</string>
    </property>
   </action>
   <action name="zoombywin" >
@@ -1003,7 +1027,16 @@
      <normaloff>:/images/dvi.png</normaloff>:/images/dvi.png</iconset>
    </property>
    <property name="text" >
-    <string>AnalyzeOutput</string>
+    <string>Analyze Output</string>
+   </property>
+  </action>
+  <action name="actionPositionBackground" >
+   <property name="icon" >
+    <iconset resource="canvas_qt4.qrc" >
+     <normaloff>:/images/move.png</normaloff>:/images/move.png</iconset>
+   </property>
+   <property name="text" >
+    <string>Position Background</string>
    </property>
   </action>
  </widget>
