@@ -87,10 +87,11 @@ class Icon
 class LinkIcon : public Icon
 {
   public:
-  	LinkIcon(int x, int y, int tox, int toy );
+  	LinkIcon(int x, int y, int tox, int toy);
 	virtual ~LinkIcon(){};
 	void set_pointers(double * q, double * r);
-	void calc_shift(); //!< calculate the relative shift from the center line between nodes
+	void set_link(Link* link_) {link=link_;}
+	void calc_shift(double q=0.0); //!< calculate the relative shift from the center line between nodes, q is radius. 
 	void sethandle(bool handle){handle_on_=handle;}
 	bool gethandle(){return handle_on_;}
 	int getLinkicon_leng(){return linkicon_leng_;}
@@ -100,6 +101,7 @@ class LinkIcon : public Icon
 	void setMOE_thickness (MOE* moe_) {moe_thickness=moe_;} // sets the output MOE (such as flows, links etc.)	
 	void setMOE_colour (MOE* moe_) {moe_colour=moe_;} // sets the output MOE (such as flows, links etc.)
   protected:
+   Link* link;
   	int stopx, stopy;
 	int shiftx, shifty;
 	int handlex, handley;

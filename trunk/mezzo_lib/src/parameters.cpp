@@ -13,6 +13,8 @@ Parameters::Parameters ()
    inverse_colour_scale=false;
    thickness_width=20;
    show_period = 1; // maybe later start at 0 with empty results (everything 0)
+   show_link_names = false;
+   show_link_ids = false;
 
 
    draw_link_ids = false;
@@ -21,7 +23,7 @@ Parameters::Parameters ()
    node_radius = 6;
    queue_thickness = 8;
    selected_thickness = 6;
-   text_size = 16;
+   text_size = 12;
    show_background = true;
 #ifndef _NO_GUI
    linkcolor=Qt::gray;

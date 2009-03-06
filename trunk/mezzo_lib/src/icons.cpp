@@ -34,7 +34,13 @@ void Drawing::draw(QPixmap* pm,QMatrix * wm)
 	}
 	if (bpm && bg_set && theParameters->show_background)
 	{
-		*pm = *bpm;	
+		//*pm = *bpm;	
+		pm->fill(theParameters->backgroundcolor); // fill with white background
+		QPainter paint (pm);
+		paint.setWorldMatrix(*wm);
+		paint.drawPixmap(0,0,*bpm);
+		paint.end();
+		
 	}
 	else	
 	{
@@ -88,23 +94,24 @@ const bool Icon::within_boundary(const double x, const double y, const int rad)
 // LinkIcon functions
 ////////////////////////////////////////
 
-LinkIcon::LinkIcon(int x, int y, int tox, int toy ): Icon (x, y), stopx(tox), stopy(toy)
+LinkIcon::LinkIcon(int x, int y, int tox, int toy): Icon (x, y), stopx(tox), stopy(toy)
 {
 	moe_thickness = NULL;
 	moe_colour = NULL;
 	handle_on_=false;
-	calc_shift();
+	calc_shift(theParameters->node_radius);
 
 }
 
-void LinkIcon::calc_shift()
+void LinkIcon::calc_shift(double q)
 {
 	int vx=stopx-startx;
 	int vy=stopy-starty;
 	linkicon_leng_=sqrt(double(vx*vx+vy*vy));
 
 //	double q=((theParameters->queue_thickness/2.0)+1.0);
-	double q=theParameters->node_radius ;
+	if (q==0.0)
+		q=theParameters->node_radius ;
 	// calculating the shift to make the links excentric 
 	// (start & end at the side of nodes)
 	if (vx==0) // to speed up in simple cases.
@@ -159,7 +166,7 @@ void LinkIcon::set_pointers(double * q, double * r)
 
 void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 {
-	calc_shift();
+	
 	if (theParameters->viewmode==0)
 	{
 		// init the painter
@@ -236,6 +243,7 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 
 	else if (theParameters->viewmode ==1) // output view
 	{
+		
 		QPen pen1;
 		// init the painter
 		QPainter paint(pm); // automatic paint.begin()
@@ -264,6 +272,7 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 				thicknessval = theParameters->thickness_width*thickness_perc; // the width to be drawn, this should
 				if (thicknessval < 1.0)
 					thicknessval = 1.0;
+				calc_shift(theParameters->node_radius + thicknessval/2);
 			}
 			
 
@@ -302,13 +311,39 @@ void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
 		    // set pen for link line,
 			pen1 =QPen(outputcolour , theParameters->link_thickness*scale_*thicknessval); // pen for the link base		
 			// adjust shifts
-			shiftx+=thicknessval;
-			shifty+=thicknessval;
+	//		shiftx+=thicknessval;
+	//		shifty+=thicknessval;
 		}
 	
 		// draw
 		paint.setPen(pen1);
 		paint.drawLine( startx+shiftx,starty+shifty, stopx+shiftx,stopy+shifty ); 
+		// draw the link IDs (or any other text)
+		bool showtext=false;
+		QString linktext="";
+		if (theParameters->show_link_ids)
+		{
+			showtext=true;
+			linktext += QString::number(link->get_id());
+		}
+		if (theParameters->show_link_names)
+		{
+			showtext=true;
+			linktext += " " + QString::fromLatin1(	link->get_name().c_str());
+		}
+		
+		if (showtext)
+		{
+			paint.setFont(QFont ("Helvetica", theParameters->text_size));
+			QPen pen4 ( Qt::red , 1*scale_);
+			paint.setPen(pen4);
+			//paint.drawText (((startx+stopx)/2)+shiftx*theParameters->text_size - 2*theParameters->text_size,((starty+stopy)/2)+shifty*theParameters->text_size, linktext);
+			double x = startx + (stopx-startx)/3 + shiftx;
+			double y = starty + (stopy-starty)/3 + shifty-theParameters->text_size/2;
+			paint.drawText (x,y, linktext);
+
+		}
+
 		// end
 		paint.end();
 	}

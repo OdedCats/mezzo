@@ -57,6 +57,9 @@ public:
 		void on_ColourMOE_currentIndexChanged(int index);
 		void on_inverseColourScale_toggled();
 		void on_maxThickness_valueChanged(int i);
+
+		void on_showLinkNames_toggled(bool checked);
+		void on_showLinkIds_toggled (bool checked);
 private:
 	
 	Network* theNetwork;

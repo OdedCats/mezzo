@@ -639,6 +639,7 @@ bool Network::readlink(istream& in)
 	// register the icon in the link
 #ifndef _NO_GUI
 	link->set_icon(icon);
+	icon->set_link(link);
 #endif //_NO_GUI 
 	linkmap [lid] = link;
 	//links.insert(links.end(),link);

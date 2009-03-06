@@ -150,7 +150,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\outputview.ui"
+				RelativePath=".\ui\outputview.ui"
 				>
 			</File>
 			<File

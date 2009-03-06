@@ -200,6 +200,14 @@ void OutputView::on_maxThickness_valueChanged(int i)
 {
 	theParameters->thickness_width = i;
 	thickness_legend->resize(thickness_legend->width(),theParameters->thickness_width);
+}
 
+void OutputView::on_showLinkNames_toggled(bool checked)
+{
+	theParameters->show_link_names=checked;
+}
 
+void OutputView::on_showLinkIds_toggled (bool checked)
+{
+	theParameters->show_link_ids=checked;
 }

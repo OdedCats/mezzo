@@ -95,7 +95,9 @@ public:
 	bool inverse_colour_scale;
 	int thickness_width;
 	int show_period;
-	double running_time; // total running time
+	double running_time; //!< total running time
+	bool show_link_names;//!< if true show link names in output
+	bool show_link_ids; //!< if true link ids are shown in output
 	
 	bool draw_link_ids; //!< If true link ID's are shown
 	int link_thickness; //!< Thickness with which links are drawn
@@ -105,6 +107,10 @@ public:
 	int selected_thickness; //!< Thickness with which selected objects are drawn
 	int text_size; //!< Size of text in the network image
 	bool show_background; //!< If true background image is displayed behind network (if any image was loaded)
+	int background_x; //!< start_x for background image
+	int background_y; //!< start_y 
+	double background_scale; //!< scale for background image
+
 #ifndef _NO_GUI
 	QColor linkcolor; //!< Colour of links
 	QColor nodecolor; //!< Colour of nodes
