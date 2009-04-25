@@ -17,6 +17,7 @@
 
 long int randseed=0;
 int vid=0;
+int pid=0;
 VehicleRecycler recycler;    // Global vehicle recycler
 double time_alpha=0.2; // smoothing factor for the output link times (uses hist_time & avg_time),
 // 1 = only new times, 0= only old times.
@@ -1377,6 +1378,14 @@ in >> keyword;
    				return false;
 			} 
 		}
+		else if (format == 3)
+		{
+			if (!read_passenger_rates_format3(in))
+			{
+				cout << " readbuslines: read_passenger_rates returned false for line nr " << (i+1) << endl;
+   				return false;
+			} 
+		}
 		else
 		{
 			cout << " readbuslines: read_passenger_rates returned false for wrong format coding " << (i+1) << endl;
@@ -1585,7 +1594,6 @@ bool Network::readbustrip(istream& in) // reads a trip
 		Busstop* bs = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (stop_id) )));
 		Visit_stop* vs = new Visit_stop (bs, pass_time);
 		stops.push_back(vs);
-
 	
 		in >> bracket;
 		if (bracket != '}')
@@ -1724,6 +1732,54 @@ bool Network::read_passenger_rates_format2 (istream& in) // reads the passenger 
 #endif //_DEBUG_NETWORK
   return ok;
 }
+
+bool Network::read_passenger_rates_format3 (istream& in) // under constructions- what would be the input format for individual passengers?
+{
+  bool ok= true;
+
+  
+
+#ifdef _DEBUG_NETWORK
+#endif //_DEBUG_NETWORK
+  return ok;
+}
+
+/*
+bool Network::find_direct_paths (ODstops* od_stops) // under constructions- what would be the input format for individual passengers?
+{
+  bool ok= true;
+  Busstop* origin_stop;
+  Busstop* destination_stop;
+  vector <Busstop*>::iterator bs_origin = stops.end();
+  vector <Busstop*>::iterator bs_destination = stops.begin();
+  for (vector <Busline*>::iterator bl = buslines.begin(); < buslines.end(); bl++)
+  {	
+		
+	  stop = (*(find_if(bl->stops.begin(), bl->stops.end(), compare <Busstop> (stop_id) ))); // find the stop
+	  for (vector <Busstop*>::iterator bs = bl->stops.begin(); < bl->stops.end(); bs++)
+	{
+		if ((*bs) == od_stops->get_origin())
+		{	
+			bs_origin = bs;
+		}
+		if ((*bs) == od_stops->get_destination())
+		{	
+			bs_destination = bs;
+		}
+	}
+	if (bs_destination > bs_origin)
+	{
+		Pass_route* new_path;
+		new_path->add_lines(bl);
+		od_stops->add_paths (new_path);
+	}
+  }
+ 
+#ifdef _DEBUG_NETWORK
+#endif //_DEBUG_NETWORK
+  return ok;
+}
+*/
 
 bool Network::read_bustype (istream& in) // reads a bustype
 {

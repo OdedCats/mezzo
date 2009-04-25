@@ -12,6 +12,7 @@
 #include "link.h"
 #include "sdfunc.h"
 #include "q.h"
+#include "passenger.h"
 #include "MMath.h" 
 
 
@@ -21,8 +22,10 @@ class Bustrip;
 class ODpair;
 class Bus;
 class Bustype;
+class Passenger;
 
 typedef pair<Bustrip*,double> Start_trip;
+typedef vector <Passenger*> passengers;
 
 class Busline: public Action
 	
@@ -88,7 +91,8 @@ public:
 	double get_starttime () {return starttime;}
 	int get_init_occupancy () {return init_occupancy;}
 	vector <Visit_stop*> :: iterator& get_next_stop() {return next_stop;} //!< returns pointer to next stop
-	
+	void set_pass (Passenger* passenger) {pass = passenger;}
+	Passenger* get_pass () {return pass;}
 
 // other functions:	
 //	bool is_trip_timepoint(Busstop* stop); //!< returns 1 if true, 0 if false, -1 if busstop not found
@@ -104,7 +108,9 @@ public:
 // public vectors
 	vector <Visit_stop*> stops; //!< contains all the busstops and the times that they are supposed to be served. NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
 	vector <Start_trip*> driving_roster; //!< trips assignment for each bus vehicle.
+	map <Busstop*, passengers> passengers_on_board;
 	map <Busstop*, int> nr_expected_alighting; //!< number of passengers expected to alight at the busline's stops
+	
 
 protected:
 	int id; //!< course nr
@@ -113,13 +119,11 @@ protected:
 	Busline* line; //!< pointer to the line it serves
 	int init_occupancy; //!< initial occupancy, usually 0
 	double starttime; //!< when the trip is starting from the origin
-	vector <Visit_stop*> :: iterator next_stop;
-
-// map <Bustrip*, double> driving_roster; 
+	vector <Visit_stop*> :: iterator next_stop; 
 	Random* random;
 //	map <Busstop*,bool> trips_timepoint; //!< will be relevant only when time points are trip-specific. binary map with time point indicatons for stops on route only (according to the schedule input file)  
 	Eventlist* eventlist; //!< for use by busstops etc to book themselves.
-
+	Passenger* pass;
 };
 
 typedef pair<Busstop*, double> stop_rate;

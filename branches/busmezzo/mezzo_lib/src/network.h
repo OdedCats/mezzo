@@ -224,8 +224,10 @@ public:
 	bool readbustrip(istream& in); //!< reads a trip
   bool read_passenger_rates_format1 (istream& in); // reads the passenger rates in the format of arrival rate and alighting fraction per line and stop combination
   bool read_passenger_rates_format2 (istream& in); // reads the passenger rates in the format of arrival rate per line, origin stop and destination stop combination
+   bool read_passenger_rates_format3 (istream& in); // what would be the format?
   bool read_bustype (istream& in); // reads a bus type
   bool read_busvehicle(istream& in); // reads a bus vehicle 
+  bool find_direct_paths (ODstops* od_stops);
 #ifndef _NO_GUI
 	double get_width_x() {return width_x;} //!< returns image width in original coordinate system
 	double get_height_y() {return height_y;} //!< ... height ...

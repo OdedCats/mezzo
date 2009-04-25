@@ -221,7 +221,5 @@ class VehicleRecycler
 //static VehicleRecycler recycler;
 extern VehicleRecycler recycler;
 
-		
-
 #endif
 

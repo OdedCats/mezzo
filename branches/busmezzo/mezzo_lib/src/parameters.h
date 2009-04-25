@@ -44,6 +44,7 @@
 // GLOBAL VARIABLES
 extern long int randseed; // random seed
 extern int vid;     // global vehicle id nr.
+extern int pid;     // global passenger id nr.
 extern double time_alpha;
 
 // OLD Network.hh parameters
