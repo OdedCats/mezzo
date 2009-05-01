@@ -4,7 +4,7 @@
 #include <math.h>
 #include "MMath.h"
 #include <sstream>
-#include "passenger.h"
+
 
 PassengerRecycler pass_recycler; // Global passenger recycler
 

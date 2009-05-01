@@ -1,9 +1,13 @@
-#ifndef _PASSENGER
-#define _PASSENGER
+#ifndef _ODSTOPS
+#define _ODSTOPS
 
 #include "parameters.h"
-#include "od.h
+#include "od.h"
 #include "busline.h"
+#include "pass_route.h"
+
+class Busstop;
+class Pass_route;
 
 class ODstops
 {
@@ -14,7 +18,7 @@ public:
 	
 	//Gets and Sets:
 	Busstop* get_origin() {return origin_stop;}
-	Busstop* get_destination {return destination_stop;}
+	Busstop* get_destination () {return destination_stop;}
 	void set_origin (Busstop* origin_stop_) {origin_stop=origin_stop_;}
 	void set_destination (Busstop* destination_stop_) {destination_stop=destination_stop_;}
 	vector <Pass_route*> paths;

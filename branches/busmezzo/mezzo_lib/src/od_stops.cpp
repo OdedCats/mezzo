@@ -1,4 +1,5 @@
 ///! odstops.cpp: implementation of the odstops class.
+#include "od_stops.h"
 
 ODstops::ODstops ()
 {

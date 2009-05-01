@@ -1,5 +1,5 @@
 ///! passenger.cpp: implementation of the passenger class.
-
+#include "passenger.h"
 Passenger::Passenger ()
 {
 }
@@ -12,10 +12,10 @@ Passenger::Passenger (double start_time_)
 	start_time = start_time_;
 }
 
-void Passenger::init (double start_time, Busstop* origin_stop, Busstop* destination_stop);
+void Passenger::init (double start_time_, Busstop* origin_stop, Busstop* destination_stop)
 {
 	start_time = start_time_;
-	ODstop* odstop = new ODstop (origin_stop, destination_stop);
+	ODstops* odstop = new ODstops (origin_stop, destination_stop);
 	set_ODstop (odstop);
 }
 
