@@ -2456,7 +2456,7 @@ bool Network::init_shortest_path()
 	routenr=routemap.size();
 	double cost, mu, sd;
 	random=new (Random);
-	/**********test***/
+
 	if (randseed != 0)
 		random->seed(randseed);
 	else
@@ -2625,13 +2625,15 @@ bool Network::shortest_paths_all()
 							cout << " making route " << endl;
 #endif //_DEBUG_SP
 							Route* rptr=new  Route(routenr, ori, (*iter3), rlinks);
-							bool not_exists=false;
+							bool exists=true;
 							if (rptr)
+							{
 								//not_exists= ( (find_if (routes.begin(),routes.end(), equalmembers <Route> (*rptr))) == routes.end() ); // find if there's a route with the same links
-								not_exists = exists_same_route(rptr);
-							if (not_exists)
-							{	
-								routemap.insert(routemap.end(),pair <odval, Route*> (val,rptr)); // add the newly found route
+								exists = exists_same_route(rptr);
+								if (!exists)
+								{	
+									routemap.insert(routemap.end(),pair <odval, Route*> (val,rptr)); // add the newly found route
+								}
 							}
 							else
 								routenr--;  	
