@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="gui"
 	ProjectGUID="{60259A8A-DDD3-4036-B4D1-C598A9F0B0E3}"
 	RootNamespace="gui"
@@ -129,6 +129,10 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+			<File
+				RelativePath=".\mezzo.rc"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Makefile"
