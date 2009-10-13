@@ -176,6 +176,7 @@ public:
 	bool writeallmoes(string name); //!< writes all the moes in one file.
 	bool writeassmatrices(string name); //!< writes the assignment matrices
 	bool write_v_queues(string name); //!< writes the virtual queue lengths
+	
 
 	bool readassignmentlinksfile(string name); //!< reads the file with the links for which the assignment matrix is collected
 
@@ -216,6 +217,8 @@ public:
 
 
 	// Public transport
+	
+	bool write_busstop_output(string name); //<! writes output of bus_stop visits to file
 	bool readbusroutes(string name); //!< reads the busroutes, similar to readroutes
 	bool readbusroute(istream& in); //!< reads a busroute
 	bool readbuslines(string name); //!< reads the busstops, buslines, and trips

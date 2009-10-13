@@ -404,7 +404,7 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 		exit_time = calc_exiting_time(bus->get_curr_trip(), time); // get the expected exit time according to dwell time calculations and time point considerations
 		buses_at_stop [exit_time] = bus; 
 		eventlist->add_event (exit_time, this); // book an event for the time it exits the stop
-		write_busstop_visit ("buslog_out.dat", bus->get_curr_trip(), enter_time); // document stop-related info
+		record_busstop_visit ( bus->get_curr_trip(), enter_time); // document stop-related info
 								// done BEFORE update_last_arrivals in order to calc the headway
 		// bool val = bus->get_curr_trip()->advance_next_stop(exit_time, eventlist); 
 		update_last_arrivals (bus->get_curr_trip(), enter_time); // in order to follow the arrival times (AFTER dwell time is calculated)
@@ -697,23 +697,23 @@ double Busstop::calc_exiting_time (Bustrip* trip, double time)
 }
 
 
-void Busstop::write_busstop_visit (string name, Bustrip* trip, double enter_time)  // creates a log-file for stop-related info
+void Busstop::record_busstop_visit ( Bustrip* trip, double enter_time)  // creates a log-file for stop-related info
 {
-	ofstream out(name.c_str(),ios_base::app);
-	assert(out);
-	out << trip->get_line()->get_id() << '\t' <<  trip->get_id() << '\t' << trip->get_busv()->get_bus_id() << '\t' << get_id() << '\t' << enter_time  << '\t'; 
-	if (trip->scheduled_arrival_time (this) == 0)
-	{
-		out << "Error : Busstop ID: " << get_id() << " is not on Bustrip ID: " << trip->get_id() << " route." << endl;
-	}
-	else
-	{
-		out << trip->scheduled_arrival_time (this) << '\t' << enter_time - trip->scheduled_arrival_time (this) << '\t' << dwelltime << '\t' <<
-		exit_time << '\t' << get_time_since_arrival (trip , enter_time) << '\t'<< get_time_since_departure (trip , exit_time) << '\t' << get_nr_alighting() << '\t' 
-		<< get_nr_boarding() << '\t' << trip->get_busv()->get_occupancy() << '\t' << get_nr_waiting(trip)<< '\t' << exit_time-enter_time-dwelltime << endl; 
-	}
-	out.close();
+	
+	output_stop_visits.push_back(Busstop_Visit(trip->get_line()->get_id(), trip->get_id() , trip->get_busv()->get_bus_id() , get_id() , enter_time,
+			trip->scheduled_arrival_time (this),dwelltime,(enter_time - trip->scheduled_arrival_time (this)), exit_time, get_time_since_arrival (trip , enter_time),
+			get_time_since_departure (trip , exit_time),get_nr_alighting() , get_nr_boarding() , trip->get_busv()->get_occupancy(), get_nr_waiting(trip),exit_time-enter_time-dwelltime)); 
+	
 }
+
+void Busstop::write_output(ostream & out)
+{
+	for (list<Busstop_Visit>::iterator iter = output_stop_visits.begin(); iter!=output_stop_visits.end();iter++)
+	{
+		iter->write(out);
+	}
+}
+
 
 
 

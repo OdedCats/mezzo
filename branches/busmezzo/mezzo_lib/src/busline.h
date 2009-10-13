@@ -131,6 +131,37 @@ typedef map <Busstop*, double> stops_rate;
 typedef pair <Busline*, stops_rate> multi_rate;
 typedef map <Busline*, stops_rate> multi_rates;
 
+
+class Busstop_Visit // container object holding output data for stop visits
+{
+public:
+	Busstop_Visit (int line_id_,	int trip_id_,	int vehicle_id_,	 int stop_id_, double entering_time_,	double sched_arr_time_,	double dwell_time_,	double lateness_,	
+							double exit_time_,double time_since_arr_, double time_since_dep_,int nr_alighting_,	int nr_boarding_,	int occupancy_,	int nr_waiting_,	double holding_time_):
+							line_id(line_id_),trip_id(trip_id_),vehicle_id(vehicle_id_), stop_id(stop_id_),entering_time(entering_time_),sched_arr_time(sched_arr_time_),dwell_time(dwell_time_),
+							lateness(lateness_), exit_time (exit_time_),time_since_arr(time_since_arr_),time_since_dep(time_since_dep_),nr_alighting(nr_alighting_),nr_boarding(nr_boarding_),occupancy(occupancy_),nr_waiting(nr_waiting_),
+							holding_time(holding_time_) {}
+	void write (ostream& out) { out << line_id << '\t'<< trip_id << '\t'<< vehicle_id << '\t'<< stop_id<< '\t'<<entering_time << '\t'<< sched_arr_time << '\t'
+		<< dwell_time << '\t'<< lateness << '\t'<< exit_time <<'\t'<< time_since_arr << '\t'<< time_since_dep << '\t'<< nr_alighting << '\t'<< nr_boarding 
+		<< '\t'<< occupancy << '\t'<< nr_waiting << '\t'<< holding_time << '\t'	<< endl; }
+	int line_id;
+	int trip_id;
+	int vehicle_id;
+	int stop_id;
+	double entering_time;
+	double sched_arr_time;
+	double dwell_time;
+	double lateness;
+	double exit_time;
+	double time_since_arr;
+	double time_since_dep;
+	int nr_alighting;
+	int nr_boarding;
+	int occupancy;
+	int nr_waiting;
+	double holding_time;
+};
+
+
 class Busstop : public Action
 {
 public:
@@ -162,6 +193,7 @@ public:
 	void add_line_nr_alighting(Busline* line, double value){alighting_fractions[line]= value;}
 
 //	other functions
+	void write_output(ostream & out);
 	double calc_dwelltime (Bustrip* trip, double time); //!< calculates the dwelltime of each bus serving this stop. currently includes: standees, out of stop, bay/lane,  vehicle refernce, poisson headways, unique boarding and alighting rates									
 	double calc_exiting_time (Bustrip* trip, double time); //!< To be implemented when time-points will work
 	bool check_out_of_stop (Bus* bus); //!< returns TRUE if there is NO avaliable space for the bus at the stop (meaning the bus is out of the stop)
@@ -171,7 +203,7 @@ public:
 	void update_last_departures (Bustrip* trip, double time); //!< everytime a bus EXITS it updates the last_departures vector 
 	double get_time_since_arrival (Bustrip* trip, double time); //!< calculates the headway (defined as the differnece in time between sequential arrivals) 
 	double get_time_since_departure (Bustrip* trip, double time); //!< calculates the headway (defined as the differnece in time between sequential departures) 
-	void write_busstop_visit (string name, Bustrip* trip, double enter_time); //!< creates a log-file for stop-related info
+	void record_busstop_visit ( Bustrip* trip, double enter_time); //!< creates a log-file for stop-related info
 
 	// Action for visits to stop
 	void book_bus_arrival(Eventlist* eventlist, double time, Bus* bus);  //!< add to expected arrivals
@@ -202,7 +234,7 @@ protected:
 	map <Busline*, double> last_departures; //!< contains the departure time of the last bus from each line that stops at the stop (can result headways)
 	map <double,Bus*> expected_arrivals; //!< booked arrivals of buses on the link on their way to the stop
 	map <double,Bus*> buses_at_stop; //!< buses currently visiting stop
-	
+	list <Busstop_Visit> output_stop_visits; //!< list of output data for buses visiting stops
 	// Maybe in the future, these three vectors could be integrated into a single matrix ( a map with busline as the key)
 };
 

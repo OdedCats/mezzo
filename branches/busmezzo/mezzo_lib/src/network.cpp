@@ -2496,9 +2496,23 @@ bool Network::writeheadways(string name)
 		out << (*iter)->get_id()<< endl;
 		(*iter)->write_in_headways(out);
 	}
+	out.close();
 	return true;
 
 
+}
+
+bool Network::write_busstop_output(string name)
+{
+	ofstream out(name.c_str());
+	assert(out);
+	
+	for (vector<Busstop*>::iterator iter=busstops.begin();iter!=busstops.end();iter++)
+	{	
+		(*iter)->write_output(out);
+	}
+	out.close();
+	return true;
 }
 
 
@@ -3558,6 +3572,7 @@ bool Network::writeall()
 	writeheadways("timestamps.dat");
 	writeassmatrices("assign.dat");
 	write_v_queues("v_queues.dat");
+	this->write_busstop_output(workingdir+"buslog_out.dat");
 	return true;
 }
 
