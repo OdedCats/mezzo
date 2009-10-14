@@ -14,6 +14,7 @@
 #include "q.h"
 #include "passenger.h"
 #include "MMath.h" 
+#include "od_stops.h"
 
 
 class Busroute;
@@ -23,6 +24,7 @@ class ODpair;
 class Bus;
 class Bustype;
 class Passenger;
+class ODstops;
 
 typedef pair<Bustrip*,double> Start_trip;
 typedef vector <Passenger*> passengers;
@@ -93,6 +95,8 @@ public:
 	vector <Visit_stop*> :: iterator& get_next_stop() {return next_stop;} //!< returns pointer to next stop
 	void set_pass (Passenger* passenger) {pass = passenger;}
 	Passenger* get_pass () {return pass;}
+	void set_enter_time (double enter_time_) {enter_time = enter_time_;}
+	double get_enter_time () {return enter_time;}
 
 // other functions:	
 //	bool is_trip_timepoint(Busstop* stop); //!< returns 1 if true, 0 if false, -1 if busstop not found
@@ -104,6 +108,7 @@ public:
 	void book_stop_visit (double time, Bus* bus); //!< books a visit to the stop
 	bool check_end_trip (); //!< returns 1 if true, 0 if false
 	double calc_departure_time (double time); //!< calculates departure time from origin according to arrival time and schedule (including layover effect)
+	
 
 // public vectors
 	vector <Visit_stop*> stops; //!< contains all the busstops and the times that they are supposed to be served. NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
@@ -121,6 +126,7 @@ protected:
 	double starttime; //!< when the trip is starting from the origin
 	vector <Visit_stop*> :: iterator next_stop; 
 	Random* random;
+	double enter_time; // the time it entered the most recently bus stop
 //	map <Busstop*,bool> trips_timepoint; //!< will be relevant only when time points are trip-specific. binary map with time point indicatons for stops on route only (according to the schedule input file)  
 	Eventlist* eventlist; //!< for use by busstops etc to book themselves.
 	Passenger* pass;
@@ -167,6 +173,8 @@ class Busstop : public Action
 public:
 	Busstop ();
 	~Busstop ();
+	vector <ODstops*> origins;
+	vector <ODstops*> destinations;
 	Busstop (int id_, int link_id_, double position_, double length_, bool has_bay_, double dwelltime_);
 
 // GETS & SETS:
@@ -188,6 +196,8 @@ public:
 	
 // functions aimed to init. lines-specific vectors at the busstop level
 	void add_lines (Busline*  line) {lines.push_back(line);}
+	void add_origins (ODstops*  odstop) {origins.push_back(odstop);}
+	void add_destinations (ODstops*  odstop) {destinations.push_back(odstop);}
 	void add_line_nr_waiting(Busline* line, int value){nr_waiting[line] = value;}
 	void add_line_nr_boarding(Busline* line, double value){arrival_rates[line] = value;}
 	void add_line_nr_alighting(Busline* line, double value){alighting_fractions[line]= value;}

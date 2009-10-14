@@ -59,7 +59,7 @@ bool Busline::execute(Eventlist* eventlist, double time)
 	}
 	else // if the Busline is active
 	{
-		// bool ok=curr_trip->first->activate(time, busroute, vtype, odpair, eventlist); // activates the trip, generates bus etc.
+		bool ok=curr_trip->first->activate(time, busroute, vtype, odpair, eventlist); // activates the trip, generates bus etc.
 		curr_trip++; // now points to next trip
 		if (curr_trip < trips.end()) // if there exists a next trip
 		{
@@ -335,8 +335,8 @@ void Busstop::book_bus_arrival(Eventlist* eventlist, double time, Bus* bus)
 bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the eventlist and means a bus needs to be processed
 {
   	// progress the vehicle when entering or exiting a stop
-	// if this is for a bus exiting the stop:
-	if (buses_at_stop.count(time) > 0) 
+		
+	if (buses_at_stop.count(time) > 0) // if this is for a bus exiting the stop:
 	{
 		Bus* bus = buses_at_stop [time]; // identify the relevant bus
 		free_length (bus);
@@ -355,13 +355,13 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 		#endif  //_RUNNING
 	
 		double speed = bus->get_curr_link()->get_sdfunc()->speed(ro);	
-		double exit_time = (time + (bus->get_curr_link()->get_length()/speed)) ;
-	
+		double link_total_travel_time = bus->get_curr_link()->get_length()/speed ;
+
 		#ifdef _USE_EXPECTED_DELAY
 			double exp_delay = 1.44 * (queue->queue(time)) / bus->get_curr_link()->get_nr_lanes();
 			exit_time = exit_time + exp_delay;
 		#endif //_USE_EXPECTED_DELAY
-		bus->set_exit_time (exit_time);
+		// bus->set_exit_time (exit_time);
 		if (bus->get_curr_trip()->check_end_trip() == false) // if there are more stops on the bus's route
 		{
 			Visit_stop* next_stop1 = *(bus->get_curr_trip()->get_next_stop());
@@ -369,16 +369,18 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 			{
 				double stop_position = (next_stop1->first)->get_position();
 				relative_length = (stop_position - position)/(bus->get_curr_link()->get_length());
-				relative_time = bus->get_exit_time() - time;
-				double time_to_stop = time + relative_time * relative_length; // calculated for the interval between the two sequential stops
+				//relative_time = bus->get_exit_time() - time;
+				//double time_to_stop = time + relative_time * relative_length; // calculated for the interval between the two sequential stops
+				double time_to_stop = time + link_total_travel_time * relative_length;
 				bus->get_curr_trip()->book_stop_visit (time_to_stop, bus); // book  stop visit
 			}
-			else // the next stop is not on this link
+			else // the next stop is NOT on this link
 			{
 				Vehicle* veh =  (Vehicle*)(bus); // so we can do vehicle operations
 				relative_length = (bus->get_curr_link()->get_length()-position)/ bus->get_curr_link()->get_length();
-				relative_time = bus->get_exit_time() - time;
-				double exit_time = time + relative_time * relative_length; // calculated for the remaining part of the link
+				//relative_time = bus->get_exit_time() - time;
+				// double exit_time = time + relative_time * relative_length; // calculated for the remaining part of the link
+				double exit_time = time + link_total_travel_time * relative_length;
 				veh->set_exit_time(exit_time);
 				veh->get_curr_link()->get_queue()->enter_veh(veh);
 			}
@@ -387,27 +389,28 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 		{
 			Vehicle* veh =  (Vehicle*)(bus); // so we can do vehicle operations
 			relative_length = (bus->get_curr_link()->get_length()-position)/ bus->get_curr_link()->get_length();
-			relative_time = bus->get_exit_time() - time;
-			double exit_time = time + relative_time * relative_length; // calculated for the remaining part of the link 
+			// relative_time = bus->get_exit_time() - time;
+			// double exit_time = time + relative_time * relative_length; // calculated for the remaining part of the link 
+			double exit_time = time + link_total_travel_time * relative_length;
 			veh->set_exit_time(exit_time);
 			veh->get_curr_link()->get_queue()->enter_veh(veh);
 			bus->set_on_trip(false); // indicate that there are no more stops on this route
-			// bool val = bus->get_curr_trip()->advance_next_stop(exit_time, eventlist); // only in order to advance to the next trip
+			bus->get_curr_trip()->advance_next_stop(exit_time, eventlist); 
 		}
 	}
 	// if this is for a bus entering the stop:
 	else if (expected_arrivals.count(time) > 0) 
 	{		
-		double enter_time = time;
 		Bus* bus = expected_arrivals [time]; // identify the relevant bus
-		occupy_length (bus);
+		bus->get_curr_trip()->set_enter_time (time);
 		exit_time = calc_exiting_time(bus->get_curr_trip(), time); // get the expected exit time according to dwell time calculations and time point considerations
+		occupy_length (bus);
 		buses_at_stop [exit_time] = bus; 
 		eventlist->add_event (exit_time, this); // book an event for the time it exits the stop
-		record_busstop_visit ( bus->get_curr_trip(), enter_time); // document stop-related info
+		record_busstop_visit ( bus->get_curr_trip(), bus->get_curr_trip()->get_enter_time()); // document stop-related info
 								// done BEFORE update_last_arrivals in order to calc the headway
-		// bool val = bus->get_curr_trip()->advance_next_stop(exit_time, eventlist); 
-		update_last_arrivals (bus->get_curr_trip(), enter_time); // in order to follow the arrival times (AFTER dwell time is calculated)
+		bool val = bus->get_curr_trip()->advance_next_stop(exit_time, eventlist); 
+		update_last_arrivals (bus->get_curr_trip(), bus->get_curr_trip()->get_enter_time()); // in order to follow the arrival times (AFTER dwell time is calculated)
 		update_last_departures (bus->get_curr_trip(), exit_time); // in order to follow the departure times (AFTER the dwell time and time point stuff)
 		expected_arrivals.erase(time);
 	}
@@ -432,9 +435,9 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 	double dwell_constant = 5.0; 
 	double out_of_stop_coefficient = 3.0;
 	double bay_coefficient = 7.0;
-	double boarding_coefficient = 4.0;	
-	double alighting_front_coefficient = 3.8;
-	double alighting_rear_coefficient = 2.1;
+	double boarding_coefficient = 3.0;	
+	double alighting_front_coefficient = 2.8;
+	double alighting_rear_coefficient = 1.5;
 	double percent_alighting_front = 0.25;
 	
 	bool crowded = 0;
@@ -489,16 +492,16 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 		trip->nr_expected_alighting[this] = 0; 
 	}
 	
-	/*
-	if (theParameters->demand_format == 3)  // under constructions - individual passengers
+	if (theParameters->demand_format == 3)  // in case of individual passengers - pass through passengers that alight and terminate them
+	// in the future - check if it is the final destination
 	{
-		for (int i=0; i<trip->passengers_on_board[this].size; i++)
-		{
-			pass_recycler.addPassenger(busv);
+		passengers multi_pass = trip->passengers_on_board[this];
+		for (vector <Passenger*>::iterator pass_iter = multi_pass.begin(); pass_iter < multi_pass.end(); pass_iter++)
+		{	
+			pass_recycler.addPassenger(*pass_iter);
+			trip->passengers_on_board[this].erase(pass_iter); 
 		}
-		trip->passengers_on_board[this] = passengers_boarding.erase; // terminate passengers that alighted
 	}
-	*/
 
 	if (curr_occupancy > trip->get_busv()->get_number_seats())	// Calculating alighting standees 
 	{ 
@@ -553,19 +556,17 @@ double Busstop::calc_dwelltime (Bustrip* trip, double time) // calculates the dw
 	curr_occupancy += get_nr_boarding();
 	trip->get_busv()->set_occupancy(curr_occupancy); // Updating the occupancy. 
 	
-	if (theParameters->demand_format == 3)
+	if (theParameters->demand_format == 3) // generate individual passengers
 	{
 		passengers passengers_boarding; 
 		for (vector <Busstop*>::iterator destination_stop = trip->get_line()->stops.begin(); destination_stop < trip->get_line()->stops.end(); destination_stop++)
 		{
 				for (int i=0; i < trip->nr_expected_alighting[(*destination_stop)] ; i++)
 				{
-					//Passenger* pass = new Passenger(time);
 					pid++;
 					Passenger* pass = pass_recycler.newPassenger();
-					// pass->init(time, this, *(destination_stop));
+					pass->init(time, this, *(destination_stop));
 					trip->set_pass(pass);
-					//trip->set_pass(new Passenger(time));
 					passengers_boarding.push_back(trip->get_pass());
 				}
 				trip->passengers_on_board[(*destination_stop)] = passengers_boarding;

@@ -1736,8 +1736,28 @@ bool Network::read_passenger_rates_format2 (istream& in) // reads the passenger 
 bool Network::read_passenger_rates_format3 (istream& in) // under constructions- what would be the input format for individual passengers?
 {
   bool ok= true;
+  char bracket;
+  int origin_stop_id, destination_stop_id;
+  double arrival_rate;
+  in >> bracket;
+  if (bracket != '{')
+  {
+  	cout << "readfile::readsbusstop scanner jammed at " << bracket;
+  	return false;
+  }
+  in >> origin_stop_id >> destination_stop_id >> arrival_rate ; 
+  Busstop* bs_o=(*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (origin_stop_id) ))); 
+  Busstop* bs_d=(*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (destination_stop_id) ))); 
+  ODstops* od_stop = new ODstops (bs_o, bs_d, arrival_rate);
+  bs_o ->add_origins (od_stop);
+  bs_d ->add_destinations (od_stop); 
 
-  
+  in >> bracket;
+  if (bracket != '}')
+  {
+    cout << "readfile::readbusstop scanner jammed at " << bracket;
+    return false;
+  }
 
 #ifdef _DEBUG_NETWORK
 #endif //_DEBUG_NETWORK

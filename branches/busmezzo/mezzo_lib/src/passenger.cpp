@@ -15,8 +15,14 @@ Passenger::Passenger (double start_time_)
 void Passenger::init (double start_time_, Busstop* origin_stop, Busstop* destination_stop)
 {
 	start_time = start_time_;
-	ODstops* odstop = new ODstops (origin_stop, destination_stop);
-	set_ODstop (odstop);
+	for (vector <ODstops*>::iterator od_stop = origin_stop->origins.begin(); od_stop < origin_stop->origins.end(); od_stop++)
+	{
+		if ((*od_stop)->get_destination() == destination_stop)
+		{
+			set_ODstop (*(od_stop));
+			break;
+		}
+	}
 }
 
  // PassengerRecycler procedures

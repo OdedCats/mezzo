@@ -13,7 +13,7 @@ class ODstops
 {
 public:
 	ODstops ();
-	ODstops (Busstop* origin_stop_, Busstop* destination_stop_);
+	ODstops (Busstop* origin_stop_, Busstop* destination_stop_, double arrival_rate_);
 	~ODstops ();
 	
 	//Gets and Sets:
@@ -27,5 +27,6 @@ public:
 protected:
 	Busstop* origin_stop;
 	Busstop* destination_stop;
+	double arrival_rate;
 };
 #endif //_OD_stops
