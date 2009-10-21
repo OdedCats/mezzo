@@ -436,7 +436,7 @@ double Busstop::passenger_activity_at_stop (Bustrip* trip, double time) //!< pro
 		nr_waiting [trip->get_line()] += random -> poisson (((get_arrival_rates (trip)) * get_time_since_arrival (trip, time)) / 3600.0 );
 				//the arrival process follows a poisson distribution and the lambda is relative to the headway
 				// with arrival time and the headway as the duration
-		if (starting_occupancy == 0 && get_alighting_fractions (trip) > 0) 
+		if (starting_occupancy > 0 && get_alighting_fractions (trip) > 0) 
 		{
 			set_nr_alighting (random -> binrandom (starting_occupancy, get_alighting_fractions (trip))); // the alighting process follows a binominal distribution 
 					// the number of trials is the number of passengers on board with the probability of the alighting fraction
@@ -463,15 +463,16 @@ double Busstop::passenger_activity_at_stop (Bustrip* trip, double time) //!< pro
 	}
 		if (theParameters->demand_format < 3) // in the case of non-individual passengers - boarding progress for waiting passengers (capacity constraints)
 	{	
-		if (trip->get_busv()->get_capacity() - (starting_occupancy + get_nr_boarding() - get_nr_alighting()) < nr_waiting [trip->get_line()]) // if the capcity determines the boarding process
+		if (trip->get_busv()->get_capacity() - (starting_occupancy - get_nr_alighting()) < nr_waiting [trip->get_line()]) // if the capcity determines the boarding process
 		{	
-			double ratio = double(nr_waiting [trip->get_line()])/(trip->get_busv()->get_capacity() - (starting_occupancy + get_nr_boarding() - get_nr_alighting()));
 			if (theParameters->demand_format == 1)
 			{
-				set_nr_boarding(nr_waiting [trip->get_line()] * ratio);
+				set_nr_boarding(trip->get_busv()->get_capacity() - (starting_occupancy - get_nr_alighting()));
+				nr_waiting [trip->get_line()] -= nr_boarding;
 			}
 			if (theParameters->demand_format == 2)
 			{
+				double ratio = double(nr_waiting [trip->get_line()])/(trip->get_busv()->get_capacity() - (starting_occupancy + get_nr_boarding() - get_nr_alighting()));
 				for (vector <Busstop*>::iterator destination_stop = trip->get_line()->stops.begin(); destination_stop < trip->get_line()->stops.end(); destination_stop++)
 				 // allow only the ratio between supply and demand for boarding equally for all destination stops
 				{
@@ -637,9 +638,9 @@ double Busstop::calc_dwelltime (Bustrip* trip)  //!< calculates the dwelltime of
 	
 	double time_front_door = boarding_coefficient * get_nr_boarding() + alighting_front_coefficient * percent_alighting_front * get_nr_alighting() + 0.5 * crowded * get_nr_boarding();
 	double time_rear_door = alighting_rear_coefficient * (1-percent_alighting_front) * get_nr_alighting();
-	dwelltime = dwell_constant + get_bay()* bay_coefficient + out_of_stop_coefficient * check_out_of_stop(trip->get_busv()) + 
+	dwelltime = get_bay()* bay_coefficient + out_of_stop_coefficient * check_out_of_stop(trip->get_busv()) + 
 			max(time_front_door, time_rear_door) + random->nrandom(0, std_error);
-	return dwelltime;
+	return max (dwelltime + dwell_constant, dwell_constant);
 }
 
 void Busstop::occupy_length (Bus* bus) // a bus arrived - decrease the left space at the stop
