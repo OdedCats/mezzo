@@ -13,12 +13,15 @@ class Passenger
 public:
 	Passenger ();
 	~Passenger ();
-	Passenger (double start_time);
+	void init (int pass_id, double start_time_, ODstops* OD_stop_);
 	
-	void init (double start_time_, Busstop* origin_stop, Busstop* destination_stop);
 	// Gets and sets:
-	ODstops* get_OD_stop () {OD_stop;}
+	ODstops* get_OD_stop () {return OD_stop;}
 	void set_ODstop (ODstops* ODstop_) {OD_stop = ODstop_;}
+
+	// Passenger decision processes - currently the simplest case possible is assumed
+	bool boarding_decision (); // boarding decision making - currently: board every passing bus
+	Busstop* alighting_decision (); // alighting decision making - currently: alight at your destination stop (assuming no transfers)
 
 protected:
 	int passenger_id;

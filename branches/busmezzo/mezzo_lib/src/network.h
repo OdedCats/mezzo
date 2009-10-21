@@ -55,6 +55,8 @@
 #include "eventlist.h"
 #include "trafficsignal.h"
 #include "busline.h"
+#include "passenger.h"
+#include "od_stops.h"
 
 // inclusions for the GUI
 #ifndef _NO_GUI
@@ -227,10 +229,10 @@ public:
 	bool readbustrip(istream& in); //!< reads a trip
   bool read_passenger_rates_format1 (istream& in); // reads the passenger rates in the format of arrival rate and alighting fraction per line and stop combination
   bool read_passenger_rates_format2 (istream& in); // reads the passenger rates in the format of arrival rate per line, origin stop and destination stop combination
-   bool read_passenger_rates_format3 (istream& in); // what would be the format?
+   bool read_passenger_rates_format3 (istream& in); // reads the passenger rates in the format of arrival rate per OD in terms of stops (no path is pre-determined)
   bool read_bustype (istream& in); // reads a bus type
   bool read_busvehicle(istream& in); // reads a bus vehicle 
-  bool find_direct_paths (ODstops* od_stops);
+  bool find_direct_paths (ODstops* od_stops); // not operational yet
 #ifndef _NO_GUI
 	double get_width_x() {return width_x;} //!< returns image width in original coordinate system
 	double get_height_y() {return height_y;} //!< ... height ...
@@ -279,8 +281,11 @@ protected:
 	vector <Bustrip*> bustrips;  //!< the trips list of all buses
 	vector <Busstop*> busstops; //!< stops on the buslines
 	vector <Busroute*> busroutes; //!< the routes that buses follow
-  vector <Bustype*> bustypes; // types of bus vehicles
-  vector <Bus*> busvehicles; // a list of the bus vehicles
+    vector <Bustype*> bustypes; // types of bus vehicles
+    vector <Bus*> busvehicles; // a list of the bus vehicles
+	//typedef map <int, ODstops*> odstops_by_destination;
+	//map <int, odstops_by_destination> odstops; // a map of maps of ODstops
+	vector <ODstops*> odstops;
 
 	//Shortest path graph
 #ifndef _USE_VAR_TIMES

@@ -9,6 +9,7 @@
 #include "vehicle.h"
 #include <fstream>
 #include <string>
+#include <vector>
 #include "link.h"
 #include "sdfunc.h"
 #include "q.h"
@@ -100,7 +101,7 @@ public:
 
 // other functions:	
 //	bool is_trip_timepoint(Busstop* stop); //!< returns 1 if true, 0 if false, -1 if busstop not found
-	bool activate (double time, Route* route, Vtype* vehtype, ODpair* odpair, Eventlist* eventlist_); //!< activates the trip. Generates the bus and inserts in net.
+	bool activate (double time, Route* route, ODpair* odpair, Eventlist* eventlist_); //!< activates the trip. Generates the bus and inserts in net.
 	bool advance_next_stop (double time, Eventlist* eventlist_); //!< advances the pointer to the next stop (checking bounds)
 	void add_stops (vector <Visit_stop*>  st) {stops = st; next_stop = stops.begin();}
 	void add_trips (vector <Start_trip*>  st) {driving_roster = st;} 
@@ -113,8 +114,8 @@ public:
 // public vectors
 	vector <Visit_stop*> stops; //!< contains all the busstops and the times that they are supposed to be served. NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
 	vector <Start_trip*> driving_roster; //!< trips assignment for each bus vehicle.
-	map <Busstop*, passengers> passengers_on_board;
-	map <Busstop*, int> nr_expected_alighting; //!< number of passengers expected to alight at the busline's stops
+	map <Busstop*, passengers> passengers_on_board; // passenger on-board storaged by their alighting stop (format 3)
+	map <Busstop*, int> nr_expected_alighting; //!< number of passengers expected to alight at the busline's stops (format 2)
 	
 
 protected:
@@ -136,7 +137,7 @@ typedef pair<Busstop*, double> stop_rate;
 typedef map <Busstop*, double> stops_rate;
 typedef pair <Busline*, stops_rate> multi_rate;
 typedef map <Busline*, stops_rate> multi_rates;
-
+typedef map <Busstop*, ODstops*> ODs_for_stop;
 
 class Busstop_Visit // container object holding output data for stop visits
 {
@@ -173,8 +174,6 @@ class Busstop : public Action
 public:
 	Busstop ();
 	~Busstop ();
-	vector <ODstops*> origins;
-	vector <ODstops*> destinations;
 	Busstop (int id_, int link_id_, double position_, double length_, bool has_bay_, double dwelltime_);
 
 // GETS & SETS:
@@ -182,6 +181,7 @@ public:
 	int get_link_id() {return link_id;}
 	double get_arrival_rates (Bustrip* trip) {return arrival_rates[trip->get_line()];}
 	double get_alighting_fractions (Bustrip* trip) {return alighting_fractions[trip->get_line()];}
+	ODs_for_stop get_stop_as_origin () {return stop_as_origin;}
 	double get_length () {return length;}
 	double get_avaliable_length () {return avaliable_length;}
 	void set_avaliable_length (double avaliable_length_) {avaliable_length = avaliable_length_;}
@@ -194,18 +194,22 @@ public:
 	const double get_position () { return position;}
 	void set_position (double position_ ) {position = position_;}
 	
-// functions aimed to init. lines-specific vectors at the busstop level
+// functions aimed to initialize lines-specific vectors at the busstop level
 	void add_lines (Busline*  line) {lines.push_back(line);}
-	void add_origins (ODstops*  odstop) {origins.push_back(odstop);}
-	void add_destinations (ODstops*  odstop) {destinations.push_back(odstop);}
 	void add_line_nr_waiting(Busline* line, int value){nr_waiting[line] = value;}
 	void add_line_nr_boarding(Busline* line, double value){arrival_rates[line] = value;}
 	void add_line_nr_alighting(Busline* line, double value){alighting_fractions[line]= value;}
+	void add_odstops_as_origin(Busstop* destination_stop, ODstops* od_stop){stop_as_origin[destination_stop]= od_stop; is_origin = true;}
+	void add_odstops_as_destination(Busstop* origin_stop, ODstops* od_stop){stop_as_destination[origin_stop]= od_stop; is_destination = true;}
 
-//	other functions
-	void write_output(ostream & out);
-	double calc_dwelltime (Bustrip* trip, double time); //!< calculates the dwelltime of each bus serving this stop. currently includes: standees, out of stop, bay/lane,  vehicle refernce, poisson headways, unique boarding and alighting rates									
+//	Action for visits to stop
+	bool execute(Eventlist* eventlist, double time); //!< is executed by the eventlist and means a bus needs to be processed
+	double passenger_activity_at_stop (Bustrip* trip, double time); //!< progress passengers at stop: waiting, boarding and alighting
+	void book_bus_arrival(Eventlist* eventlist, double time, Bus* bus);  //!< add to expected arrivals
 	double calc_exiting_time (Bustrip* trip, double time); //!< To be implemented when time-points will work
+	
+// dwell-time calculation related functions	
+	double calc_dwelltime (Bustrip* trip); //!< calculates the dwelltime of each bus serving this stop. currently includes: passenger service times ,out of stop, bay/lane		
 	bool check_out_of_stop (Bus* bus); //!< returns TRUE if there is NO avaliable space for the bus at the stop (meaning the bus is out of the stop)
 	void occupy_length (Bus* bus); //!< update avaliable length when bus arrives
 	void free_length (Bus* bus); //!< update avaliable length when bus leaves
@@ -213,12 +217,12 @@ public:
 	void update_last_departures (Bustrip* trip, double time); //!< everytime a bus EXITS it updates the last_departures vector 
 	double get_time_since_arrival (Bustrip* trip, double time); //!< calculates the headway (defined as the differnece in time between sequential arrivals) 
 	double get_time_since_departure (Bustrip* trip, double time); //!< calculates the headway (defined as the differnece in time between sequential departures) 
+
+	// output-related functions
+	void write_output(ostream & out);
 	void record_busstop_visit ( Bustrip* trip, double enter_time); //!< creates a log-file for stop-related info
 
-	// Action for visits to stop
-	void book_bus_arrival(Eventlist* eventlist, double time, Bus* bus);  //!< add to expected arrivals
-	bool execute(Eventlist* eventlist, double time); //!< is executed by the eventlist and means a bus needs to be processed
-	
+	// relevant only for demand format 2
 	multi_rates multi_arrival_rates; //!< parameter lambda that defines the poission proccess of passengers arriving at the stop for each sequential stop
 
 protected:
@@ -236,16 +240,28 @@ protected:
 	Random* random;
 	
 	vector <Busline*> lines;
-	map <Busline*, int> nr_waiting; //!< number of waiting passengers for each of the bus lines that stops at the stop
-	multi_rates multi_nr_waiting; // for demant format is from type 2. 
-	map <Busline*, double> arrival_rates; //!< parameter lambda that defines the poission proccess of passengers arriving at the stop
-	map <Busline*, double> alighting_fractions; //!< parameter that defines the poission process of the alighting passengers (second contains the alighting fraction)
-	map <Busline*, double> last_arrivals; //!< contains the arrival time of the last bus from each line that stops at the stop (can result headways)
-	map <Busline*, double> last_departures; //!< contains the departure time of the last bus from each line that stops at the stop (can result headways)
 	map <double,Bus*> expected_arrivals; //!< booked arrivals of buses on the link on their way to the stop
 	map <double,Bus*> buses_at_stop; //!< buses currently visiting stop
 	list <Busstop_Visit> output_stop_visits; //!< list of output data for buses visiting stops
-	// Maybe in the future, these three vectors could be integrated into a single matrix ( a map with busline as the key)
+	map <Busline*, double> last_arrivals; //!< contains the arrival time of the last bus from each line that stops at the stop (can result headways)
+	map <Busline*, double> last_departures; //!< contains the departure time of the last bus from each line that stops at the stop (can result headways)
+
+	// relevant only for demand format 1
+	map <Busline*, double> arrival_rates; //!< parameter lambda that defines the poission proccess of passengers arriving at the stop
+	map <Busline*, double> alighting_fractions; //!< parameter that defines the poission process of the alighting passengers 
+
+	// relevant only for demand format 2
+	multi_rates multi_nr_waiting; // for demant format is from type 2. 
+
+	
+	// relevant for demand formats 1 & 2
+	map <Busline*, int> nr_waiting; //!< number of waiting passengers for each of the bus lines that stops at the stop
+
+	// relevant only for demand format 3
+	ODs_for_stop stop_as_origin; // a map of all the OD's that this busstop is their origin 
+	ODs_for_stop stop_as_destination; // a map of all the OD's that this busstop is their destination
+	bool is_origin; // indicates if this busstop serves as an origin for some passenger demand
+	bool is_destination; // indicates if this busstop serves as an destination for some passenger demand
 };
 
 #endif //_BUSLINE

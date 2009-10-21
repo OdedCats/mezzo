@@ -1733,7 +1733,7 @@ bool Network::read_passenger_rates_format2 (istream& in) // reads the passenger 
   return ok;
 }
 
-bool Network::read_passenger_rates_format3 (istream& in) // under constructions- what would be the input format for individual passengers?
+bool Network::read_passenger_rates_format3 (istream& in) // reads the passenger rates in the format of arrival rate per OD in terms of stops (no path is pre-determined)
 {
   bool ok= true;
   char bracket;
@@ -1745,13 +1745,13 @@ bool Network::read_passenger_rates_format3 (istream& in) // under constructions-
   	cout << "readfile::readsbusstop scanner jammed at " << bracket;
   	return false;
   }
-  in >> origin_stop_id >> destination_stop_id >> arrival_rate ; 
+  in >> origin_stop_id >> destination_stop_id >> arrival_rate; // 
   Busstop* bs_o=(*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (origin_stop_id) ))); 
   Busstop* bs_d=(*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (destination_stop_id) ))); 
   ODstops* od_stop = new ODstops (bs_o, bs_d, arrival_rate);
-  bs_o ->add_origins (od_stop);
-  bs_d ->add_destinations (od_stop); 
-
+  odstops.push_back(od_stop);
+  bs_o->add_odstops_as_origin(bs_d, od_stop);
+  bs_d->add_odstops_as_destination(bs_o, od_stop);
   in >> bracket;
   if (bracket != '}')
   {
@@ -3480,6 +3480,7 @@ double Network::executemaster(QPixmap * pm_,QMatrix * wm_)
 	// read the busroutes & Lines
 	this->readbusroutes (workingdir + "busroutes.dat"); //FIX IN THE MAIN READ & WRITE
 	this->readbuslines (workingdir + "buslines.dat"); //FIX IN THE MAIN READ & WRITE
+
 #endif // _BUSES
 	if (!init())
 		cout << "Problem initialising " << endl;
@@ -3766,6 +3767,11 @@ bool Network::init()
 	for (vector <Busline*>::iterator iter3=buslines.begin(); iter3 < buslines.end(); iter3++)
 	{
 		(*iter3)->execute(eventlist,initvalue);
+		initvalue+=0.00001;
+	}
+	for (vector<ODstops*>::iterator iter_odstops = odstops.begin(); iter_odstops < odstops.end(); iter_odstops++ )
+	{
+		(*iter_odstops)->execute(eventlist,initvalue); // adds an event for the generation time for the first passenger per OD in terms of stops
 		initvalue+=0.00001;
 	}
 #endif //_BUSES

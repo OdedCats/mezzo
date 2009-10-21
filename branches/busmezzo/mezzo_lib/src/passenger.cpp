@@ -5,24 +5,24 @@ Passenger::Passenger ()
 }
 
 Passenger::~Passenger()
-{}
-
-Passenger::Passenger (double start_time_)
 {
-	start_time = start_time_;
 }
 
-void Passenger::init (double start_time_, Busstop* origin_stop, Busstop* destination_stop)
+void Passenger::init (int pass_id, double start_time_, ODstops* OD_stop_)
 {
+	passenger_id = pass_id;
 	start_time = start_time_;
-	for (vector <ODstops*>::iterator od_stop = origin_stop->origins.begin(); od_stop < origin_stop->origins.end(); od_stop++)
-	{
-		if ((*od_stop)->get_destination() == destination_stop)
-		{
-			set_ODstop (*(od_stop));
-			break;
-		}
-	}
+	OD_stop = OD_stop_;
+}
+
+bool Passenger:: boarding_decision () // assuming that passengers board the first bus arriving at the stop (regardless of its route)
+{
+	return true;
+}
+
+Busstop* Passenger::alighting_decision () // assuming that all passenger paths involve only direct trips
+{
+	return get_OD_stop()->get_destination();
 }
 
  // PassengerRecycler procedures
@@ -35,3 +35,4 @@ PassengerRecycler::	~PassengerRecycler()
 		iter=pass_recycled.erase(iter);	
 	}
 }
+

@@ -136,7 +136,7 @@ void Bus::advance_curr_trip (double time, Eventlist* eventlist) // progresses tr
 		{
 			Busline* line = (*next_trip)->first->get_line();
 			// then the trip is activated
-			(*next_trip)->first->activate((*next_trip)->first->calc_departure_time(time), line->get_busroute(), line->get_vtype(), line->get_odpair(), eventlist);
+			(*next_trip)->first->activate((*next_trip)->first->calc_departure_time(time), line->get_busroute(), line->get_odpair(), eventlist);
 		}
 		// if the bus is early for the next trip, then it will be activated at the scheduled time from Busline
 	}
