@@ -2,7 +2,8 @@
 
 TEMPLATE = app
 TARGET = mezzo_gui_hybrid
-INCLUDEPATH += .. . $(QTDIR)/include $(QTDIR)/include/QtCore $(QTDIR)/include/QtGui $(QTDIR)/include/QtDesigner $(QTDIR)/include/QtNetwork $(QTDIR)/include/ActiveQt $(QTDIR)/include/Qt3Support
+INCLUDEPATH += .. . $(QTDIR)/include $(QTDIR)/include/QtCore $(QTDIR)/include/QtGui $(QTDIR)/include/QtDesigner $(QTDIR)/include/QtNetwork $(QTDIR)/include/ActiveQt 
+#$(QTDIR)/include/Qt3Support
 DEFINES += _VISSIMCOM -MIME
 
 CONFIG(debug, debug|release) {
@@ -13,14 +14,15 @@ CONFIG(debug, debug|release) {
  }
 
 
-LIBS += -L$(QTDIR)/lib -lQtCore -lQtGui -lQtNetwork -lQt3Support -lQtDesigner 
+LIBS += -L$(QTDIR)/lib -lQtCore -lQtGui -lQtNetwork  -lQtDesigner 
+#-lQt3Support
 
-QT+= core gui qt3support 
-#activeqt xml network svg
+QT+= core gui 
+#qt3support  activeqt xml network svg
 CONFIG += uic4 embed_manifest_exe
 
 # Input
-HEADERS += ../canvas_qt4.h ../parametersdialog_qt4.h ../src/nodedlg.h ../src/batchrundlg.h
-FORMS += ../canvas_qt4.ui ../parametersdialog_qt4.ui ../ui/nodedlg.ui ../ui/batchrundlg.ui
-SOURCES += ../canvas_qt4.cpp ../main.cpp ../parametersdialog_qt4.cpp ../src/nodedlg.cpp ../src/batchrundlg.cpp
+HEADERS += ../canvas_qt4.h ../parametersdialog_qt4.h ../src/nodedlg.h ../src/batchrundlg.h ../src/outputview.h ../src/positionbackground.h
+FORMS += ../canvas_qt4.ui ../parametersdialog_qt4.ui ../ui/nodedlg.ui ../ui/batchrundlg.ui ../ui/outputview.ui ../ui/positionbackground.ui
+SOURCES += ../canvas_qt4.cpp ../main.cpp ../parametersdialog_qt4.cpp ../src/nodedlg.cpp ../src/batchrundlg.cpp ../src/outputview.cpp ../src/positionbackground.cpp
 RESOURCES += ../canvas_qt4.qrc
