@@ -70,11 +70,11 @@ Parameters::Parameters ()
    shortest_paths_initialised = false;
 
 // #mime_parameters
-   mime_comm_step= 0.5;
+   mime_comm_step= 0.1;
    mime_min_queue_length= 20;
    mime_queue_dis_speed= 6.0;
    vissim_step= 0.1;
-   sim_speed_factor= 2.0;
+   sim_speed_factor= 0.0;
    
 }
 
