@@ -39,6 +39,7 @@ Parameters::Parameters ()
 // #server_parameters
    od_servers_deterministic= 1;
    odserver_sigma= 0.2;
+   sd_server_scale= 1.0;
 // #vehicle_parameters
    standard_veh_length= 7;
 // #route_parameters
@@ -61,6 +62,10 @@ Parameters::Parameters ()
 
 // demand parameters:
    demand_format = 1;
+   demand_scale = 1.0;
+   transfer_coefficient = 0; 
+   in_vehicle_time_coefficient = 0;
+   waiting_time_coefficient = 0;
 }
 
 bool Parameters::read_parameters (istream & in )
@@ -328,6 +333,14 @@ bool Parameters::read_parameters (istream & in )
 	in >> odserver_sigma;
 
 	in >> keyword;
+	if (keyword!= "sd_server_scale=")
+	{
+		cout << "ERROR reading Parameters file, expecting: sd_server_scale=, read: " << keyword << endl;
+		return false;
+	}
+	in >> sd_server_scale;
+
+	in >> keyword;
 	if (keyword!= "#vehicle_parameters")
 	{
 		cout << "ERROR reading Parameters file, expecting: #vehicle_parameters, read: " << keyword << endl;
@@ -457,6 +470,34 @@ bool Parameters::read_parameters (istream & in )
 		return false;
 	}
 	in >> demand_format;
+	in >> keyword;
+	if (keyword!= "demand_scale=")
+	{
+		cout << "ERROR reading Parameters file, expecting: demand_scale=, read: " << keyword << endl;
+		return false;
+	}
+	in >> demand_scale;
+	in >> keyword;
+	if (keyword!= "transfer_coefficient=")
+	{
+		cout << "ERROR reading Parameters file, expecting: transfer_coefficient=, read: " << keyword << endl;
+		return false;
+	}
+	in >> transfer_coefficient;
+	in >> keyword;
+	if (keyword!= "in_vehicle_time_coefficient=")
+	{
+		cout << "ERROR reading Parameters file, expecting: in_vehicle_time_coefficient=, read: " << keyword << endl;
+		return false;
+	}
+	in >> in_vehicle_time_coefficient;
+	in >> keyword;
+	if (keyword!= "waiting_time_coefficient=")
+	{
+		cout << "ERROR reading Parameters file, expecting: waiting_time_coefficient=, read: " << keyword << endl;
+		return false;
+	}
+	in >> waiting_time_coefficient;
 	return true;
 }
 

@@ -57,6 +57,7 @@
 #include "busline.h"
 #include "passenger.h"
 #include "od_stops.h"
+#include "pass_route.h"
 
 // inclusions for the GUI
 #ifndef _NO_GUI
@@ -232,7 +233,9 @@ public:
    bool read_passenger_rates_format3 (istream& in); // reads the passenger rates in the format of arrival rate per OD in terms of stops (no path is pre-determined)
   bool read_bustype (istream& in); // reads a bus type
   bool read_busvehicle(istream& in); // reads a bus vehicle 
-  bool find_direct_paths (ODstops* od_stops); // not operational yet
+  bool find_direct_paths (); // not operational yet
+  void merge_paths (Busstop* stop);  // not operational yet
+  bool compare_same_paths (Pass_path* path1, Pass_path* path2); // not operational yet
 #ifndef _NO_GUI
 	double get_width_x() {return width_x;} //!< returns image width in original coordinate system
 	double get_height_y() {return height_y;} //!< ... height ...

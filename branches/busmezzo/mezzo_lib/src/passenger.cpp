@@ -2,6 +2,15 @@
 #include "passenger.h"
 Passenger::Passenger ()
 {
+	random = new (Random);
+	if (randseed != 0)
+	{
+		random->seed(randseed);
+	}
+	else
+	{
+		random->randomize();
+	}
 }
 
 Passenger::~Passenger()
@@ -15,8 +24,9 @@ void Passenger::init (int pass_id, double start_time_, ODstops* OD_stop_)
 	OD_stop = OD_stop_;
 }
 
-bool Passenger:: boarding_decision () // assuming that passengers board the first bus arriving at the stop (regardless of its route)
+bool Passenger:: boarding_decision (Busline* arriving_bus) // assuming that passengers board the first bus arriving at the stop (regardless of its route)
 {
+	random ->brandom(OD_stop->calc_boarding_probability(arriving_bus));
 	return true;
 }
 

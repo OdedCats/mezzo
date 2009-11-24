@@ -846,7 +846,7 @@ bool Network::readserver(istream& in)
 	in  >> sid >> stype >> mu >> sd >> delay;
 	//assert  ( (find_if (servers.begin(),servers.end(), compare <Server> (sid))) == servers.end() );   // no server with sid exists
 	assert (!servermap.count(sid));
-	assert ( (stype > -1) && (stype<4) && (mu>0.0) && (sd>=0.0) && (delay>=0.0)); // to be updated when more server types are added
+	assert ( (stype > -1) && (stype<4) && (mu>=0.0) && (sd>=0.0) && (delay>=0.0)); // to be updated when more server types are added
 	// check id, vmax, vmin, romax;
 	// type 0= dummy server: Const server
 	// type 1=standard N(mu,sd) sever
@@ -865,7 +865,7 @@ bool Network::readserver(istream& in)
 	{
 		in >> delay_std;
 		assert (delay_std >=0.0);
-		sptr = new StochasticDelayServer (sid,stype,mu,sd,delay,delay_std);
+		sptr = new StochasticDelayServer (sid,stype,mu,sd,delay,delay_std * theParameters->sd_server_scale);
 		//sptr->set_delay_std (delay_std);
 	}
 	assert (sptr);
@@ -1392,6 +1392,10 @@ in >> keyword;
    			return false;
 		}
 	}
+	if (format == 3)
+	{
+		find_direct_paths ();
+	}
 	// Fifth read bus types
 in >> keyword;
 #ifdef _DEBUG_NETWORK
@@ -1474,7 +1478,7 @@ bool Network::readbusstop (istream& in) // reads a busstop
 bool Network::readbusline(istream& in) // reads a busline
 {
 	//  buslines: nr_buslines
-	//{	id	name	origin	destination	route_id	vehtype average_headway ratio_headway_holding holding_strategy 	
+	//{	id	name	origin	destination	route_id	vehtype mean_total_driving_time(ex. dwell time) average_headway ratio_headway_holding holding_strategy 	
 	//	nr_stops	{	stop_id1  stop_id2  stop_id3  ...	stop_idn	} nr_time_points { stop_id1 ... stop_idn }
 	//}
   char bracket;
@@ -1503,7 +1507,6 @@ bool Network::readbusline(istream& in) // reads a busline
 	{
 		in >> stop_id;
 		stop = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (stop_id) ))); // find the stop 
-	//  assert (stop !=  *(stops.end())); // assure tp exists
 		stops.push_back(stop); // and add it
 	}
 	in >> bracket;
@@ -1513,19 +1516,20 @@ bool Network::readbusline(istream& in) // reads a busline
 		return false;
 	}
 
-
 	// find OD pair, route, vehicle type
 	odval odid (ori_id, dest_id);
 	ODpair* odptr=(*(find_if (odpairs.begin(),odpairs.end(), compareod (odid) )));
 	Busroute* br=(*(find_if(busroutes.begin(), busroutes.end(), compare <Route> (route_id) )));
 	Vtype* vt= (*(find_if(vehtypes.vtypes.begin(), vehtypes.vtypes.end(), compare <Vtype> (vehtype) )));
-  Busline* bl= new Busline (busline_id,name,br,vt,odptr,average_headway,ratio_headway_holding,holding_strategy);
-	bl->add_stops(stops);
-  stop->add_lines(bl);
-  stop->add_line_nr_waiting(bl, 0);
-  stop->add_line_nr_boarding(bl, 0);
-  stop->add_line_nr_alighting(bl, 0);
-  
+	Busline* bl= new Busline (busline_id,name,br,stops,vt,odptr,average_headway,ratio_headway_holding,holding_strategy);
+
+	for (vector<Busstop*>::iterator stop_iter = bl->stops.begin(); stop_iter < bl->stops.end(); stop_iter++)
+	{
+		(*stop_iter)->add_lines(bl);
+		(*stop_iter)->add_line_nr_waiting(bl, 0);
+		(*stop_iter)->add_line_nr_boarding(bl, 0);
+		(*stop_iter)->add_line_nr_alighting(bl, 0);
+	}
 
 // reading time point stops
   in >> nr_tp;
@@ -1646,7 +1650,7 @@ bool Network::read_passenger_rates_format1 (istream& in) // reads the passenger 
 	in >> origin_stop_id >> busline_id >> arrival_rate >> alighting_fraction ;
 	Busstop* bs_o=(*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (origin_stop_id) ))); 
 	Busline* bl=(*(find_if(buslines.begin(), buslines.end(), compare <Busline> (busline_id) )));
-	bs_o->add_line_nr_boarding (bl, arrival_rate);
+	bs_o->add_line_nr_boarding (bl, arrival_rate * theParameters->demand_scale);
 	bs_o->add_line_nr_alighting (bl, alighting_fraction);
 
   in >> bracket;
@@ -1764,42 +1768,97 @@ bool Network::read_passenger_rates_format3 (istream& in) // reads the passenger 
   return ok;
 }
 
-/*
-bool Network::find_direct_paths (ODstops* od_stops) // under constructions- what would be the input format for individual passengers?
+bool Network::find_direct_paths () 
 {
   bool ok= true;
-  Busstop* origin_stop;
-  Busstop* destination_stop;
-  vector <Busstop*>::iterator bs_origin = stops.end();
-  vector <Busstop*>::iterator bs_destination = stops.begin();
-  for (vector <Busline*>::iterator bl = buslines.begin(); < buslines.end(); bl++)
-  {	
-		
-	  stop = (*(find_if(bl->stops.begin(), bl->stops.end(), compare <Busstop> (stop_id) ))); // find the stop
-	  for (vector <Busstop*>::iterator bs = bl->stops.begin(); < bl->stops.end(); bs++)
-	{
-		if ((*bs) == od_stops->get_origin())
-		{	
-			bs_origin = bs;
-		}
-		if ((*bs) == od_stops->get_destination())
-		{	
-			bs_destination = bs;
-		}
-	}
-	if (bs_destination > bs_origin)
-	{
-		Pass_route* new_path;
-		new_path->add_lines(bl);
-		od_stops->add_paths (new_path);
-	}
+for (vector <Busstop*>::iterator bs_o = busstops.begin(); bs_o < busstops.end(); bs_o++)
+  {
+	map <Busstop*, ODstops*> od_as_origin = (*bs_o)->get_stop_as_origin();
+	for (map<Busstop*, ODstops*>::iterator bs_d = od_as_origin.begin(); bs_d != od_as_origin.end(); bs_d++)
+	  {
+		  vector <Busline*> lines_o = (*bs_o)->get_lines();
+		  for (vector <Busline*>::iterator bl_o = lines_o.begin(); bl_o < lines_o.end(); bl_o++)
+		  {
+			vector <Busline*> lines_d = (*bs_d).first->get_lines();
+			for (vector <Busline*>::iterator bl_d = lines_d.begin(); bl_d < lines_d.end(); bl_d++)
+			{
+				if ((*bl_o)->get_id() == (*bl_d)->get_id())
+				{
+					for (vector <Busstop*>::iterator stop = (*bl_o)->stops.begin(); stop < (*bl_o)->stops.end(); stop++)
+					{
+						if ((*stop) == (*bs_o)) // if this condition is met first - it means that this is a possible path for this OD (origin preceeds destination)
+						{
+							vector<Busline*> direct_line;
+							vector<vector<Busline*>> lines_no_transfer;
+							vector<Busstop*> o_stop;
+							vector<Busstop*> d_stop;
+							vector<vector<Busstop*>> stops_no_transfer;
+							o_stop.push_back(*bs_o);
+							stops_no_transfer.push_back(o_stop);
+							d_stop.push_back(bs_d->first);
+							stops_no_transfer.push_back(d_stop);
+							direct_line.push_back(*bl_o);
+							lines_no_transfer.push_back(direct_line);
+							Pass_path* direct_path = new Pass_path(lines_no_transfer, stops_no_transfer);
+							(*bs_d).second->add_paths(direct_path);
+						}
+						if ((*stop) == (*bs_d).first) // if this condition is met first - it means that this is not a possible path (destination preceeds origin)
+						{
+							break;
+						}
+					}
+				}
+			}
+		  }
+	  }
+	// merge_paths (*bs_o);
   }
- 
+  
 #ifdef _DEBUG_NETWORK
 #endif //_DEBUG_NETWORK
   return ok;
 }
-*/
+
+void Network::merge_paths (Busstop* stop) // aimed to merge paths with same lines for all legs
+{
+	for (map <Busstop*, ODstops*>::iterator odpairs = stop->get_stop_as_origin().begin(); odpairs != stop->get_stop_as_origin().end(); odpairs++)
+	{
+		for (vector <Pass_path*>::iterator path1 = odpairs->second->get_path_set().begin(); path1 < odpairs->second->get_path_set().end(); path1++)
+		{
+				for (vector <Pass_path*>::iterator path2 = odpairs->second->get_path_set().begin(); path2 < odpairs->second->get_path_set().end(); path2++)
+				{
+					if (compare_same_paths ((*path1), (*path2)) == true)
+					{
+							// TO DO: actually merge them: add lines, stops 
+					}
+				}
+		}
+	}
+}
+
+bool Network::compare_same_paths (Pass_path* path1, Pass_path* path2)
+{
+	bool same = false;
+	if (path1->get_number_of_transfers() == path2->get_number_of_transfers())
+	{
+			vector <vector <Busline*>>::iterator lines2 = path2->get_alt_lines().begin();
+			for (vector <vector <Busline*>>::iterator lines1 = path1->get_alt_lines().begin(); lines1 < path1->get_alt_lines().end(); lines1++)
+			{
+				vector <Busline*>::iterator leg_lines2 = (*lines2).begin();
+				for (vector <Busline*>::iterator leg_lines1 = (*lines1).begin(); leg_lines1 < (*lines1).end(); leg_lines1++)
+				{
+					if ((*leg_lines1)->get_id() != (*leg_lines2)->get_id())
+					{
+						break;	
+					}
+					leg_lines2++;		
+				}
+				lines2++;
+			}
+			same = true;
+	}
+	return same;
+}
 
 bool Network::read_bustype (istream& in) // reads a bustype
 {
@@ -3603,10 +3662,10 @@ bool Network::writeallmoes(string name)
 	ofstream out(name.c_str());
 	assert(out);
 
-	out << "CONVERGENCE" << endl;
+	//out << "CONVERGENCE" << endl;
 
-	out << "SumDiff_InputOutputLinkTimes : " << calc_diff_input_output_linktimes () << endl << endl;
-	out << "SumSquare_InputOutputLinkTimes : " << calc_sumsq_input_output_linktimes () << endl << endl;
+	//out << "SumDiff_InputOutputLinkTimes : " << calc_diff_input_output_linktimes () << endl << endl;
+	//out << "SumSquare_InputOutputLinkTimes : " << calc_sumsq_input_output_linktimes () << endl << endl;
 	out << "MOES" << endl;
 	/****** TEMPORARY TO CUT OUT THE ALL MOES THAT ARE NOT USED NOW
 	int maxindex=0;

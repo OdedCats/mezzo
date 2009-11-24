@@ -4,7 +4,9 @@
 #include "parameters.h"
 #include "busline.h"
 #include "od_stops.h"
+#include "Random.h"
 
+class Busline;
 class Busstop;
 class ODstops;
 
@@ -20,13 +22,14 @@ public:
 	void set_ODstop (ODstops* ODstop_) {OD_stop = ODstop_;}
 
 	// Passenger decision processes - currently the simplest case possible is assumed
-	bool boarding_decision (); // boarding decision making - currently: board every passing bus
+	bool boarding_decision (Busline* arriving_bus); // boarding decision making - currently: board every passing bus
 	Busstop* alighting_decision (); // alighting decision making - currently: alight at your destination stop (assuming no transfers)
 
 protected:
 	int passenger_id;
 	double start_time;
 	ODstops* OD_stop;
+	Random* random;
 };
 
 class PassengerRecycler

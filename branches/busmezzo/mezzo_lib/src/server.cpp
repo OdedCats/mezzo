@@ -106,6 +106,8 @@ double OServer::next(const double time)
 double StochasticDelayServer::next (const double time)
 {
 	double result = mu + random->lnrandom(delay, delay_std);
+	//double delay_std1 = theParameters->sd_server_scale * sqrt(delay_std) * sqrt (mu + delay); // This is specifically for the Tel-Aviv case study use - delay_std = total driving time for this busline
+	//double result = mu + max(0.0, random->nrandom(delay, delay_std1));
 	//double result = mu + min(random->lnrandom(delay, delay_std), delay + 2 * delay_std);
 	return time + result ;
 }

@@ -124,6 +124,7 @@ public:
 // #server_parameters
    bool od_servers_deterministic; //!< if true the time headways in OD servers are determiunistic, otherwise neg_exp
    double odserver_sigma; //!< Obsolete since OD servers now have Mu=Sigma  (neg exp). Was for use with previous combined normal-neg_exp servers
+   double sd_server_scale; // !< for the case study - scale for SD delay at the stochastic delay server
 
 // #vehicle_parameters
    int standard_veh_length; //!< used to calculate a-priori capacity of links
@@ -145,6 +146,10 @@ public:
 
 // demand parameters:
    int demand_format;
+   double demand_scale; // !< currently for demand format 1 only - multiplies the hourly arrival rate
+   double transfer_coefficient;
+   double in_vehicle_time_coefficient;
+   double waiting_time_coefficient;
 
 // TODO: Implement the use of the following paramaters
    double vissim_step; //!< time step for the VISSIM micro model

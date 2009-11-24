@@ -87,7 +87,7 @@ public:
   double nrandom();
   double nrandom_trunc(double r);
   double nrandom(double m, double v);
-  double nrandom_trunc(double m, double v, double r = 3.0);
+  double nrandom_trunc(double m, double v, double r);
 
   // lognormal with mean m and stddev v
 

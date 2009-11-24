@@ -38,23 +38,36 @@ public:
 	
 	
 	Busline (); //!< simple constructor
-	Busline (int id_, string name_, Busroute* busroute_, Vtype* vtype_, ODpair* odpair_, int average_headway_, float ratio_headway_holding_, int holding_strategy_); //!< Initialising constructor
+	Busline (int id_, string name_, Busroute* busroute_, vector <Busstop*> stops_, Vtype* vtype_, ODpair* odpair_, int average_headway_, float ratio_headway_holding_, int holding_strategy_); //!< Initialising constructor
 	virtual ~Busline(); //!< destructor
 
+	// Gets and sets
 	int get_id () {return id;} //!< returns id, used in the compare  functions for find and find_if algorithms
 	Busroute* get_busroute() {return busroute;} //!< returns Busroute
 	Vtype* get_vtype() {return vtype;} //!< returns Vtype
 	ODpair* get_odpair() {return odpair;} //!< returns ODpair
+	vector <Start_trip>::iterator get_curr_trip() {return curr_trip;} 
 	int get_average_headway() {return average_headway;} //!< returns avg headway to previous bus
 	float get_ratio_headway_holding() {return ratio_headway_holding;} //!< returns ratio_headway_holding
 	int get_holding_strategy() {return holding_strategy;} //!< returns the holding strategy
-	bool execute(Eventlist* eventlist, double time); //!< re-implemented from virtual function in Action this function does the real work. It initiates the current Bustrip and books the next one
-	void add_stops (vector <Busstop*>  st) {stops = st;}
+	void set_curr_trip(vector <Start_trip>::iterator curr_trip_) {curr_trip = curr_trip_;}
+
+	// initialization
 	void add_timepoints (vector <Busstop*> tp) {line_timepoint = tp;}
 	void add_trip(Bustrip* trip, double starttime){trips.push_back(Start_trip(trip,starttime));}
+	
+	// checks
 	bool is_line_timepoint (Busstop* stop); //!< returns true if stops is a time point for this busline, otherwise it returns false
 	bool check_first_stop (Busstop* stop); // returns true if the stop is the first stop on the bus line, otherwise it returns false 
 	bool check_first_trip (Bustrip* trip); // returns true if the trip is the first trip on the bus line, otherwise it returns false  
+	
+	bool execute(Eventlist* eventlist, double time); //!< re-implemented from virtual function in Action this function does the real work. It initiates the current Bustrip and books the next one
+	
+	// calc attributes (for pass_paths)
+	double calc_curr_line_headway ();
+	double calc_curr_line_ivt (Busstop* start_stop, Busstop* end_stop);
+	
+	
 	vector <Busstop*>  stops; //!< contains all the stops on this line
 
 protected:
@@ -117,14 +130,13 @@ public:
 	map <Busstop*, passengers> passengers_on_board; // passenger on-board storaged by their alighting stop (format 3)
 	map <Busstop*, int> nr_expected_alighting; //!< number of passengers expected to alight at the busline's stops (format 2)
 	
-
 protected:
 	int id; //!< course nr
 	Bus* busv; //!< pointer to the bus vehicle
 	Bustype* btype;
 	Busline* line; //!< pointer to the line it serves
 	int init_occupancy; //!< initial occupancy, usually 0
-	double starttime; //!< when the trip is starting from the origin
+	double starttime; //!< when the trip is schedule to departure from the origin
 	vector <Visit_stop*> :: iterator next_stop; 
 	Random* random;
 	double enter_time; // the time it entered the most recently bus stop
@@ -193,6 +205,7 @@ public:
 	int get_nr_waiting (Bustrip* trip) {return nr_waiting[trip->get_line()];}
 	const double get_position () { return position;}
 	void set_position (double position_ ) {position = position_;}
+	vector <Busline*> get_lines () {return lines;}
 	
 // functions aimed to initialize lines-specific vectors at the busstop level
 	void add_lines (Busline*  line) {lines.push_back(line);}
