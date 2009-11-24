@@ -5,14 +5,29 @@ Parameters::Parameters ()
 // Later this will be read from a file
 
 {
+   viewmode = 0; // show simulation run
+   max_thickness_value=1;
+   max_colour_value=1;
+   min_thickness_value=1;
+   min_colour_value=1;
+   inverse_colour_scale=false;
+   thickness_width=20;
+   show_period = 1; // maybe later start at 0 with empty results (everything 0)
+   show_link_names = false;
+   show_link_ids = false;
+
+
    draw_link_ids = false;
    link_thickness = 3;
    node_thickness = 2;
    node_radius = 6;
    queue_thickness = 8;
    selected_thickness = 6;
-   text_size = 16;
+   text_size = 12;
    show_background = true;
+   background_x=0;
+   background_y=0;
+   background_scale=5;
 #ifndef _NO_GUI
    linkcolor=Qt::gray;
    nodecolor=Qt::gray;
@@ -36,6 +51,8 @@ Parameters::Parameters ()
 // #turning_parameters
    default_lookback_size= 20;
    turn_penalty_cost= 99999.0;
+   use_giveway = false;
+   max_wait = 5.0;
 // #server_parameters
    od_servers_deterministic= 1;
    odserver_sigma= 0.2;
@@ -54,11 +71,11 @@ Parameters::Parameters ()
    shortest_paths_initialised = false;
 
 // #mime_parameters
-   mime_comm_step= 0.5;
+   mime_comm_step= 0.1;
    mime_min_queue_length= 20;
    mime_queue_dis_speed= 6.0;
    vissim_step= 0.1;
-   sim_speed_factor= 2.0;
+   sim_speed_factor= 0.0;
 
 // demand parameters:
    demand_format = 1;

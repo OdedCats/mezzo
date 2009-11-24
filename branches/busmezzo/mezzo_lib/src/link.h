@@ -95,6 +95,7 @@ public:
 	Link (int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* sdfunc_);
 	Link();
 	virtual ~Link();
+	void end_of_simulation(); // consolidates all temp values in their containers
 	virtual void reset();  // resets the link for restart
 	// accessors, they are inline where possible, but inline keyword not necessary
 	const int get_id () {return id;}
@@ -104,17 +105,26 @@ public:
 	const int get_nr_lanes() {return nr_lanes;}
 	Sdfunc* get_sdfunc() {return sdfunc;}
 	Q* get_queue () {return queue;}
+	const string get_name() {return name;}
+	void set_name(string name_) {name=name_;}
 	//const int Link::size();
 	const int size();
+	pair<double,double> set_output_moe_thickness(unsigned int val); // sets the output MOE for the link icon returns min/max
+	pair <double,double>  set_output_moe_colour(unsigned int val); // sets the output MOE for the link icon returns min/max
 	void set_hist_time(double time) {	hist_time=time;}
 	void set_histtimes(LinkTime* ltime) {
 		histtimes=ltime;
+		/*
 		avgtimes->nrperiods=histtimes->nrperiods;
 		avgtimes->periodlength=histtimes->periodlength;
+		avgtimes->times = histtimes->times;
+		*/
+		avgtimes = new LinkTime(*histtimes);
 		curr_period=0;
 		tmp_avg=0.0;
 		tmp_passed=0;
 		}
+	bool copy_linktimes_out_in(); //!< copies the output travel times to input (historical) travel times
 	const double get_hist_time() {return hist_time;}
 	double get_cost (double time) {
 		if (histtimes)	
@@ -130,6 +140,7 @@ public:
 	const bool empty();
 	const bool exit_ok() {	return ok;}
 	const double next_action (double time);
+	bool veh_exiting(double time, Link* nextlink, int lookback); 
 	void update_icon(double time);
 
 #ifndef _NO_GUI   
@@ -170,15 +181,20 @@ public:
 	// IO methods
 	bool write(ostream& out);
 	void write_time(ostream& out);	
-	void write_speeds(ostream & out ) {out << id << "\t" ; moe_speed->write_values(out);}
+	void write_speeds(ostream & out, int nrperiods ) {out << id << "\t" ; moe_speed->fill_missing(nrperiods,speed_density(0));
+														moe_speed->write_values(out, nrperiods);}
 	void write_speed(ostream & out, int index ) {moe_speed->write_value(out,index);}
-	void write_inflows(ostream & out ) {out << id << "\t" ; moe_inflow->write_values(out);}
+	void write_inflows(ostream & out, int nrperiods) {out << id << "\t" ; moe_inflow->fill_missing (nrperiods, 0); 
+														moe_inflow->write_values(out,nrperiods);}
 	void write_inflow(ostream & out, int index ) {moe_inflow->write_value(out,index);}
-	void write_outflows(ostream & out ) {out << id << "\t" ; moe_outflow->write_values(out);}
+	void write_outflows(ostream & out,int nrperiods ) {out << id << "\t" ; moe_outflow->fill_missing (nrperiods, 0);
+														moe_outflow->write_values(out,nrperiods);}
 	void write_outflow(ostream & out, int index ) {moe_outflow->write_value(out,index);}
-	void write_queues(ostream & out ) {out << id << "\t" ; moe_queue->write_values(out);}
+	void write_queues(ostream & out,int nrperiods ) {out << id << "\t" ; moe_queue->fill_missing (nrperiods, 0);
+														moe_queue->write_values(out,nrperiods);}
 	void write_queue(ostream & out, int index ) {moe_queue->write_value(out,index);}
-	void write_densities(ostream & out ) {out << id << "\t" ; moe_density->write_values(out);}
+	void write_densities(ostream & out,int nrperiods ) {out << id << "\t" ; moe_density->fill_missing (nrperiods, 0);
+														moe_density->write_values(out,nrperiods);}
 	void write_density(ostream & out, int index ) {moe_density->write_value(out,index);}
 	int max_moe_size() {return _MAX(moe_speed->get_size(), _MAX (moe_inflow->get_size(),_MAX(moe_outflow->get_size(),_MAX(moe_queue->get_size(),moe_density->get_size()))));}
 	void add_blocked_exit() {nr_exits_blocked++;}
@@ -202,6 +218,7 @@ public:
 
 protected:
 	int id;
+	string name;
 	Node* in_node;
 	Node* out_node;
 	Q* queue;

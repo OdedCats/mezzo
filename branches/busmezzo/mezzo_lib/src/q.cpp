@@ -125,13 +125,36 @@ void Q::update_exit_times(double time, Link* nextlink, int lookback, double v_ex
    }
 }
 
-
+bool Q::veh_exiting (double time, Link* nextlink, int lookback)
+{
+	int next = 0;
+	if (empty())
+		return false;
+	else
+	{
+	    int i=0;
+		list <Veh_in_Q>::iterator v_it = vehicles.begin();
+		for (v_it; (v_it != vehicles.end()) && (i<lookback);v_it++,i++)
+		{
+			next=v_it->second->nextlink()->get_id();
+			if (nextlink->get_id() == next)
+			{
+				if (v_it->first > time)
+					return false;
+				else
+					return true;
+			}
+			
+		}
+		return false;
+	}
+}
 
 Vehicle* Q::exit_veh(double time, Link* nextlink, int lookback)
 
 {
 	ok=false;
-  next_action=-1.0;
+	next_action=-1.0;
     if (empty())
         return NULL;
     else

@@ -27,6 +27,7 @@ Link::Link(int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* s
 #endif //_COLLECT_ALL	
 	avg_time=0.0;
 	avgtimes=new LinkTime();
+	avgtimes->id=id;
 	histtimes=NULL;
 	nr_passed=0;
 	running_percentage=0.0;
@@ -91,7 +92,9 @@ void Link::reset()
 	tmp_avg=0.0;
 	tmp_passed=0;
 	// Reset avgtimes
-	avgtimes->reset();
+	//avgtimes->reset();
+	delete avgtimes;
+	avgtimes = new LinkTime(*histtimes);
 	nr_passed=0;
 	running_percentage=0.0;
 	queue_percentage=0.0;
@@ -112,6 +115,30 @@ void Link::reset()
 	ass_matrix.clear();
 }
 
+void Link::end_of_simulation()
+{	
+	// store times for current(last) period in avgtimes and make sure all periods have values.
+	if (tmp_avg==0.0)
+		tmp_avg = histtimes->times [curr_period];
+		//tmp_avg=freeflowtime;
+	avgtimes->times[curr_period] = tmp_avg;
+	int i= 0;
+	for (i;i<histtimes->nrperiods;i++)
+	{
+		if (avgtimes->times.count(i)==0) // no avg time exists, should be impossible, but to be sure...
+		{
+			avgtimes->times[i] = histtimes->times[i];
+		}
+		else
+		{
+			if (avgtimes->times [i] == 0.0) // should be impossible
+				avgtimes->times[i] = histtimes->times[i];
+		}
+
+	}
+	
+
+}
 
 const int Link::get_out_node_id ()
 	{return out_node->get_id();}
@@ -198,6 +225,94 @@ void Link::set_selected (const bool sel)
 #endif // _NO_GUI	
 }
 
+pair<double,double> Link::set_output_moe_thickness(unsigned int val)// sets the output MOE for the link icon
+{
+#ifndef _NO_GUI	
+	int nr_periods;
+	//double min, max;
+	switch (val)
+	{
+		case (1):
+			icon->setMOE_thickness(moe_outflow);
+			nr_periods= static_cast<int>(theParameters->moe_outflow_update/theParameters->running_time);
+			moe_outflow->fill_missing(nr_periods, 0.0);
+			return pair <double,double> ( moe_outflow->get_min(), moe_outflow->get_max());
+			break;
+		case (2):
+			icon->setMOE_thickness(moe_inflow);
+			nr_periods= static_cast<int>(theParameters->moe_inflow_update/theParameters->running_time);
+			moe_inflow->fill_missing(nr_periods, 0.0);
+			return pair <double,double> ( moe_inflow->get_min(), moe_inflow->get_max());
+			break;
+		case (3):
+			icon->setMOE_thickness(moe_speed);
+			nr_periods= static_cast<int>(theParameters->moe_speed_update/theParameters->running_time);
+			moe_speed->fill_missing(nr_periods, this->speed_density(0.0));
+			return pair <double,double> ( moe_speed->get_min(), moe_speed->get_max());
+			break;
+		case (4):
+			icon->setMOE_thickness(moe_density);
+			nr_periods= static_cast<int>(theParameters->moe_density_update/theParameters->running_time);
+			moe_density->fill_missing(nr_periods, 0.0);
+			return pair <double,double> ( moe_density->get_min(), moe_density->get_max());
+			break;
+		case (5):
+			icon->setMOE_thickness(moe_queue);
+			nr_periods= static_cast<int>(theParameters->moe_queue_update/theParameters->running_time);
+			moe_queue->fill_missing(nr_periods, 0.0);
+			return pair <double,double> ( moe_queue->get_min(), moe_queue->get_max());
+			break;
+		case (0):
+			icon->setMOE_thickness(NULL);
+
+	}
+	#endif // _NO_GUI	
+	return pair <double, double> (0,0);
+}
+pair <double,double> Link::set_output_moe_colour(unsigned int val)// sets the output MOE for the link icon
+{
+#ifndef _NO_GUI	
+	int nr_periods;
+	//double min, max;
+	switch (val)
+	{
+		case (1):
+			icon->setMOE_colour(moe_outflow);
+			nr_periods= static_cast<int>(theParameters->moe_outflow_update/theParameters->running_time);
+			moe_outflow->fill_missing(nr_periods, 0.0);
+			return pair <double,double> ( moe_outflow->get_min(), moe_outflow->get_max());
+			break;
+		case (2):
+			icon->setMOE_colour(moe_inflow);
+			nr_periods= static_cast<int>(theParameters->moe_inflow_update/theParameters->running_time);
+			moe_inflow->fill_missing(nr_periods, 0.0);
+			return pair <double,double> ( moe_inflow->get_min(), moe_inflow->get_max());
+			break;
+		case (3):
+			icon->setMOE_colour(moe_speed);
+			nr_periods= static_cast<int>(theParameters->moe_speed_update/theParameters->running_time);
+			moe_speed->fill_missing(nr_periods, this->speed_density(0.0));
+			return pair <double,double> ( moe_speed->get_min(), moe_speed->get_max());
+			break;
+		case (4):
+			icon->setMOE_colour(moe_density);
+			nr_periods= static_cast<int>(theParameters->moe_density_update/theParameters->running_time);
+			moe_density->fill_missing(nr_periods, 0.0);
+			return pair <double,double> ( moe_density->get_min(), moe_density->get_max());
+			break;
+		case (5):
+			icon->setMOE_colour(moe_queue);
+			nr_periods= static_cast<int>(theParameters->moe_queue_update/theParameters->running_time);
+			moe_queue->fill_missing(nr_periods, 0.0);
+			return pair <double,double> ( moe_queue->get_min(), moe_queue->get_max());
+			break;
+		case (0):
+			icon->setMOE_colour(NULL);
+
+	}
+	#endif // _NO_GUI	
+	return pair <double, double> (0,0);
+}
 
 void Link::update_exit_times(double time,Link* nextlink, int lookback)
 {
@@ -400,6 +515,9 @@ bool Link::enter_veh(Vehicle* veh, double time)
 	return queue->enter_veh(veh);
 }
 
+bool Link::veh_exiting(double time, Link* nextlink, int lookback)
+	{return queue->veh_exiting(time,nextlink,lookback);}
+
 Vehicle* Link::exit_veh(double time, Link* nextlink, int lookback)
 {
 	ok=false;
@@ -413,8 +531,11 @@ Vehicle* Link::exit_veh(double time, Link* nextlink, int lookback)
 			avg_time=(nr_passed*avg_time + traveltime)/(nr_passed+1); // update of the average
 			if ((curr_period+1)*(avgtimes->periodlength) < entrytime )
 			{			 	
-			 	
-			 	avgtimes->times.push_back(tmp_avg);
+			 	if (tmp_avg==0.0)
+					tmp_avg = histtimes->times [curr_period];
+					//tmp_avg=freeflowtime;
+			 	//avgtimes->times.push_back(tmp_avg);
+				avgtimes->times [curr_period] = tmp_avg;
 			 	curr_period++;
 			 	tmp_avg=0.0;
 			 	tmp_passed=0;
@@ -474,8 +595,12 @@ Vehicle* Link::exit_veh(double time)
 			double traveltime=(time-entrytime);
 			avg_time=(nr_passed*avg_time + traveltime)/(nr_passed+1); // update of the average
 			if ((curr_period+1)*(avgtimes->periodlength) < entrytime )
-			{			 	
-			 	avgtimes->times.push_back(tmp_avg);
+			{		
+				if (tmp_avg==0.0)
+					tmp_avg = histtimes->times [curr_period];
+				//	tmp_avg=freeflowtime;
+			 	//avgtimes->times.push_back(tmp_avg);
+				avgtimes->times [curr_period] = tmp_avg;
 			 	curr_period++;
 			 	tmp_avg=0.0;
 
@@ -608,15 +733,21 @@ void Link::write_ass_matrix (ostream & out, int linkflowperiod)
 
 void Link::write_time(ostream& out)
 {
-//#ifdef _COLLECT_TRAVELTIMES
 	double newtime=0.0;
+	int i = 0;
+	this->end_of_simulation(); // check everything is stored as it should, including current temp values, no empty values in avg times, etc.
 	out << "{\t" << id ;
+	for (i; i<histtimes->nrperiods;i++)
+	{
+		newtime=time_alpha * (avgtimes->times[i]) + (1-time_alpha) * (histtimes->times[i]);
+		out << "\t"<< newtime;
+	}
+	out << "\t}" << endl;
 /* ************ Old crap
-#ifdef _AVERAGING	
-	newtime=(alpha*avg_time)+(1-alpha)*hist_time;
-#endif	
- ***************/
+//#ifdef _COLLECT_TRAVELTIMES
+
   // TEST IF THERE ARE ANY AVG TIMES,    
+
   if (avgtimes->times.size()==0) // to make sure the old times are rewritten, in case there are no avg times
   {
     if (histtimes) // test if the histtimes exist (they don't if there was a problem reading the file)
@@ -662,6 +793,8 @@ void Link::write_time(ostream& out)
       }
   }
   out << "\t}" << endl;
+  */
+	//TODO rewrite this procedure with new travel times
 //#endif _COLLECT_TRAVELTIMES	
 }
 
@@ -674,7 +807,8 @@ void Link::update_icon(double time)
 	runningsize=queue->nr_running(time);
 	queuesize=totalsize-runningsize;
 	queue_percentage=(queuesize/cap);
-	running_percentage=(runningsize/cap);
+	//running_percentage=(runningsize/cap);
+	running_percentage = density_running_only(time)/140; // density as percentage of jamdensity
 #ifdef _DEBUG_LINK	
 	cout << " runningsize " << runningsize;
 	cout << "  queueingsize " << queuesize << endl;
@@ -746,16 +880,19 @@ double Link::calc_diff_input_output_linktimes ()
 	if (avgtimes->times.size() > 0)
 		{
 		double total = 0.0;
-		vector <double>::iterator newtime=avgtimes->times.begin();
-		vector <double>::iterator oldtime=histtimes->times.begin();
-		
+//		map <int,double>::iterator newtime=avgtimes->times.begin();
+//		map <int,double>::iterator oldtime=histtimes->times.begin();
+		/*
 		for (newtime, oldtime; (newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()); newtime++, oldtime++)
 		{
-			if ((newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()))
+			if ((newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()) &&((*newtime) > 0))
 			{
 				total+= (*newtime) - (*oldtime);
 			}
 		}
+		*/
+		for (int i=0; i<avgtimes->nrperiods; i++)
+			total += avgtimes->times [i] - histtimes->times [i];
 		return total;
 	}
 	else
@@ -767,19 +904,38 @@ double Link::calc_sumsq_input_output_linktimes ()
 	if (avgtimes->times.size() > 0)
 	{
 		double total = 0.0;
+		/*
 		vector <double>::iterator newtime=avgtimes->times.begin();
 		vector <double>::iterator oldtime=histtimes->times.begin();
 		for (newtime, oldtime; (newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()); newtime++, oldtime++)
 		{
-			if ((newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()))
+			if ((newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()) && ((*newtime) > 0))
 			{
 				total+= ((*newtime) - (*oldtime)) * ((*newtime) - (*oldtime)) ;
 		
 			}
 		}
+		*/
+		for (int i=0; i<avgtimes->nrperiods; i++)
+			total += (avgtimes->times [i] - histtimes->times [i])*(avgtimes->times [i] - histtimes->times [i]);
 		return total;
 	}
 	else return 0.0;
+}
+
+bool Link::copy_linktimes_out_in()
+{
+	// 'safe' way of copying the output to input travel times. 
+	// If no value in output (for certain time period), input value is kept. 
+	// If no value in input, no value is copied from output. (to preserve same length)
+	if (avgtimes->times.size() > 0)
+	{
+		for (int i=0; i<avgtimes->nrperiods; i++)
+			histtimes->times [i] =time_alpha*avgtimes->times [i] + (1-time_alpha)* histtimes->times [i];
+		return true;
+	}
+	else 
+		return false;
 }
 
 
@@ -895,8 +1051,12 @@ const  bool VirtualLink::full()
 			//cout << "virtuallink::exit_veh: entrytime: " << entrytime << " exittime " << time << endl;
 			avg_time=(nr_passed*avg_time + traveltime)/(nr_passed+1); // update of the average
 			if ((curr_period+1)*(avgtimes->periodlength) < entrytime )
-			{			 	
-			 	avgtimes->times.push_back(tmp_avg);
+			{	
+				if (tmp_avg==0.0)
+					tmp_avg = histtimes->times [curr_period];
+					//tmp_avg=freeflowtime;
+//			 	avgtimes->times.push_back(tmp_avg);
+				avgtimes->times [curr_period] = tmp_avg;
 			 	curr_period++;
 			 	tmp_avg=0.0;
 			 	tmp_passed=0;

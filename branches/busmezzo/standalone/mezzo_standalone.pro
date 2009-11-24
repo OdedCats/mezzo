@@ -2,7 +2,7 @@
 # Makes standalone version of Mezzo
 TEMPLATE = app
 
-CONFIG +=  console
+CONFIG +=  console embed_manifest_exe
 CONFIG -= qt
 TARGET = mezzo_s
 DEPENDPATH += . ../mezzo_lib/src

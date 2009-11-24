@@ -19,7 +19,7 @@
 
 /**
  * modification:
- *   add a handler to the linkicon
+ *   add a handle to the linkicon
  *   
  * Xiaoliang Ma 
  * last change: 2007-10-30 
@@ -28,14 +28,13 @@
 #define ICONS_HH
 //#undef _NO_GUI
 #ifndef _NO_GUI
-//Added by qt3to4:
 #include <QPixmap>
-#include <qt3support> // new in QT4 to port from QT3
-#include <qpixmap>
+//#include <qpixmap>
 #include <qpen>
 #include <qpainter>
 #include <list>
 #include "parameters.h"
+#include "grid.h"
 
 #define FIXED_RUNNING
 
@@ -88,23 +87,31 @@ class Icon
 class LinkIcon : public Icon
 {
   public:
-  	LinkIcon(int x, int y, int tox, int toy );
+  	LinkIcon(int x, int y, int tox, int toy);
 	virtual ~LinkIcon(){};
 	void set_pointers(double * q, double * r);
-	void setHandler(bool handle){handler_on_=handle;}
-	bool getHandler(){return handler_on_;}
+	void set_link(Link* link_) {link=link_;}
+	void calc_shift(double q=0.0); //!< calculate the relative shift from the center line between nodes, q is radius. 
+	void sethandle(bool handle){handle_on_=handle;}
+	bool gethandle(){return handle_on_;}
 	int getLinkicon_leng(){return linkicon_leng_;}
 	virtual const bool within_boundary(const double x, const double y, const int rad);
   	virtual void draw(QPixmap * pm,QMatrix * wm);
+
+	void setMOE_thickness (MOE* moe_) {moe_thickness=moe_;} // sets the output MOE (such as flows, links etc.)	
+	void setMOE_colour (MOE* moe_) {moe_colour=moe_;} // sets the output MOE (such as flows, links etc.)
   protected:
+   Link* link;
   	int stopx, stopy;
 	int shiftx, shifty;
 	int handlex, handley;
     int x2,x3,y2,y3; // points for the arrowhead
   	double * queuepercentage;
   	double * runningpercentage;
-	bool handler_on_;
+	bool handle_on_;
 	int linkicon_leng_;
+	MOE* moe_thickness;
+	MOE* moe_colour;
 };
 
 class VirtualLinkIcon: public LinkIcon

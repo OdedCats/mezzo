@@ -21,6 +21,13 @@ Server::~Server()
 	delete (random);
 }
 
+void Server::reset()
+{
+	if (randseed != 0)
+	   random->seed(randseed);
+	else
+		random->randomize();
+}
 double Server::next(const double time)
 {
  	double temp= _MAX(min_hdway,random->nrandom(mu,sd));
@@ -112,11 +119,18 @@ double StochasticDelayServer::next (const double time)
 	return time + result ;
 }
 
-ChangeRateAction::ChangeRateAction (Eventlist* eventlist, double time, Server* server_, double mu_, double sd_)
+ChangeRateAction::ChangeRateAction (Eventlist* eventlist_, double time_, Server* server_, double mu_, double sd_)
 {
    mu=mu_;
    sd=sd_;
    server=server_;
+   time=time_;
+   eventlist = eventlist_;
+   eventlist->add_event(time, this);
+}
+
+void ChangeRateAction::reset()
+{
 	eventlist->add_event(time, this);
 }
 		

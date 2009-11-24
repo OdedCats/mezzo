@@ -43,6 +43,7 @@ class Server  // standard n(mu,sd2) server  type: 1
 {
   public:
   Server(const int id_, const int type_, const double mu_, const double sd_, const double delay_);
+  void reset();
   virtual ~Server();
   const int get_id() const;
   virtual  double next(const double time);
@@ -140,11 +141,14 @@ class ChangeRateAction: public Action
 
 {
 	public:
-		ChangeRateAction (Eventlist* eventlist, double time, Server* server_, double mu_, double sd_);
+		ChangeRateAction (Eventlist* eventlist_, double time_, Server* server_, double mu_, double sd_);
+		void reset();
 		bool execute(Eventlist* eventlist, double time);
 	private:
 		Server* server;
 		double mu, sd;
+		double time;
+		Eventlist* eventlist;
 };
 
 

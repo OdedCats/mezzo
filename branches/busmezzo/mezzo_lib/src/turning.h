@@ -37,6 +37,7 @@ class Turning;
 
 
 
+
 class TurnAction : public Action
 {
  	public:
@@ -59,6 +60,9 @@ public:
 	void stop() { active = false;} // red light
 	bool is_active() {return active;}
 	bool is_blocked() { return blocked;}
+	bool giveway_can_pass(double time); // returns true if vehicle from minor turning can pass
+	bool check_controlling(double time); // checks all controlling turnings if vehicle can pass.
+	void register_controlling_turn(Turning* turn) {controlling_turnings.push_back(turn);}
 	void block() {blocked=true;}
 	void unblock() {blocked=false;}
 	bool process_veh(double time);
@@ -72,6 +76,7 @@ public:
 private:
 	//TurnAction* turnaction;    // performs the action of transferring vehicles at the right times
 	vector <TurnAction*> turnactions; // multiple turnactions per turning. One for each lane...
+	vector <Turning*> controlling_turnings; // turnings to give way to
 	int id;
 	Node* node;
 	Server* server;
@@ -85,7 +90,8 @@ private:
 	bool ok; // true if processing went fine
 	bool out_full; // true if outlink full
 	bool active; // true if turning is active (has green light in signalised crossing), false if red light.
-
+	bool waiting; // true if vehicle waiting to pass.
+	double waiting_since; // how many seconds a vehicle is waiting for gap in opposing stream. 
 };
 
 

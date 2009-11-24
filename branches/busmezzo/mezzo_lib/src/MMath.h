@@ -16,12 +16,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-//-*-c++-*------------------------------------------------------
-// FILE: Math.h
-// NOTE: Some useful math functions
-// AUTH: Qi Yang
-// DATE: Thu Sep 21 22:09:16 1995
-//--------------------------------------------------------------
 
 #ifndef MATH_HEADER
 #define MATH_HEADER

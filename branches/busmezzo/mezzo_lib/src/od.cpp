@@ -54,6 +54,7 @@ ODaction::~ODaction()
 
 void ODaction::reset(double rate_)
 {
+	server->reset();
 	if (rate_ < 1)
 	{
 		active = false;
@@ -303,7 +304,7 @@ odval ODpair::odids ()
 	return odval(origin->get_id(), destination->get_id());
 }
 
-ODpair::ODpair(Origin* origin_, Destination* destination_, int rate_, Vtypes* vtypes_)
+ODpair::ODpair(Origin* origin_, Destination* destination_, double rate_, Vtypes* vtypes_)
 	:origin(origin_), destination(destination_), rate(rate_), vtypes (vtypes_)
 {
  	odaction=new ODaction(this);
@@ -321,10 +322,11 @@ ODpair::ODpair(Origin* origin_, Destination* destination_, int rate_, Vtypes* vt
 	string names[nr_fields]={"origin_id","dest_id","veh_id","start_time","end_time","travel_time", "mileage","route_id","switched_route"};
     vector <string> fields(names,names+nr_fields);
 	grid=new Grid(nr_fields,fields);	
+	oldgrid =new Grid(nr_fields,fields);
 }
 
 ODpair::ODpair(): id (-1), odaction (NULL), origin (NULL), destination (NULL), 
-                  rate (-1), random (NULL), start_rate(-1)
+                  rate (-1), random (NULL), start_rate(-1), grid(NULL), oldgrid(NULL)
 {
 
 }
@@ -340,8 +342,17 @@ ODpair::~ODpair()
 void ODpair::reset()
 {
 	rate=start_rate;
+#ifndef _DETERMINISTIC_ROUTE_CHOICE
+ 	if (randseed != 0)
+	   random->seed(randseed);
+	else
+		random->randomize();	
+#else
+	random->seed(42);
+#endif
 	odaction->reset(rate);
-	
+	if (oldgrid)
+		*oldgrid = *grid;
 	grid->reset();
 }
  	
@@ -359,7 +370,7 @@ bool ODpair::execute(Eventlist* eventlist, double time)
 
 }
 
-const int ODpair::get_rate()
+const double ODpair::get_rate()
 {
 	return rate;
 }

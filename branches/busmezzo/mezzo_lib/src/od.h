@@ -73,43 +73,58 @@ class ODpair
 {
 public:
 	ODpair();
-	ODpair(Origin* origin_, Destination* destination_, int rate_, Vtypes* vtypes_);
+	ODpair(Origin* origin_, Destination* destination_, double rate_, Vtypes* vtypes_);
 	~ODpair();
 	void reset();
-	bool execute(Eventlist* eventlist, double time);
-	void add_route(Route* route);
-	long get_nr_routes() {return routes.size();}
-	Route* select_route(double time); // pretrip route choice
+// GETS
+	odval  odids();
+	const long get_nr_routes() {return routes.size();}
 	Route* get_route(int id);
-	vector<Route*>& get_allroutes(){return routes;}
-	odval  odids();	
 	Origin* get_origin();
 	Destination* get_destination();
-	const int get_rate();
+	const double get_rate();
 	vector <rateval> get_route_rates();
+	vector<Route*>& get_allroutes(){return routes;}
+	Vtypes* vehtypes() {return vtypes;}
+	Random* get_random(){return random;} 
+	Grid* get_grid() {return grid;}
+	Grid* get_oldgrid() {return grid;}
+	double get_diff_odtimes(){ return (grid->sum(6) - oldgrid->sum(6));}
+	double get_mean_odtimes() {return (grid->sum(6))/(grid->size());}
+	double get_mean_old_odtimes() {if (oldgrid->size() ==0)
+										return 0.0;
+									else
+										return (oldgrid->sum(6))/(oldgrid->size());}
+	double get_nr_arrived() {return grid->size();}
+	
+//SETS
+	void add_route(Route* route);
+	void set_rate(double rate_) {rate=rate_; odaction->set_rate(rate);}
+	
+//OTHER	
+	bool execute(Eventlist* eventlist, double time);
+	Route* select_route(double time); // pretrip route choice
 	void report (list <double>   collector);
 	bool write (ostream& out) {return grid->write_empty(out);}
 	bool writesummary(ostream& out);
 	bool writefieldnames(ostream& out);
-	Vtypes* vehtypes() {return vtypes;}
-	void set_rate(double rate_) {rate=static_cast<int>(rate_); odaction->set_rate(rate);}
 	bool less_than(ODpair* od); 
 	vector <Route*> delete_spurious_routes(double time=0.0); // deletes spurious routes (with unrealistic costs) and returns ids of routes deleted
-	Random* get_random(){return random;} 
 	Route* filteredRoute(int index);
 private:
 	int id;  // for later use
 	ODaction* odaction;
 	Origin* origin;
 	Destination* destination;
-	int rate;
-	int start_rate; // original OD rate, to be used when OD pair is reset.
+	double rate;
+	double start_rate; // original OD rate, to be used when OD pair is reset.
 	//double rate;
 	vector <Route*> routes;
 	vector <Route*> filtered_routes_;
 	vector <double> utilities;
 	Random* random;
 	Grid* grid;
+	Grid* oldgrid;
 	Vtypes* vtypes;
 	double totalU;    // total utility  = sum of all utilities
 	double subU;    //subsum of utilities

@@ -1,0 +1,519 @@
+<ui version="4.0" >
+ <class>Batchrun</class>
+ <widget class="QDialog" name="Batchrun" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>415</width>
+    <height>514</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Batch Run</string>
+  </property>
+  <property name="windowIcon" >
+   <iconset resource="../canvas_qt4.qrc" >:/images/batchrun.gif</iconset>
+  </property>
+  <widget class="QDialogButtonBox" name="buttonBox" >
+   <property name="geometry" >
+    <rect>
+     <x>40</x>
+     <y>480</y>
+     <width>341</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="orientation" >
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="standardButtons" >
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
+   </property>
+  </widget>
+  <widget class="QTabWidget" name="tabWidget" >
+   <property name="geometry" >
+    <rect>
+     <x>16</x>
+     <y>19</y>
+     <width>381</width>
+     <height>461</height>
+    </rect>
+   </property>
+   <property name="currentIndex" >
+    <number>0</number>
+   </property>
+   <widget class="QWidget" name="IterationsTab" >
+    <attribute name="title" >
+     <string>Iterations</string>
+    </attribute>
+    <widget class="QRadioButton" name="iterate_traveltimes_rb" >
+     <property name="geometry" >
+      <rect>
+       <x>20</x>
+       <y>10</y>
+       <width>331</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Iterate Travel Times - "Dynamic Equilibrium"</string>
+     </property>
+     <property name="checked" >
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="convergence_gb" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>120</y>
+       <width>351</width>
+       <height>151</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Convergence</string>
+     </property>
+     <widget class="QSpinBox" name="max_iterations_val" >
+      <property name="geometry" >
+       <rect>
+        <x>250</x>
+        <y>20</y>
+        <width>51</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="minimum" >
+       <number>2</number>
+      </property>
+      <property name="maximum" >
+       <number>999</number>
+      </property>
+      <property name="value" >
+       <number>10</number>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="max_iterations_cb" >
+      <property name="geometry" >
+       <rect>
+        <x>20</x>
+        <y>20</y>
+        <width>221</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="toolTip" >
+       <string>Max nr of iterations for the Batch run</string>
+      </property>
+      <property name="text" >
+       <string>Max Nr Iterations</string>
+      </property>
+      <property name="checkable" >
+       <bool>true</bool>
+      </property>
+      <property name="checked" >
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="max_rmsn_cb" >
+      <property name="geometry" >
+       <rect>
+        <x>20</x>
+        <y>50</y>
+        <width>221</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="toolTip" >
+       <string>The maximum Root Mean Square Normalized error between Input-Output traveltimes. between 0.00 and 1.00</string>
+      </property>
+      <property name="text" >
+       <string>Max RMSN difference</string>
+      </property>
+      <property name="checked" >
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="max_rmsn_val" >
+      <property name="geometry" >
+       <rect>
+        <x>250</x>
+        <y>50</y>
+        <width>48</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="inputMask" >
+       <string>0.00; </string>
+      </property>
+      <property name="text" >
+       <string>0.02</string>
+      </property>
+      <property name="maxLength" >
+       <number>4</number>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="rmsn_link_tt" >
+      <property name="geometry" >
+       <rect>
+        <x>60</x>
+        <y>100</y>
+        <width>131</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="toolTip" >
+       <string>The maximum Root Mean Square Normalized error between Input-Output traveltimes. between 0.00 and 1.00</string>
+      </property>
+      <property name="text" >
+       <string>Link travel times</string>
+      </property>
+      <property name="checked" >
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="rmsn_od_tt" >
+      <property name="geometry" >
+       <rect>
+        <x>60</x>
+        <y>120</y>
+        <width>131</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="toolTip" >
+       <string>The maximum Root Mean Square Normalized error between Input-Output traveltimes. between 0.00 and 1.00</string>
+      </property>
+      <property name="text" >
+       <string>OD travel times</string>
+      </property>
+      <property name="checked" >
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_5" >
+      <property name="geometry" >
+       <rect>
+        <x>260</x>
+        <y>80</y>
+        <width>71</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Current RMSN</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="rmsn_ltt" >
+      <property name="geometry" >
+       <rect>
+        <x>280</x>
+        <y>100</y>
+        <width>41</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string/>
+      </property>
+      <property name="textFormat" >
+       <enum>Qt::PlainText</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="rmsn_odtt" >
+      <property name="geometry" >
+       <rect>
+        <x>280</x>
+        <y>120</y>
+        <width>41</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string/>
+      </property>
+      <property name="textFormat" >
+       <enum>Qt::PlainText</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="rmsn_lf" >
+      <property name="geometry" >
+       <rect>
+        <x>280</x>
+        <y>140</y>
+        <width>41</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string/>
+      </property>
+      <property name="textFormat" >
+       <enum>Qt::PlainText</enum>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="progress_gb" >
+     <property name="geometry" >
+      <rect>
+       <x>0</x>
+       <y>320</y>
+       <width>371</width>
+       <height>111</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Progress</string>
+     </property>
+     <widget class="QProgressBar" name="totalPb" >
+      <property name="enabled" >
+       <bool>true</bool>
+      </property>
+      <property name="geometry" >
+       <rect>
+        <x>110</x>
+        <y>80</y>
+        <width>241</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="value" >
+       <number>0</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label" >
+      <property name="geometry" >
+       <rect>
+        <x>120</x>
+        <y>30</y>
+        <width>51</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Iteration</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="cur_iter" >
+      <property name="geometry" >
+       <rect>
+        <x>170</x>
+        <y>30</y>
+        <width>21</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_3" >
+      <property name="geometry" >
+       <rect>
+        <x>190</x>
+        <y>30</y>
+        <width>16</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>of</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="total_iter" >
+      <property name="geometry" >
+       <rect>
+        <x>210</x>
+        <y>30</y>
+        <width>21</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>10</string>
+      </property>
+     </widget>
+     <widget class="QProgressBar" name="currIterPb" >
+      <property name="enabled" >
+       <bool>true</bool>
+      </property>
+      <property name="geometry" >
+       <rect>
+        <x>110</x>
+        <y>50</y>
+        <width>241</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="value" >
+       <number>0</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_2" >
+      <property name="geometry" >
+       <rect>
+        <x>20</x>
+        <y>50</y>
+        <width>82</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Current Iteration</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_4" >
+      <property name="geometry" >
+       <rect>
+        <x>20</x>
+        <y>80</y>
+        <width>82</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Total</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QLineEdit" name="alpha" >
+     <property name="geometry" >
+      <rect>
+       <x>260</x>
+       <y>40</y>
+       <width>48</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="inputMask" >
+      <string>0.00; </string>
+     </property>
+     <property name="text" >
+      <string>0.60</string>
+     </property>
+     <property name="maxLength" >
+      <number>4</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_6" >
+     <property name="geometry" >
+      <rect>
+       <x>81</x>
+       <y>40</y>
+       <width>159</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Smoothing factor link travel times</string>
+     </property>
+    </widget>
+    <widget class="QToolButton" name="runButton" >
+     <property name="geometry" >
+      <rect>
+       <x>50</x>
+       <y>280</y>
+       <width>31</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="toolTip" >
+      <string>Run</string>
+     </property>
+     <property name="text" >
+      <string>...</string>
+     </property>
+     <property name="icon" >
+      <iconset resource="../canvas_qt4.qrc" >:/images/bt_play.png</iconset>
+     </property>
+    </widget>
+    <widget class="QToolButton" name="stopButton" >
+     <property name="geometry" >
+      <rect>
+       <x>80</x>
+       <y>280</y>
+       <width>31</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="toolTip" >
+      <string>Stop &amp; reset</string>
+     </property>
+     <property name="text" >
+      <string>...</string>
+     </property>
+     <property name="icon" >
+      <iconset resource="../canvas_qt4.qrc" >:/images/bt_stop.png</iconset>
+     </property>
+    </widget>
+    <widget class="QToolButton" name="saveButton" >
+     <property name="geometry" >
+      <rect>
+       <x>110</x>
+       <y>280</y>
+       <width>31</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="toolTip" >
+      <string>Stop &amp; reset</string>
+     </property>
+     <property name="text" >
+      <string>...</string>
+     </property>
+     <property name="icon" >
+      <iconset resource="../canvas_qt4.qrc" >:/images/filesave.png</iconset>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="ReplicationsTab" >
+    <attribute name="title" >
+     <string>Replications</string>
+    </attribute>
+   </widget>
+   <widget class="QWidget" name="ODestimationTab" >
+    <attribute name="title" >
+     <string>ODestimation</string>
+    </attribute>
+   </widget>
+  </widget>
+ </widget>
+ <resources>
+  <include location="../canvas_qt4.qrc" />
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>Batchrun</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>Batchrun</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

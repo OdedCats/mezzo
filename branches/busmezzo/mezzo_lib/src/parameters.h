@@ -86,6 +86,20 @@ public:
 
 // THE (PUBLIC) PARAMETERS
 	// Drawing parameters
+		
+	// parameters for output analysis
+	unsigned int viewmode; //<! Sets the view mode for the graphics: 0 = simulation run (standard), 1= show output data (such as flows etc)
+	double max_thickness_value; // regulates scaling of values to thickness
+	double max_colour_value;
+	double min_thickness_value;
+	double min_colour_value;
+	bool inverse_colour_scale;
+	int thickness_width;
+	int show_period;
+	double running_time; //!< total running time
+	bool show_link_names;//!< if true show link names in output
+	bool show_link_ids; //!< if true link ids are shown in output
+	
 	bool draw_link_ids; //!< If true link ID's are shown
 	int link_thickness; //!< Thickness with which links are drawn
 	int node_thickness; //!< Thickness with which nodes are drawn	
@@ -94,6 +108,10 @@ public:
 	int selected_thickness; //!< Thickness with which selected objects are drawn
 	int text_size; //!< Size of text in the network image
 	bool show_background; //!< If true background image is displayed behind network (if any image was loaded)
+	int background_x; //!< start_x for background image
+	int background_y; //!< start_y 
+	double background_scale; //!< scale for background image
+
 #ifndef _NO_GUI
 	QColor linkcolor; //!< Colour of links
 	QColor nodecolor; //!< Colour of nodes
@@ -120,7 +138,8 @@ public:
 //#turning_parameters
    int default_lookback_size; //!< default queue look-back
    double turn_penalty_cost;  //!< added penalty in shortest path alg. if a turn is forbidden
-
+   bool use_giveway; //!< if true, giveway logic is used
+   double max_wait; //!< default max waiting time for give_way
 // #server_parameters
    bool od_servers_deterministic; //!< if true the time headways in OD servers are determiunistic, otherwise neg_exp
    double odserver_sigma; //!< Obsolete since OD servers now have Mu=Sigma  (neg exp). Was for use with previous combined normal-neg_exp servers

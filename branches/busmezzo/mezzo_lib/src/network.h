@@ -63,9 +63,9 @@
 #ifndef _NO_GUI
 //Added by qt3to4:
 #include <QPixmap>
-#include <Qt3Support> // new in QT4 to port from QT3
+//#include <Qt3Support> // new in QT4 to port from QT3
 #include <qpixmap.h>
-#include <QWMatrix>
+#include <QMatrix>
 #endif // _NO_GUI
 
 //include the PVM communicator
@@ -143,6 +143,7 @@ public:
 #endif //_NO_GUI
 	double executemaster(); //!< without GUI
 	int reset(); //!< resets the simulation to 0, clears all the state variables. returns runtime
+	void end_of_simulation(double time); //!< finalise all the temp values into containers (linktimes)
 	double step(double timestep); //!< executes one step of simulation, called by the gui, returns current value of time
 	bool writeall();
 	bool readnetwork(string name); //!< reads the network and creates the appropriate structures
@@ -158,7 +159,8 @@ public:
 	bool add_od_routes()	; //!< adds routes to all ODpairs
 	bool readinput(string name);  //!< reads the OD matrix and creates the ODpairs
 	bool readlinktimes(string name); //!< reads historical link travel times
-	bool setlinktimes();
+	bool set_freeflow_linktimes();
+	bool copy_linktimes_out_in(); //!< copies output link travel times to input
 	bool readpathfile(string name); //!< reads the routes
 	bool readincidentfile(string name); //!< reads the file with the incident (for now only 1)
 	bool writepathfile (string name); //!< appends the routes found to the route file
@@ -190,34 +192,47 @@ public:
 	void seed (long int seed_) {randseed=seed_; vehtypes.set_seed(seed_);}          //!< sets the random seed
 	void removeRoute(Route* theroute);
 	void reset_link_icons(); //!< makes sure all the link-icons are shown normally when the run button is pressed. This corrects the colours in case of an incident file (it colours show affected links)
+		
+	void set_output_moe_thickness ( unsigned int val ) ; // sets the output moe for the link thickness  for analysis
+	void set_output_moe_colour ( unsigned int val ) ; // sets the output moe for the link colours for analysis
+
 #ifndef _NO_GUI
 	void recenter_image();   //!< sets the image in the center and adapts zoom to fit window
-	QWMatrix netgraphview_init(); //!< scale the network graph to the view initialized by pixmaps
+	QMatrix netgraphview_init(); //!< scale the network graph to the view initialized by pixmaps
+	
 	void redraw(); //!< redraws the image
+
 #endif //_NO_GUI
 
 	// GET's
 	double get_currenttime(){return time;}
+	double get_runtime(){return runtime;}
+	double get_time_alpha(){return time_alpha;}
 	Parameters* get_parameters () {return theParameters;} 
 	vector <ODpair*>& get_odpairs () {return odpairs;} // keep as vector
 
-	//vector <Origin*>& get_origins(){return origins;}
 	map <int, Origin*>& get_origins() {return originmap;}
-	//vector <Destination*>& get_destinations(){return destinations;}
 	map <int, Destination*>& get_destinations() {return destinationmap;}
-	//vector <Node*>& get_nodes(){return nodes;}
 	map <int, Node*>& get_nodes() {return nodemap;}
-	//vector <Link*>& get_links(){return links;}
 	map <int,Link*>& get_links() {return linkmap;}
+	
 	multimap<odval, Route*>::iterator find_route (int id, odval val);
 	bool exists_route (int id, odval val); // checks if route with this ID exists for OD pair val
 	bool exists_same_route (Route* route); // checks if a similar route with the same links already exists
-
+// STATISTICS
+	//Linktimes
 	double calc_diff_input_output_linktimes (); //!< calculates the sum of the differences in output-input link travel times
 	double calc_sumsq_input_output_linktimes (); //!< calculates the sum square of the differences in output-input link travel times
+	double calc_rms_input_output_linktimes();//!< calculates the root mean square of the differences in output-input link travel times
+	double calc_rmsn_input_output_linktimes();//!< calculates the Normalized (by mean) root mean square differences in output-input link travel times
+	double calc_mean_input_linktimes(); //!< calculates the mean of the input link travel times;
+	// OD times
+	double calc_rms_input_output_odtimes();
+	double calc_mean_input_odtimes();
+	double calc_rmsn_input_output_odtimes();
 	// SET's
 	void set_workingdir (const string dir) {workingdir = dir;}
-
+	void set_time_alpha(double val) {time_alpha=val;}
 
 	// Public transport
 	
@@ -263,6 +278,7 @@ protected:
 	map <int, Turning*> turningmap; //!< 
 	// vector <Server*> servers;
 	map <int, Server*> servermap; //!< 
+	vector <ChangeRateAction*> changerateactions; //!<
 //	vector <Route*> routes;	
 	multimap <odval, Route*> routemap; //!< 
 	vector <ODpair*> odpairs; //!< keep using OD pair vector for now, as map is too much of a hassle with two indices.
@@ -303,8 +319,8 @@ protected:
 #ifndef _NO_GUI
 	Drawing* drawing; //!< the place where all the Icons live
 	QPixmap* pm; //!< the place where the drawing is drawn
-	QWMatrix* wm; //!< worldmatrix that contains all the transformations of the drawing (scaling, translation, rotation, &c)
-	QWMatrix initview_wm; //!< world matrix that transform the drawing to the inital view
+	QMatrix* wm; //!< worldmatrix that contains all the transformations of the drawing (scaling, translation, rotation, &c)
+	QMatrix initview_wm; //!< world matrix that transform the drawing to the inital view
 	double scale; //!< contains the scale of the drawing
 	double width_x; //!< width of boundaries of drawing in original coordinate system
 	double height_y; //!< height of boundaries of drawing in org. coord. sys.
@@ -328,6 +344,8 @@ protected:
 	bool readservers(istream& in);
 	bool readserver(istream& in);
 	bool readturning(istream& in);
+	bool readgiveway(istream& in);
+	bool readgiveways(istream& in);
 	bool readroutes(istream& in);
 	bool readroute(istream& in);
 	bool readods(istream& in);

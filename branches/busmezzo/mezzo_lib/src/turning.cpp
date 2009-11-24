@@ -16,6 +16,8 @@ Turning::Turning(int id_, Node* node_, Server* server_, Link* inlink_, Link* out
 		cout << "new turning: tid,nid,sid,in,out " << id << node->get_id();
 		cout << server->get_id() << inlink->get_id() << outlink->get_id() << endl;
 #endif //_DEBUG_TURNING
+		waiting_since = 0.0;
+		waiting = false;
 		blocked=false;
 		active = true; // turning is active by default
 		out_full = false;
@@ -72,33 +74,84 @@ bool Turning::process_veh(double time)
     }
     else	
 	{
-		Vehicle* veh=inlink->exit_veh(time, outlink, size);
-		if (inlink->exit_ok())
+		if (check_controlling(time))
 		{
+			Vehicle* veh=inlink->exit_veh(time, outlink, size);
+			if (inlink->exit_ok())
+			{
 			delay=server->get_delay(); // get new delay, may be stochastic (2007-10-26)
-			ok=outlink->enter_veh(veh, time+delay);	
-           if (ok)
-             return true;
-           else
-           {
-             cout << " turning " << id << " dropped a vehicle, because outlink couldnt enter vehicle" << endl;
-             nexttime=inlink->next_action(time);
-             delete veh;
-             return false;
-           }           
-        }
-       else
-        {
-			nexttime=inlink->next_action(time);
-           if (nexttime <= time)
-               cout << "nexttime <= time in Turning::process_veh, from inlink::next_action " << endl;
-          return false;
-        }
+				ok=outlink->enter_veh(veh, time+delay);	
+			   if (ok)
+				 return true;
+			   else
+			   {
+				 cout << " turning " << id << " dropped a vehicle, because outlink couldnt enter vehicle" << endl;
+				 nexttime=inlink->next_action(time);
+				 delete veh;
+				 return false;
+			   }           
+			}
+		   else
+			{
+				nexttime=inlink->next_action(time);
+			   if (nexttime <= time)
+				   cout << "nexttime <= time in Turning::process_veh, from inlink::next_action " << endl;
+			  return false;
+			}
+		}
+		else // vehicle has to give way, needs to wait
+		{
+			// ask when to try again?
+			// simply next time in the server for now,. Maybe we can do something smarter later
+			nexttime = next_time(time);
+		}
 	 }
    }
   return ok;
 }
- 
+bool Turning::check_controlling(double time) 
+{
+	if (!theParameters->use_giveway)
+		return true;
+	if (waiting && ((time-waiting_since) > theParameters->max_wait))
+	{	
+		waiting=false;
+		waiting_since = 0.0;
+	}
+	bool can_pass = true;
+	// Check all controlling turnings if vehicle can pass
+	vector <Turning*>::iterator gv = controlling_turnings.begin();
+	for (gv ; gv != controlling_turnings.end(); gv++)
+	{
+		can_pass = can_pass && (*gv)->giveway_can_pass(time);
+	}
+	if (!can_pass)
+	{
+		waiting = true;
+		waiting_since=time;
+		return false; // just for debugging
+	}
+	else
+	{
+		waiting=false;
+		waiting_since = 0.0;
+		return true;
+	}
+}
+
+bool Turning::giveway_can_pass(double time) // returns true if vehicle from minor turning can pass
+{
+	//TODO
+	// implement a max waiting time
+	if (!active)// if turning is not active (red light)
+		return true;
+	else
+	{
+		// check if there is any vehicle in the incoming link ready to make this turn.
+		return !(inlink->veh_exiting(time,outlink,size));
+	}
+	return true;
+}
 
 
 double Turning::next_time(double time)

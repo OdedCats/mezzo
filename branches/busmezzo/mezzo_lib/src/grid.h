@@ -38,7 +38,9 @@ using namespace std;
 class Grid
 {
     public:
+		Grid() {}
       Grid(int nr_fields_, vector<string> names_);
+	  Grid (const Grid & grid_): nr_fields(grid_.nr_fields), fnames(grid_.fnames), grid (grid_.grid) {}
 	  void reset(); // resets the values NOT the fieldnames!
       bool insert_row(list <double> & values); // reference to a list of values so theres no needless copying
       bool write_empty(ostream& out);
@@ -58,11 +60,14 @@ class MOE
  	MOE (double val_update);
  	MOE (double val_update, double scale_);
 	void reset(); // resets the value list, NOT the scale_ or value_update
+	void fill_missing (const int nr_periods,const double default_value);
  	void report_value(double value, double time); // used to report values that are averaged
  	void report_value(double time); // used to report counts such as flows
   double get_value(int index);
   double get_last_value();
- 	void write_values(ostream & out);
+  double get_min();
+  double get_max();
+ 	void write_values(ostream & out, int nrperiods);
  	void write_value(ostream& out, int index);
  	int get_size() {return values.size();}
  private:

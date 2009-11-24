@@ -43,8 +43,9 @@
 using namespace std;
 
 // import of all VISSIM COM server interfaces
-//#import "c:\Program Files\PTV_Vision\VISSIM410\Exe\vissim.exe"
-#import "C:\Program\VISSIM_420-00_beta\vissim.exe"
+
+#import "C:\Program Files\PTV_Vision\VISSIM510\Exe\vissim.exe"
+
 //using namespace VISSIM_COMSERVERLib;
 
 // Not using the VISSIM-COM namespace, due to name clashes 'Link' and 'Node'

@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>810</width>
-    <height>660</height>
+    <width>815</width>
+    <height>674</height>
    </rect>
   </property>
   <property name="sizePolicy" >
@@ -33,10 +33,11 @@
    <enum>Qt::StrongFocus</enum>
   </property>
   <property name="windowTitle" >
-   <string comment="Prototype Mesomodel" >Mezzo version 0.51</string>
+   <string comment="Prototype Mesomodel" >Mezzo version 0.53</string>
   </property>
   <property name="windowIcon" >
-   <iconset resource="canvas_qt4.qrc" >:/images/mime.png</iconset>
+   <iconset resource="canvas_qt4.qrc" >
+    <normaloff>:/images/mime.png</normaloff>:/images/mime.png</iconset>
   </property>
   <property name="windowIconText" >
    <string>Mezzo</string>
@@ -635,6 +636,40 @@
      </item>
     </layout>
    </widget>
+   <widget class="QSlider" name="horizontalSlider" >
+    <property name="enabled" >
+     <bool>true</bool>
+    </property>
+    <property name="geometry" >
+     <rect>
+      <x>20</x>
+      <y>10</y>
+      <width>771</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="autoFillBackground" >
+     <bool>false</bool>
+    </property>
+    <property name="minimum" >
+     <number>0</number>
+    </property>
+    <property name="maximum" >
+     <number>4</number>
+    </property>
+    <property name="pageStep" >
+     <number>1</number>
+    </property>
+    <property name="orientation" >
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="tickPosition" >
+     <enum>QSlider::TicksBelow</enum>
+    </property>
+    <property name="tickInterval" >
+     <number>1</number>
+    </property>
+   </widget>
   </widget>
   <widget class="QToolBar" name="toolBar1" >
    <property name="horizontallyStretchable" stdset="0" >
@@ -659,6 +694,7 @@
    <addaction name="run" />
    <addaction name="breakoff" />
    <addaction name="stop" />
+   <addaction name="batch_run" />
    <addaction name="separator" />
    <addaction name="zoomin" />
    <addaction name="zoomout" />
@@ -679,14 +715,15 @@
    </attribute>
    <addaction name="parametersdialog" />
    <addaction name="inspectdialog" />
+   <addaction name="actionAnalyzeOutput" />
   </widget>
   <widget class="QMenuBar" name="menubar" >
    <property name="geometry" >
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>810</width>
-     <height>21</height>
+     <width>815</width>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu" >
@@ -707,9 +744,6 @@
     </property>
     <addaction name="linkhandlemark" />
     <addaction name="inselectmode" />
-    <addaction name="parametersdialog" />
-    <addaction name="loadbackground" />
-    <addaction name="inspectdialog" />
    </widget>
    <widget class="QMenu" name="menuSimulation" >
     <property name="title" >
@@ -719,15 +753,41 @@
     <addaction name="breakoff" />
     <addaction name="stop" />
     <addaction name="separator" />
+    <addaction name="batch_run" />
+   </widget>
+   <widget class="QMenu" name="menuTools" >
+    <property name="title" >
+     <string>Tools</string>
+    </property>
+    <widget class="QMenu" name="menuBackground" >
+     <property name="title" >
+      <string>Background</string>
+     </property>
+     <addaction name="loadbackground" />
+     <addaction name="actionPositionBackground" />
+    </widget>
+    <addaction name="menuBackground" />
+    <addaction name="separator" />
+    <addaction name="parametersdialog" />
     <addaction name="savescreenshot" />
+   </widget>
+   <widget class="QMenu" name="menuAnalysis" >
+    <property name="title" >
+     <string>Analyze</string>
+    </property>
+    <addaction name="actionAnalyzeOutput" />
+    <addaction name="inspectdialog" />
    </widget>
    <addaction name="fileMenu" />
    <addaction name="EditMenu" />
    <addaction name="menuSimulation" />
+   <addaction name="menuTools" />
+   <addaction name="menuAnalysis" />
   </widget>
   <action name="openmasterfile" >
    <property name="icon" >
-    <iconset resource="canvas_qt4.qrc" >:/images/fileopen2.png</iconset>
+    <iconset resource="canvas_qt4.qrc" >
+     <normaloff>:/images/fileopen2.png</normaloff>:/images/fileopen2.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Open Network</string>
@@ -741,7 +801,8 @@
   </action>
   <action name="savescreenshot" >
    <property name="icon" >
-    <iconset resource="canvas_qt4.qrc" >:/images/background.png</iconset>
+    <iconset resource="canvas_qt4.qrc" >
+     <normaloff>:/images/background.png</normaloff>:/images/background.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Save Snapshot</string>
@@ -755,16 +816,17 @@
   </action>
   <action name="stop" >
    <property name="icon" >
-    <iconset resource="canvas_qt4.qrc" >:/images/bt_stop.png</iconset>
+    <iconset resource="canvas_qt4.qrc" >
+     <normaloff>:/images/bt_stop.png</normaloff>:/images/bt_stop.png</iconset>
    </property>
    <property name="text" >
-    <string>Stop</string>
+    <string>Stop/Reset</string>
    </property>
    <property name="iconText" >
-    <string>Quit</string>
+    <string>Stop</string>
    </property>
    <property name="toolTip" >
-    <string>Quit</string>
+    <string>Stop &amp; reset</string>
    </property>
    <property name="statusTip" >
     <string/>
@@ -775,7 +837,11 @@
     <bool>false</bool>
    </property>
    <property name="icon" >
-    <iconset resource="canvas_qt4.qrc" >:/images/bt_play.png</iconset>
+    <iconset resource="canvas_qt4.qrc" >
+     <normaloff>:/images/bt_play.png</normaloff>:/images/bt_play.png</iconset>
+   </property>
+   <property name="text" >
+    <string>Run/Continue</string>
    </property>
    <property name="iconText" >
     <string>Run</string>
@@ -786,7 +852,8 @@
   </action>
   <action name="breakoff" >
    <property name="icon" >
-    <iconset resource="canvas_qt4.qrc" >:/images/bt_pause.png</iconset>
+    <iconset resource="canvas_qt4.qrc" >
+     <normaloff>:/images/bt_pause.png</normaloff>:/images/bt_pause.png</iconset>
    </property>
    <property name="iconText" >
     <string>Pause</string>
@@ -800,7 +867,8 @@
   </action>
   <action name="zoomin" >
    <property name="icon" >
-    <iconset resource="canvas_qt4.qrc" >:/images/zoom_in.png</iconset>
+    <iconset resource="canvas_qt4.qrc" >
+     <normaloff>:/images/zoom_in.png</normaloff>:/images/zoom_in.png</iconset>
    </property>
    <property name="iconText" >
     <string>Zoom in</string>
@@ -808,7 +876,8 @@
   </action>
   <action name="zoomout" >
    <property name="icon" >
-    <iconset resource="canvas_qt4.qrc" >:/images/zoom_out.png</iconset>
+    <iconset resource="canvas_qt4.qrc" >
+     <normaloff>:/images/zoom_out.png</normaloff>:/images/zoom_out.png</iconset>
    </property>
    <property name="iconText" >
     <string>Zoom out</string>
@@ -816,7 +885,8 @@
   </action>
   <action name="viewSet_ParametersAction" >
    <property name="icon" >
-    <iconset resource="canvas_qt4.qrc" >:/images/icon-tool.png</iconset>
+    <iconset resource="canvas_qt4.qrc" >
+     <normaloff>:/images/icon-tool.png</normaloff>:/images/icon-tool.png</iconset>
    </property>
    <property name="iconText" >
     <string>&amp;Set Parameters</string>
@@ -824,7 +894,8 @@
   </action>
   <action name="parametersdialog" >
    <property name="icon" >
-    <iconset resource="canvas_qt4.qrc" >:/images/icon-tool.png</iconset>
+    <iconset resource="canvas_qt4.qrc" >
+     <normaloff>:/images/icon-tool.png</normaloff>:/images/icon-tool.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Parameters</string>
@@ -835,7 +906,8 @@
   </action>
   <action name="loadbackground" >
    <property name="icon" >
-    <iconset resource="canvas_qt4.qrc" >:/images/dvi.png</iconset>
+    <iconset resource="canvas_qt4.qrc" >
+     <normaloff>:/images/background_map.jpg</normaloff>:/images/background_map.jpg</iconset>
    </property>
    <property name="text" >
     <string>Load &amp;Background</string>
@@ -849,7 +921,8 @@
   </action>
   <action name="saveresults" >
    <property name="icon" >
-    <iconset resource="canvas_qt4.qrc" >:/images/filesave.png</iconset>
+    <iconset resource="canvas_qt4.qrc" >
+     <normaloff>:/images/filesave.png</normaloff>:/images/filesave.png</iconset>
    </property>
    <property name="text" >
     <string>Save Results</string>
@@ -860,10 +933,11 @@
     <bool>false</bool>
    </property>
    <property name="icon" >
-    <iconset resource="canvas_qt4.qrc" >:/images/inspect.png</iconset>
+    <iconset resource="canvas_qt4.qrc" >
+     <normaloff>:/images/inspect.png</normaloff>:/images/inspect.png</iconset>
    </property>
    <property name="text" >
-    <string>Inspect</string>
+    <string>Inspect Routes</string>
    </property>
   </action>
   <action name="zoombywin" >
@@ -871,7 +945,8 @@
     <bool>true</bool>
    </property>
    <property name="icon" >
-    <iconset resource="canvas_qt4.qrc" >:/images/file_explore.png</iconset>
+    <iconset resource="canvas_qt4.qrc" >
+     <normaloff>:/images/file_explore.png</normaloff>:/images/file_explore.png</iconset>
    </property>
    <property name="text" >
     <string>Zoom window</string>
@@ -885,13 +960,14 @@
     <bool>false</bool>
    </property>
    <property name="icon" >
-    <iconset resource="canvas_qt4.qrc" >:/images/penmark.png</iconset>
+    <iconset resource="canvas_qt4.qrc" >
+     <normaloff>:/images/penmark.png</normaloff>:/images/penmark.png</iconset>
    </property>
    <property name="text" >
     <string>Link marks</string>
    </property>
    <property name="toolTip" >
-    <string>Show link handlers</string>
+    <string>Show link handles</string>
    </property>
   </action>
   <action name="inselectmode" >
@@ -902,7 +978,8 @@
     <bool>false</bool>
    </property>
    <property name="icon" >
-    <iconset resource="canvas_qt4.qrc" >:/images/file_edit.png</iconset>
+    <iconset resource="canvas_qt4.qrc" >
+     <normaloff>:/images/file_edit.png</normaloff>:/images/file_edit.png</iconset>
    </property>
    <property name="text" >
     <string>Selection mode</string>
@@ -916,7 +993,8 @@
   </action>
   <action name="quit" >
    <property name="icon" >
-    <iconset resource="canvas_qt4.qrc" >:/images/exit.png</iconset>
+    <iconset resource="canvas_qt4.qrc" >
+     <normaloff>:/images/exit.png</normaloff>:/images/exit.png</iconset>
    </property>
    <property name="text" >
     <string>Exit</string>
@@ -924,10 +1002,41 @@
   </action>
   <action name="closenetwork" >
    <property name="icon" >
-    <iconset resource="canvas_qt4.qrc" >:/images/close.png</iconset>
+    <iconset resource="canvas_qt4.qrc" >
+     <normaloff>:/images/close.png</normaloff>:/images/close.png</iconset>
    </property>
    <property name="text" >
     <string>Close Network</string>
+   </property>
+  </action>
+  <action name="batch_run" >
+   <property name="icon" >
+    <iconset resource="canvas_qt4.qrc" >
+     <normaloff>:/images/batchrun.gif</normaloff>:/images/batchrun.gif</iconset>
+   </property>
+   <property name="text" >
+    <string>Batch Run</string>
+   </property>
+  </action>
+  <action name="actionAnalyzeOutput" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="icon" >
+    <iconset resource="canvas_qt4.qrc" >
+     <normaloff>:/images/dvi.png</normaloff>:/images/dvi.png</iconset>
+   </property>
+   <property name="text" >
+    <string>Analyze Output</string>
+   </property>
+  </action>
+  <action name="actionPositionBackground" >
+   <property name="icon" >
+    <iconset resource="canvas_qt4.qrc" >
+     <normaloff>:/images/move.png</normaloff>:/images/move.png</iconset>
+   </property>
+   <property name="text" >
+    <string>Position Background</string>
    </property>
   </action>
  </widget>

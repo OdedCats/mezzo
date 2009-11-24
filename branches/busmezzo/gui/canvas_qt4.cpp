@@ -14,6 +14,7 @@
 */
 
 #include <qmessagebox.h>
+ #include <QKeyEvent>
 #include "canvas_qt4.h"
 
 MainForm::MainForm(QWidget *parent): QMainWindow(parent)
@@ -24,6 +25,7 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 
 	// first create a Network object
 	theNetwork = new Network();
+	fn = "";
 
 	panelx=Canvas->width();
 	panely=Canvas->height();
@@ -49,8 +51,8 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 
 	// implementation of view zooming and panning
 	//xiaoliang
-	mod2stdViewMat_=QWMatrix(1,0,0,1,0,0);
-	viewMat_=QWMatrix(1,0,0,1,0,0);
+	mod2stdViewMat_=QMatrix(1,0,0,1,0,0);
+	viewMat_=QMatrix(1,0,0,1,0,0);
 	viewSize_=QSize(panelx,panely);
 	pm1=QPixmap(viewSize_);
 	pm1.fill();
@@ -62,20 +64,18 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 	connect( timer, SIGNAL(timeout()), this, SLOT(loop()) );
 	runtime=1.0; 
 	currtime=0.0;
-	
-	//canvas_center = QPoint(start_x + (panelx /2) , start_y + (panely / 2));
-	//wm.scale(scale,scale); 
-	//statusbar = this->statusBar();
-	//statusbar->showMessage("Load a master file");
 	exited = false;
 	theParameters=theNetwork->get_parameters();
 	
 	// need to figure out if this affect the simulation
 	// COMMENT WILCO: this is to slow down the simulation
-	//simspeed->setValue(static_cast<int> (  theParameters->sim_speed_factor * 100 ));
+//	simspeed->setValue(static_cast<int> (  theParameters->sim_speed_factor * 100 ));
 	
-	// Parameters dialog
+	// dialogs
 	pmdlg = new ParametersDialog (this);
+	brdlg = new BatchrunDlg(this);
+	outputview = new OutputView(this);
+	posbackground = new PositionBackground(this);
 	
 	// construction of the MezzoAnalyzer dialog 
 	od_analyser_=new ODCheckerDlg();
@@ -89,7 +89,7 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 					 SLOT(on_zoombywin_triggered(bool)));
 	QObject::connect(inselectmode, SIGNAL(toggled(bool)), this,
 					 SLOT(on_inselectmode_triggered(bool)));
-	// show link handlers
+	// show link handles
 	QObject::connect(linkhandlemark, SIGNAL(toggled(bool)), this,
 					 SLOT(on_showhandle_triggered(bool)));
 
@@ -103,10 +103,12 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 
 	// deactive the actions except the open masterfile
 	activateToolbars(false);
-    
-	// hide the status bar
+    // hide the slider for output analysis
+	horizontalSlider->hide();
+	actionAnalyzeOutput->setEnabled(false);
+
 	// WILCO: move all the status widgets to the Statusbar
-	//statusBar()->hide();
+
 	statusBar()->addWidget (status_label);
 	statusBar()->addWidget(simprogress_widget);
 	statusBar()->addWidget(this->TextLabel12,10);
@@ -119,6 +121,7 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 
 void MainForm::activateToolbars(bool activated)
 {
+	
 	savescreenshot->setEnabled(activated);
     run->setEnabled(activated);
     breakoff->setEnabled(activated);
@@ -133,6 +136,7 @@ void MainForm::activateToolbars(bool activated)
     loadbackground->setEnabled(activated);
     saveresults->setEnabled(activated);
     inspectdialog->setEnabled(activated);
+	batch_run->setEnabled(activated);
 	openmasterfile->setEnabled(!activated); // should be only be enabled when everything else is not
 	if(activated)
 		status_label->setText("Network initialized");
@@ -174,8 +178,8 @@ void MainForm::on_closenetwork_activated()
 	nodes_sel_.clear();
 	links_sel_.clear();
 
-	mod2stdViewMat_=QWMatrix(1,0,0,1,0,0);
-	viewMat_=QWMatrix(1,0,0,1,0,0);
+	mod2stdViewMat_=QMatrix(1,0,0,1,0,0);
+	viewMat_=QMatrix(1,0,0,1,0,0);
 	viewSize_=QSize(panelx,panely);
 	pm1=QPixmap(viewSize_);
 	pm1.fill();
@@ -188,12 +192,15 @@ void MainForm::on_closenetwork_activated()
 
 	activateToolbars(false);
 	simprogress_widget->setVisible(false);
+	actionAnalyzeOutput->setChecked(false);
+	actionAnalyzeOutput->setEnabled(false);
 
 	// Delete the current network 
 	delete theNetwork;
 
 	// Create a new Network
 	theNetwork = new Network();
+	fn ="";
 
 	//display empty pixmap
 	copyPixmap();
@@ -221,6 +228,10 @@ void MainForm::on_stop_activated()
 	zoombywin_triggered_=false;
 	// !!! I AM SURE THIS IS INCOMPLETE !!!
 
+	run->setEnabled(true);
+	batch_run->setEnabled(true);
+	actionAnalyzeOutput->setChecked(false);
+	actionAnalyzeOutput->setEnabled(false);
 
 	//updat the canvas
 	updateCanvas();
@@ -233,23 +244,30 @@ void MainForm::on_quit_activated()
 	//theNetwork->~Network(); 
 	delete theNetwork;
 	od_analyser_->~ODCheckerDlg();
+	outputview->~OutputView();
+	brdlg->~BatchrunDlg();
 	close();
 }
 
 
 void MainForm::on_openmasterfile_activated()
 {
-	QString fn = "";
+	fn = "";
 	fn = (QFileDialog::getOpenFileName(this, "Select a MEZZO master file", QString::null,"Mezzo Files (*.mime *.mezzo)") );
 	// Open master file
+	process_masterfile();	
+}
+
+void MainForm::process_masterfile()
+{
 	if ( !fn.isEmpty() ) 
 	{
 		// strip the dir from the filename and give to the Network
 		int pos = fn.lastIndexOf ('/');
 		QString workingdir = fn.left(pos+1);
-		theNetwork->set_workingdir (workingdir.latin1());
+		theNetwork->set_workingdir (string(workingdir.toLatin1()));
 		// make a STL compatible string
-		string name=fn.latin1();
+		string name=fn.toLatin1();
 		if (theNetwork->readmaster(name))
 			runtime=theNetwork->executemaster(&pm2,&wm);
 		else
@@ -267,8 +285,7 @@ void MainForm::on_openmasterfile_activated()
 		wm=mod2stdViewMat_;
 		updateCanvas();
 		//statusbar->message("Initialised");
-	}	
-	
+	}
 }
 
 void MainForm::on_zoomin_activated()
@@ -276,7 +293,7 @@ void MainForm::on_zoomin_activated()
 	// the view center
 	int xviewcenter=viewSize_.width()/2;
 	int yviewcenter=viewSize_.height()/2;
-	QWMatrix tempMat;
+	QMatrix tempMat;
 	scale*=scalefactor;
 
 	// transfer matrix
@@ -299,7 +316,7 @@ void MainForm::on_zoomout_activated()
 	// the view center
 	int xviewcenter=viewSize_.width()/2;
 	int yviewcenter=viewSize_.height()/2;
-	QWMatrix tempMat;
+	QMatrix tempMat;
 
 	scale/=scalefactor;
 	tempMat.reset();
@@ -320,15 +337,15 @@ void MainForm::on_zoombywin_triggered(bool triggered)
 
 void MainForm::on_showhandle_triggered(bool triggered)
 {
-	//update all linkicons property on handler 
+	//update all linkicons property on handle 
 	if(this->initialised){
 		map <int, Link*> alllinks=theNetwork->get_links();
 		//for( unsigned i=0; i<alllinks.size(); i++)
-		//	alllinks[i]->get_icon()->setHandler(triggered);
+		//	alllinks[i]->get_icon()->sethandle(triggered);
 		map <int,Link*>::iterator l_iter=alllinks.begin();
 		for(l_iter;l_iter!=alllinks.end();l_iter++)
 		{
-			(*l_iter).second->get_icon()->setHandler(triggered);
+			(*l_iter).second->get_icon()->sethandle(triggered);
 		}
 		updateCanvas();
 	}
@@ -351,7 +368,7 @@ void MainForm::on_loadbackground_activated()
 	QString fn( QFileDialog::getOpenFileName(this, "Open background image",QString::null,"PNG Files (*.png)" ) );
     if (!fn.isEmpty())
     {
-		string haha=fn.latin1();
+		string haha=fn.toLatin1();
 		theNetwork->set_background (haha);
     }
 }
@@ -359,11 +376,14 @@ void MainForm::on_loadbackground_activated()
 void MainForm::on_breakoff_activated()
 {
 	breaknow=true;
+	run->setEnabled(true);
 }
 
 void MainForm::on_run_activated()
 {
 	simprogress_widget->setVisible(true);
+	run->setEnabled(false);
+	batch_run->setEnabled(false);
 	breaknow=false;
 	theNetwork->reset_link_icons();
 	loop();
@@ -382,11 +402,27 @@ void MainForm::on_panfactor_valueChanged( int value )
 
 void MainForm::on_parametersdialog_activated()
 {
-	pmdlg->set_parameters(theNetwork->get_parameters());
-    pmdlg->show();
-	pmdlg->raise();
-	pmdlg->activateWindow();
+	if (initialised)
+	{
+		pmdlg->set_parameters(theNetwork->get_parameters());
+		pmdlg->show();
+		pmdlg->raise();
+		pmdlg->activateWindow();
+	}
 } 
+
+void MainForm::on_batch_run_activated()
+{
+	if (initialised)
+	{	
+		brdlg->setNetwork(theNetwork);
+		brdlg->show();
+		brdlg->raise();
+		brdlg->activateWindow();
+
+	}
+}
+
 
 /**
 * if the mezzoAnalyzer is triggered
@@ -421,6 +457,54 @@ void MainForm::on_saveresults_activated()
 	 theNetwork->writeall();
 }
 
+void MainForm::on_actionAnalyzeOutput_toggled()
+{
+	if (actionAnalyzeOutput->isChecked())
+	{
+		int nr_periods;
+		horizontalSlider->show();
+		displaytime(0.0);
+		// default: select flow MOE as main variable, later make a dialogue for selecting MOE
+		theNetwork->set_output_moe_thickness(1); // set flows as thickness
+		theNetwork->set_output_moe_colour (3); // set speeds as colour
+		theParameters->inverse_colour_scale = true; // so high speeds are green and low speeds red
+		nr_periods=static_cast<int>((theParameters->running_time/theParameters->moe_outflow_update)+0.5);
+		horizontalSlider->setRange(0,nr_periods);
+		theParameters->viewmode = 1; // set view mode to output
+		theParameters->show_period = 0; // show the first period
+		outputview->setNetwork(theNetwork);
+		outputview->show();
+	}
+	else
+	{
+		theParameters->viewmode = 0; // set view mode to output
+		horizontalSlider->hide();
+		outputview->hide();
+	}
+	updateCanvas();
+
+}
+
+void MainForm::on_horizontalSlider_valueChanged()
+{
+	theParameters->show_period = horizontalSlider->value();
+	double show_time = theParameters->moe_outflow_update * theParameters->show_period;
+	displaytime(show_time);
+		updateCanvas();
+}
+
+void MainForm::on_simspeed_valueChanged( int  value)
+{
+    theParameters->sim_speed_factor =(value/100);
+}
+
+void MainForm::on_actionPositionBackground_activated()
+{
+	posbackground->set_network(theNetwork);
+	posbackground->show();
+	updateCanvas();
+}
+
 ////////////////////////////////////////////////
 // NORMAL PRIVATE METHODS
 ////////////////////////////////////////////////
@@ -431,14 +515,18 @@ void MainForm::loop()
 	int msecs (pmdlg->refreshrate->value());
 	int updatefac (pmdlg->updatefactor->value());
 	if (!breaknow)
-	timer->start( msecs, TRUE ); // ... mseconds single-shot timer 
+	{
+		timer->setSingleShot(true);
+		timer->start( msecs ); // ... mseconds single-shot timer 
+	}
 	currtime=theNetwork->step(((updatefac/100)*msecs/1000.0));
 	progressbar->setValue(static_cast<int>(100.0*currtime/runtime));
-	//LCDNumber1->display(static_cast<int>(currtime));
 	displaytime(currtime);
 	if (currtime>=runtime)
 	{
-		breaknow=false;
+		//breaknow=false;
+		breaknow=true;
+		actionAnalyzeOutput->setEnabled(true);
 	}
 }
 
@@ -480,10 +568,9 @@ void MainForm::seed(int sd )
    theNetwork->seed(sd);
 }
 
-void MainForm::on_simspeed_valueChanged( int  value)
-{
-    theParameters->sim_speed_factor =(value/100);
-}
+
+
+
 
 /**
 * key press event handling
@@ -504,25 +591,25 @@ void MainForm::keyPressEvent( QKeyEvent *e )
 		case (Qt::Key_Up):		// pan up
 			dy=panfactor;
 			wm.translate(0,dy);
-			viewMat_=mod2stdViewMat_.invert()*wm;
+			viewMat_=mod2stdViewMat_.inverted()*wm;
 			updateCanvas();
 			break;   
 		case (Qt::Key_Down):	// pan down
 			dy=-panfactor;
 			wm.translate(0,dy);	
-			viewMat_=mod2stdViewMat_.invert()*wm;
+			viewMat_=mod2stdViewMat_.inverted()*wm;
 			updateCanvas();
 			break;       
 		case (Qt::Key_Left):	// pan left
 			dx=panfactor;
 			wm.translate(dx,0);
-			viewMat_=mod2stdViewMat_.invert()*wm;
+			viewMat_=mod2stdViewMat_.inverted()*wm;
 			updateCanvas();
 			break; 
 		case (Qt::Key_Right):	// pan right
 			dx=-panfactor;
 			wm.translate(dx,0);
-			viewMat_=mod2stdViewMat_.invert()*wm;
+			viewMat_=mod2stdViewMat_.inverted()*wm;
 			updateCanvas();
 			break;
 		case (Qt::Key_C):		// return to initial view with a central image
@@ -680,7 +767,6 @@ void MainForm::mouseReleaseEvent(QMouseEvent* mev)
 
 void MainForm::mouseDoubleClickEvent(QMouseEvent* mev)
 {
-
 }
 
 /*
@@ -741,7 +827,7 @@ void MainForm::zoomRectArea()
 	scale*=rect2view_factor;
 
 	// transfer matrix
-	QWMatrix tempMat;
+	QMatrix tempMat;
 	tempMat.reset();
 	tempMat.scale(rect2view_factor, rect2view_factor);
 	tempMat.translate(-zoomrect_->left(),-zoomrect_->top());
@@ -859,24 +945,22 @@ void MainForm::resizeEvent(QResizeEvent* event)
 	// resize the drawing widgets
 	QSize oldviewsize=viewSize_;
 	viewSize_=QSize(panelx,panely);
-	pm1.resize(viewSize_);
-	pm2.resize(viewSize_);
-	Canvas->resize(panelx,panely); // resize the canvas
+	pm1 = QPixmap (viewSize_);
+	pm2 = QPixmap (viewSize_);
+	Canvas->resize (panelx,panely); // resize the canvas
 
 	if (!initialised) return; 
-	// update the matrix and redraw
-	//mod2stdViewMat_=theNetwork->netgraphview_init();
-	//wm=mod2stdViewMat_;
-	//updateCanvas();
 
 	// the view center offset
 	int dxviewC=viewSize_.width()/2-oldviewsize.width()/2;
 	int dyviewC=viewSize_.height()/2-oldviewsize.height()/2;
 	wm.translate(dxviewC, dyviewC);
-	mod2stdViewMat_=wm*viewMat_.invert();
+	mod2stdViewMat_=wm*viewMat_.inverted();
 	//update the canvas
 	updateCanvas();
 	
 	// Call the parent's resizeEvent		
 	QWidget::resizeEvent(event);
 }
+
+

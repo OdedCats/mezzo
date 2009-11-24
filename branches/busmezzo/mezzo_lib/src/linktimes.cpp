@@ -73,12 +73,36 @@ const double LinkTime::cost(const double time)
         return 0.1; // never return 0
     else
 	{
-		if (i < (times.size()-1))
+		if (times.count(i)) // if exists (should always be true, but still
 			return times[i];
 		else
-			return times.back();
+			return 0.1;
 	}
     
+}
+
+const double LinkTime::mean ()
+{
+	totaltime=0.0;
+	map<int,double>::iterator t_iter = times.begin();
+	for (t_iter;t_iter!=times.end();t_iter++)
+	{
+		totaltime+=(*t_iter).second;	
+	}
+	return (totaltime / times.size());
+
+}
+
+const double LinkTimeInfo::mean()
+{	
+	double totaltime = 0.0;
+	map <int,LinkTime*>::iterator iter = times.begin();
+	for (iter;iter!=times.end();iter++)
+	{
+		totaltime+=(*iter).second->mean();
+	}
+	return (totaltime / times.size()); // we can do this since all linktimes have same nr of periods
+
 }
 
 const double LinkTimeInfo::cost (const int i, const double time)  // to be repaired. It caused crashes in the Graph.cc routines (which contain some archaic C-style array magic)
@@ -95,5 +119,7 @@ const double LinkTimeInfo::cost (const int i, const double time)  // to be repai
  		return 0.1; // NEVER RETURN 0
    }
 }
+
+
    
 

@@ -19,14 +19,6 @@
 /*! Mainform is the main GUI class
  * It contains the main network graph display, and calls the Network->step() repeatedly to simulate
  *
- *
- *
- *  latest changes: 
- * 1)add the mezzo analyzer dialog
- * 2)solve the zooming problems by the qmatrix approach 
- * 3)GUI development
- * last modified: Xiaoliang Ma 
- * 2007-10-22
  */
 
 
@@ -35,12 +27,15 @@
 
 //#include <Qt3Support>
 #include <Qfiledialog>
-#include <QWMatrix>
+#include <QMatrix>
 #include "ui_canvas_qt4.h"
 #include "parametersdialog_qt4.h"
 #include "../mezzo_lib/src/parameters.h"
 #include "../mezzoAnalyzer/src/odcheckerdlg.h"
 #include "../mezzo_lib/src/network.h"
+#include "src/batchrundlg.h"
+#include "src/outputview.h"
+#include "src/positionbackground.h"
 
 class MainForm : public QMainWindow, private Ui::MainForm
 {
@@ -49,7 +44,10 @@ class MainForm : public QMainWindow, private Ui::MainForm
 public:
 	MainForm(QWidget *parent = 0); //!< inits the main form
 	void seed(int sd ); //!< sets the seed
-
+	void set_filename(const QString fn_) {	
+			fn = QDir (fn_).path();
+			process_masterfile();}
+	void process_masterfile();
 	// access ports
 	Network* getMezzoNet(){return (theNetwork);}
 
@@ -68,20 +66,24 @@ private slots:
 	void on_loadbackground_activated();  //!< Opens a Load background dialog
 	void on_breakoff_activated ();  //!< Pauses the simulation
 	void on_run_activated();	 //!< Starts the simulation
+	void on_batch_run_activated(); //!< Shows the Batch Run dialog
 	void on_parametersdialog_activated();  //!< Shows parameters dialog
 	void on_inspectdialog_activated();  //!< Shows Route inspect dialog
 	void on_simspeed_valueChanged(int value);  //!< changes the simspeed
 	void on_zoomfactor_valueChanged(int value);  //!< changes the zoom step for zooming in/out
 	void on_panfactor_valueChanged(int value );  //!< changes the pan step for panning the network
 	void on_saveresults_activated();  //!< Saves the results of the simulation 
+	void on_actionAnalyzeOutput_toggled(); //!< Turns on output analysis dialogue
+	void on_horizontalSlider_valueChanged(); // !< changes output view period
+	void on_actionPositionBackground_activated();//!< opens Position Background Dialogue
 		
 	// other slots	
-	void keyPressEvent(QKeyEvent* e);  //!< handler for key presses
-	void keyReleaseEvent(QKeyEvent* kev);  //!< handler for key releases
-	void mousePressEvent(QMouseEvent* event);  //!< handler for mous presses
-	void mouseDoubleClickEvent(QMouseEvent* mev);  //!< handler for double clicks
-	void mouseMoveEvent(QMouseEvent* mev);  //!< handler for mouse moves
-	void mouseReleaseEvent(QMouseEvent* mev);   //!< handler for mouse release
+	void keyPressEvent(QKeyEvent* e);  //!< handle for key presses
+	void keyReleaseEvent(QKeyEvent* kev);  //!< handle for key releases
+	void mousePressEvent(QMouseEvent* event);  //!< handle for mous presses
+	void mouseDoubleClickEvent(QMouseEvent* mev);  //!< handle for double clicks
+	void mouseMoveEvent(QMouseEvent* mev);  //!< handle for mouse moves
+	void mouseReleaseEvent(QMouseEvent* mev);   //!< handle for mouse release
 	
 	void loop();  //!< main simulation - display loop in which the Network->step() is called repeatedly and the GUI is refreshed in between
 	void paintEvent(QPaintEvent *event );
@@ -111,9 +113,9 @@ private:
     bool exited;
 
 	// xiaoliang work variables on zooming
-	QWMatrix wm;			  //!< general world matrix from model to current view	
-    QWMatrix mod2stdViewMat_; //!< define transition from basic model to standard view
-	QWMatrix viewMat_;		  //!< define transition from standard view to current view
+	QMatrix wm;			  //!< general world matrix from model to current view	
+    QMatrix mod2stdViewMat_; //!< define transition from basic model to standard view
+	QMatrix viewMat_;		  //!< define transition from standard view to current view
 	QSize viewSize_;
 	QSize canvasOffset; // off set in X and Y of the Canvas to the Mainform
 	QPixmap pm1, pm2; //!< shared pixmaps on which the network is drawn off-screen
@@ -143,13 +145,16 @@ private:
     QTimer* timer;
 	Parameters* theParameters;  //!< The parameters object, which contains the global parameters for the simulation and GUI
     QStringList files;
-    QString filename;
+    QString fn;
     bool breaknow;
     //QStatusBar* statusbar;
 	
 	// sub dialogs
 	ParametersDialog* pmdlg;
 	ODCheckerDlg* od_analyser_;
+	BatchrunDlg* brdlg;
+	OutputView* outputview;
+	PositionBackground* posbackground;
 
 };
 
