@@ -30,9 +30,25 @@ class ODstops;
 typedef pair<Bustrip*,double> Start_trip;
 typedef vector <Passenger*> passengers;
 
+class Output_Summary_Line // container object holding output data for busline
+{
+public:
+	void write (ostream& out, int line_id) { out << line_id <<  '\t'<< line_avg_headway << '\t'<< line_avg_DT << '\t'<< line_avg_abs_deviation << '\t'<< line_avg_waiting_per_stop<< '\t'<< line_total_boarding << '\t'<< line_sd_headway << '\t'
+		<< line_sd_DT << '\t'<< line_on_time << '\t'<< line_early <<'\t'<< line_late << '\t'<< endl; }
+	// line summary measures
+	double line_avg_headway;
+	double line_avg_DT;
+	double line_avg_abs_deviation;
+	double line_avg_waiting_per_stop;
+	double line_total_boarding;
+	double line_sd_headway;
+	double line_sd_DT;
+	double line_on_time;
+	double line_early;
+	double line_late;
+};
+
 class Busline: public Action
-	
-	
 {
 public:
 	
@@ -51,6 +67,8 @@ public:
 	float get_ratio_headway_holding() {return ratio_headway_holding;} //!< returns ratio_headway_holding
 	int get_holding_strategy() {return holding_strategy;} //!< returns the holding strategy
 	void set_curr_trip(vector <Start_trip>::iterator curr_trip_) {curr_trip = curr_trip_;}
+	Output_Summary_Line get_output_summary () {return output_summary;}
+	vector <Start_trip> get_trips () {return trips;}
 
 	// initialization
 	void add_timepoints (vector <Busstop*> tp) {line_timepoint = tp;}
@@ -67,7 +85,9 @@ public:
 	double calc_curr_line_headway ();
 	double calc_curr_line_ivt (Busstop* start_stop, Busstop* end_stop);
 	
-	
+	// output-related functions
+	void calculate_sum_output_line();
+
 	vector <Busstop*>  stops; //!< contains all the stops on this line
 
 protected:
@@ -85,6 +105,7 @@ protected:
 	int holding_strategy; 
 	bool active; //!< is true when the busline has started generating trips
 	vector <Start_trip>::iterator curr_trip; //!< indicates the next trip
+	Output_Summary_Line output_summary;
 };
 
 typedef pair<Busstop*,double> Visit_stop;
@@ -180,6 +201,22 @@ public:
 	double holding_time;
 };
 
+class Output_Summary_Stop_Line // container object holding output data for stop visits
+{
+public:
+	void write (ostream& out, int stop_id, int line_id) { out << stop_id <<  '\t'<< line_id <<  '\t'<<stop_avg_headway << '\t'<< stop_avg_DT << '\t'<< stop_avg_abs_deviation << '\t'<< stop_avg_waiting_per_stop<< '\t'<< stop_total_boarding << '\t'<< stop_sd_headway << '\t'
+		<< stop_sd_DT << '\t'<< stop_on_time << '\t'<< stop_early <<'\t'<< stop_late << '\t'<< endl; }
+	double stop_avg_headway;
+	double stop_avg_DT;
+	double stop_avg_abs_deviation;
+	double stop_avg_waiting_per_stop;
+	double stop_total_boarding;
+	double stop_sd_headway;
+	double stop_sd_DT;
+	double stop_on_time;
+	double stop_early;
+	double stop_late;
+};
 
 class Busstop : public Action
 {
@@ -206,7 +243,9 @@ public:
 	const double get_position () { return position;}
 	void set_position (double position_ ) {position = position_;}
 	vector <Busline*> get_lines () {return lines;}
-	
+
+	Output_Summary_Stop_Line get_output_summary (int line_id) {return output_summary[line_id];}
+
 // functions aimed to initialize lines-specific vectors at the busstop level
 	void add_lines (Busline*  line) {lines.push_back(line);}
 	void add_line_nr_waiting(Busline* line, int value){nr_waiting[line] = value;}
@@ -234,6 +273,7 @@ public:
 	// output-related functions
 	void write_output(ostream & out);
 	void record_busstop_visit ( Bustrip* trip, double enter_time); //!< creates a log-file for stop-related info
+	void calculate_sum_output_stop_per_line(int line_id);
 
 	// relevant only for demand format 2
 	multi_rates multi_arrival_rates; //!< parameter lambda that defines the poission proccess of passengers arriving at the stop for each sequential stop
@@ -255,7 +295,6 @@ protected:
 	vector <Busline*> lines;
 	map <double,Bus*> expected_arrivals; //!< booked arrivals of buses on the link on their way to the stop
 	map <double,Bus*> buses_at_stop; //!< buses currently visiting stop
-	list <Busstop_Visit> output_stop_visits; //!< list of output data for buses visiting stops
 	map <Busline*, double> last_arrivals; //!< contains the arrival time of the last bus from each line that stops at the stop (can result headways)
 	map <Busline*, double> last_departures; //!< contains the departure time of the last bus from each line that stops at the stop (can result headways)
 
@@ -266,7 +305,6 @@ protected:
 	// relevant only for demand format 2
 	multi_rates multi_nr_waiting; // for demant format is from type 2. 
 
-	
 	// relevant for demand formats 1 & 2
 	map <Busline*, int> nr_waiting; //!< number of waiting passengers for each of the bus lines that stops at the stop
 
@@ -275,6 +313,10 @@ protected:
 	ODs_for_stop stop_as_destination; // a map of all the OD's that this busstop is their destination
 	bool is_origin; // indicates if this busstop serves as an origin for some passenger demand
 	bool is_destination; // indicates if this busstop serves as an destination for some passenger demand
+
+	// output structures
+	list <Busstop_Visit> output_stop_visits; //!< list of output data for buses visiting stops
+	map<int,Output_Summary_Stop_Line> output_summary; //  int value is line_id
 };
 
 #endif //_BUSLINE

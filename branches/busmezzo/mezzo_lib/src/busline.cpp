@@ -5,6 +5,18 @@
 #include "MMath.h"
 #include <sstream>
 
+template<class T>
+struct compare
+{
+	compare(int id_):id(id_) {}
+	bool operator () (T* thing)
+
+	{
+		return (thing->get_id()==id);
+	}
+
+	int id;
+};
 
 PassengerRecycler pass_recycler; // Global passenger recycler
 
@@ -143,6 +155,47 @@ double Busline::calc_curr_line_ivt (Busstop* start_stop, Busstop* end_stop)
 			}
 	}
 	return ((*alight_stop)->second - (*board_stop)->second);
+}
+
+void Busline::calculate_sum_output_line()
+{
+	output_summary.line_avg_headway = 0;
+	output_summary.line_avg_DT = 0;
+	output_summary.line_avg_abs_deviation = 0;
+	output_summary.line_avg_waiting_per_stop = 0;
+	output_summary.line_total_boarding = 0;
+	
+	// average standard deviation over line's stops
+	output_summary.line_sd_headway = 0;
+	output_summary.line_sd_DT = 0;
+	
+	output_summary.line_on_time = 0;
+	output_summary.line_early = 0;
+	output_summary.line_late = 0;
+	
+	for (vector<Busstop*>::iterator stop = stops.begin(); stop < stops.end(); stop++)
+	{
+		output_summary.line_avg_headway += (*stop)->get_output_summary(id).stop_avg_headway;
+		output_summary.line_avg_DT += (*stop)->get_output_summary(id).stop_avg_DT;
+		output_summary.line_avg_abs_deviation += (*stop)->get_output_summary(id).stop_avg_abs_deviation;
+		output_summary.line_avg_waiting_per_stop += (*stop)->get_output_summary(id).stop_avg_waiting_per_stop;
+		output_summary.line_total_boarding += (*stop)->get_output_summary(id).stop_total_boarding;
+		output_summary.line_sd_headway += (*stop)->get_output_summary(id).stop_sd_headway; 
+		output_summary.line_sd_DT += (*stop)->get_output_summary(id).stop_sd_DT;
+		output_summary.line_on_time += (*stop)->get_output_summary(id).stop_on_time;
+		output_summary.line_early += (*stop)->get_output_summary(id).stop_early;
+		output_summary.line_late += (*stop)->get_output_summary(id).stop_late;
+	}
+	// dividing by the number of stops for average measures
+	output_summary.line_avg_headway = output_summary.line_avg_headway / stops.size();
+	output_summary.line_avg_DT = output_summary.line_avg_DT / stops.size();
+	output_summary.line_avg_abs_deviation = output_summary.line_avg_abs_deviation / stops.size();
+	output_summary.line_avg_waiting_per_stop = output_summary.line_avg_waiting_per_stop / stops.size();
+	output_summary.line_sd_headway = output_summary.line_sd_headway / stops.size();
+	output_summary.line_sd_DT = output_summary.line_sd_DT / stops.size();
+	output_summary.line_on_time = output_summary.line_on_time / stops.size();
+	output_summary.line_early = output_summary.line_early / stops.size();
+	output_summary.line_late = output_summary.line_late / stops.size();
 }
 
 // ***** Bustrip Functions *****
@@ -397,8 +450,8 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 		{
 			passengers pass_waiting_od = (*destination_stop).second->get_waiting_passengers();		
 			passengers::iterator check_pass = pass_waiting_od.begin();
-			Passenger* next_pass;
-			bool last_waiting_pass = false;
+			//Passenger* next_pass;
+			//bool last_waiting_pass = false;
 			while (check_pass < pass_waiting_od.end())
 			{
 					// progress each waiting passenger   
@@ -848,6 +901,112 @@ void Busstop::write_output(ostream & out)
 	}
 }
 
+void Busstop::calculate_sum_output_stop_per_line(int line_id)
+{
+	int counter = 0;
+	// initialize all output measures
+	Busline* bl=(*(find_if(lines.begin(), lines.end(), compare <Busline> (line_id) )));
+	vector<Start_trip> trips = bl->get_trips();
+	output_summary[line_id].stop_avg_headway = 0;
+	output_summary[line_id].stop_avg_DT = 0;
+	output_summary[line_id].stop_avg_abs_deviation = 0;
+	output_summary[line_id].stop_total_boarding = 0;
+	output_summary[line_id].stop_avg_waiting_per_stop = 0;
+	output_summary[line_id].stop_sd_headway = 0;
+	output_summary[line_id].stop_sd_DT = 0;
+	output_summary[line_id].stop_on_time = 0;
+	output_summary[line_id].stop_early = 0;
+	output_summary[line_id].stop_late = 0;
+	for (list <Busstop_Visit>::iterator iter1 = output_stop_visits.begin(); iter1!=output_stop_visits.end();iter1++)
+	{
+		if ((*iter1).line_id == line_id)
+			{
+				// accumulating all the measures
+				counter++; // should equal the total number of trips for this bus line passing at this bus stop
+				if (trips.size()>2)
+				{
+					vector<Start_trip>::iterator iter = trips.begin();
+					if ((*iter1).trip_id != (*iter).first->get_id())
+					{
+						iter++;
+						if ((*iter1).trip_id != (*iter).first->get_id())
+						{
+							output_summary[line_id].stop_avg_headway += (*iter1).time_since_dep;
+						}
+					}
+				}
+				else 
+				{
+					output_summary[line_id].stop_avg_headway += (*iter1).time_since_dep;
+				}
+				output_summary[line_id].stop_avg_DT += (*iter1).dwell_time;
+				output_summary[line_id].stop_avg_abs_deviation += abs((*iter1).lateness);
+				output_summary[line_id].stop_total_boarding += (*iter1).nr_boarding;
+				output_summary[line_id].stop_avg_waiting_per_stop += (*iter1).nr_waiting;
+				if ((*iter1).lateness > 300)
+				{
+					output_summary[line_id].stop_late ++;
+				}
+				else if ((*iter1).lateness < -60)
+				{
+					output_summary[line_id].stop_early ++;
+				}
+				else 
+				{
+					output_summary[line_id].stop_on_time ++;
+				}
+			}
+	}
+	// dividing all the average measures by the number of records	
+	if (trips.size()>2)	
+	{
+		output_summary[line_id].stop_avg_headway = output_summary[line_id].stop_avg_headway/(counter-2);
+	}
+	else
+	{
+		output_summary[line_id].stop_avg_headway = output_summary[line_id].stop_avg_headway/(counter);
+	}
+	output_summary[line_id].stop_avg_DT = output_summary[line_id].stop_avg_DT/counter;
+	output_summary[line_id].stop_avg_abs_deviation = output_summary[line_id].stop_avg_abs_deviation/counter;
+	output_summary[line_id].stop_total_boarding = output_summary[line_id].stop_total_boarding/counter;
+	output_summary[line_id].stop_avg_waiting_per_stop = output_summary[line_id].stop_avg_waiting_per_stop/counter;
+	output_summary[line_id].stop_on_time = output_summary[line_id].stop_on_time/counter;
+	output_summary[line_id].stop_early = output_summary[line_id].stop_early/counter;
+	output_summary[line_id].stop_late = output_summary[line_id].stop_late/counter;
 
-
+	// now go over again for SD calculations
+	for (list <Busstop_Visit>::iterator iter1 = output_stop_visits.begin(); iter1!=output_stop_visits.end();iter1++)
+	{
+		if ((*iter1).line_id == line_id)
+		{
+			vector<Start_trip>::iterator iter = trips.begin();
+			if (trips.size()>2)
+			{
+				if ((*iter1).trip_id != (*iter).first->get_id())
+				{
+					iter++;
+					if ((*iter1).trip_id != (*iter).first->get_id())
+					{
+						output_summary[line_id].stop_sd_headway += pow ((*iter1).time_since_dep - output_summary[line_id].stop_avg_headway, 2);
+					}
+				}
+			}
+			else 
+			{
+				output_summary[line_id].stop_sd_headway += pow ((*iter1).time_since_dep - output_summary[line_id].stop_avg_headway, 2);
+			}
+			output_summary[line_id].stop_sd_DT += pow ((*iter1).dwell_time - output_summary[line_id].stop_avg_DT, 2);
+		}
+	}
+	// finish calculating all the SD measures 
+	if (trips.size()>2)	
+	{
+		output_summary[line_id].stop_sd_headway = sqrt(output_summary[line_id].stop_sd_headway/(counter-3));
+	}
+	else
+	{
+		output_summary[line_id].stop_sd_headway = sqrt(output_summary[line_id].stop_sd_headway/(counter-1));
+	}
+	output_summary[line_id].stop_sd_DT = sqrt(output_summary[line_id].stop_sd_DT/(counter-1));
+}
 

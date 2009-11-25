@@ -2547,16 +2547,32 @@ bool Network::writeheadways(string name)
 
 }
 
-bool Network::write_busstop_output(string name)
+bool Network::write_busstop_output(string name1, string name2, string name3)
 {
-	ofstream out(name.c_str());
-	assert(out);
-	
-	for (vector<Busstop*>::iterator iter=busstops.begin();iter!=busstops.end();iter++)
+	ofstream out1(name1.c_str());
+	ofstream out2(name2.c_str());
+	ofstream out3(name3.c_str());
+	assert(out1);
+	assert(out2);
+	assert(out3);
+	for (vector<Busstop*>::iterator iter = busstops.begin();iter != busstops.end();iter++)
 	{	
-		(*iter)->write_output(out);
+		(*iter)->write_output(out1);
+		vector<Busline*> stop_lines = (*iter)->get_lines();
+		for (vector <Busline*>::iterator lines = stop_lines.begin(); lines != stop_lines.end(); lines++)
+		{
+			(*iter)->calculate_sum_output_stop_per_line((*lines)->get_id());
+			(*iter)->get_output_summary((*lines)->get_id()).write(out2,(*iter)->get_id(),(*lines)->get_id());
+		}
 	}
-	out.close();
+	out1.close();
+	out2.close();
+	for (vector<Busline*>::iterator iter = buslines.begin();iter!= buslines.end(); iter++)
+	{	
+		(*iter)->calculate_sum_output_line();
+		(*iter)->get_output_summary().write(out3,(*iter)->get_id());
+	}
+	out3.close();
 	return true;
 }
 
@@ -3387,8 +3403,6 @@ bool Network::readmaster(string name)
 		return false;
 	inputfile >> temp;
 	filenames.push_back(workingdir+temp); // #17
-
-
 	inputfile >> temp;
 	if (temp!="#scenario")
 		return false;
@@ -3635,7 +3649,7 @@ bool Network::writeall()
 	writeheadways("timestamps.dat");
 	writeassmatrices("assign.dat");
 	write_v_queues("v_queues.dat");
-	this->write_busstop_output(workingdir+"buslog_out.dat");
+	this->write_busstop_output(workingdir + "buslog_out.dat", workingdir + "busstop_sum.dat", workingdir + "busline_sum.dat");
 	return true;
 }
 
