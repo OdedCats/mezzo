@@ -41,8 +41,8 @@ public:
 	double line_avg_abs_deviation;
 	double line_avg_waiting_per_stop;
 	double line_total_boarding;
-	double line_sd_headway;
-	double line_sd_DT;
+	double line_sd_headway; // averaged over stops (and not the SD for the whole dataset)
+	double line_sd_DT; // averaged over stops (and not the SD for the whole dataset)
 	double line_on_time;
 	double line_early;
 	double line_late;
@@ -86,7 +86,7 @@ public:
 	double calc_curr_line_ivt (Busstop* start_stop, Busstop* end_stop);
 	
 	// output-related functions
-	void calculate_sum_output_line();
+	void calculate_sum_output_line(); 
 
 	vector <Busstop*>  stops; //!< contains all the stops on this line
 
@@ -273,7 +273,7 @@ public:
 	// output-related functions
 	void write_output(ostream & out);
 	void record_busstop_visit ( Bustrip* trip, double enter_time); //!< creates a log-file for stop-related info
-	void calculate_sum_output_stop_per_line(int line_id);
+	void calculate_sum_output_stop_per_line(int line_id); // calculates for a single line that visits the stop (identified by line_id)
 
 	// relevant only for demand format 2
 	multi_rates multi_arrival_rates; //!< parameter lambda that defines the poission proccess of passengers arriving at the stop for each sequential stop

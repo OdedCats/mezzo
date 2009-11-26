@@ -2555,6 +2555,7 @@ bool Network::write_busstop_output(string name1, string name2, string name3)
 	assert(out1);
 	assert(out2);
 	assert(out3);
+	// writing the crude data and summary outputs for each bus stop
 	for (vector<Busstop*>::iterator iter = busstops.begin();iter != busstops.end();iter++)
 	{	
 		(*iter)->write_output(out1);
@@ -2563,10 +2564,12 @@ bool Network::write_busstop_output(string name1, string name2, string name3)
 		{
 			(*iter)->calculate_sum_output_stop_per_line((*lines)->get_id());
 			(*iter)->get_output_summary((*lines)->get_id()).write(out2,(*iter)->get_id(),(*lines)->get_id());
+			// this summary file contains for each stop a record for each line thats use it
 		}
 	}
 	out1.close();
 	out2.close();
+	// writing the aggregate summary output for each bus line
 	for (vector<Busline*>::iterator iter = buslines.begin();iter!= buslines.end(); iter++)
 	{	
 		(*iter)->calculate_sum_output_line();

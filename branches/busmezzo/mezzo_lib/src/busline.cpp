@@ -159,20 +159,19 @@ double Busline::calc_curr_line_ivt (Busstop* start_stop, Busstop* end_stop)
 
 void Busline::calculate_sum_output_line()
 {
+	// initialize all the measures
 	output_summary.line_avg_headway = 0;
 	output_summary.line_avg_DT = 0;
 	output_summary.line_avg_abs_deviation = 0;
 	output_summary.line_avg_waiting_per_stop = 0;
 	output_summary.line_total_boarding = 0;
-	
-	// average standard deviation over line's stops
-	output_summary.line_sd_headway = 0;
-	output_summary.line_sd_DT = 0;
-	
+	output_summary.line_sd_headway = 0; // average standard deviation over line's stops
+	output_summary.line_sd_DT = 0; // average standard deviation over line's stops
 	output_summary.line_on_time = 0;
 	output_summary.line_early = 0;
 	output_summary.line_late = 0;
 	
+	// accumulating the measures over line's stops
 	for (vector<Busstop*>::iterator stop = stops.begin(); stop < stops.end(); stop++)
 	{
 		output_summary.line_avg_headway += (*stop)->get_output_summary(id).stop_avg_headway;
