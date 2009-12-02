@@ -128,8 +128,6 @@ public:
 	double get_starttime () {return starttime;}
 	int get_init_occupancy () {return init_occupancy;}
 	vector <Visit_stop*> :: iterator& get_next_stop() {return next_stop;} //!< returns pointer to next stop
-	void set_pass (Passenger* passenger) {pass = passenger;}
-	Passenger* get_pass () {return pass;}
 	void set_enter_time (double enter_time_) {enter_time = enter_time_;}
 	double get_enter_time () {return enter_time;}
 
@@ -163,7 +161,6 @@ protected:
 	double enter_time; // the time it entered the most recently bus stop
 //	map <Busstop*,bool> trips_timepoint; //!< will be relevant only when time points are trip-specific. binary map with time point indicatons for stops on route only (according to the schedule input file)  
 	Eventlist* eventlist; //!< for use by busstops etc to book themselves.
-	Passenger* pass;
 };
 
 typedef pair<Busstop*, double> stop_rate;
@@ -246,7 +243,7 @@ public:
 
 	Output_Summary_Stop_Line get_output_summary (int line_id) {return output_summary[line_id];}
 
-// functions aimed to initialize lines-specific vectors at the busstop level
+// functions for initializing lines-specific vectors at the busstop level
 	void add_lines (Busline*  line) {lines.push_back(line);}
 	void add_line_nr_waiting(Busline* line, int value){nr_waiting[line] = value;}
 	void add_line_nr_boarding(Busline* line, double value){arrival_rates[line] = value;}
@@ -274,6 +271,7 @@ public:
 	void write_output(ostream & out);
 	void record_busstop_visit ( Bustrip* trip, double enter_time); //!< creates a log-file for stop-related info
 	void calculate_sum_output_stop_per_line(int line_id); // calculates for a single line that visits the stop (identified by line_id)
+	int calc_total_nr_waiting ();
 
 	// relevant only for demand format 2
 	multi_rates multi_arrival_rates; //!< parameter lambda that defines the poission proccess of passengers arriving at the stop for each sequential stop
@@ -289,7 +287,7 @@ protected:
 	double exit_time;
 	double dwelltime; //!< standard dwell time
 	int nr_boarding;//!< pass. boarding
-	int nr_alighting; //!< pass alighting
+	int nr_alighting; //!< pass alighting 
 	Random* random;
 	
 	vector <Busline*> lines;

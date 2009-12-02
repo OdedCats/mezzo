@@ -56,7 +56,7 @@ double Pass_path::calc_total_scheduled_in_vehicle_time (ODstops* odstops)
 		}
 		sum_in_vehicle_time += (*alight_stop)->second - (*board_stop)->second;
 		*/
-	return sum_in_vehicle_time;
+	return (sum_in_vehicle_time/60); // minutes
 }
 
 double Pass_path::calc_total_scheduled_headway ()
@@ -66,7 +66,7 @@ double Pass_path::calc_total_scheduled_headway ()
 	{
 		sum_headway_time += calc_curr_leg_headway(*iter_alt_lines);
 	}
-	return sum_headway_time;
+	return sum_headway_time; // minutes
 }
 
 double Pass_path::calc_curr_leg_headway (vector<Busline*> leg_lines)
@@ -74,11 +74,12 @@ double Pass_path::calc_curr_leg_headway (vector<Busline*> leg_lines)
 	double accumlated_frequency = 0.0;
 	for (vector<Busline*>::iterator iter_leg_lines = leg_lines.begin(); iter_leg_lines < leg_lines.end(); iter_leg_lines++)
 	{
-		accumlated_frequency += 60.0 / ((*iter_leg_lines)->calc_curr_line_headway ());
+		accumlated_frequency += 3600.0 / ((*iter_leg_lines)->calc_curr_line_headway ());
 	}
-	return (60/accumlated_frequency);
+	return (60/accumlated_frequency); // minutes
 }
 double Pass_path::calc_arriving_utility (ODstops* odstop)
+// this function currently assumes direct paths (has to include waiting times at transfers)
 {
 	return (theParameters->transfer_coefficient * number_of_transfers + theParameters->in_vehicle_time_coefficient * calc_total_scheduled_in_vehicle_time(odstop));
 }

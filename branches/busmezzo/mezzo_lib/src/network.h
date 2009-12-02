@@ -236,7 +236,7 @@ public:
 
 	// Public transport
 	
-	bool write_busstop_output(string name1, string name2, string name3); //<! writes all the bus-related output 
+	bool write_busstop_output(string name1, string name2, string name3, string name4); //<! writes all the bus-related output 
 	bool readbusroutes(string name); //!< reads the busroutes, similar to readroutes
 	bool readbusroute(istream& in); //!< reads a busroute
 	bool readbuslines(string name); //!< reads the busstops, buslines, and trips

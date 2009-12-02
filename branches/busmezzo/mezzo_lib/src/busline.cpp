@@ -641,7 +641,6 @@ double Busstop::passenger_activity_at_stop (Bustrip* trip, double time) //!< pro
 				if (this == (*alighting_passenger)->get_OD_stop()->get_destination()) // if this is the final destination of the passenger
 				{
 					pass_recycler.addPassenger(*alighting_passenger); // terminate passenger
-					// in the future - create an output file for passenger activity
 				}
 				else // if this is an intermediate transfer stop on passenger route 
 				{
@@ -670,13 +669,14 @@ double Busstop::passenger_activity_at_stop (Bustrip* trip, double time) //!< pro
 						{
 							break;
 						}
-						if ((*check_pass)->boarding_decision(trip->get_line()) == true)
+						if ((*check_pass)->make_boarding_decision(trip, time) == true)
 						{
 							// if the passenger decided to board this bus
 							if ((starting_occupancy + get_nr_boarding() - get_nr_alighting()) < trip->get_busv()->get_capacity()) 
 							{
-								// if the bus is not completly full - then the passenger board
+								// if the bus is not completly full - then the passenger boards
 								trip->passengers_on_board[(*check_pass)->alighting_decision()].push_back((*check_pass)); 
+								// currently - alighting decision is made when boarding
 								set_nr_boarding (get_nr_boarding()+1);
 								if (check_pass < pass_waiting_od.end()-1)
 								{
@@ -688,6 +688,7 @@ double Busstop::passenger_activity_at_stop (Bustrip* trip, double time) //!< pro
 								else
 								{
 									last_waiting_pass = true;
+									pass_waiting_od.erase(check_pass);
 									break;
 								}	
 							}
@@ -710,15 +711,15 @@ double Busstop::passenger_activity_at_stop (Bustrip* trip, double time) //!< pro
 								}	
 						}
 					}
-					if (last_waiting_pass == true)
-					{
-						pass_waiting_od.erase(pass_waiting_od.end()-1);
-					}
+					(*destination_stop).second->set_waiting_passengers(pass_waiting_od); // updating the waiting list at the ODstops object (deleting boarding pass.)
+					//if (last_waiting_pass == true)
+					//{
+					//	pass_waiting_od.erase(pass_waiting_od.end()-1);
+					//}
 				}
 			}
 		}	
 	}
-
 	trip->get_busv()->set_occupancy(starting_occupancy + get_nr_boarding() - get_nr_alighting()); // updating the occupancy
 	return calc_dwelltime (trip); 
 }
@@ -882,13 +883,35 @@ double Busstop::calc_exiting_time (Bustrip* trip, double time)
 	}
 }
 
+int Busstop::calc_total_nr_waiting ()
+{
+	int total_nr_waiting = 0;
+	// formats 1 and 2
+	if (theParameters->demand_format == 1 || theParameters->demand_format == 2)
+	{
+		for (vector<Busline*>::iterator lines_at_stop = lines.begin(); lines_at_stop < lines.end(); lines_at_stop++)
+		{
+			total_nr_waiting += nr_waiting[(*lines_at_stop)];
+		}
+	}
+	// format 3
+	else if (theParameters->demand_format ==3)
+	{
+		for (map <Busstop*, ODstops*>::iterator destination_stop = stop_as_origin.begin(); destination_stop != stop_as_origin.end(); destination_stop++)
+				// going through all the stops that this stop is their origin on a given OD pair
+		{
+			total_nr_waiting += (*destination_stop).second->get_waiting_passengers().size();
+		}
+	}
+return total_nr_waiting;
+}
 
-void Busstop::record_busstop_visit ( Bustrip* trip, double enter_time)  // creates a log-file for stop-related info
+void Busstop::record_busstop_visit (Bustrip* trip, double enter_time)  // creates a log-file for stop-related info
 {
 	
 	output_stop_visits.push_back(Busstop_Visit(trip->get_line()->get_id(), trip->get_id() , trip->get_busv()->get_bus_id() , get_id() , enter_time,
 			trip->scheduled_arrival_time (this),dwelltime,(enter_time - trip->scheduled_arrival_time (this)), exit_time, get_time_since_arrival (trip , enter_time),
-			get_time_since_departure (trip , exit_time),get_nr_alighting() , get_nr_boarding() , trip->get_busv()->get_occupancy(), get_nr_waiting(trip),exit_time-enter_time-dwelltime)); 
+			get_time_since_departure (trip , exit_time),get_nr_alighting() , get_nr_boarding() , trip->get_busv()->get_occupancy(), calc_total_nr_waiting() ,exit_time-enter_time-dwelltime)); 
 	
 }
 

@@ -54,11 +54,14 @@ bool ODstops::execute (Eventlist* eventlist, double curr_time) // generate passe
 
 double ODstops::calc_boarding_probability (Busline* arriving_bus)
 {
-	double boarding_utility;
-	double staying_utility = 0.0;
+	// initialization
+	boarding_utility = 0.0;
+	staying_utility = 0.0;
 	double accumlated_frequency_staying_alts = 0.0;
 	vector<Busline*> first_leg_lines;
 	bool in_alt = false; // indicates if the current arriving bus is included 
+	
+	// checks if the arriving bus is included as an option in the path set of this OD pair 
 	for (vector <Pass_path*>::iterator path = path_set.begin(); path < path_set.end(); path ++)
 	{
 		if (in_alt == true)
@@ -66,7 +69,7 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus)
 			break;
 		}
 		vector <vector <Busline*>> alt_lines = (*path)->get_alt_lines();
-		vector <Busline*> first_lines = alt_lines.front();
+		vector <Busline*> first_lines = alt_lines.front(); // need to check only for the first leg
 		for (vector <Busline*>::iterator line = first_lines.begin(); line < first_lines.end(); line++)
 		{
 			if ((*line)->get_id() == arriving_bus->get_id())
@@ -75,40 +78,69 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus)
 			}
 		}
 	}
-	for (vector<Pass_path*>::iterator iter_paths = path_set.begin(); iter_paths < path_set.end(); iter_paths++)
-	{
-		(*iter_paths)->set_arriving_bus_rellevant(false);
-		first_leg_lines = (*iter_paths)->get_alt_lines().front();
-		for(vector<Busline*>::iterator iter_first_leg_lines = first_leg_lines.begin(); iter_first_leg_lines < first_leg_lines.end(); iter_first_leg_lines++)
-		{
-			if ((*iter_first_leg_lines)->get_id() == arriving_bus->get_id())
-			{
-				 boarding_utility = (*iter_paths)->calc_arriving_utility(this);
-				 (*iter_paths)->set_arriving_bus_rellevant(true);
-				 break;
-			}
-		}
-		if ((*iter_paths)->get_arriving_bus_rellevant() == false)
-		{
-			accumlated_frequency_staying_alts = (60 / (*iter_paths)->calc_curr_leg_headway(first_leg_lines));
-		}
-	}
-	for (vector<Pass_path*>::iterator iter_paths = path_set.begin(); iter_paths < path_set.end(); iter_paths++)
-	{
-		if ((*iter_paths)->get_arriving_bus_rellevant() == false)
-		{
-			double relative_frequency = (60/(*iter_paths)->calc_curr_leg_headway(first_leg_lines)) / (60/accumlated_frequency_staying_alts);
-			staying_utility += relative_frequency * (*iter_paths)->calc_waiting_utility(this);
-		}
-	}
 	if (in_alt == true)
 	{
-		return calc_binary_logit(boarding_utility, staying_utility);
+		if (path_set.size() == 1) // if the choice-set includes only a single alternative of the arriving bus - then there is no choice left
+		{
+			boarding_utility = 10.0;
+			staying_utility = -10.0;
+			return 1;
+		}
+		for (vector<Pass_path*>::iterator iter_paths = path_set.begin(); iter_paths < path_set.end(); iter_paths++)
+		{
+			(*iter_paths)->set_arriving_bus_rellevant(false);
+			first_leg_lines = (*iter_paths)->get_alt_lines().front();
+			for(vector<Busline*>::iterator iter_first_leg_lines = first_leg_lines.begin(); iter_first_leg_lines < first_leg_lines.end(); iter_first_leg_lines++)
+			{
+				// has to be revised for non-direct paths, aggreagte over all options that include this bus
+				if ((*iter_first_leg_lines)->get_id() == arriving_bus->get_id()) // if the arriving bus is a possible first leg for this path alternative
+				{
+					boarding_utility = (*iter_paths)->calc_arriving_utility(this); 
+					(*iter_paths)->set_arriving_bus_rellevant(true);
+					break;
+				}
+			}
+			if ((*iter_paths)->get_arriving_bus_rellevant() == false) // if the arriving bus isn't a possible first leg for this path alternative
+			{
+				accumlated_frequency_staying_alts += (60 / (*iter_paths)->calc_curr_leg_headway(first_leg_lines)); 
+				// aggregates the frequencies of all the options that does not include the arriving bus
+			}
+		}
+		for (vector<Pass_path*>::iterator iter_paths = path_set.begin(); iter_paths < path_set.end(); iter_paths++)
+		{
+			if ((*iter_paths)->get_arriving_bus_rellevant() == false)
+			{
+				double relative_frequency = (60/(*iter_paths)->calc_curr_leg_headway(first_leg_lines)) / accumlated_frequency_staying_alts;
+				// weighting factor for each path alternative that does not include the arriving bus
+				staying_utility += relative_frequency * (*iter_paths)->calc_waiting_utility(this);
+			}
+		}
+		return calc_binary_logit(boarding_utility, staying_utility); // calculate the probability to board
 	}
-	else return 0.5;
+	// what to do if the arriving bus is not included in any of the alternatives?
+	// currently - will not board it
+	else 
+	{	
+		boarding_utility = -10.0;
+		staying_utility = 10.0;
+		return 0;
+	}
 }
 
 double ODstops::calc_binary_logit (double utility_i, double utility_j)
 {
-	return ((exp(utility_i)) / exp(utility_i + utility_j));
+	return ((exp(utility_i)) / (exp(utility_i) + exp (utility_j)));
+}
+
+void ODstops::record_passenger_boarding_decision (Passenger* pass, Bustrip* trip, double time, bool boarding_decision)  // creates a log-file for stop-related info
+{
+	output_pass_decisions.push_back(Pass_boarding_decision(pass->get_id(), trip->get_line()->get_id(), trip->get_id() , pass->get_OD_stop()->get_origin()->get_id() , time, pass->get_start_time(), boarding_decision, boarding_utility, staying_utility)); 
+}
+
+void ODstops::write_output(ostream & out)
+{
+	for (list <Pass_boarding_decision>::iterator iter = output_pass_decisions.begin(); iter!=output_pass_decisions.end();iter++)
+	{
+		iter->write(out);
+	}
 }

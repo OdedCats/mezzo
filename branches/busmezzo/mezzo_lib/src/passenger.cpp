@@ -2,6 +2,7 @@
 #include "passenger.h"
 Passenger::Passenger ()
 {
+	boarding_decision = false;
 	random = new (Random);
 	if (randseed != 0)
 	{
@@ -22,12 +23,14 @@ void Passenger::init (int pass_id, double start_time_, ODstops* OD_stop_)
 	passenger_id = pass_id;
 	start_time = start_time_;
 	OD_stop = OD_stop_;
+	boarding_decision = false;
 }
 
-bool Passenger:: boarding_decision (Busline* arriving_bus) // assuming that passengers board the first bus arriving at the stop (regardless of its route)
+bool Passenger:: make_boarding_decision (Bustrip* arriving_bus, double time) 
 {
-	random ->brandom(OD_stop->calc_boarding_probability(arriving_bus));
-	return true;
+	boarding_decision = random ->brandom(OD_stop->calc_boarding_probability(arriving_bus->get_line()));
+	OD_stop->record_passenger_boarding_decision (this, arriving_bus, time, boarding_decision);
+	return boarding_decision;
 }
 
 Busstop* Passenger::alighting_decision () // assuming that all passenger paths involve only direct trips

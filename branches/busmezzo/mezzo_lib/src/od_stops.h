@@ -11,10 +11,31 @@
 
 class Busline;
 class Busstop;
+class Bustrip;
 class Passenger;
 class Pass_path;
 
 typedef vector <Passenger*> passengers;
+
+class Pass_boarding_decision // container object holding output data for passenger boarding decision
+{
+public:
+	Pass_boarding_decision (int pass_id_, int line_id_,	int trip_id_, int stop_id_, double time_, double generation_time_, bool boarding_,
+							double u_boarding_, double u_staying_):
+							pass_id(pass_id_),line_id(line_id_),trip_id(trip_id_), stop_id(stop_id_),time(time_),generation_time(generation_time_),boarding(boarding_),
+							u_boarding(u_boarding_),u_staying(u_staying_) {}
+	void write (ostream& out) { out << pass_id << '\t' << line_id << '\t'<< trip_id << '\t'<< stop_id<< '\t'<< time << '\t'<< generation_time << '\t'
+		<< boarding << '\t'<< u_boarding << '\t'<< u_staying <<'\t'<< endl; }
+	int pass_id;
+	int line_id;
+	int trip_id;
+	int stop_id;
+	double time;
+	double generation_time;
+	bool boarding;
+	double u_boarding;
+	double u_staying;
+};
 
 class ODstops : public Action
 {
@@ -29,6 +50,7 @@ public:
 	vector <Pass_path*> get_path_set () {return path_set;}
 	double get_arrivalrate () {return arrival_rate;}
 	passengers get_waiting_passengers() {return waiting_passengers;}
+	void set_waiting_passengers(passengers passengers_) {waiting_passengers = passengers_;}
 	void set_origin (Busstop* origin_stop_) {origin_stop=origin_stop_;}
 	void set_destination (Busstop* destination_stop_) {destination_stop=destination_stop_;}
 	
@@ -41,6 +63,11 @@ public:
 	double calc_boarding_probability (Busline* arriving_bus);
 	double calc_binary_logit (double utility_i, double utility_j);
 
+	
+	// output-related functions
+	void record_passenger_boarding_decision (Passenger* pass, Bustrip* trip, double time, bool boarding_decision); //!< creates a log-file for boarding decision related info
+	void write_output(ostream & out);
+
 protected:
 	Busstop* origin_stop;
 	Busstop* destination_stop;
@@ -48,6 +75,11 @@ protected:
 	passengers waiting_passengers; // a list of passengers with this OD that wait at the origin
 	
 	vector <Pass_path*> path_set;
+	double boarding_utility;
+	double staying_utility;
+
+	// output structures
+	list <Pass_boarding_decision> output_pass_decisions; //!< list of output data for buses visiting stops
 
 	Random* random;
 	Eventlist* eventlist; //!< to book passenger generation events

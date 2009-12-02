@@ -2547,14 +2547,16 @@ bool Network::writeheadways(string name)
 
 }
 
-bool Network::write_busstop_output(string name1, string name2, string name3)
+bool Network::write_busstop_output(string name1, string name2, string name3, string name4)
 {
 	ofstream out1(name1.c_str());
 	ofstream out2(name2.c_str());
 	ofstream out3(name3.c_str());
+	ofstream out4(name4.c_str());
 	assert(out1);
 	assert(out2);
 	assert(out3);
+	assert(out4);
 	// writing the crude data and summary outputs for each bus stop
 	for (vector<Busstop*>::iterator iter = busstops.begin();iter != busstops.end();iter++)
 	{	
@@ -2576,6 +2578,11 @@ bool Network::write_busstop_output(string name1, string name2, string name3)
 		(*iter)->get_output_summary().write(out3,(*iter)->get_id());
 	}
 	out3.close();
+	for (vector<ODstops*>::iterator od_iter = odstops.begin(); od_iter < odstops.end(); od_iter++)
+	{
+		(*od_iter)->write_output(out4);
+	}
+	out4.close();
 	return true;
 }
 
@@ -3652,7 +3659,7 @@ bool Network::writeall()
 	writeheadways("timestamps.dat");
 	writeassmatrices("assign.dat");
 	write_v_queues("v_queues.dat");
-	this->write_busstop_output(workingdir + "buslog_out.dat", workingdir + "busstop_sum.dat", workingdir + "busline_sum.dat");
+	this->write_busstop_output(workingdir + "buslog_out.dat", workingdir + "busstop_sum.dat", workingdir + "busline_sum.dat", workingdir + "passengerlog.dat");
 	return true;
 }
 

@@ -6,6 +6,7 @@
 #include "od_stops.h"
 #include "Random.h"
 
+class Bustrip;
 class Busline;
 class Busstop;
 class ODstops;
@@ -18,17 +19,20 @@ public:
 	void init (int pass_id, double start_time_, ODstops* OD_stop_);
 	
 	// Gets and sets:
+	int get_id () {return passenger_id;}
+	double get_start_time () {return start_time;}
 	ODstops* get_OD_stop () {return OD_stop;}
 	void set_ODstop (ODstops* ODstop_) {OD_stop = ODstop_;}
 
 	// Passenger decision processes - currently the simplest case possible is assumed
-	bool boarding_decision (Busline* arriving_bus); // boarding decision making - currently: board every passing bus
+	bool make_boarding_decision (Bustrip* arriving_bus, double time); // boarding decision making 
 	Busstop* alighting_decision (); // alighting decision making - currently: alight at your destination stop (assuming no transfers)
 
 protected:
 	int passenger_id;
 	double start_time;
 	ODstops* OD_stop;
+	bool boarding_decision;
 	Random* random;
 };
 
