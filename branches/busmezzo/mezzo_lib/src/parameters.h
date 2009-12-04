@@ -169,6 +169,7 @@ public:
    double transfer_coefficient;
    double in_vehicle_time_coefficient;
    double waiting_time_coefficient;
+   int max_nr_extra_transfers;
 
 // TODO: Implement the use of the following paramaters
    double vissim_step; //!< time step for the VISSIM micro model

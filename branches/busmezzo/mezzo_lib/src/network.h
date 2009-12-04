@@ -248,9 +248,11 @@ public:
    bool read_passenger_rates_format3 (istream& in); // reads the passenger rates in the format of arrival rate per OD in terms of stops (no path is pre-determined)
   bool read_bustype (istream& in); // reads a bus type
   bool read_busvehicle(istream& in); // reads a bus vehicle 
-  bool find_direct_paths (); // not operational yet
-  void merge_paths (Busstop* stop);  // not operational yet
-  bool compare_same_paths (Pass_path* path1, Pass_path* path2); // not operational yet
+  bool find_direct_paths (Busstop* bs_origin, Busstop* bs_destination);
+  void find_all_paths (); // to be tested
+  void find_recursive_connection (Busstop* origin, Busstop* destination);
+  void merge_paths (Busstop* stop);  // to be tested
+  bool compare_same_paths (Pass_path* path1, Pass_path* path2); // to be tested
 #ifndef _NO_GUI
 	double get_width_x() {return width_x;} //!< returns image width in original coordinate system
 	double get_height_y() {return height_y;} //!< ... height ...
@@ -305,6 +307,8 @@ protected:
 	//typedef map <int, ODstops*> odstops_by_destination;
 	//map <int, odstops_by_destination> odstops; // a map of maps of ODstops
 	vector <ODstops*> odstops;
+	vector<Busstop*> collect_im_stops;
+	vector<Busline*> collect_lines;
 
 	//Shortest path graph
 #ifndef _USE_VAR_TIMES

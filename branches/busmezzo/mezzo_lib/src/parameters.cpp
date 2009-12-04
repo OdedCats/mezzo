@@ -83,6 +83,7 @@ Parameters::Parameters ()
    transfer_coefficient = 0; 
    in_vehicle_time_coefficient = 0;
    waiting_time_coefficient = 0;
+   max_nr_extra_transfers = 1;
 }
 
 bool Parameters::read_parameters (istream & in )
@@ -515,6 +516,13 @@ bool Parameters::read_parameters (istream & in )
 		return false;
 	}
 	in >> waiting_time_coefficient;
+	in >> keyword;
+	if (keyword!= "max_nr_extra_transfers=")
+	{
+		cout << "ERROR reading Parameters file, expecting: max_nr_extra_transfers=, read: " << keyword << endl;
+		return false;
+	}
+	in >> max_nr_extra_transfers;
 	return true;
 }
 

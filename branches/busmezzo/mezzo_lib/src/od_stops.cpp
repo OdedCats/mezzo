@@ -12,6 +12,7 @@ ODstops::ODstops (Busstop* origin_stop_, Busstop* destination_stop_, double arri
 	origin_stop = origin_stop_;
 	destination_stop = destination_stop_;
 	arrival_rate = arrival_rate_;
+	min_transfers = 100;
 	random = new (Random);
 	active = false;
 	if (randseed != 0)

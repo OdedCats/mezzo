@@ -50,9 +50,11 @@ public:
 	vector <Pass_path*> get_path_set () {return path_set;}
 	double get_arrivalrate () {return arrival_rate;}
 	passengers get_waiting_passengers() {return waiting_passengers;}
+	int get_min_transfers () {return min_transfers;}
 	void set_waiting_passengers(passengers passengers_) {waiting_passengers = passengers_;}
 	void set_origin (Busstop* origin_stop_) {origin_stop=origin_stop_;}
 	void set_destination (Busstop* destination_stop_) {destination_stop=destination_stop_;}
+	void set_min_transfers (int min_transfers_) {min_transfers = min_transfers_;}
 	
 	// Passengers processes
 	void book_next_passenger (double curr_time);
@@ -73,6 +75,7 @@ protected:
 	Busstop* destination_stop;
 	double arrival_rate; 
 	passengers waiting_passengers; // a list of passengers with this OD that wait at the origin
+	int min_transfers; // the minimum number of trnasfers possible for getting from O to D
 	
 	vector <Pass_path*> path_set;
 	double boarding_utility;
