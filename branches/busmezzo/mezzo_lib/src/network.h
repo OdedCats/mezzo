@@ -248,11 +248,15 @@ public:
    bool read_passenger_rates_format3 (istream& in); // reads the passenger rates in the format of arrival rate per OD in terms of stops (no path is pre-determined)
   bool read_bustype (istream& in); // reads a bus type
   bool read_busvehicle(istream& in); // reads a bus vehicle 
-  bool find_direct_paths (Busstop* bs_origin, Busstop* bs_destination);
-  void find_all_paths (); // to be tested
-  void find_recursive_connection (Busstop* origin, Busstop* destination);
+  bool find_direct_paths (Busstop* bs_origin, Busstop* bs_destination); // finds direct paths and generate new direct paths
+  void generate_indirect_paths (); // generates new indirect paths
+  void find_all_paths (); // goes over all OD stop pairs to generate their path choice set
+  void find_recursive_connection (Busstop* origin, Busstop* destination); // search recursively for a path (forward - from origin to destination)
   void merge_paths (Busstop* stop);  // to be tested
-  bool compare_same_paths (Pass_path* path1, Pass_path* path2); // to be tested
+  bool compare_same_lines_paths (Pass_path* path1, Pass_path* path2); // checks if two paths are identical in terms of lines
+  bool check_constraints_paths (Pass_path* path); // checks if the path meets all the constraints
+  bool check_path_no_repeating_lines (Pass_path* path); // checks if the path does not include going on and off the same bus line at the same stop
+  bool check_path_no_repeating_stops (Pass_path* path); // chceks if the path deos not include going through the same stop more than once
 #ifndef _NO_GUI
 	double get_width_x() {return width_x;} //!< returns image width in original coordinate system
 	double get_height_y() {return height_y;} //!< ... height ...
@@ -304,11 +308,9 @@ protected:
 	vector <Busroute*> busroutes; //!< the routes that buses follow
     vector <Bustype*> bustypes; // types of bus vehicles
     vector <Bus*> busvehicles; // a list of the bus vehicles
-	//typedef map <int, ODstops*> odstops_by_destination;
-	//map <int, odstops_by_destination> odstops; // a map of maps of ODstops
 	vector <ODstops*> odstops;
-	vector<Busstop*> collect_im_stops;
-	vector<Busline*> collect_lines;
+	vector<Busstop*> collect_im_stops; // compose the list of stops for a path
+	map<ODstops*, vector<Busline*>> direct_lines; // contains all direct lines between ODs
 
 	//Shortest path graph
 #ifndef _USE_VAR_TIMES

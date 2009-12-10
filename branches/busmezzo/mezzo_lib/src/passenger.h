@@ -22,15 +22,17 @@ public:
 	int get_id () {return passenger_id;}
 	double get_start_time () {return start_time;}
 	ODstops* get_OD_stop () {return OD_stop;}
+	Busstop* get_original_origin () {return original_origin;}
 	void set_ODstop (ODstops* ODstop_) {OD_stop = ODstop_;}
 
 	// Passenger decision processes - currently the simplest case possible is assumed
 	bool make_boarding_decision (Bustrip* arriving_bus, double time); // boarding decision making 
-	Busstop* alighting_decision (); // alighting decision making - currently: alight at your destination stop (assuming no transfers)
+	Busstop* make_alighting_decision (Bustrip* boarding_bus); // alighting decision making - currently: alight at your destination stop (assuming no transfers)
 
 protected:
 	int passenger_id;
 	double start_time;
+	Busstop* original_origin;
 	ODstops* OD_stop;
 	bool boarding_decision;
 	Random* random;

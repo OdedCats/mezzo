@@ -633,93 +633,86 @@ double Busstop::passenger_activity_at_stop (Bustrip* trip, double time) //!< pro
 	if (theParameters->demand_format == 3)   // demand is given in terms of arrival rate of individual passengers per OD of stops (future - route choice)
 	{	
 		// * Alighting passengers *
-		if (is_destination == true)
+		set_nr_alighting (trip->passengers_on_board[this].size()); 
+		for (vector <Passenger*> ::iterator alighting_passenger = trip->passengers_on_board[this].begin(); alighting_passenger < trip->passengers_on_board[this].end(); alighting_passenger++)
 		{
-			set_nr_alighting (trip->passengers_on_board[this].size()); 
-			for (vector <Passenger*> ::iterator alighting_passenger = trip->passengers_on_board[this].begin(); alighting_passenger < trip->passengers_on_board[this].end(); alighting_passenger++)
+			if (this == (*alighting_passenger)->get_OD_stop()->get_destination()) // if this is the final destination of the passenger
 			{
-				if (this == (*alighting_passenger)->get_OD_stop()->get_destination()) // if this is the final destination of the passenger
-				{
-					pass_recycler.addPassenger(*alighting_passenger); // terminate passenger
-				}
-				else // if this is an intermediate transfer stop on passenger route 
-				{
-					(*alighting_passenger)->set_ODstop(stop_as_origin[(*alighting_passenger)->get_OD_stop()->get_destination()]); // set this stop to his new origin (new OD)
-					(*alighting_passenger)->get_OD_stop()->get_waiting_passengers().push_back (*alighting_passenger); // add him to the waiting queue on his new OD
-				}
+				pass_recycler.addPassenger(*alighting_passenger); // terminate passenger
 			}
-			trip->passengers_on_board[this].clear(); 
-		}
-		// * Boarding passengers *
-		if (is_origin == true)
-		{
-			for (map <Busstop*, ODstops*>::iterator destination_stop = stop_as_origin.begin(); destination_stop != stop_as_origin.end(); destination_stop++)
+			else // if this is an intermediate transfer stop on passenger route 
 			{
-				// going through all the stops that this stop is their origin on a given OD pair
-				passengers pass_waiting_od = (*destination_stop).second->get_waiting_passengers();
-				if (pass_waiting_od.empty() == false) // if there are waiting passengers with this destination
+				(*alighting_passenger)->set_ODstop(stop_as_origin[(*alighting_passenger)->get_OD_stop()->get_destination()]); // set this stop as his new origin (new OD)
+				passengers wait_pass = (*alighting_passenger)->get_OD_stop()->get_waiting_passengers(); // add him to the waiting queue on his new OD
+				wait_pass.push_back (*alighting_passenger);
+			    (*alighting_passenger)->get_OD_stop()->set_waiting_passengers(wait_pass);
+			}
+		}
+			trip->passengers_on_board[this].clear(); 
+		// * Boarding passengers *
+
+		for (map <Busstop*, ODstops*>::iterator destination_stop = stop_as_origin.begin(); destination_stop != stop_as_origin.end(); destination_stop++)
+		{
+			// going through all the stops that this stop is their origin on a given OD pair
+			passengers pass_waiting_od = (*destination_stop).second->get_waiting_passengers();
+			if (pass_waiting_od.empty() == false) // if there are waiting passengers with this destination
+			{
+				passengers::iterator check_pass = pass_waiting_od.begin();
+				Passenger* next_pass;
+				bool last_waiting_pass = false;
+				while (check_pass < pass_waiting_od.end())
 				{
-					passengers::iterator check_pass = pass_waiting_od.begin();
-					Passenger* next_pass;
-					bool last_waiting_pass = false;
-					while (check_pass < pass_waiting_od.end())
+					// progress each waiting passenger   
+					if ((*check_pass)->get_OD_stop()->get_origin()->get_id() != this->get_id())
 					{
-						// progress each waiting passenger   
-						if ((*check_pass)->get_OD_stop()->get_origin()->get_id() != this->get_id())
+						break;
+					}
+					if ((*check_pass)->make_boarding_decision(trip, time) == true)
+					{
+						// if the passenger decided to board this bus
+						if ((starting_occupancy + get_nr_boarding() - get_nr_alighting()) < trip->get_busv()->get_capacity()) 
 						{
-							break;
+							// if the bus is not completly full - then the passenger boards
+							trip->passengers_on_board[(*check_pass)->make_alighting_decision(trip)].push_back((*check_pass)); 
+							// currently - alighting decision is made when boarding
+							set_nr_boarding (get_nr_boarding()+1);
+							if (check_pass < pass_waiting_od.end()-1)
+							{
+								check_pass++;
+								next_pass = (*check_pass);
+								pass_waiting_od.erase(check_pass-1);
+								check_pass = find(pass_waiting_od.begin(),pass_waiting_od.end(),next_pass);
+							}
+							else
+							{
+								last_waiting_pass = true;				
+								pass_waiting_od.erase(check_pass);
+								break;
+							}	
 						}
-						if ((*check_pass)->make_boarding_decision(trip, time) == true)
+						else 
 						{
-							// if the passenger decided to board this bus
-							if ((starting_occupancy + get_nr_boarding() - get_nr_alighting()) < trip->get_busv()->get_capacity()) 
-							{
-								// if the bus is not completly full - then the passenger boards
-								trip->passengers_on_board[(*check_pass)->alighting_decision()].push_back((*check_pass)); 
-								// currently - alighting decision is made when boarding
-								set_nr_boarding (get_nr_boarding()+1);
-								if (check_pass < pass_waiting_od.end()-1)
-								{
-									check_pass++;
-									next_pass = (*check_pass);
-									pass_waiting_od.erase(check_pass-1);
-									check_pass = find(pass_waiting_od.begin(),pass_waiting_od.end(),next_pass);
-								}
-								else
-								{
-									last_waiting_pass = true;
-									pass_waiting_od.erase(check_pass);
-									break;
-								}	
-							}
-							else 
-							{
-								// if the bus is already completly full - then the passenger cannot board, even though he wants to
-							}
+							// if the bus is already completly full - then the passenger cannot board, even though he wants to
+						}
+					}	
+					else
+					{
+						// if the passenger decides he does NOT want to board this bus
+						if (check_pass < pass_waiting_od.end()-1)
+						{
+							check_pass++;
 						}
 						else
 						{
-							// if the passenger decides he does NOT want to board this bus
-								if (check_pass < pass_waiting_od.end()-1)
-								{
-									check_pass++;
-								}
-								else
-								{
-									last_waiting_pass = true;
-									break;
-								}	
-						}
+							last_waiting_pass = true;
+							break;
+						}	
 					}
-					(*destination_stop).second->set_waiting_passengers(pass_waiting_od); // updating the waiting list at the ODstops object (deleting boarding pass.)
-					//if (last_waiting_pass == true)
-					//{
-					//	pass_waiting_od.erase(pass_waiting_od.end()-1);
-					//}
 				}
+				(*destination_stop).second->set_waiting_passengers(pass_waiting_od); // updating the waiting list at the ODstops object (deleting boarding pass.)
 			}
 		}	
-	}
+	}	
 	trip->get_busv()->set_occupancy(starting_occupancy + get_nr_boarding() - get_nr_alighting()); // updating the occupancy
 	return calc_dwelltime (trip); 
 }

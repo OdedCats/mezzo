@@ -1732,6 +1732,7 @@ bool Network::read_passenger_rates_format3 (istream& in) // reads the passenger 
 }
 
 bool Network::find_direct_paths (Busstop* bs_origin, Busstop* bs_destination) 
+// finds if there is a direct path between a given pair of stops, generate new direct paths
 {
   vector <Busline*> lines_o = bs_origin->get_lines();
   for (vector <Busline*>::iterator bl_o = lines_o.begin(); bl_o < lines_o.end(); bl_o++)
@@ -1746,7 +1747,6 @@ bool Network::find_direct_paths (Busstop* bs_origin, Busstop* bs_destination)
 				if ((*stop) == (bs_origin)) // if this condition is met first - it means that this is a possible path for this OD (origin preceeds destination)
 				{	
 					bool original_path = true;
-					collect_lines.push_back(*bl_o);
 					vector<Busline*> last_line;
 					vector<vector<Busline*>> lines_sequence;
 					vector<vector<Busstop*>> stops_sequence;
@@ -1765,72 +1765,25 @@ bool Network::find_direct_paths (Busstop* bs_origin, Busstop* bs_destination)
 						vector <Pass_path*> current_path_set = od_as_origin[bs_destination]->get_path_set();
 						for (vector <Pass_path*>::iterator iter = current_path_set.begin(); iter != current_path_set.end(); iter++)
 						{
-							if (compare_same_paths(direct_path,(*iter)) == true)
+							if (compare_same_lines_paths(direct_path,(*iter)) == true)
 							{
 								original_path = false;
 							}
 						}
-					// add the direct path if it is an original one
-						if (original_path == true)
+					// add the direct path if it is an original one and it fulfills the constraints
+						if (original_path == true && check_constraints_paths(direct_path) == true)
 						{
 							map <Busstop*, ODstops*> od_as_origin = bs_origin->get_stop_as_origin();
 							od_as_origin[bs_destination]->add_paths(direct_path);
+							direct_lines[od_as_origin[bs_destination]].push_back(*bl_o);
 							if (direct_path->get_number_of_transfers() < od_as_origin[bs_destination]->get_min_transfers())
 							// update the no. of min transfers required if decreased
 							{
 								od_as_origin[bs_destination]->set_min_transfers(direct_path->get_number_of_transfers());
 							}
+							return true;
 						}
-					if (bs_origin->get_id() != collect_im_stops.front()->get_id()) 
-					// in case it is also the last segment of an indirect path
-					{
-						original_path = true;
-						last_line.clear();
-						stops_sequence.clear();
-						lines_sequence.clear();
-						for (vector<Busstop*>::iterator im_iter = collect_im_stops.begin(); im_iter < collect_im_stops.end(); im_iter++)
-						{
-							vector <Busstop*> im_stops;
-							im_stops.push_back((*im_iter));
-							stops_sequence.push_back(im_stops);
-						}
-						vector<Busstop*> d_stop; // the destination of this segment is also the destination for the complete path
-						d_stop.push_back(bs_destination);
-						stops_sequence.push_back(d_stop);
-						for (vector<Busline*>::iterator p_lines_iter = collect_lines.begin(); p_lines_iter < collect_lines.end(); p_lines_iter++)
-						{
-							vector <Busline*> p_lines;
-							p_lines.push_back((*p_lines_iter));
-							lines_sequence.push_back(p_lines);
-						}
-						last_line.push_back(*bl_o);
-						lines_sequence.push_back(last_line);
-						Pass_path* indirect_path = new Pass_path(lines_sequence, stops_sequence);
-						// check if this path was already generated		
-						map <Busstop*, ODstops*> od_as_origin = collect_im_stops.front()->get_stop_as_origin();
-						vector <Pass_path*> current_path_set = od_as_origin[bs_destination]->get_path_set();
-						for (vector <Pass_path*>::iterator iter = current_path_set.begin(); iter != current_path_set.end(); iter++)
-						{
-							if (compare_same_paths(indirect_path,(*iter)) == true)
-							{
-								original_path = false;
-								break;
-							}
-						}
-						// add the indirect path if it is an original one
-						if (original_path == true)
-						{
-							map <Busstop*, ODstops*> od_as_origin = collect_im_stops.front()->get_stop_as_origin(); // refer the original origin
-							od_as_origin[bs_destination]->add_paths(indirect_path);
-							if (indirect_path->get_number_of_transfers() < od_as_origin[bs_destination]->get_min_transfers())
-							// update the no. of min transfers required if decreased
-							{
-								od_as_origin[bs_destination]->set_min_transfers(indirect_path->get_number_of_transfers());
-							}
-						}
-					}
-					collect_lines.pop_back();
-					return true;
+
 				}
 				if ((*stop) == bs_destination) // if this condition is met first - it means that this is not a possible path (destination preceeds origin)
 				{
@@ -1845,8 +1798,75 @@ bool Network::find_direct_paths (Busstop* bs_origin, Busstop* bs_destination)
 return false;
 }
 
-void Network::find_all_paths () 
+void Network::generate_indirect_paths()
 {
+	bool original_path = true;
+	vector<vector<Busline*>> lines_sequence;
+	vector<vector<Busstop*>> stops_sequence;
+	// compose the list of intermediate stops
+	for (vector<Busstop*>::iterator im_iter = collect_im_stops.begin(); im_iter < collect_im_stops.end(); im_iter++)
+	{
+		vector <Busstop*> im_stops;
+		im_stops.push_back((*im_iter));
+		stops_sequence.push_back(im_stops);
+	}
+	// compose the list of direct lines between wach pair of intermediate stops
+	for (vector<Busstop*>::iterator im_iter = collect_im_stops.begin(); im_iter < collect_im_stops.end()-1; im_iter++)
+	{
+		map <Busstop*, ODstops*> im_as_origin = (*im_iter)->get_stop_as_origin();
+		vector <Busline*> p_lines;
+		vector<Busline*> d_lines = direct_lines[im_as_origin[(*(im_iter+1))]];
+		p_lines.push_back(d_lines.front()); // assuming a unique direct line for the moment
+		lines_sequence.push_back(p_lines);
+	}
+	Pass_path* indirect_path = new Pass_path(lines_sequence, stops_sequence);
+	// check if this path was already generated		
+	map <Busstop*, ODstops*> od_as_origin = collect_im_stops.front()->get_stop_as_origin();
+	vector <Pass_path*> current_path_set = od_as_origin[collect_im_stops.back()]->get_path_set();
+	for (vector <Pass_path*>::iterator iter = current_path_set.begin(); iter != current_path_set.end(); iter++)
+	{
+		if (compare_same_lines_paths(indirect_path,(*iter)) == true)
+		{
+			original_path = false;
+			break;
+		}
+	}
+	// add the indirect path if it is an original one and it fulfills the constraints
+	if (original_path == true && check_constraints_paths (indirect_path) == true)
+	{
+		map <Busstop*, ODstops*> od_as_origin = collect_im_stops.front()->get_stop_as_origin(); // refer the original origin
+		od_as_origin[collect_im_stops.back()]->add_paths(indirect_path);
+		if (indirect_path->get_number_of_transfers() < od_as_origin[collect_im_stops.back()]->get_min_transfers())
+		// update the no. of min transfers required if decreased
+		{
+			od_as_origin[collect_im_stops.back()]->set_min_transfers(indirect_path->get_number_of_transfers());
+		}
+	}
+					/******************************************************************
+						int nr_path_combinations = 1;
+						// count how many combinations of paths you can make (multiply number of direct lines on segments)
+						for (vector<Busstop*>::iterator im_iter = collect_im_stops.begin(); im_iter < (collect_im_stops.end()-1); im_iter++)
+						{
+							map <Busstop*, ODstops*> od_as_origin = (*im_iter)->get_stop_as_origin();
+							nr_path_combinations = nr_path_combinations * direct_lines[od_as_origin[*(im_iter+1)]].size();
+						}
+						*/////////////////////
+
+}
+void Network::find_all_paths () 
+// goes over all OD stop pairs to generate their path choice set
+{
+	// first - generate all direct paths
+	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
+	{
+		map <Busstop*, ODstops*> od_as_origin = (*basic_origin)->get_stop_as_origin();
+		for (map<Busstop*, ODstops*>::iterator iter = od_as_origin.begin(); iter != od_as_origin.end(); iter++)
+		{
+			Busstop* basic_destination = (*iter).first;
+			find_direct_paths ((*basic_origin), basic_destination);
+		}
+	}
+	// second - generate indirect paths
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{
 		map <Busstop*, ODstops*> od_as_origin = (*basic_origin)->get_stop_as_origin();
@@ -1856,35 +1876,42 @@ void Network::find_all_paths ()
 			Busstop* basic_destination = (*iter).first;
 			find_recursive_connection ((*basic_origin), basic_destination);
 			collect_im_stops.clear();
-			collect_lines.clear();
 		}
 	}
 }
 
 void Network:: find_recursive_connection (Busstop* origin, Busstop* destination)
+// search recursively for a path (forward - from origin to destination)
 {
-	find_direct_paths (origin,destination);
 	map <Busstop*, ODstops*> od_as_origin = origin->get_stop_as_origin();
-	for (map<Busstop*, ODstops*>::iterator iter = od_as_origin.begin(); iter != od_as_origin.end(); iter++)
+	map <Busstop*, ODstops*> original_od_as_origin = collect_im_stops.front()->get_stop_as_origin();
+	if (od_as_origin.size() > 0)
 	{
-		Busstop* intermediate_destination = (*iter).first;
-		if (intermediate_destination->get_id() != destination->get_id())
+		if ((collect_im_stops.size() - 1) <= original_od_as_origin[destination]->get_min_transfers() + theParameters->max_nr_extra_transfers)
 		{
-			collect_im_stops.push_back(intermediate_destination);
-			if (find_direct_paths(intermediate_destination, destination) == true)
+			for (map<Busstop*, ODstops*>::iterator iter = od_as_origin.begin(); iter != od_as_origin.end(); iter++)
 			{
-				map <Busstop*, ODstops*> im_as_origin = intermediate_destination->get_stop_as_origin();
-				int nr_transfers = im_as_origin[destination]->get_path_set().back()->get_number_of_transfers();
-				if (nr_transfers >= im_as_origin[destination]->get_min_transfers() + theParameters->max_nr_extra_transfers)
+				Busstop* intermediate_destination = (*iter).first;
+				map <Busstop*, ODstops*> last_stop_as_origin = collect_im_stops.back()->get_stop_as_origin();
+				if (direct_lines[last_stop_as_origin[intermediate_destination]].size() != 0)
 				{
+					collect_im_stops.push_back(intermediate_destination);
+						if (intermediate_destination->get_id() != destination->get_id())
+						{
+							map <Busstop*, ODstops*> im_as_origin = intermediate_destination->get_stop_as_origin();
+							if (direct_lines[im_as_origin[destination]].size() != 0)
+							{			
+								collect_im_stops.push_back(destination);
+								generate_indirect_paths();
+								collect_im_stops.pop_back();
+							}
+							find_recursive_connection (intermediate_destination, destination);	
+						}
 					collect_im_stops.pop_back();
-					return;
 				}
 			}
-			find_recursive_connection (intermediate_destination, destination);	
 		}
 	}
-		// add recursive calls counter - up to max_transfers parameter
 	return;
 }
 
@@ -1897,7 +1924,7 @@ void Network ::merge_paths (Busstop* stop) // aimed to merge paths with same lin
 		{
 				for (vector <Pass_path*>::iterator path2 = odpairs->second->get_path_set().begin(); path2 < odpairs->second->get_path_set().end(); path2++)
 				{
-					if (compare_same_paths ((*path1), (*path2)) == true) // both have exactly the same lines for all legs 
+					if (compare_same_lines_paths ((*path1), (*path2)) == true) // both have exactly the same lines for all legs 
 					{
 						vector <vector <Busstop*>>::iterator stops1 = (*path1)->get_alt_transfer__stops().begin();
 						vector <vector <Busstop*>>::iterator stops2 = (*path2)->get_alt_transfer__stops().begin();
@@ -1918,7 +1945,8 @@ void Network ::merge_paths (Busstop* stop) // aimed to merge paths with same lin
 	}
 }
 
-bool Network::compare_same_paths (Pass_path* path1, Pass_path* path2)
+bool Network::compare_same_lines_paths (Pass_path* path1, Pass_path* path2)
+// checks if two paths are identical in terms of lines
 {
 	if (path1->get_number_of_transfers() == path2->get_number_of_transfers())
 	{
@@ -1954,6 +1982,76 @@ bool Network::compare_same_paths (Pass_path* path1, Pass_path* path2)
 	{
 		return false;
 	}
+}
+bool Network::check_constraints_paths (Pass_path* path) // checks if the path meets all the constraints
+{
+	if (path->get_alt_transfer__stops().size() == 2)
+	{
+		return true;
+	}
+	if (check_path_no_repeating_lines(path) == false)
+	{
+		return false;
+	}
+	if (check_path_no_repeating_stops(path) == false)
+	{
+		return false;
+	}
+return true;
+}
+
+bool Network::check_path_no_repeating_lines (Pass_path* path) // checks if the path does not include going on and off the same bus line at the same stop
+{
+	vector <vector <Busline*>> lines = path->get_alt_lines();	
+	for (vector <vector <Busline*>>::iterator lines_iter1 = lines.begin(); lines_iter1 < (lines.end()-1); lines_iter1++)
+	{
+		for (vector <Busline*>::iterator leg_lines1 = (*lines_iter1).begin(); leg_lines1 < (*lines_iter1).end(); leg_lines1++)
+		{
+			vector <vector <Busline*>>::iterator lines_iter2 = lines_iter1 + 1;
+			// checking only for the same line in consecutive legs
+			// taking the same line with an intermediate line is allowed (1-2-1)
+			for (vector <Busline*>::iterator leg_lines2 = (*lines_iter2).begin(); leg_lines2 < (*lines_iter2).end(); leg_lines2++)
+			{
+				if ((*leg_lines1)->get_id() == (*leg_lines2)->get_id())
+				{
+					return false;
+				}
+			}
+		}
+	}
+return true;
+}
+
+bool Network::check_path_no_repeating_stops (Pass_path* path) // chceks if the path deos not include going through the same stop more than once
+{
+	vector <vector <Busstop*>> stops = path->get_alt_transfer__stops();	
+	for (vector <vector <Busstop*>>::iterator stops_iter1 = stops.begin(); stops_iter1 < stops.end(); stops_iter1++)
+	{	
+		for (vector <Busstop*>::iterator leg_stops1 = (*stops_iter1).begin(); leg_stops1 < (*stops_iter1).end()-1; leg_stops1++)
+		{
+			Busstop* check_stop = (*leg_stops1);
+			for (vector <Busstop*>::iterator leg_stops2 = leg_stops1 + 1; leg_stops1 < (*stops_iter1).end(); leg_stops1++)
+			// go over the consecutive stops in the same leg
+			{
+				if ((*leg_stops1)->get_id() == (*leg_stops2)->get_id())
+				{
+					return false;
+				}
+			}
+			// go over all the stops in consecutive legs
+			for (vector <vector <Busstop*>>::iterator stops_iter2 = stops_iter1+1; stops_iter2 < stops.end(); stops_iter2++)
+			{
+				for (vector <Busstop*>::iterator leg_stops2 = (*stops_iter2).begin(); leg_stops1 < (*stops_iter1).end()-1; leg_stops1++)
+				{
+					if ((*leg_stops1)->get_id() == (*leg_stops2)->get_id())
+					{
+						return false;
+					}
+				}
+			}
+		}
+	}
+return true;
 }
 
 bool Network::read_bustype (istream& in) // reads a bustype

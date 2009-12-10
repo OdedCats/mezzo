@@ -20,13 +20,15 @@ typedef vector <Passenger*> passengers;
 class Pass_boarding_decision // container object holding output data for passenger boarding decision
 {
 public:
-	Pass_boarding_decision (int pass_id_, int line_id_,	int trip_id_, int stop_id_, double time_, double generation_time_, bool boarding_,
-							double u_boarding_, double u_staying_):
-							pass_id(pass_id_),line_id(line_id_),trip_id(trip_id_), stop_id(stop_id_),time(time_),generation_time(generation_time_),boarding(boarding_),
+		Pass_boarding_decision (int pass_id_, int original_origin_, int destination_stop_, int line_id_, int trip_id_, int stop_id_, double time_,	double generation_time_,
+							bool boarding_,double u_boarding_, double u_staying_):
+							pass_id(pass_id_),original_origin(original_origin_),destination_stop(destination_stop_),line_id(line_id_),trip_id(trip_id_), stop_id(stop_id_),time(time_),generation_time(generation_time_),boarding(boarding_),
 							u_boarding(u_boarding_),u_staying(u_staying_) {}
-	void write (ostream& out) { out << pass_id << '\t' << line_id << '\t'<< trip_id << '\t'<< stop_id<< '\t'<< time << '\t'<< generation_time << '\t'
+	void write (ostream& out) { out << pass_id << '\t' << original_origin << '\t' << destination_stop << '\t' << line_id << '\t'<< trip_id << '\t'<< stop_id<< '\t'<< time << '\t'<< generation_time << '\t'
 		<< boarding << '\t'<< u_boarding << '\t'<< u_staying <<'\t'<< endl; }
 	int pass_id;
+	int original_origin;
+	int destination_stop;
 	int line_id;
 	int trip_id;
 	int stop_id;

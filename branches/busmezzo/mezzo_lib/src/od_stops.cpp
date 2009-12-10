@@ -135,7 +135,7 @@ double ODstops::calc_binary_logit (double utility_i, double utility_j)
 
 void ODstops::record_passenger_boarding_decision (Passenger* pass, Bustrip* trip, double time, bool boarding_decision)  // creates a log-file for stop-related info
 {
-	output_pass_decisions.push_back(Pass_boarding_decision(pass->get_id(), trip->get_line()->get_id(), trip->get_id() , pass->get_OD_stop()->get_origin()->get_id() , time, pass->get_start_time(), boarding_decision, boarding_utility, staying_utility)); 
+	output_pass_decisions.push_back(Pass_boarding_decision(pass->get_id(), pass->get_original_origin()->get_id(), pass->get_OD_stop()->get_destination()->get_id(), trip->get_line()->get_id(), trip->get_id() , pass->get_OD_stop()->get_origin()->get_id() , time, pass->get_start_time(), boarding_decision, boarding_utility, staying_utility)); 
 }
 
 void ODstops::write_output(ostream & out)
