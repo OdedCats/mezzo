@@ -659,14 +659,21 @@ bool Network::readvirtuallinks(string name)
 	cout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="virtuallinks:")
+	{
+		in.close();
 		return false;
+	}
 	int nr;
 	in >> nr;
 	for (int i=0; i<nr;i++)
 	{
 		if (!readvirtuallink(in))
+		{
+			in.close();
 			return false;
+		}
 	}
+	in.close();
 	return true;
 }
 
@@ -841,13 +848,19 @@ bool Network::readturnings(string name)
 	cout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="turnings:")
+	{
+		inputfile.close();
 		return false;
+	}
 	int nr;
 	inputfile >> nr;
 	for (int i=0; i<nr;i++)
 	{
 		if (!readturning(inputfile))
+		{
+			inputfile.close();
 			return false;
+		}
 	}
 	readgiveways(inputfile);
 	inputfile.close();
@@ -1135,6 +1148,7 @@ bool Network::readbusroutes(string name) // reads the busroutes, similar to read
 	if (keyword!="routes:")
 	{
 		cout << " readBusroutes: no << routes: >> keyword " << endl;
+		in.close();
 		return false;
 	}
 	int nr;
@@ -1144,6 +1158,7 @@ bool Network::readbusroutes(string name) // reads the busroutes, similar to read
 		if (!readbusroute(in))
 		{
 			cout << " readbusroutes: readbusroute returned false for line nr " << (i+1) << endl;
+			in.close();
 			return false;
 		} 
 	}
@@ -1151,6 +1166,7 @@ bool Network::readbusroutes(string name) // reads the busroutes, similar to read
 	{
 		(*iter)->register_busroutes(&busroutes);
 	}
+	in.close();
 	return true;
 
 }
@@ -1237,6 +1253,7 @@ bool Network::readbuslines(string name) // reads the busstops, buslines, and tri
 	if (keyword!="busstops:")
 	{
 		cout << " readbuslines: no << stops: >> keyword " << endl;
+		in.close();
 		return false;
 	}
 	int nr= 0;
@@ -1247,6 +1264,7 @@ bool Network::readbuslines(string name) // reads the busstops, buslines, and tri
 		if (!readbusstop(in))
 		{
 			cout << " readbuslines: readbusstop returned false for line nr " << (i+1) << endl;
+			in.close();
 			return false;
 		} 
 	}
@@ -1258,6 +1276,7 @@ bool Network::readbuslines(string name) // reads the busstops, buslines, and tri
 	if (keyword!="buslines:")
 	{
 		cout << " readbuslines: no << buslines: >> keyword " << endl;
+		in.close();
 		return false;
 	}
 	in >> nr;
@@ -1267,6 +1286,7 @@ bool Network::readbuslines(string name) // reads the busstops, buslines, and tri
 		if (!readbusline(in))
 		{
 			cout << " readbuslines: readbusline returned false for line nr " << (i+1) << endl;
+			in.close();
 			return false;
 		} 
 	}
@@ -1278,6 +1298,7 @@ bool Network::readbuslines(string name) // reads the busstops, buslines, and tri
 	if (keyword!="bustrips:")
 	{
 		cout << " readbuslines: no << bustrips: >> keyword " << endl;
+		in.close();
 		return false;
 	}
 	in >> nr;
@@ -1287,10 +1308,11 @@ bool Network::readbuslines(string name) // reads the busstops, buslines, and tri
 		if (!readbustrip(in))
 		{
 			cout << " readbuslines: readbustrip returned false for line nr " << (i+1) << endl;
+			in.close();
 			return false;
 		} 
 	}
-
+	in.close();
 	return true;
 }
 
@@ -1463,14 +1485,21 @@ bool Network::readsignalcontrols(string name)
 	cout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="controls:")
+	{
+		inputfile.close();
 		return false;
+	}
 	int nr;
 	inputfile >> nr;
 	for (int i=0; i<nr;i++)
 	{
 		if (!readsignalcontrol(inputfile))
+		{
+			inputfile.close();
 			return false;
+		}
 	}
+	inputfile.close();
 	return true;
 }
 
@@ -1609,10 +1638,14 @@ bool Network::readnetwork(string name)
 	assert  (inputfile);
 	if (readservers(inputfile) && readnodes(inputfile) && readsdfuncs(inputfile) && readlinks (inputfile) )		
 	{
+		inputfile.close();
 		return true;
 	}
 	else
+	{
+		inputfile.close();
 		return false;
+	}
 }
 
 bool Network::register_links()
@@ -1683,7 +1716,7 @@ bool Network::readod(istream& in, double scale)
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readinput::readod scanner jammed at " << bracket;
+		cout << "readdemandfile::readod scanner jammed at " << bracket;
 		return false;
 	}
 	in  >> oid >> did >> rate;
@@ -1694,7 +1727,7 @@ bool Network::readod(istream& in, double scale)
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readinput::readod scanner jammed at " << bracket;
+		cout << "readdemandfile::readod scanner jammed at " << bracket;
 		return false;
 	}
 	// find oid, did
@@ -1821,7 +1854,7 @@ ODRate Network::readrate(istream& in, double scale)
 
 	if (bracket != '{')
 	{
-		cout << "readinput::readrate scanner jammed at " << bracket;
+		cout << "readdemandfile::readrate scanner jammed at " << bracket;
 		return odrate;
 	}
 	in  >> oid >> did >> rate;
@@ -1832,7 +1865,7 @@ ODRate Network::readrate(istream& in, double scale)
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readinput::readrate scanner jammed at " << bracket;
+		cout << "readdemandfile::readrate scanner jammed at " << bracket;
 		return odrate;
 	}
 	odrate.odid=odval(oid,did);
@@ -1916,14 +1949,21 @@ bool Network::readserverrates(string name)
 	cout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="rates:")
+	{
+		in.close();
 		return false;
+	}
 	int nr;
 	in >> nr;
 	for (int i=0; i<nr;i++)
 	{
 		if (!readserverrate(in))
+		{
+			in.close();
 			return false;
+		}
 	}
+	in.close();
 	return true;	
 }
 
@@ -1938,7 +1978,7 @@ bool Network::readserverrate(istream& in)
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readinput::readserverrate scanner jammed at " << bracket;
+		cout << "readserverrate::readserverrate scanner jammed at " << bracket;
 		return  false;
 	}
 	in  >> sid >> time >> mu >> sd;
@@ -1947,7 +1987,7 @@ bool Network::readserverrate(istream& in)
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readinput::readserverrate scanner jammed at " << bracket;
+		cout << "readserverrate::readserverrate scanner jammed at " << bracket;
 		return false;
 	}
 	//Server* sptr=*(find_if (servers.begin(),servers.end(), compare <Server> (sid)));
@@ -1958,7 +1998,7 @@ bool Network::readserverrate(istream& in)
 	return true;
 }
 
-bool Network::readinput(string name)
+bool Network::readdemandfile(string name)
 {
 
 	ifstream inputfile(name.c_str());
@@ -1971,18 +2011,28 @@ bool Network::readinput(string name)
 		cout << keyword << endl;
 #endif //_DEBUG_NETWORK
 		if (keyword!="slices:")
+		{
+			inputfile.close();
 			return false;
+		}
 		int nr;
 		inputfile >> nr;
 		for (int i=0; i<nr; i++)
 		{
 			if (!readrates(inputfile))
-				return false;				
+			{
+				inputfile.close();
+				return false;			
+			}
 		}
+		inputfile.close();
 		return true;
 	}	
 	else
+	{
+		inputfile.close();
 		return false;	
+	}
 }
 
 bool Network::readvtype (istream & in)
@@ -2023,15 +2073,22 @@ bool Network::readvtypes (string name)
 	cout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="vtypes:")
+	{
+		in.close();
 		return false;
+	}
 	int nr;
 	in >> nr;
 	for (int i=0; i<nr;i++)
 	{
 		if (!readvtype(in))
+		{
+			in.close();
 			return false;
+		}
 	}
 	vehtypes.initialize();
+	in.close();
 	return true;
 }
 
@@ -2049,6 +2106,7 @@ bool Network::writeoutput(string name)
 	{
 		ok=ok && (*iter)->write(out);
 	}
+	out.close();
 	return ok;
 }
 
@@ -2063,6 +2121,7 @@ bool Network::writesummary(string name)
 	{
 		ok=ok && (*iter)->writesummary(out);
 	}
+	out.close();
 	return ok;
 }
 
@@ -2076,6 +2135,7 @@ bool Network::writeheadways(string name)
 		out << (*iter)->get_id()<< endl;
 		(*iter)->write_in_headways(out);
 	}
+	out.close();
 	return true;
 
 
@@ -2100,6 +2160,7 @@ bool Network::writelinktimes(string name)
 	{
 		(*iter).second->write_time(out);
 	}
+	out.close();
 	return true;
 }
 
@@ -2108,9 +2169,15 @@ bool Network::readlinktimes(string name)
 	ifstream inputfile(name.c_str());
 	assert (inputfile);
 	if (readtimes(inputfile))
+	{
+		inputfile.close();
 		return true;
+	}
 	else
+	{
+		inputfile.close();
 		return false;	
+	}
 }
 
 bool Network::readtimes(istream& in)
@@ -2371,10 +2438,14 @@ bool Network::readincidentfile(string name)
 		{
 			(*incident)->set_incident_parameters(incident_parameters);
 		}
+		inputfile.close();
 		return true;
 	}
 	else
+	{
+		inputfile.close();
 		return false;		
+	}
 
 }
 
@@ -2384,10 +2455,12 @@ bool Network::readpathfile(string name)
 	assert (inputfile);
 	if (readroutes(inputfile))
 	{
+		inputfile.close();
 		return true;
 	}
 	else
 	{
+		inputfile.close();
 		return false;
 	}
 }
@@ -2402,6 +2475,7 @@ bool Network::writepathfile(string name)
 	{
 		(*r_iter).second->write(out);
 	}
+	out.close();
 	return true;
 }
 
@@ -2417,7 +2491,10 @@ bool Network::readassignmentlinksfile(string name)
 	cout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="no_obs_links:")
+	{
+		in.close();
 		return false;
+	}
 	int nr,lid;
 	in >> nr;
 	in >> temp;
@@ -2433,6 +2510,7 @@ bool Network::readassignmentlinksfile(string name)
 	}
 	in >> temp;
 	assert (temp=="}");
+	in.close();
 	return true;
 }
 
@@ -2442,9 +2520,15 @@ bool Network::readparameters(string name)
 	ifstream inputfile(name.c_str());
 	assert (inputfile);
 	if (theParameters->read_parameters(inputfile))
+	{
+		inputfile.close();
 		return true;
+	}
 	else
+	{
+		inputfile.close();
 		return false;	
+	}
 
 }
 
@@ -2809,125 +2893,186 @@ bool Network::readmaster(string name)
 	assert (inputfile);
 	inputfile >> temp;
 	if (temp!="#input_files")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> temp;
 	if (temp!="network=")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> temp;
 	filenames.push_back(workingdir+temp); // #0
 	inputfile >> temp;
 	if (temp!="turnings=")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> temp;
 	filenames.push_back(workingdir+temp); // #1
-
-	// INSERT SIGNALS HERE 
 	inputfile >> temp;
 	if (temp!="signals=")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> temp;
 	filenames.push_back(workingdir+temp); // #2
-
 	inputfile >> temp;
 	if (temp!="histtimes=")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> temp;
 	filenames.push_back(workingdir+temp); // #3
 	inputfile >> temp;
 	if (temp!="routes=")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> temp;
 	filenames.push_back(workingdir+temp); // #4
 	inputfile >> temp;
 	if (temp!="demand=")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> temp;
 	filenames.push_back(workingdir+temp); //  #5
 	inputfile >> temp;
 	if (temp!="incident=")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> temp;
 	filenames.push_back(workingdir+temp); // #6
 	inputfile >> temp;
 	if (temp!="vehicletypes=")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> temp;	
 	filenames.push_back(workingdir+temp); // #7	
 	inputfile >> temp;
 	if (temp!="virtuallinks=")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> temp;	
 	filenames.push_back(workingdir+temp); // #8		
 	inputfile >> temp;
 	if (temp!="serverrates=")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> temp;	
 	filenames.push_back(workingdir+temp); // #9			
 	inputfile >> temp;
 	if (temp!="#output_files")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> temp;
 	if (temp!="linktimes=")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> temp;
 	filenames.push_back(workingdir+temp); // #10
 	inputfile >> temp;
 	if (temp!="output=")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> temp;
 	filenames.push_back(workingdir+temp); // #11
 	inputfile >> temp;
 	if (temp!="summary=")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> temp;
 	filenames.push_back(workingdir+temp); //  #12
-
 	inputfile >> temp;
 	if (temp!="speeds=")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> temp;
 	filenames.push_back(workingdir+temp); // #13
-
 	inputfile >> temp;
 	if (temp!="inflows=")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> temp;
 	filenames.push_back(workingdir+temp); // #14
 	inputfile >> temp;
 	if (temp!="outflows=")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> temp;
 	filenames.push_back(workingdir+temp); //  #15
 	inputfile >> temp;
 	if (temp!="queuelengths=")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> temp;
 	filenames.push_back(workingdir+temp); // #16
 	inputfile >> temp;
 	if (temp!="densities=")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> temp;
 	filenames.push_back(workingdir+temp); // #17
-
-
 	inputfile >> temp;
 	if (temp!="#scenario")
+	{
+		inputfile.close();
 		return false;
-	// insert Start time here
+	}
 	inputfile >> temp;
 	if (temp!="starttime=")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> starttime;
-
 	inputfile >> temp;
 	if (temp!="stoptime=") // stoptime==runtime
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> runtime;
 	theParameters->running_time = runtime;
 	inputfile >> temp;
 	if (temp!="calc_paths=")
 	{
 		calc_paths=false;
+		inputfile.close();
 		return true;
 	}
 	else
@@ -2936,12 +3081,17 @@ bool Network::readmaster(string name)
 	}
 	inputfile >> temp;
 	if (temp!="traveltime_alpha=")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> time_alpha;
-
 	inputfile >> temp;
 	if (temp!="parameters=")
+	{
+		inputfile.close();
 		return false;
+	}
 	inputfile >> temp;
 	filenames.push_back(workingdir+temp);   //  #18 Parameters
 
@@ -2950,6 +3100,7 @@ bool Network::readmaster(string name)
 	if (temp!="vissimfile=")
 	{
 		//cout << "No vissimfile specified in masterfile" << endl;
+		inputfile.close();
 		return true;
 	}
 	else
@@ -2962,11 +3113,14 @@ bool Network::readmaster(string name)
 	if (temp!="background=")
 	{
 		//cout << "No background specified in masterfile" << endl;
+		inputfile.close();
 		return true;
 
 	}
 	if (inputfile >> temp)
 		filenames.push_back(workingdir+temp); //  #19	
+
+	inputfile.close();
 	return true;
 }
 
@@ -3003,7 +3157,7 @@ double Network::executemaster(QPixmap * pm_,QMatrix * wm_)
 	}
 
 	// 2005-11-28 put the reading of OD matrix before the paths...
-	if (!readinput(filenames[5]))
+	if (!readdemandfile(filenames[5]))
 		cout << "Problem reading OD matrix " << filenames [5] << endl; // generate the odpairs.
 	//Sort the ODpairs
 	sort (odpairs.begin(), odpairs.end(), od_less_than);
@@ -3086,7 +3240,7 @@ double Network::executemaster()
 		set_freeflow_linktimes();  //read the historical link times if exist, otherwise set them to freeflow link times.
 	}
 	// New 2005-11-28 put the reading of OD matrix before the paths...
-	if (!readinput(filenames[5]))
+	if (!readdemandfile(filenames[5]))
 		cout << "Problem reading OD matrix " << filenames [4] << endl; // generate the odpairs.
 	//Sort the ODpairs
 	sort (odpairs.begin(), odpairs.end(), od_less_than);
@@ -3152,7 +3306,7 @@ bool Network::writeall()
 	writeoutput(filenames[11]);  // here the detailed output is written and then deleted from memory
 	writemoes();
 	writeallmoes("allmoes.dat");
-	writeheadways("timestamps.dat");
+	//writeheadways("timestamps.dat"); // commented out, since no-one uses them 
 	writeassmatrices("assign.dat");
 	write_v_queues("v_queues.dat");
 	return true;
@@ -3198,6 +3352,7 @@ bool Network::writeallmoes(string name)
 	out << endl;
 	}
 	*/
+	out.close();
 	return true;
 }
 
@@ -3333,6 +3488,7 @@ bool Network::write_v_queues(string name)
 	{
 		(*iter).second->write_v_queues(out);
 	}
+	out.close();
 	return true;
 }
 
@@ -3353,6 +3509,7 @@ bool Network::writeassmatrices(string name)
 		}
 		//out << endl;
 	}
+	out.close();
 	return true;
 
 }

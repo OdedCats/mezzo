@@ -58,12 +58,13 @@
 
 // inclusions for the GUI
 #ifndef _NO_GUI
-//Added by qt3to4:
-#include <QPixmap>
-//#include <Qt3Support> // new in QT4 to port from QT3
-#include <qpixmap.h>
-#include <QMatrix>
+	#include <QPixmap>
+	#include <qpixmap.h>
+	#include <QMatrix>
 #endif // _NO_GUI
+
+//thread support
+#include <QThread.h>
 
 //include the PVM communicator
 #ifdef _PVM
@@ -132,6 +133,7 @@ class Network
 {
 public:
 	Network();
+	//Network(const Network& net) {}
 	~Network();
 	bool readmaster(string name); //!< reads the master file.
 #ifndef _NO_GUI
@@ -154,7 +156,7 @@ public:
 	bool run(int period); //!< RUNS the network for 'period' seconds
 	bool addroutes (int oid, int did, ODpair* odpair); //!< adds routes to an ODpair
 	bool add_od_routes()	; //!< adds routes to all ODpairs
-	bool readinput(string name);  //!< reads the OD matrix and creates the ODpairs
+	bool readdemandfile(string name);  //!< reads the OD matrix and creates the ODpairs
 	bool readlinktimes(string name); //!< reads historical link travel times
 	bool set_freeflow_linktimes();
 	bool copy_linktimes_out_in(); //!< copies output link travel times to input
@@ -413,6 +415,41 @@ public:
 	double cost;
 };
 
+class NetworkThread: public QThread
+{
+public:
+
+	NetworkThread (string masterfile,int threadnr = 1,long int seed=0):masterfile_(masterfile),threadnr_(threadnr),seed_(seed) 
+		{
+			theNetwork= new Network();
+			if (seed_)
+					theNetwork->seed(seed_);
+		}
+	void init () 
+		{
+			theNetwork->readmaster(masterfile_);
+			runtime_=theNetwork->executemaster();
+		}
+	void run ()
+	  {				
+				theNetwork->step(runtime_);
+	  }
+	void saveresults ()
+	  {
+			theNetwork->writeall();
+	  }
+	 ~NetworkThread () 
+	  {
+			delete theNetwork;
+	  }
+private:
+	Network* theNetwork;
+	long int seed_;
+    string masterfile_;
+	double runtime_;
+	int threadnr_;
+
+};
 
 
 #endif

@@ -3,10 +3,11 @@
 TEMPLATE = app
 
 CONFIG +=  console embed_manifest_exe
-CONFIG -= qt
+#CONFIG -= qt
 TARGET = mezzo_s
 DEPENDPATH += . ../mezzo_lib/src
-QT -= core gui
+QT -=  gui
+#core
 DEFINES += _NO_GUI
 QMAKE= $(QTDIR)/bin/qmake
 

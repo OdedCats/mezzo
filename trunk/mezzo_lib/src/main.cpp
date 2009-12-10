@@ -26,6 +26,17 @@ int main ( int argc, char **argv)
 	cout << "at least one argument needed (*.mezzo filename) " << endl;
 	return -1;
   }
+  long int seed = 0;
+  if (argc > 2)
+	  seed=atoi(argv[2]);
+  NetworkThread* net1 = new NetworkThread(argv[1],1,seed);
+  net1->init();
+  net1->start(QThread::HighestPriority);
+  net1->wait();
+
+  delete net1;
+  
+  /*
   Network* theNetwork= new Network();
   if (argc > 2)
   {
@@ -44,6 +55,7 @@ int main ( int argc, char **argv)
 	  theNetwork->step(runtime);
 	  theNetwork->writeall();
   }
+  */
   return 0;
 }
 
