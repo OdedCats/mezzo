@@ -1803,6 +1803,7 @@ void Network::generate_indirect_paths()
 	bool original_path = true;
 	vector<vector<Busline*>> lines_sequence;
 	vector<vector<Busstop*>> stops_sequence;
+	vector<Pass_path*> paths;
 	// compose the list of intermediate stops
 	for (vector<Busstop*>::iterator im_iter = collect_im_stops.begin(); im_iter < collect_im_stops.end(); im_iter++)
 	{
@@ -1810,48 +1811,81 @@ void Network::generate_indirect_paths()
 		im_stops.push_back((*im_iter));
 		stops_sequence.push_back(im_stops);
 	}
-	// compose the list of direct lines between wach pair of intermediate stops
+	int nr_path_combinations = 1;
+	// count how many combinations of paths you can make (multiply number of direct lines on segments)
+	for (vector<Busstop*>::iterator im_iter = collect_im_stops.begin(); im_iter < (collect_im_stops.end()-1); im_iter++)
+	{
+		map <Busstop*, ODstops*> od_as_origin = (*im_iter)->get_stop_as_origin();
+		nr_path_combinations = nr_path_combinations * direct_lines[od_as_origin[*(im_iter+1)]].size();
+	}
+	// compose the list of direct lines between each pair of intermediate stops
 	for (vector<Busstop*>::iterator im_iter = collect_im_stops.begin(); im_iter < collect_im_stops.end()-1; im_iter++)
 	{
 		map <Busstop*, ODstops*> im_as_origin = (*im_iter)->get_stop_as_origin();
 		vector <Busline*> p_lines;
 		vector<Busline*> d_lines = direct_lines[im_as_origin[(*(im_iter+1))]];
-		p_lines.push_back(d_lines.front()); // assuming a unique direct line for the moment
+		p_lines.push_back(d_lines.front()); // assuming a unique direct line for each leg
 		lines_sequence.push_back(p_lines);
 	}
 	Pass_path* indirect_path = new Pass_path(lines_sequence, stops_sequence);
-	// check if this path was already generated		
-	map <Busstop*, ODstops*> od_as_origin = collect_im_stops.front()->get_stop_as_origin();
-	vector <Pass_path*> current_path_set = od_as_origin[collect_im_stops.back()]->get_path_set();
-	for (vector <Pass_path*>::iterator iter = current_path_set.begin(); iter != current_path_set.end(); iter++)
+	paths.push_back(indirect_path);
+	int stop_leg = 0;
+	vector<vector<Busline*>>::iterator lines_sequence_iter = lines_sequence.begin();
+	for (vector<Busstop*>::iterator im_iter = collect_im_stops.begin(); im_iter < collect_im_stops.end()-1; im_iter++)
 	{
-		if (compare_same_lines_paths(indirect_path,(*iter)) == true)
+		stop_leg++;
+		map <Busstop*, ODstops*> im_as_origin = (*im_iter)->get_stop_as_origin();
+		vector <Busline*>::iterator d_lines_begin = direct_lines[im_as_origin[(*(im_iter+1))]].begin();
+		for (vector<Busline*>::iterator d_lines = d_lines_begin+1 ; d_lines < direct_lines[im_as_origin[(*(im_iter+1))]].end(); d_lines++)
 		{
-			original_path = false;
-			break;
+			vector <Busline*> p_lines;
+			p_lines.push_back((*d_lines));
+			for (vector<Pass_path*>::iterator existing_paths = paths.begin(); existing_paths < paths.end(); existing_paths++)
+			{
+				vector<vector<Busline*>> permute_path_lines;
+				vector<vector<Busline*>> path_lines = (*existing_paths)->get_alt_lines();
+				int line_leg = 0;
+				for (vector<vector<Busline*>>::iterator path_lines_iter = path_lines.begin(); path_lines_iter < path_lines.end(); path_lines_iter++)
+				{
+					line_leg++;
+					if (stop_leg != line_leg)
+					{
+						permute_path_lines.push_back((*path_lines_iter));
+					}
+					else
+					{
+						permute_path_lines.push_back(p_lines);
+					}
+				}
+				Pass_path* indirect_path = new Pass_path(permute_path_lines , stops_sequence);	
+			}
 		}
 	}
-	// add the indirect path if it is an original one and it fulfills the constraints
-	if (original_path == true && check_constraints_paths (indirect_path) == true)
+	for (vector<Pass_path*>::iterator paths_iter = paths.begin(); paths_iter < paths.end(); paths_iter++)
 	{
-		map <Busstop*, ODstops*> od_as_origin = collect_im_stops.front()->get_stop_as_origin(); // refer the original origin
-		od_as_origin[collect_im_stops.back()]->add_paths(indirect_path);
-		if (indirect_path->get_number_of_transfers() < od_as_origin[collect_im_stops.back()]->get_min_transfers())
-		// update the no. of min transfers required if decreased
+		// check if this path was already generated		
+		map <Busstop*, ODstops*> od_as_origin = collect_im_stops.front()->get_stop_as_origin();
+		vector <Pass_path*> current_path_set = od_as_origin[collect_im_stops.back()]->get_path_set();
+		for (vector <Pass_path*>::iterator iter = current_path_set.begin(); iter != current_path_set.end(); iter++)
 		{
-			od_as_origin[collect_im_stops.back()]->set_min_transfers(indirect_path->get_number_of_transfers());
+			if (compare_same_lines_paths((*paths_iter),(*iter)) == true)
+			{
+				original_path = false;
+				break;
+			}
+		}
+		// add the indirect path if it is an original one and it fulfills the constraints
+		if (original_path == true && check_constraints_paths ((*paths_iter)) == true)
+		{
+			map <Busstop*, ODstops*> od_as_origin = collect_im_stops.front()->get_stop_as_origin(); // refer the original origin
+			od_as_origin[collect_im_stops.back()]->add_paths((*paths_iter));
+			if ((*paths_iter)->get_number_of_transfers() < od_as_origin[collect_im_stops.back()]->get_min_transfers())
+			// update the no. of min transfers required if decreased
+			{
+				od_as_origin[collect_im_stops.back()]->set_min_transfers((*paths_iter)->get_number_of_transfers());
+			}
 		}
 	}
-					/******************************************************************
-						int nr_path_combinations = 1;
-						// count how many combinations of paths you can make (multiply number of direct lines on segments)
-						for (vector<Busstop*>::iterator im_iter = collect_im_stops.begin(); im_iter < (collect_im_stops.end()-1); im_iter++)
-						{
-							map <Busstop*, ODstops*> od_as_origin = (*im_iter)->get_stop_as_origin();
-							nr_path_combinations = nr_path_combinations * direct_lines[od_as_origin[*(im_iter+1)]].size();
-						}
-						*/////////////////////
-
 }
 void Network::find_all_paths () 
 // goes over all OD stop pairs to generate their path choice set
