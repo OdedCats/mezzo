@@ -21,21 +21,42 @@
 
 int main ( int argc, char **argv)
 {
+  long int seed = 0;
+  unsigned int replications = 1;
   if (argc < 2)
   {
 	cout << "at least one argument needed (*.mezzo filename) " << endl;
+	cout << " Usage: mezzo_s   <filename.mezzo>    <nr_replications>   <random_seed>" << endl; 
 	return -1;
   }
-  long int seed = 0;
   if (argc > 2)
-	  seed=atoi(argv[2]);
+	replications=atoi(argv[2]);
+   if (argc > 3)
+	  seed=atoi(argv[3]);
+   // NEW started using threads for future parallel runs. 
+   // However, global vars need to be moved local to run more than one thread at a time to avoid data conflicts.
   NetworkThread* net1 = new NetworkThread(argv[1],1,seed);
-  net1->init();
-  net1->start(QThread::HighestPriority);
-  net1->wait();
-
+  net1->init(); // reads the input files
+  if (replications <=1)
+  {
+	  net1->start(QThread::HighestPriority);
+	  net1->wait();
+	  net1->saveresults();
+  }
+  else
+  {
+	  for (unsigned int rep=1; rep <=replications; rep++)
+	  {
+		  net1->start(QThread::HighestPriority);
+		  net1->wait();
+		  net1->saveresults(rep);
+		  net1->reset();
+	  }
+  }
   delete net1;
   
+
+  //OLD:
   /*
   Network* theNetwork= new Network();
   if (argc > 2)

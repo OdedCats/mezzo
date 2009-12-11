@@ -144,7 +144,7 @@ public:
 	int reset(); //!< resets the simulation to 0, clears all the state variables. returns runtime
 	void end_of_simulation(double time); //!< finalise all the temp values into containers (linktimes)
 	double step(double timestep); //!< executes one step of simulation, called by the gui, returns current value of time
-	bool writeall();
+	bool writeall(unsigned int repl=0); //writes the output, appends replication number to output files
 	bool readnetwork(string name); //!< reads the network and creates the appropriate structures
 	bool init(); //!< creates eventlist and initializes first actions for all turnings at time 0 and starts the Communicator
 	bool init_shortest_path(); //!< builds the shortest path graph
@@ -176,7 +176,7 @@ public:
 	bool readturnings(string name); //!< reads the turning movements
 	void create_turnings();          //!< creates the turning movements
 	bool writeturnings(string name);  //!< writes the turing movements
-	bool writemoes(); //!< writes all the moes: speeds, inflows, outflows, queuelengths and densities per link
+	bool writemoes(string ending=""); //!< writes all the moes: speeds, inflows, outflows, queuelengths and densities per link
 	bool writeallmoes(string name); //!< writes all the moes in one file.
 	bool writeassmatrices(string name); //!< writes the assignment matrices
 	bool write_v_queues(string name); //!< writes the virtual queue lengths
@@ -344,6 +344,7 @@ protected:
 	// end of read functions
 	vector <string> filenames; //!< filenames for input/output as read in the master file
 	string workingdir;
+	unsigned int replication;
 	int runtime; //!< == stoptime
 	int starttime;
 	bool calc_paths; //!< if true new shortest paths are calculated and new paths added to the route file
@@ -434,10 +435,14 @@ public:
 	  {				
 				theNetwork->step(runtime_);
 	  }
-	void saveresults ()
+	void saveresults (unsigned int replication = 0)
 	  {
-			theNetwork->writeall();
+			theNetwork->writeall(replication);
 	  }
+	void reset ()
+	{
+		theNetwork->reset();
+	}
 	 ~NetworkThread () 
 	  {
 			delete theNetwork;

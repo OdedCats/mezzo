@@ -3293,22 +3293,44 @@ double Network::executemaster()
 }
 
 
-bool Network::writeall()
+bool Network::writeall(unsigned int repl)
 {
+	replication=repl;
+	string rep="";
+	string cleantimes;
 	end_of_simulation(runtime);
-	writelinktimes(filenames[10]);
+	string linktimesfile = filenames[10];
+	string summaryfile=filenames[12];
+	string vehicleoutputfile=filenames[11];
+	string allmoesfile="allmoes.dat";
+	string assignmentmatfile="assign.dat";
+	string vqueuesfile="v_queues.dat";
+	if (replication >0)
+	{
+		stringstream repstr;
+		repstr << "." << replication;
+		rep=repstr.str();
+		cleantimes=linktimesfile +".clean" +rep;
+		linktimesfile += rep ;
+		summaryfile += rep ;
+		vehicleoutputfile += rep ;
+		allmoesfile += rep ;
+		assignmentmatfile += rep;
+		vqueuesfile += rep;
+	}
+	writelinktimes(linktimesfile);
 	// NEW: Write also the non-smoothed times
-	string cleantimes=filenames[10]+".clean";
+	
 	time_alpha=1.0;
 	writelinktimes(cleantimes);
 	////////
-	writesummary(filenames[12]); // write the summary first because	
-	writeoutput(filenames[11]);  // here the detailed output is written and then deleted from memory
-	writemoes();
-	writeallmoes("allmoes.dat");
+	writesummary(summaryfile); // write the summary first because	
+	writeoutput(vehicleoutputfile);  // here the detailed output is written and then deleted from memory
+	writemoes(rep);
+	writeallmoes(allmoesfile);
 	//writeheadways("timestamps.dat"); // commented out, since no-one uses them 
-	writeassmatrices("assign.dat");
-	write_v_queues("v_queues.dat");
+	writeassmatrices(assignmentmatfile);
+	write_v_queues(vqueuesfile);
 	return true;
 }
 
@@ -3428,9 +3450,9 @@ double Network::calc_rmsn_input_output_odtimes()
 	return (calc_rms_input_output_odtimes() / calc_mean_input_odtimes());
 }
 
-bool Network::writemoes()
+bool Network::writemoes(string ending)
 {
-	string name=filenames[13]; // speeds
+	string name=filenames[13] + ending; // speeds
 	ofstream out(name.c_str());
 	assert(out);
 	
@@ -3440,7 +3462,7 @@ bool Network::writemoes()
 		(*iter).second->write_speeds(out,nrperiods);
 	}
 	out.close();
-	name=filenames[14]; // inflows
+	name=filenames[14] + ending; // inflows
 	out.open(name.c_str());
 	assert(out);
 
@@ -3449,7 +3471,7 @@ bool Network::writemoes()
 		(*iter1).second->write_inflows(out,nrperiods);
 	}
 	out.close();
-	name=filenames[15]; // outflows
+	name=filenames[15] + ending; // outflows
 	out.open(name.c_str());
 	assert(out);
 
@@ -3458,7 +3480,7 @@ bool Network::writemoes()
 		(*iter2).second->write_outflows(out,nrperiods);
 	}
 	out.close();
-	name=filenames[16]; // queues
+	name=filenames[16] + ending; // queues
 	out.open(name.c_str());
 	assert(out);
 
@@ -3467,7 +3489,7 @@ bool Network::writemoes()
 		(*iter3).second->write_queues(out,nrperiods);
 	}
 	out.close();
-	name=filenames[17]; // densities
+	name=filenames[17] + ending; // densities
 	out.open(name.c_str());
 	assert(out);
 
