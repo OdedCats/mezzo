@@ -61,12 +61,13 @@
 
 // inclusions for the GUI
 #ifndef _NO_GUI
-//Added by qt3to4:
-#include <QPixmap>
-//#include <Qt3Support> // new in QT4 to port from QT3
-#include <qpixmap.h>
-#include <QMatrix>
+	#include <QPixmap>
+	#include <qpixmap.h>
+	#include <QMatrix>
 #endif // _NO_GUI
+
+//thread support
+#include <QThread.h>
 
 //include the PVM communicator
 #ifdef _PVM
@@ -135,6 +136,7 @@ class Network
 {
 public:
 	Network();
+	//Network(const Network& net) {}
 	~Network();
 	bool readmaster(string name); //!< reads the master file.
 #ifndef _NO_GUI
@@ -145,7 +147,7 @@ public:
 	int reset(); //!< resets the simulation to 0, clears all the state variables. returns runtime
 	void end_of_simulation(double time); //!< finalise all the temp values into containers (linktimes)
 	double step(double timestep); //!< executes one step of simulation, called by the gui, returns current value of time
-	bool writeall();
+	bool writeall(unsigned int repl=0); //writes the output, appends replication number to output files
 	bool readnetwork(string name); //!< reads the network and creates the appropriate structures
 	bool init(); //!< creates eventlist and initializes first actions for all turnings at time 0 and starts the Communicator
 	bool init_shortest_path(); //!< builds the shortest path graph
@@ -157,7 +159,7 @@ public:
 	bool run(int period); //!< RUNS the network for 'period' seconds
 	bool addroutes (int oid, int did, ODpair* odpair); //!< adds routes to an ODpair
 	bool add_od_routes()	; //!< adds routes to all ODpairs
-	bool readinput(string name);  //!< reads the OD matrix and creates the ODpairs
+	bool readdemandfile(string name);  //!< reads the OD matrix and creates the ODpairs
 	bool readlinktimes(string name); //!< reads historical link travel times
 	bool set_freeflow_linktimes();
 	bool copy_linktimes_out_in(); //!< copies output link travel times to input
@@ -177,7 +179,7 @@ public:
 	bool readturnings(string name); //!< reads the turning movements
 	void create_turnings();          //!< creates the turning movements
 	bool writeturnings(string name);  //!< writes the turing movements
-	bool writemoes(); //!< writes all the moes: speeds, inflows, outflows, queuelengths and densities per link
+	bool writemoes(string ending=""); //!< writes all the moes: speeds, inflows, outflows, queuelengths and densities per link
 	bool writeallmoes(string name); //!< writes all the moes in one file.
 	bool writeassmatrices(string name); //!< writes the assignment matrices
 	bool write_v_queues(string name); //!< writes the virtual queue lengths
@@ -368,6 +370,7 @@ protected:
 	// end of read functions
 	vector <string> filenames; //!< filenames for input/output as read in the master file
 	string workingdir;
+	unsigned int replication;
 	int runtime; //!< == stoptime
 	int starttime;
 	bool calc_paths; //!< if true new shortest paths are calculated and new paths added to the route file
@@ -439,6 +442,45 @@ public:
 	double cost;
 };
 
+class NetworkThread: public QThread
+{
+public:
+
+	NetworkThread (string masterfile,int threadnr = 1,long int seed=0):masterfile_(masterfile),threadnr_(threadnr),seed_(seed) 
+		{
+			theNetwork= new Network();
+			if (seed_)
+					theNetwork->seed(seed_);
+		}
+	void init () 
+		{
+			theNetwork->readmaster(masterfile_);
+			runtime_=theNetwork->executemaster();
+		}
+	void run ()
+	  {				
+				theNetwork->step(runtime_);
+	  }
+	void saveresults (unsigned int replication = 0)
+	  {
+			theNetwork->writeall(replication);
+	  }
+	void reset ()
+	{
+		theNetwork->reset();
+	}
+	 ~NetworkThread () 
+	  {
+			delete theNetwork;
+	  }
+private:
+	Network* theNetwork;
+	long int seed_;
+    string masterfile_;
+	double runtime_;
+	int threadnr_;
+
+};
 
 
 #endif
