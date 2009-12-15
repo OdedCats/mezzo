@@ -19,6 +19,16 @@ Pass_path::~Pass_path()
 {
 }
 
+void Pass_path::reset()
+{
+	alt_lines.clear();
+	alt_transfer_stops.clear();
+	number_of_transfers = 0;
+	scheduled_in_vehicle_time = 0;
+	scheduled_headway = 0;
+	arriving_bus_rellevant = 0;
+}
+
 int Pass_path::find_number_of_transfers ()
 {
 	return (alt_transfer_stops.size()-2); // omitting origin and destination stops
@@ -90,6 +100,6 @@ double Pass_path::calc_waiting_utility (ODstops* odstop)
 }
 
 double Pass_path::calc_estimated_waiting_time ()
-{
+{	
 	return (calc_total_scheduled_headway()/2);
 }

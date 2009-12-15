@@ -16,6 +16,7 @@
 #include "passenger.h"
 #include "MMath.h" 
 #include "od_stops.h"
+#include <stddef.h>
 
 
 class Busroute;
@@ -35,6 +36,8 @@ class Output_Summary_Line // container object holding output data for busline
 public:
 	void write (ostream& out, int line_id) { out << line_id <<  '\t'<< line_avg_headway << '\t'<< line_avg_DT << '\t'<< line_avg_abs_deviation << '\t'<< line_avg_waiting_per_stop<< '\t'<< line_total_boarding << '\t'<< line_sd_headway << '\t'
 		<< line_sd_DT << '\t'<< line_on_time << '\t'<< line_early <<'\t'<< line_late << '\t'<< endl; }
+	void reset () { line_avg_headway = 0;  line_avg_DT = 0; line_avg_abs_deviation = 0; line_avg_waiting_per_stop = 0; line_total_boarding = 0;
+	line_sd_headway = 0; line_sd_DT = 0; line_on_time = 0; line_early = 0; line_late = 0;}
 	// line summary measures
 	double line_avg_headway;
 	double line_avg_DT;
@@ -51,11 +54,10 @@ public:
 class Busline: public Action
 {
 public:
-	
-	
 	Busline (); //!< simple constructor
 	Busline (int id_, string name_, Busroute* busroute_, vector <Busstop*> stops_, Vtype* vtype_, ODpair* odpair_, int average_headway_, float ratio_headway_holding_, int holding_strategy_); //!< Initialising constructor
 	virtual ~Busline(); //!< destructor
+	void reset ();
 
 	// Gets and sets
 	int get_id () {return id;} //!< returns id, used in the compare  functions for find and find_if algorithms
@@ -116,6 +118,7 @@ public:
 	Bustrip ();
 	~Bustrip ();
 	Bustrip (int id_, double start_time_);
+	void reset ();
 
 // GETS & SETS
 	int get_id () {return id;} //!< returns id, used in the compare <..> functions for find and find_if algorithms
@@ -180,6 +183,9 @@ public:
 	void write (ostream& out) { out << line_id << '\t'<< trip_id << '\t'<< vehicle_id << '\t'<< stop_id<< '\t'<<entering_time << '\t'<< sched_arr_time << '\t'
 		<< dwell_time << '\t'<< lateness << '\t'<< exit_time <<'\t'<< time_since_arr << '\t'<< time_since_dep << '\t'<< nr_alighting << '\t'<< nr_boarding 
 		<< '\t'<< occupancy << '\t'<< nr_waiting << '\t'<< holding_time << '\t'	<< endl; }
+	void reset () {line_id = 0 ; trip_id = 0; vehicle_id = 0; stop_id = 0; entering_time = 0; sched_arr_time = 0; dwell_time = 0;
+	lateness = 0; exit_time = 0; time_since_arr = 0; time_since_dep = 0; nr_alighting = 0; nr_boarding = 0; occupancy = 0; nr_waiting = 0;
+	holding_time = 0; }
 	int line_id;
 	int trip_id;
 	int vehicle_id;
@@ -203,6 +209,8 @@ class Output_Summary_Stop_Line // container object holding output data for stop 
 public:
 	void write (ostream& out, int stop_id, int line_id) { out << stop_id <<  '\t'<< line_id <<  '\t'<<stop_avg_headway << '\t'<< stop_avg_DT << '\t'<< stop_avg_abs_deviation << '\t'<< stop_avg_waiting_per_stop<< '\t'<< stop_total_boarding << '\t'<< stop_sd_headway << '\t'
 		<< stop_sd_DT << '\t'<< stop_on_time << '\t'<< stop_early <<'\t'<< stop_late << '\t'<< endl; }
+	void reset () { stop_avg_headway = 0; stop_avg_DT = 0; stop_avg_abs_deviation = 0; stop_avg_waiting_per_stop = 0; stop_total_boarding = 0;
+	stop_sd_headway = 0; stop_sd_DT = 0; stop_on_time = 0; stop_early = 0; stop_late = 0; }
 	double stop_avg_headway;
 	double stop_avg_DT;
 	double stop_avg_abs_deviation;
@@ -221,6 +229,7 @@ public:
 	Busstop ();
 	~Busstop ();
 	Busstop (int id_, int link_id_, double position_, double length_, bool has_bay_, double dwelltime_);
+	void reset (); 
 
 // GETS & SETS:
 	int get_id () {return id;} //!< returns id, used in the compare <..> functions for find and find_if algorithms

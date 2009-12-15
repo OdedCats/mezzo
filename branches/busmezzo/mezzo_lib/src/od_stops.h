@@ -26,6 +26,8 @@ public:
 							u_boarding(u_boarding_),u_staying(u_staying_) {}
 	void write (ostream& out) { out << pass_id << '\t' << original_origin << '\t' << destination_stop << '\t' << line_id << '\t'<< trip_id << '\t'<< stop_id<< '\t'<< time << '\t'<< generation_time << '\t'
 		<< boarding << '\t'<< u_boarding << '\t'<< u_staying <<'\t'<< endl; }
+	void reset () { pass_id = 0; original_origin = 0; destination_stop = 0; line_id = 0; trip_id = 0; stop_id = 0; time = 0;
+	generation_time = 0; boarding = 0; u_boarding = 0; u_staying = 0; }
 	int pass_id;
 	int original_origin;
 	int destination_stop;
@@ -45,13 +47,14 @@ public:
 	ODstops ();
 	ODstops (Busstop* origin_stop_, Busstop* destination_stop_, double arrival_rate_);
 	~ODstops ();
+	void reset ();
 	
 	//Gets and Sets:
 	Busstop* get_origin() {return origin_stop;}
 	Busstop* get_destination () {return destination_stop;}
 	vector <Pass_path*> get_path_set () {return path_set;}
 	double get_arrivalrate () {return arrival_rate;}
-	passengers get_waiting_passengers() {return waiting_passengers;}
+	vector<Passenger*> get_waiting_passengers() {return waiting_passengers;}
 	int get_min_transfers () {return min_transfers;}
 	void set_waiting_passengers(passengers passengers_) {waiting_passengers = passengers_;}
 	void set_origin (Busstop* origin_stop_) {origin_stop=origin_stop_;}

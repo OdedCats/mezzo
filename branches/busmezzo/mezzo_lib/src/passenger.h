@@ -17,6 +17,7 @@ public:
 	Passenger ();
 	~Passenger ();
 	void init (int pass_id, double start_time_, ODstops* OD_stop_);
+	void reset();
 	
 	// Gets and sets:
 	int get_id () {return passenger_id;}

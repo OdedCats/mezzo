@@ -13,8 +13,8 @@ ODstops::ODstops (Busstop* origin_stop_, Busstop* destination_stop_, double arri
 	destination_stop = destination_stop_;
 	arrival_rate = arrival_rate_;
 	min_transfers = 100;
-	random = new (Random);
 	active = false;
+	random = new (Random);
 	if (randseed != 0)
 		{
 		random->seed(randseed);
@@ -28,6 +28,22 @@ ODstops::ODstops (Busstop* origin_stop_, Busstop* destination_stop_, double arri
 ODstops::~ODstops()
 {
 	delete random;
+}
+
+void ODstops::reset()
+{
+	min_transfers = 100;
+	active = false;
+	/*
+	for (vector <Passenger*>::iterator iter_pass = waiting_passengers.begin(); iter_pass < waiting_passengers.end();)
+	{
+		pass_recycler.addPassenger(*iter_pass);
+	}
+	*/
+	boarding_utility = 0;
+	staying_utility = 0;
+	waiting_passengers.clear();
+	output_pass_decisions.clear();
 }
 
 bool ODstops::execute (Eventlist* eventlist, double curr_time) // generate passengers with this OD and books an event for next passenger generation

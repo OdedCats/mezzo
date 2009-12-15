@@ -106,6 +106,14 @@ VehicleRecycler::	~VehicleRecycler()
 }
 
 // ***** Special Bus Functions *****
+void Bus::reset ()
+{
+	occupancy = 0;
+	on_trip = false;
+	number_seats = 45;
+	capacity = 70;
+	type = 4;
+}
 
 void Bus::set_bustype_attributes (Bustype* bty) 
 // change the fields that are determined by the bustype

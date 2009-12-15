@@ -260,12 +260,39 @@ int Network::reset()
 	// vehicle types
 	vehtypes.initialize();
 
-	//TO DO
+	// buslines
+	for (vector<Busline*>::iterator lines_iter = buslines.begin(); lines_iter < buslines.end(); lines_iter++)
+	{
+		(*lines_iter)->reset();
+	}
 
+	// bustrips
+	for (vector<Bustrip*>::iterator trips_iter = bustrips.begin(); trips_iter < bustrips.end(); trips_iter++)
+	{
+		(*trips_iter)->reset();
+	}
+
+	// busstops
+	for (vector<Busstop*>::iterator stops_iter = busstops.begin(); stops_iter < busstops.end(); stops_iter++)
+	{
+		(*stops_iter)->reset();
+	}
+
+	// ODstops, passengers, paths
+	for (vector<ODstops*>::iterator odstops_iter = odstops.begin(); odstops_iter < odstops.end(); odstops_iter++)
+	{		
+		(*odstops_iter)->reset();
+	}
+
+	// busvechiles
+	for (vector<Bus*>::iterator bus_iter = busvehicles.begin(); bus_iter < busvehicles.end(); bus_iter++)
+	{
+		(*bus_iter)->reset();
+	}
+
+	//TO DO
 	
 	// incidents
-
-	// buslines, busstops etc etc etc!
 
 	// all the Hybrid functions: BoundaryIn, BoundaryOut etc.
 
@@ -1618,11 +1645,46 @@ bool Network::readbustrip(istream& in) // reads a trip
 	return true;
 }
 
+
+
+
 bool Network::read_passenger_rates_format1 (istream& in) // reads the passenger rates in the format of arrival rate and alighting fraction per line and stop combination
 {
   char bracket;
   int origin_stop_id, busline_id;
   double arrival_rate, alighting_fraction;
+  bool ok= true;
+  
+  in >> bracket;
+  if (bracket != '{')
+  {
+  	cout << "readfile::readsbusstop scanner jammed at " << bracket;
+  	return false;
+  }
+
+	in >> origin_stop_id >> busline_id >> arrival_rate >> alighting_fraction ;
+	Busstop* bs_o=(*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (origin_stop_id) ))); 
+	Busline* bl=(*(find_if(buslines.begin(), buslines.end(), compare <Busline> (busline_id) )));
+	bs_o->add_line_nr_boarding (bl, arrival_rate * theParameters->demand_scale);
+	bs_o->add_line_nr_alighting (bl, alighting_fraction);
+
+  in >> bracket;
+  if (bracket != '}')
+  {
+    cout << "readfile::readbusstop scanner jammed at " << bracket;
+    return false;
+  }
+
+#ifdef _DEBUG_NETWORK
+#endif //_DEBUG_NETWORK
+  return ok;
+}
+
+bool Network::read_passenger_rates_format1_TD_basic (istream& in) // reads the passenger rates in the format of arrival rate and alighting fraction per line and stop combination
+{
+  char bracket;
+  int origin_stop_id, busline_id;
+  double scale, slices;
   bool ok= true;
   
   in >> bracket;
@@ -1753,6 +1815,62 @@ bool Network::read_passenger_rates_format3 (istream& in) // reads the passenger 
   return ok;
 }
 
+/////////////// Transit path-set generation functions: start
+
+void Network::generate_consecutive_stops()
+{
+	for (vector<Busstop*>::iterator iter_stop = busstops.begin(); iter_stop < busstops.end(); iter_stop++)
+	{
+		vector<Busline*> lines = (*iter_stop)->get_lines();
+		for (vector<Busline*>::iterator iter_line = lines.begin(); iter_line < lines.end(); iter_line++)
+		{
+			bool prior_this_stop = true;
+			for (vector<Busstop*>::iterator iter_consecutive_stops = (*iter_line)->stops.begin(); iter_consecutive_stops < (*iter_line)->stops.end(); iter_consecutive_stops++)
+			{
+				if (prior_this_stop == false)
+				{
+					int origin_id = (*iter_stop)->get_id();
+					int destination_id = (*iter_consecutive_stops)->get_id();
+					map <int, vector<Busline*>> origin_map = direct_lines[origin_id];
+					origin_map[destination_id].push_back(*iter_line);
+					direct_lines[origin_id] = origin_map;
+					consecutive_stops[(*iter_stop)].push_back((*iter_consecutive_stops));
+				}
+				if ((*iter_consecutive_stops)->get_id() == (*iter_stop)->get_id())
+				{
+					prior_this_stop = false;
+				}
+			}
+		}
+	}
+	// omitting all repetitions (caused by several direct lines connecting two stops)
+	for (vector<Busstop*>::iterator iter_stop = busstops.begin(); iter_stop < busstops.end(); iter_stop++)
+	{
+		vector<Busstop*> updated_cons;
+		map<Busstop*,bool> already_exist;
+		vector<Busstop*> cons_stops = consecutive_stops[(*iter_stop)];
+		for (vector<Busstop*>::iterator cons_stops_iter = cons_stops.begin(); cons_stops_iter < cons_stops.end(); cons_stops_iter++)
+		{
+			  already_exist[(*cons_stops_iter)] = false;	
+		}
+		for (vector<Busstop*>::iterator cons_stops_iter = cons_stops.begin(); cons_stops_iter < cons_stops.end(); cons_stops_iter++)
+		{
+			if (already_exist[(*cons_stops_iter)] == false)
+			{
+				updated_cons.push_back((*cons_stops_iter));
+				already_exist[(*cons_stops_iter)] = true;
+			}
+		}
+		consecutive_stops[(*iter_stop)].swap(updated_cons);
+		/*
+		for (vector <vector<Busstop*>::iterator>::iterator iter_drop = drop_stops.begin(); iter_drop < drop_stops.end(); iter_drop++)
+		{
+			consecutive_stops[(*iter_stop)].erase((*iter_drop));	
+		}
+		*/
+	}
+}
+
 bool Network::find_direct_paths (Busstop* bs_origin, Busstop* bs_destination) 
 // finds if there is a direct path between a given pair of stops, generate new direct paths
 {
@@ -1797,13 +1915,16 @@ bool Network::find_direct_paths (Busstop* bs_origin, Busstop* bs_destination)
 						{
 							map <Busstop*, ODstops*> od_as_origin = bs_origin->get_stop_as_origin();
 							od_as_origin[bs_destination]->add_paths(direct_path);
-							direct_lines[od_as_origin[bs_destination]].push_back(*bl_o);
+							int origin_id = bs_origin->get_id();
+							int destination_id = bs_destination->get_id();
+							map <int, vector<Busline*>> origin_map = direct_lines[origin_id];
+							origin_map[destination_id].push_back(*bl_o);
+							direct_lines[origin_id] = origin_map;
 							if (direct_path->get_number_of_transfers() < od_as_origin[bs_destination]->get_min_transfers())
 							// update the no. of min transfers required if decreased
 							{
 								od_as_origin[bs_destination]->set_min_transfers(direct_path->get_number_of_transfers());
 							}
-							return true;
 						}
 
 				}
@@ -1815,6 +1936,14 @@ bool Network::find_direct_paths (Busstop* bs_origin, Busstop* bs_destination)
 		}
 	}
   }
+  map <Busstop*, ODstops*> od_as_origin = bs_origin->get_stop_as_origin();
+  int origin_id = bs_origin->get_id();
+  int destination_id = bs_destination->get_id();
+  map <int, vector<Busline*>> origin_map = direct_lines[origin_id];
+  if  (origin_map[destination_id].size() != 0)
+  {
+	return true;
+  }
 #ifdef _DEBUG_NETWORK
 #endif //_DEBUG_NETWORK
 return false;
@@ -1825,6 +1954,7 @@ void Network::generate_indirect_paths()
 	bool original_path = true;
 	vector<vector<Busline*>> lines_sequence;
 	vector<vector<Busstop*>> stops_sequence;
+	vector<Pass_path*> updated_paths;
 	vector<Pass_path*> paths;
 	// compose the list of intermediate stops
 	for (vector<Busstop*>::iterator im_iter = collect_im_stops.begin(); im_iter < collect_im_stops.end(); im_iter++)
@@ -1833,19 +1963,25 @@ void Network::generate_indirect_paths()
 		im_stops.push_back((*im_iter));
 		stops_sequence.push_back(im_stops);
 	}
+	/* count how many combinations of paths you can make (multiply number of direct lines on segments)
 	int nr_path_combinations = 1;
-	// count how many combinations of paths you can make (multiply number of direct lines on segments)
 	for (vector<Busstop*>::iterator im_iter = collect_im_stops.begin(); im_iter < (collect_im_stops.end()-1); im_iter++)
 	{
 		map <Busstop*, ODstops*> od_as_origin = (*im_iter)->get_stop_as_origin();
-		nr_path_combinations = nr_path_combinations * direct_lines[od_as_origin[*(im_iter+1)]].size();
+		int origin_id = (*im_iter)->get_id();
+		int destination_id = (*(im_iter+1))->get_id();
+		map <int, vector<Busline*>> origin_map = direct_lines[origin_id];
+		nr_path_combinations = nr_path_combinations * origin_map[destination_id].size();
 	}
+	*/
 	// compose the list of direct lines between each pair of intermediate stops
 	for (vector<Busstop*>::iterator im_iter = collect_im_stops.begin(); im_iter < collect_im_stops.end()-1; im_iter++)
 	{
-		map <Busstop*, ODstops*> im_as_origin = (*im_iter)->get_stop_as_origin();
 		vector <Busline*> p_lines;
-		vector<Busline*> d_lines = direct_lines[im_as_origin[(*(im_iter+1))]];
+		int origin_id = (*im_iter)->get_id();
+		int destination_id = (*(im_iter+1))->get_id();
+		map <int, vector<Busline*>> origin_map = direct_lines[origin_id];
+		vector<Busline*> d_lines = origin_map[destination_id];
 		p_lines.push_back(d_lines.front()); // assuming a unique direct line for each leg
 		lines_sequence.push_back(p_lines);
 	}
@@ -1856,9 +1992,11 @@ void Network::generate_indirect_paths()
 	for (vector<Busstop*>::iterator im_iter = collect_im_stops.begin(); im_iter < collect_im_stops.end()-1; im_iter++)
 	{
 		stop_leg++;
-		map <Busstop*, ODstops*> im_as_origin = (*im_iter)->get_stop_as_origin();
-		vector <Busline*>::iterator d_lines_begin = direct_lines[im_as_origin[(*(im_iter+1))]].begin();
-		for (vector<Busline*>::iterator d_lines = d_lines_begin+1 ; d_lines < direct_lines[im_as_origin[(*(im_iter+1))]].end(); d_lines++)
+		int origin_id = (*im_iter)->get_id();
+		int destination_id = (*(im_iter+1))->get_id();
+		map <int, vector<Busline*>> origin_map = direct_lines[origin_id];
+		vector <Busline*>::iterator d_lines_begin = origin_map[destination_id].begin();
+		for (vector<Busline*>::iterator d_lines = d_lines_begin+1 ; d_lines < origin_map[destination_id].end(); d_lines++)
 		{
 			vector <Busline*> p_lines;
 			p_lines.push_back((*d_lines));
@@ -1880,7 +2018,13 @@ void Network::generate_indirect_paths()
 					}
 				}
 				Pass_path* indirect_path = new Pass_path(permute_path_lines , stops_sequence);	
+				updated_paths.push_back(indirect_path);
 			}
+			for (vector<Pass_path*>::iterator additional_paths = updated_paths.begin(); additional_paths < updated_paths.end(); additional_paths++)
+			{
+				paths.push_back((*additional_paths));
+			}
+			updated_paths.clear();
 		}
 	}
 	for (vector<Pass_path*>::iterator paths_iter = paths.begin(); paths_iter < paths.end(); paths_iter++)
@@ -1912,6 +2056,7 @@ void Network::generate_indirect_paths()
 void Network::find_all_paths () 
 // goes over all OD stop pairs to generate their path choice set
 {
+	generate_consecutive_stops();
 	// first - generate all direct paths
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{
@@ -1939,23 +2084,28 @@ void Network::find_all_paths ()
 void Network:: find_recursive_connection (Busstop* origin, Busstop* destination)
 // search recursively for a path (forward - from origin to destination)
 {
-	map <Busstop*, ODstops*> od_as_origin = origin->get_stop_as_origin();
+	// map <Busstop*, ODstops*> od_as_origin = origin->get_stop_as_origin();
 	map <Busstop*, ODstops*> original_od_as_origin = collect_im_stops.front()->get_stop_as_origin();
-	if (od_as_origin.size() > 0)
+	vector <Busstop*> cons_stops = consecutive_stops[origin];
+	if (cons_stops.size() > 0)
 	{
 		if ((collect_im_stops.size() - 1) <= original_od_as_origin[destination]->get_min_transfers() + theParameters->max_nr_extra_transfers)
 		{
-			for (map<Busstop*, ODstops*>::iterator iter = od_as_origin.begin(); iter != od_as_origin.end(); iter++)
+			for (vector<Busstop*>::iterator stop = cons_stops.begin(); stop < cons_stops.end(); stop++)
+			//for (map<Busstop*, ODstops*>::iterator iter = od_as_origin.begin(); iter != od_as_origin.end(); iter++)
 			{
-				Busstop* intermediate_destination = (*iter).first;
-				map <Busstop*, ODstops*> last_stop_as_origin = collect_im_stops.back()->get_stop_as_origin();
-				if (direct_lines[last_stop_as_origin[intermediate_destination]].size() != 0)
+				Busstop* intermediate_destination = (*stop);
+				int intermediate_id = intermediate_destination->get_id();
+				int previous_stop_id = collect_im_stops.back()->get_id();
+				map <int, vector<Busline*>> origin_map = direct_lines[previous_stop_id];
+				if (origin_map[intermediate_id].size() != 0)
 				{
-					collect_im_stops.push_back(intermediate_destination);
+						collect_im_stops.push_back(intermediate_destination);
 						if (intermediate_destination->get_id() != destination->get_id())
 						{
-							map <Busstop*, ODstops*> im_as_origin = intermediate_destination->get_stop_as_origin();
-							if (direct_lines[im_as_origin[destination]].size() != 0)
+							int destination_id = destination->get_id();
+							map <int, vector<Busline*>> origin_map = direct_lines[intermediate_id];
+							if (origin_map[destination_id].size() != 0)
 							{			
 								collect_im_stops.push_back(destination);
 								generate_indirect_paths();
@@ -1971,7 +2121,7 @@ void Network:: find_recursive_connection (Busstop* origin, Busstop* destination)
 	return;
 }
 
-void Network ::merge_paths (Busstop* stop) // aimed to merge paths with same lines for all legs (only different transfer stops)
+void Network ::merge_paths_stops (Busstop* stop) // aimed to merge paths with same lines for all legs (only different transfer stops)
 // TO DO: merge for different lines with same route between trnasfer stops?
 {
 	for (map <Busstop*, ODstops*>::iterator odpairs = stop->get_stop_as_origin().begin(); odpairs != stop->get_stop_as_origin().end(); odpairs++)
@@ -2109,6 +2259,8 @@ bool Network::check_path_no_repeating_stops (Pass_path* path) // chceks if the p
 	}
 return true;
 }
+
+/////////////// Transit path-set generation functions: end
 
 bool Network::read_bustype (istream& in) // reads a bustype
 {
@@ -4070,6 +4222,7 @@ bool Network::writeall(unsigned int repl)
 	string cleantimes;
 	end_of_simulation(runtime);
 	string linktimesfile = filenames[10];
+	cleantimes=linktimesfile+".clean";
 	string summaryfile=filenames[12];
 	string vehicleoutputfile=filenames[11];
 	string allmoesfile="allmoes.dat";

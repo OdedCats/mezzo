@@ -4,6 +4,7 @@
 #include <math.h>
 #include "MMath.h"
 #include <sstream>
+#include <stddef.h>
 
 template<class T>
 struct compare
@@ -51,6 +52,15 @@ Busline::Busline (int id_, string name_, Busroute* busroute_, vector<Busstop*> s
 
 Busline::~Busline()
 {}
+
+void Busline::reset ()
+{
+	line_timepoint.clear();
+	active = false;
+	average_headway = 0;
+	ratio_headway_holding = 0;
+	holding_strategy = 0; 
+}
 
 bool Busline::execute(Eventlist* eventlist, double time)
 {
@@ -236,6 +246,13 @@ Bustrip::Bustrip (int id_, double start_time_): id(id_), starttime(start_time_)
 Bustrip::~Bustrip ()
 {}
 
+void Bustrip::reset ()
+{
+	init_occupancy=0;
+	passengers_on_board.clear();
+	enter_time = 0;
+}
+
 double Bustrip::calc_departure_time (double time) // calculates departure time from origin according to arrival time and schedule (including layover effect)
 {
 	double min_recovery = 60.00; 
@@ -311,6 +328,7 @@ bool Bustrip::activate (double time, Route* route, ODpair* odpair, Eventlist* ev
 	// inserts the bus at the origin of the route
 	// if the assigned bus isn't avaliable at the scheduled time, then the trip is activated by Bus::advance_curr_trip as soon as it is done with the previous trip
 	eventlist = eventlist_;
+	next_stop = stops.begin();
 	bool ok = false; // flag to check if all goes ok
 	vector <Start_trip*>::iterator curr_trip, previous_trip; // find the pointer to the current and previous trip
 	for (vector <Start_trip*>::iterator trip = driving_roster.begin(); trip < driving_roster.end(); trip++)
@@ -339,7 +357,6 @@ bool Bustrip::activate (double time, Route* route, ODpair* odpair, Eventlist* ev
 		}
 	}	
 	busv->init(busv->get_id(),4,busv->get_length(),route,odpair,time); // initialize with the trip specific details
-	busv->set_on_trip (true);
 	if ( (odpair->get_origin())->insert_veh(busv, calc_departure_time(time))) // insert the bus at the origin at the possible departure time
 	{
   		busv->set_on_trip(true); // turn on indicator for bus on a trip
@@ -432,6 +449,24 @@ Busstop::~Busstop ()
 	delete random;
 }
 
+void Busstop::reset()
+{
+	avaliable_length = 0;
+	nr_boarding = 0;
+	nr_alighting = 0;
+	is_origin = false;
+	is_destination = false;
+	dwelltime = 0;
+	exit_time = 0;
+	expected_arrivals.clear();
+	buses_at_stop.clear();
+	last_arrivals.clear();
+	last_departures.clear();
+	multi_nr_waiting.clear();
+	nr_waiting.clear();
+	output_stop_visits.clear();
+	output_summary.clear();
+}
 void Busstop::book_bus_arrival(Eventlist* eventlist, double time, Bus* bus)
 {
 	// books an event for the arrival of a bus at a bus stop by adding it to the expected arrivals at the stop 
@@ -643,9 +678,19 @@ double Busstop::passenger_activity_at_stop (Bustrip* trip, double time) //!< pro
 			else // if this is an intermediate transfer stop on passenger route 
 			{
 				(*alighting_passenger)->set_ODstop(stop_as_origin[(*alighting_passenger)->get_OD_stop()->get_destination()]); // set this stop as his new origin (new OD)
-				passengers wait_pass = (*alighting_passenger)->get_OD_stop()->get_waiting_passengers(); // add him to the waiting queue on his new OD
-				wait_pass.push_back (*alighting_passenger);
-			    (*alighting_passenger)->get_OD_stop()->set_waiting_passengers(wait_pass);
+				ODstops* odstop = (*alighting_passenger)->get_OD_stop();
+				if (odstop->get_waiting_passengers().size() != 0)
+				{
+					passengers wait_pass = odstop->get_waiting_passengers(); // add him to the waiting queue on his new OD
+					wait_pass.push_back (*alighting_passenger);
+					odstop->set_waiting_passengers(wait_pass);
+				}
+				else
+				{
+					passengers wait_pass;
+					wait_pass.push_back(*alighting_passenger);
+					odstop->set_waiting_passengers(wait_pass);
+				}
 			}
 		}
 			trip->passengers_on_board[this].clear(); 

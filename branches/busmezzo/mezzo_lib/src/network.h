@@ -246,15 +246,17 @@ public:
 	bool readbusline(istream& in); //!< reads a busline
 	bool readbustrip(istream& in); //!< reads a trip
   bool read_passenger_rates_format1 (istream& in); // reads the passenger rates in the format of arrival rate and alighting fraction per line and stop combination
+  bool read_passenger_rates_format1_TD_basic (istream& in)
   bool read_passenger_rates_format2 (istream& in); // reads the passenger rates in the format of arrival rate per line, origin stop and destination stop combination
    bool read_passenger_rates_format3 (istream& in); // reads the passenger rates in the format of arrival rate per OD in terms of stops (no path is pre-determined)
   bool read_bustype (istream& in); // reads a bus type
   bool read_busvehicle(istream& in); // reads a bus vehicle 
+  void generate_consecutive_stops (); // stores for each stop all the stops that can be reached within a direct trip
   bool find_direct_paths (Busstop* bs_origin, Busstop* bs_destination); // finds direct paths and generate new direct paths
   void generate_indirect_paths (); // generates new indirect paths
   void find_all_paths (); // goes over all OD stop pairs to generate their path choice set
   void find_recursive_connection (Busstop* origin, Busstop* destination); // search recursively for a path (forward - from origin to destination)
-  void merge_paths (Busstop* stop);  // to be tested
+  void merge_paths_stops (Busstop* stop);  // to be tested
   bool compare_same_lines_paths (Pass_path* path1, Pass_path* path2); // checks if two paths are identical in terms of lines
   bool check_constraints_paths (Pass_path* path); // checks if the path meets all the constraints
   bool check_path_no_repeating_lines (Pass_path* path); // checks if the path does not include going on and off the same bus line at the same stop
@@ -312,7 +314,8 @@ protected:
     vector <Bus*> busvehicles; // a list of the bus vehicles
 	vector <ODstops*> odstops;
 	vector<Busstop*> collect_im_stops; // compose the list of stops for a path
-	map<ODstops*, vector<Busline*>> direct_lines; // contains all direct lines between ODs
+	map<int,map<int, vector<Busline*>>> direct_lines; // contains all direct lines between a couple of stops
+	map<Busstop*,vector<Busstop*>> consecutive_stops; // contains all the stops that can be reached within no transfer per stop
 
 	//Shortest path graph
 #ifndef _USE_VAR_TIMES

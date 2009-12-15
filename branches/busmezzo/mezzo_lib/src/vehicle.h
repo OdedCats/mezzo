@@ -106,7 +106,7 @@ public:
 		occupancy = 0;
 		on_trip = false;
 		number_seats = 45;
-		capacity = 75;
+		capacity = 70;
 		type = 4;
 		random = new (Random);
 		if (randseed != 0)
@@ -123,7 +123,7 @@ public:
 	{	occupancy = 0;
 		on_trip = false;
 		number_seats = 50;
-		capacity = 80;
+		capacity = 70;
 		type = 4;
 		random = new (Random);
 		if (randseed != 0)
@@ -153,6 +153,7 @@ public:
 				random->randomize();
 		}		
 	};
+	void reset ();
 // GETS and SETS
 	int get_bus_id () {return bus_id;}
 	void set_bus_id (int bus_id_) {bus_id = bus_id_;}

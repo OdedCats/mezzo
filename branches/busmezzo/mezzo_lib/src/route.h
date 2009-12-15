@@ -90,8 +90,6 @@ class Busroute: public Route
 public:
 	Busroute(int id_, Origin* origin_, Destination* destination_, vector <Link*> links_) :
 		Route (id_, origin_, destination_, links_) {}
-
-
 };
 
 #endif

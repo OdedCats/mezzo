@@ -18,6 +18,13 @@ Passenger::~Passenger()
 {
 }
 
+
+void Passenger::reset()
+{
+	boarding_decision = false;
+	start_time = 0; 
+
+}
 void Passenger::init (int pass_id, double start_time_, ODstops* OD_stop_)
 {
 	passenger_id = pass_id;

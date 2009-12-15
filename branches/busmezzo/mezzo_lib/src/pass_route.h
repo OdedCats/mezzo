@@ -16,6 +16,7 @@ class Pass_path
 	Pass_path (vector<vector<Busline*>> alt_lines_);
 	Pass_path (vector<vector<Busline*>> alt_lines_, vector <vector <Busstop*>> alt_transfer_stops_);
 	~Pass_path ();
+	void reset();
 
 	// Gets and sets:
 	vector <vector <Busline*>> get_alt_lines () {return alt_lines;}
