@@ -246,7 +246,7 @@ public:
 	bool readbusline(istream& in); //!< reads a busline
 	bool readbustrip(istream& in); //!< reads a trip
   bool read_passenger_rates_format1 (istream& in); // reads the passenger rates in the format of arrival rate and alighting fraction per line and stop combination
-  bool read_passenger_rates_format1_TD_basic (istream& in)
+  bool read_passenger_rates_format1_TD_basic (istream& in);
   bool read_passenger_rates_format2 (istream& in); // reads the passenger rates in the format of arrival rate per line, origin stop and destination stop combination
    bool read_passenger_rates_format3 (istream& in); // reads the passenger rates in the format of arrival rate per OD in terms of stops (no path is pre-determined)
   bool read_bustype (istream& in); // reads a bus type

@@ -1694,11 +1694,6 @@ bool Network::read_passenger_rates_format1_TD_basic (istream& in) // reads the p
   	return false;
   }
 
-	in >> origin_stop_id >> busline_id >> arrival_rate >> alighting_fraction ;
-	Busstop* bs_o=(*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (origin_stop_id) ))); 
-	Busline* bl=(*(find_if(buslines.begin(), buslines.end(), compare <Busline> (busline_id) )));
-	bs_o->add_line_nr_boarding (bl, arrival_rate * theParameters->demand_scale);
-	bs_o->add_line_nr_alighting (bl, alighting_fraction);
 
   in >> bracket;
   if (bracket != '}')
