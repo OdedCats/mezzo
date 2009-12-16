@@ -3,10 +3,10 @@
 TEMPLATE = app
 
 CONFIG +=  console
-CONFIG -= qt
+#CONFIG -= qt
 TARGET = mezzo_s_hybrid
 DEPENDPATH += . ../../mezzo_lib/src
-QT -= core gui
+QT -= gui
 DEFINES += _NO_GUI _MIME _VISSIMCOM
 QMAKE= $(QTDIR)/bin/qmake
 
