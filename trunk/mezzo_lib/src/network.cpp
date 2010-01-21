@@ -1129,6 +1129,7 @@ bool Network::readroute(istream& in)
 #endif //_DEBUG_NETWORK
 	Route* rptr = new Route(rid, optr, dptr, rlinks);
 	routemap.insert(pair <odval, Route*> (odval(oid,did),rptr));
+	routenr= max(routenr,rid);
 #ifdef _DEBUG_NETWORK
 	cout << " read a route"<<endl;
 #endif //_DEBUG_NETWORK
@@ -2536,8 +2537,9 @@ bool Network::init_shortest_path()
 /* Initialises the shortest path graph with the link costs
 */
 {
-	int lid,in,out,routenr;
-	routenr=routemap.size();
+	int lid,in,out;
+		// int routenr;
+	//routenr=routemap.size();
 	double cost, mu, sd;
 	random=new (Random);
 
@@ -2629,7 +2631,7 @@ bool Network::shortest_paths_all()
 	double entrytime=0.0;    // entry time for time-variant shortest path search
 	int nr_reruns=static_cast<int> (runtime/theParameters->update_interval_routes)-1; // except for last period
 	// determines the number of reruns of the shortest path alg.
-	int routenr=routemap.size();
+	//int routenr=routemap.size();
 	for (int i=0; i<nr_reruns; i++)
 	{
 		entrytime= i*theParameters->update_interval_routes;
@@ -3300,6 +3302,7 @@ bool Network::writeall(unsigned int repl)
 	string cleantimes;
 	end_of_simulation(runtime);
 	string linktimesfile = filenames[10];
+	cleantimes=linktimesfile +".clean";
 	string summaryfile=filenames[12];
 	string vehicleoutputfile=filenames[11];
 	string allmoesfile="allmoes.dat";

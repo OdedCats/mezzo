@@ -347,6 +347,7 @@ protected:
 	unsigned int replication;
 	int runtime; //!< == stoptime
 	int starttime;
+	int routenr; // id for next route to be created (> max route id)
 	bool calc_paths; //!< if true new shortest paths are calculated and new paths added to the route file
 	double time;
 	int no_ass_links; //!< number of links observed in assignment matrix
