@@ -248,6 +248,7 @@ public:
 	int get_nr_alighting () {return nr_alighting;}
 	int get_nr_waiting (Bustrip* trip) {return nr_waiting[trip->get_line()];}
 	const double get_position () { return position;}
+	double get_exit_time() { return exit_time;}
 	void set_position (double position_ ) {position = position_;}
 	vector <Busline*> get_lines () {return lines;}
 	void save_previous_arrival_rates () {previous_arrival_rates.swap(arrival_rates);}

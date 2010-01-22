@@ -43,7 +43,7 @@ void ODstops::reset()
 	boarding_utility = 0;
 	staying_utility = 0;
 	waiting_passengers.clear();
-	output_pass_decisions.clear();
+	output_pass_boarding_decision.clear();
 }
 
 bool ODstops::execute (Eventlist* eventlist, double curr_time) // generate passengers with this OD and books an event for next passenger generation
@@ -74,7 +74,6 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus)
 	// initialization
 	boarding_utility = 0.0;
 	staying_utility = 0.0;
-	double accumlated_frequency_staying_alts = 0.0;
 	vector<Busline*> first_leg_lines;
 	bool in_alt = false; // indicates if the current arriving bus is included 
 	
@@ -109,10 +108,9 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus)
 			first_leg_lines = (*iter_paths)->get_alt_lines().front();
 			for(vector<Busline*>::iterator iter_first_leg_lines = first_leg_lines.begin(); iter_first_leg_lines < first_leg_lines.end(); iter_first_leg_lines++)
 			{
-				// has to be revised for non-direct paths, aggreagte over all options that include this bus
 				if ((*iter_first_leg_lines)->get_id() == arriving_bus->get_id()) // if the arriving bus is a possible first leg for this path alternative
 				{
-					boarding_utility = (*iter_paths)->calc_arriving_utility(this); 
+					boarding_utility += exp((*iter_paths)->calc_arriving_utility(this)); 
 					(*iter_paths)->set_arriving_bus_rellevant(true);
 					break;
 				}
@@ -125,6 +123,7 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus)
 			}
 			*/
 		}
+		boarding_utility = log (boarding_utility);
 		for (vector<Pass_path*>::iterator iter_paths = path_set.begin(); iter_paths < path_set.end(); iter_paths++)
 		{
 			if ((*iter_paths)->get_arriving_bus_rellevant() == false)
@@ -135,7 +134,7 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus)
 				staying_utility += relative_frequency * (*iter_paths)->calc_waiting_utility(this);
 				*/
 				// logsum calculation
-				staying_utility += (*iter_paths)->calc_waiting_utility(this);
+				staying_utility += exp((*iter_paths)->calc_waiting_utility(this));
 			}
 		}
 		staying_utility = log (staying_utility);
@@ -156,26 +155,54 @@ double ODstops::calc_binary_logit (double utility_i, double utility_j)
 	return ((exp(utility_i)) / (exp(utility_i) + exp (utility_j)));
 }
 
-double ODstops::calc_combined_set_utility (Passenger* pass)
+double ODstops::calc_combined_set_utility (Passenger* pass, Bustrip* bus_on_board)
 {
 	// calc logsum over all the paths from this origin stop
 	staying_utility = 0.0;
 	for (vector <Pass_path*>::iterator paths = path_set.begin(); paths < path_set.end(); paths++)
 	{
-		staying_utility += (*paths)->calc_waiting_utility(this);
+		staying_utility += exp(theParameters->in_vehicle_time_coefficient * bus_on_board->get_line()->calc_curr_line_ivt(pass->get_OD_stop()->get_origin(),origin_stop) + theParameters->transfer_coefficient +  (*paths)->calc_waiting_utility(this));
+		// taking into account IVT till this intermediate stop, transfer penalty and the utility of the path from this transfer stop till the final destination
 	}
 	return log(staying_utility);
 }
 
-void ODstops::record_passenger_boarding_decision (Passenger* pass, Bustrip* trip, double time, bool boarding_decision)  // creates a log-file for stop-related info
+void ODstops::record_passenger_boarding_decision (Passenger* pass, Bustrip* trip, double time, bool boarding_decision)  // add to output structure boarding decision info
 {
-	output_pass_decisions.push_back(Pass_boarding_decision(pass->get_id(), pass->get_original_origin()->get_id(), pass->get_OD_stop()->get_destination()->get_id(), trip->get_line()->get_id(), trip->get_id() , pass->get_OD_stop()->get_origin()->get_id() , time, pass->get_start_time(), boarding_decision, boarding_utility, staying_utility)); 
+	output_pass_boarding_decision[pass].push_back(Pass_boarding_decision(pass->get_id(), pass->get_original_origin()->get_id(), pass->get_OD_stop()->get_destination()->get_id(), trip->get_line()->get_id(), trip->get_id() , pass->get_OD_stop()->get_origin()->get_id() , time, pass->get_start_time(), boarding_decision, boarding_utility, staying_utility)); 
 }
 
-void ODstops::write_output(ostream & out)
+void ODstops::record_passenger_alighting_decision (Passenger* pass, Bustrip* trip, double time, Busstop* chosen_alighting_stop, map<Busstop*,pair<double,double>> alighting_MNL)  //  add to output structure alighting decision info
 {
-	for (list <Pass_boarding_decision>::iterator iter = output_pass_decisions.begin(); iter!=output_pass_decisions.end();iter++)
+	output_pass_alighting_decision[pass].push_back(Pass_alighting_decision(pass->get_id(), pass->get_original_origin()->get_id(), pass->get_OD_stop()->get_destination()->get_id(), trip->get_line()->get_id(), trip->get_id() , pass->get_OD_stop()->get_origin()->get_id() , time, pass->get_start_time(), chosen_alighting_stop->get_id(), alighting_MNL)); 
+}
+
+void ODstops::write_boarding_output(ostream & out, Passenger* pass)
+{
+	for (list <Pass_boarding_decision>::iterator iter = output_pass_boarding_decision[pass].begin(); iter!=output_pass_boarding_decision[pass].end();iter++)
 	{
 		iter->write(out);
 	}
+}
+
+void ODstops::write_alighting_output(ostream & out, Passenger* pass)
+{
+	for (list <Pass_alighting_decision>::iterator iter = output_pass_alighting_decision[pass].begin(); iter!=output_pass_alighting_decision[pass].end();iter++)
+	{
+		iter->write(out);
+	}
+}
+
+//**************
+
+void Pass_alighting_decision::write (ostream& out) 
+{ 
+	out << pass_id << '\t' << original_origin << '\t' << destination_stop << '\t' << line_id << '\t'<< trip_id << '\t'<< stop_id<< '\t'<< time << '\t'<< generation_time << '\t' << chosen_alighting_stop << '\t' ;
+	for (map<Busstop*,pair<double,double>>::iterator iter = alighting_MNL.begin(); iter != alighting_MNL.end(); iter++)
+	{
+		out<< (*iter).first->get_id() << '\t';
+		out<< (*iter).second.first << '\t';
+		out<< (*iter).second.second << '\t';
+	}
+	out << endl; 
 }

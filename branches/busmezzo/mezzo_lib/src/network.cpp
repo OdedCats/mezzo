@@ -3247,16 +3247,20 @@ bool Network::writeheadways(string name)
 
 }
 
-bool Network::write_busstop_output(string name1, string name2, string name3, string name4)
+bool Network::write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6)
 {
 	ofstream out1(name1.c_str(),ios_base::app);
 	ofstream out2(name2.c_str(),ios_base::app);
 	ofstream out3(name3.c_str(),ios_base::app);
 	ofstream out4(name4.c_str(),ios_base::app);
+	ofstream out5(name5.c_str(),ios_base::app);
+	ofstream out6(name6.c_str(),ios_base::app);
 	assert(out1);
 	assert(out2);
 	assert(out3);
 	assert(out4);
+	assert(out5);
+	assert(out6);
 	// writing the crude data and summary outputs for each bus stop
 	for (vector<Busstop*>::iterator iter = busstops.begin();iter != busstops.end();iter++)
 	{	
@@ -3278,12 +3282,33 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 		(*iter)->get_output_summary().write(out3,(*iter)->get_id());
 	}
 	out3.close();
+	// writing the trajectory output for each bus vehicle (by stops)
+	for (vector<Bus*>::iterator iter = busvehicles.begin(); iter!= busvehicles.end(); iter++)
+	{
+		(*iter)->write_output(out4);
+	}
+	out4.close();
+	// writing the boarding decisions of passenger
 	for (vector<ODstops*>::iterator od_iter = odstops.begin(); od_iter < odstops.end(); od_iter++)
 	{
-		(*od_iter)->write_output(out4);
+		map <Passenger*,list<Pass_boarding_decision>> boarding_decisions = (*od_iter)->get_boarding_output();
+		for (map<Passenger*,list<Pass_boarding_decision>>::iterator pass_iter1 = boarding_decisions.begin(); pass_iter1 != boarding_decisions.end(); pass_iter1++)
+		{
+			(*od_iter)->write_boarding_output(out5, (*pass_iter1).first);
+		}
 	}
+	out5.close();
+	// writing the alighting decisions of passenger
+	for (vector<ODstops*>::iterator od_iter = odstops.begin(); od_iter < odstops.end(); od_iter++)
+	{
+		map <Passenger*,list<Pass_alighting_decision>> alighting_decisions = (*od_iter)->get_alighting_output();
+		for (map<Passenger*,list<Pass_alighting_decision>>::iterator pass_iter2 = alighting_decisions.begin(); pass_iter2 != alighting_decisions.end(); pass_iter2++)
+		{
+			(*od_iter)->write_alighting_output(out6, (*pass_iter2).first);
+		}
+	}
+	out6.close();
 	return true;
-	out4.close();
 }
 
 
@@ -4478,7 +4503,7 @@ bool Network::writeall(unsigned int repl)
 	//writeheadways("timestamps.dat"); // commented out, since no-one uses them 
 	writeassmatrices(assignmentmatfile);
 	write_v_queues(vqueuesfile);
-	this->write_busstop_output(workingdir + "buslog_out.dat", workingdir + "busstop_sum.dat", workingdir + "busline_sum.dat", workingdir + "passengerlog.dat");
+	this->write_busstop_output(workingdir + "buslog_out.dat", workingdir + "busstop_sum.dat", workingdir + "busline_sum.dat", workingdir + "bus_trajectory.dat", workingdir + "passenger_boarding.dat", workingdir + "passenger_alighting.dat");
 	return true;
 }
 

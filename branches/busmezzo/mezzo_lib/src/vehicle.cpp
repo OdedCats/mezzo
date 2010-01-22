@@ -150,6 +150,19 @@ void Bus::advance_curr_trip (double time, Eventlist* eventlist) // progresses tr
 	}
 }
 
+void Bus::record_busvehicle_location (Bustrip* trip, Busstop* stop, double time)
+{
+	output_vehicle.push_back(Busvehicle_location(trip->get_line()->get_id(), trip->get_id() , stop->get_id(), bus_id , stop->get_link_id() , 1, time)); 
+	output_vehicle.push_back(Busvehicle_location(trip->get_line()->get_id(), trip->get_id() , stop->get_id(), bus_id , stop->get_link_id() , 0, stop->get_exit_time())); 
+}
+
+void Bus::write_output(ostream & out)
+{
+	for (list <Busvehicle_location>::iterator iter = output_vehicle.begin(); iter!=output_vehicle.end();iter++)
+	{
+		iter->write(out);
+	}
+}
 
 // ***** Bus-types functions *****
 Bustype::Bustype ()

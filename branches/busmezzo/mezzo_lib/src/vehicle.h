@@ -32,6 +32,9 @@ class Route;
 class Link;
 //class PVM;
 class Bustype;
+class Bustrip;
+class Busstop;
+class Busvehicle_location;
 
 class Vehicle
 {
@@ -171,6 +174,10 @@ public:
 	void set_bustype_attributes (Bustype* bty); // change the fields that are determined by the bustype
 	void advance_curr_trip (double time, Eventlist* eventlist); // progresses trip-pointer 
 
+// output-related functions
+	void record_busvehicle_location (Bustrip* trip,  Busstop* stop, double time);
+	void write_output(ostream & out);
+
 protected:
 	int	bus_id;
 	Bustype* bus_type;
@@ -179,7 +186,25 @@ protected:
 	int capacity; // In the future will be determined according to the bus type
 	int occupancy;
 	Bustrip* curr_trip;
-	bool on_trip; // is true when bus is on a trip and false when waiting for the next trip	
+	bool on_trip; // is true when bus is on a trip and false when waiting for the next trip
+	list <Busvehicle_location> output_vehicle; //!< list of output data for buses visiting stops
+};
+
+class Busvehicle_location // container object holding output data for stop visits
+{
+public:
+	Busvehicle_location (int line_id_,	int trip_id_,	int vehicle_id_, int stop_id_, int link_id_, bool entering_stop_, double time_):
+							line_id(line_id_),trip_id(trip_id_),vehicle_id(vehicle_id_), stop_id(stop_id_), link_id(link_id_), entering_stop(entering_stop_), time (time_){}
+	void write (ostream& out) { out << line_id << '\t'<< trip_id << '\t'<< vehicle_id << '\t'<< stop_id<< '\t'<<link_id << '\t'<< entering_stop << '\t'
+		<< time  << '\t'	<< endl; }
+	void reset () {line_id = 0 ; trip_id = 0; vehicle_id = 0; stop_id = 0; link_id = 0; entering_stop = 0; time = 0; }
+	int line_id;
+	int trip_id;
+	int vehicle_id;
+	int stop_id;
+	int link_id;
+	bool entering_stop;
+	double time;
 };
 
 #endif// BUSES

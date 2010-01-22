@@ -28,7 +28,7 @@ public:
 
 	// Passenger decision processes - currently the simplest case possible is assumed
 	bool make_boarding_decision (Bustrip* arriving_bus, double time); // boarding decision making 
-	Busstop* make_alighting_decision (Bustrip* boarding_bus); // alighting decision making - currently: alight at your destination stop (assuming no transfers)
+	Busstop* make_alighting_decision (Bustrip* boarding_bus, double time); // alighting decision making - currently: alight at your destination stop (assuming no transfers)
 
 protected:
 	int passenger_id;

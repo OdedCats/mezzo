@@ -45,29 +45,6 @@ double Pass_path::calc_total_scheduled_in_vehicle_time (ODstops* odstops)
 		sum_in_vehicle_time += (*iter_alt_lines).front()->calc_curr_line_ivt((*iter_alt_transfer_stops).front(),(*(iter_alt_transfer_stops+1)).front());
 		iter_alt_transfer_stops++;
 	}
-		/*
-		vector <Start_trip>::iterator iter_curr_trip = (*iter_alt_lines).front()->get_curr_trip();
-		Bustrip* line_first_trip = (*iter_alt_lines).front()->get_trips().front().first;
-		if ((*iter_curr_trip).first != line_first_trip)
-		{
-			iter_curr_trip--;
-		}
-		
-		vector <Visit_stop*>::iterator board_stop,alight_stop; 
-		for (vector <Visit_stop*>::iterator stop = (*(iter_curr_trip)).first->stops.begin(); stop < (*(iter_curr_trip)).first->stops.end(); stop++)
-		{
-			if ((*stop)->first->get_id() == boarding_stop->get_id())
-			{
-				board_stop = stop;
-			}
-			if ((*stop)->first->get_id() == alighting_stop->get_id())
-			{
-				alight_stop = stop;
-				break;
-			}
-		}
-		sum_in_vehicle_time += (*alight_stop)->second - (*board_stop)->second;
-		*/
 	return (sum_in_vehicle_time/60); // minutes
 }
 

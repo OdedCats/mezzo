@@ -164,7 +164,7 @@ double Busline::calc_curr_line_ivt (Busstop* start_stop, Busstop* end_stop)
 				break;
 			}
 	}
-	return ((*alight_stop)->second - (*board_stop)->second);
+	return ((*alight_stop)->second - (*board_stop)->second); // in seconds
 }
 
 void Busline::calculate_sum_output_line()
@@ -341,10 +341,10 @@ bool Bustrip::activate (double time, Route* route, ODpair* odpair, Eventlist* ev
 	}
 	if (curr_trip == driving_roster.begin()) // if it is the first trip for this chain
 	{
-		vid++;
-		Bus* new_bus=recycler.newBus(); // then generate a new vehicle
-		new_bus->set_bustype_attributes (btype);
-		busv =new_bus;
+		//vid++;
+		//Bus* new_bus=recycler.newBus(); // then generate a new vehicle
+		//new_bus->set_bustype_attributes (btype);
+		//busv =new_bus;
 		busv->set_curr_trip(this);	
 	}
 	else // if it isn't the first trip for this chain 
@@ -565,6 +565,7 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 		eventlist->add_event (exit_time, this); // book an event for the time it exits the stop
 		record_busstop_visit ( bus->get_curr_trip(), bus->get_curr_trip()->get_enter_time()); // document stop-related info
 								// done BEFORE update_last_arrivals in order to calc the headway
+		bus->record_busvehicle_location (bus->get_curr_trip(), this, bus->get_curr_trip()->get_enter_time());
 		bus->get_curr_trip()->advance_next_stop(exit_time, eventlist); 
 		update_last_arrivals (bus->get_curr_trip(), bus->get_curr_trip()->get_enter_time()); // in order to follow the arrival times (AFTER dwell time is calculated)
 		update_last_departures (bus->get_curr_trip(), exit_time); // in order to follow the departure times (AFTER the dwell time and time point stuff)
@@ -768,7 +769,7 @@ double Busstop::passenger_activity_at_stop (Bustrip* trip, double time) //!< pro
 						if ((starting_occupancy + get_nr_boarding() - get_nr_alighting()) < trip->get_busv()->get_capacity()) 
 						{
 							// if the bus is not completly full - then the passenger boards
-							trip->passengers_on_board[(*check_pass)->make_alighting_decision(trip)].push_back((*check_pass)); 
+							trip->passengers_on_board[(*check_pass)->make_alighting_decision(trip, time)].push_back((*check_pass)); 
 							// currently - alighting decision is made when boarding
 							set_nr_boarding (get_nr_boarding()+1);
 							if (check_pass < pass_waiting_od.end()-1)
@@ -996,11 +997,9 @@ return total_nr_waiting;
 
 void Busstop::record_busstop_visit (Bustrip* trip, double enter_time)  // creates a log-file for stop-related info
 {
-	
 	output_stop_visits.push_back(Busstop_Visit(trip->get_line()->get_id(), trip->get_id() , trip->get_busv()->get_bus_id() , get_id() , enter_time,
 			trip->scheduled_arrival_time (this),dwelltime,(enter_time - trip->scheduled_arrival_time (this)), exit_time, get_time_since_arrival (trip , enter_time),
 			get_time_since_departure (trip , exit_time),get_nr_alighting() , get_nr_boarding() , trip->get_busv()->get_occupancy(), calc_total_nr_waiting() ,exit_time-enter_time-dwelltime)); 
-	
 }
 
 void Busstop::write_output(ostream & out)
