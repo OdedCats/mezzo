@@ -601,6 +601,56 @@ double Busstop::passenger_activity_at_stop (Bustrip* trip, double time) //!< pro
 					// the number of trials is the number of passengers on board with the probability of the alighting fraction
 		}
 	}
+	if (theParameters->demand_format == 10) // format 1 with time-dependent demand slices
+	{
+		// find the time that this slice started
+		vector<double>::iterator curr_slice_start;
+		bool simulation_start_slice = true;
+		for (vector<double>::iterator iter_slices = update_rates_times[trip->get_line()].begin(); iter_slices != update_rates_times[trip->get_line()].end(); iter_slices++)
+		{
+			if (iter_slices == update_rates_times[trip->get_line()].begin() && time > (*iter_slices))
+				// it is before the first slice
+			{
+				simulation_start_slice = false;
+			}
+			if ((iter_slices+1) == update_rates_times[trip->get_line()].end() && time > (*iter_slices))
+				// it is the last slice
+			{
+				curr_slice_start = iter_slices;
+				break;
+			}
+			if ((*iter_slices)< time && (*(iter_slices+1)) >= time)
+			{
+				curr_slice_start = iter_slices;
+				break;
+			}
+		}
+		if (simulation_start_slice == false && (time - get_time_since_arrival(trip,time) < (*curr_slice_start))) 
+		// if the previous bus from this line arrives on the previous slice - then take into account previous rate
+		{
+			double time_previous_slice = ((*curr_slice_start) - (time - get_time_since_arrival(trip,time)));
+			double time_current_slice = time - (*curr_slice_start);
+			nr_waiting [trip->get_line()] += random -> poisson ((previous_arrival_rates[trip->get_line()] * time_previous_slice) / 3600.0 ) + random -> poisson (((get_arrival_rates (trip)) * time_current_slice) / 3600.0 );
+			// sum of two poisson processes - pass. arriving during the leftover of the previous lsice plus pass. arriving during the begining of this slice
+			double weighted_alighting_fraction = (get_alighting_fractions (trip) * time_current_slice + previous_alighting_fractions[trip->get_line()] * time_previous_slice) / (time_current_slice + time_previous_slice);
+			if (starting_occupancy > 0 && weighted_alighting_fraction > 0)
+			{
+				set_nr_alighting (random -> binrandom (starting_occupancy, weighted_alighting_fraction)); // the alighting process follows a binominal distribution 
+					// the number of trials is the number of passengers on board with the probability of the weighted alighting fraction
+			}
+		}
+		else // take into account only current rates
+		{
+			nr_waiting [trip->get_line()] += random -> poisson (((get_arrival_rates (trip)) * get_time_since_arrival (trip, time)) / 3600.0 );
+				//the arrival process follows a poisson distribution and the lambda is relative to the headway
+				// with arrival time and the headway as the duration
+			if (starting_occupancy > 0 && get_alighting_fractions (trip) > 0) 
+			{
+				set_nr_alighting (random -> binrandom (starting_occupancy, get_alighting_fractions (trip))); // the alighting process follows a binominal distribution 
+					// the number of trials is the number of passengers on board with the probability of the alighting fraction
+			}
+		}
+	}
 	if (theParameters->demand_format == 2) // demand is given in terms of arrival rates per a pair of stops (no individual pass.)
 	{
 		// generate waiting pass. per pre-determined destination stop and alight passngers headed for this stop
@@ -620,15 +670,15 @@ double Busstop::passenger_activity_at_stop (Bustrip* trip, double time) //!< pro
 		set_nr_alighting (trip->nr_expected_alighting[this]); // passengers heading for this stop alight
 		trip->nr_expected_alighting[this] = 0; 
 	}
-		if (theParameters->demand_format < 3) // in the case of non-individual passengers - boarding progress for waiting passengers (capacity constraints)
+	if (theParameters->demand_format == 1 || theParameters->demand_format == 2 || theParameters->demand_format == 10) // in the case of non-individual passengers - boarding progress for waiting passengers (capacity constraints)
 	{	
 		if (trip->get_busv()->get_capacity() - (starting_occupancy - get_nr_alighting()) < nr_waiting [trip->get_line()]) // if the capcity determines the boarding process
 		{	
-			if (theParameters->demand_format == 1)
+			if (theParameters->demand_format == 1 || theParameters->demand_format == 10)
 			{
 				set_nr_boarding(trip->get_busv()->get_capacity() - (starting_occupancy - get_nr_alighting()));
 				nr_waiting [trip->get_line()] -= nr_boarding;
-			}
+			} 
 			if (theParameters->demand_format == 2)
 			{
 				double ratio = double(nr_waiting [trip->get_line()])/(trip->get_busv()->get_capacity() - (starting_occupancy + get_nr_boarding() - get_nr_alighting()));
@@ -1070,3 +1120,35 @@ void Busstop::calculate_sum_output_stop_per_line(int line_id)
 	output_summary[line_id].stop_sd_DT = sqrt(output_summary[line_id].stop_sd_DT/(counter-1));
 }
 
+Change_arrival_rate::Change_arrival_rate(double time)
+{
+	loadtime = time;	
+}
+
+void Change_arrival_rate::book_update_arrival_rates (Eventlist* eventlist, double time)
+{
+	eventlist->add_event(time,this);
+}
+
+bool Change_arrival_rate::execute(Eventlist* eventlist, double time)
+{		
+	for (TD_demand::iterator stop_iter = arrival_rates_TD.begin(); stop_iter != arrival_rates_TD.end(); stop_iter++)
+	{
+		map<Busline*,double> td_line = (*stop_iter).second;
+		(*stop_iter).first->save_previous_arrival_rates ();
+		for (map<Busline*,double>::iterator line_iter = td_line.begin(); line_iter != td_line.end(); line_iter++)
+		{
+			(*stop_iter).first->add_line_nr_boarding((*line_iter).first,(*line_iter).second);
+		}
+	}
+	for (TD_demand::iterator stop_iter = alighting_fractions_TD.begin(); stop_iter != alighting_fractions_TD.end(); stop_iter++)
+	{
+		map<Busline*,double> td_line = (*stop_iter).second;
+		(*stop_iter).first->save_previous_alighting_fractions ();
+		for (map<Busline*,double>::iterator line_iter = td_line.begin(); line_iter != td_line.end(); line_iter++)
+		{
+			(*stop_iter).first->add_line_nr_alighting((*line_iter).first,(*line_iter).second);
+		}
+	}
+	return true;
+}

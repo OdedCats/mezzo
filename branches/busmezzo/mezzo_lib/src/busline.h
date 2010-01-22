@@ -27,6 +27,7 @@ class Bus;
 class Bustype;
 class Passenger;
 class ODstops;
+class Change_arrival_rate;
 
 typedef pair<Bustrip*,double> Start_trip;
 typedef vector <Passenger*> passengers;
@@ -249,6 +250,8 @@ public:
 	const double get_position () { return position;}
 	void set_position (double position_ ) {position = position_;}
 	vector <Busline*> get_lines () {return lines;}
+	void save_previous_arrival_rates () {previous_arrival_rates.swap(arrival_rates);}
+	void save_previous_alighting_fractions () {previous_alighting_fractions.swap(alighting_fractions);}
 
 	Output_Summary_Stop_Line get_output_summary (int line_id) {return output_summary[line_id];}
 
@@ -257,6 +260,7 @@ public:
 	void add_line_nr_waiting(Busline* line, int value){nr_waiting[line] = value;}
 	void add_line_nr_boarding(Busline* line, double value){arrival_rates[line] = value;}
 	void add_line_nr_alighting(Busline* line, double value){alighting_fractions[line]= value;}
+	void add_line_update_rate_time(Busline* line, double time){update_rates_times[line].push_back(time);}
 	void add_odstops_as_origin(Busstop* destination_stop, ODstops* od_stop){stop_as_origin[destination_stop]= od_stop; is_origin = true;}
 	void add_odstops_as_destination(Busstop* origin_stop, ODstops* od_stop){stop_as_destination[origin_stop]= od_stop; is_destination = true;}
 
@@ -309,6 +313,11 @@ protected:
 	map <Busline*, double> arrival_rates; //!< parameter lambda that defines the poission proccess of passengers arriving at the stop
 	map <Busline*, double> alighting_fractions; //!< parameter that defines the poission process of the alighting passengers 
 
+	// relevant only for demand format 1 TD (format 10)
+	map <Busline*, double> previous_arrival_rates;
+	map <Busline*, double> previous_alighting_fractions; 
+	map <Busline*, vector<double>> update_rates_times; // contains the information about when there is a change in rates (but not the actual change)
+	
 	// relevant only for demand format 2
 	multi_rates multi_nr_waiting; // for demant format is from type 2. 
 
@@ -324,6 +333,26 @@ protected:
 	// output structures
 	list <Busstop_Visit> output_stop_visits; //!< list of output data for buses visiting stops
 	map<int,Output_Summary_Stop_Line> output_summary; //  int value is line_id
+};
+
+typedef pair<Busline*,double> TD_single_pair;
+typedef map<Busstop*, map<Busline*,double>> TD_demand;
+
+class Change_arrival_rate : public Action
+{
+public:
+	Change_arrival_rate(double time); 
+	void book_update_arrival_rates (Eventlist* eventlist, double time);
+	bool execute(Eventlist* eventlist, double time); 
+	void add_line_nr_boarding_TD(Busstop* stop, Busline* line, double value){TD_single_pair TD; TD.first = line; TD.second = value; arrival_rates_TD[stop].insert(TD);}
+	void add_line_nr_alighting_TD(Busstop* stop, Busline* line, double value){TD_single_pair TD; TD.first = line; TD.second = value; alighting_fractions_TD[stop].insert(TD);}
+	
+protected:
+	double loadtime;
+	// relevant only for time-dependent demand format 1
+	TD_demand arrival_rates_TD; //!< parameter lambda that defines the poission proccess of passengers arriving at the stop
+	TD_demand alighting_fractions_TD; //!< parameter that defines the poission process of the alighting passengers 
+
 };
 
 #endif //_BUSLINE

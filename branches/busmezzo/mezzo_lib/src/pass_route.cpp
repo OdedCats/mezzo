@@ -3,13 +3,15 @@
 Pass_path:: Pass_path ()
 {
 }
-Pass_path:: Pass_path (vector<vector<Busline*>> alt_lines_)
+Pass_path:: Pass_path (int path_id, vector<vector<Busline*>> alt_lines_)
 {
+	p_id = path_id;
 	alt_lines = alt_lines_;
 	number_of_transfers = find_number_of_transfers();
 }
-Pass_path:: Pass_path (vector<vector<Busline*>> alt_lines_, vector <vector <Busstop*>> alt_transfer_stops_)
+Pass_path:: Pass_path (int path_id, vector<vector<Busline*>> alt_lines_, vector <vector <Busstop*>> alt_transfer_stops_)
 {
+	p_id = path_id;
 	alt_lines = alt_lines_;
 	alt_transfer_stops = alt_transfer_stops_;
 	number_of_transfers = find_number_of_transfers();

@@ -246,7 +246,8 @@ public:
 	bool readbusline(istream& in); //!< reads a busline
 	bool readbustrip(istream& in); //!< reads a trip
   bool read_passenger_rates_format1 (istream& in); // reads the passenger rates in the format of arrival rate and alighting fraction per line and stop combination
-  bool read_passenger_rates_format1_TD_basic (istream& in);
+  bool read_passenger_rates_format1_TD_basic (istream& in, int nr_rates);
+  bool read_passenger_rates_format1_TD_slices (istream& in);
   bool read_passenger_rates_format2 (istream& in); // reads the passenger rates in the format of arrival rate per line, origin stop and destination stop combination
    bool read_passenger_rates_format3 (istream& in); // reads the passenger rates in the format of arrival rate per OD in terms of stops (no path is pre-determined)
   bool read_bustype (istream& in); // reads a bus type
@@ -258,6 +259,7 @@ public:
   void find_recursive_connection (Busstop* origin, Busstop* destination); // search recursively for a path (forward - from origin to destination)
   void merge_paths_stops (Busstop* stop);  // to be tested
   bool compare_same_lines_paths (Pass_path* path1, Pass_path* path2); // checks if two paths are identical in terms of lines
+  bool compare_same_stops_paths (Pass_path* path1, Pass_path* path2); // checks if two paths are identical in terms of stops
   bool check_constraints_paths (Pass_path* path); // checks if the path meets all the constraints
   bool check_path_no_repeating_lines (Pass_path* path); // checks if the path does not include going on and off the same bus line at the same stop
   bool check_path_no_repeating_stops (Pass_path* path); // chceks if the path deos not include going through the same stop more than once

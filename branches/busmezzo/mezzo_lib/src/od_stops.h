@@ -53,6 +53,7 @@ public:
 	Busstop* get_origin() {return origin_stop;}
 	Busstop* get_destination () {return destination_stop;}
 	vector <Pass_path*> get_path_set () {return path_set;}
+	void set_path_set (vector <Pass_path*> path_set_) {path_set = path_set_;}
 	double get_arrivalrate () {return arrival_rate;}
 	vector<Passenger*> get_waiting_passengers() {return waiting_passengers;}
 	int get_min_transfers () {return min_transfers;}
@@ -69,8 +70,8 @@ public:
 	void add_paths (Pass_path* pass_path_) {path_set.push_back(pass_path_);}
 	double calc_boarding_probability (Busline* arriving_bus);
 	double calc_binary_logit (double utility_i, double utility_j);
+	double calc_combined_set_utility (Passenger* pass);
 
-	
 	// output-related functions
 	void record_passenger_boarding_decision (Passenger* pass, Bustrip* trip, double time, bool boarding_decision); //!< creates a log-file for boarding decision related info
 	void write_output(ostream & out);

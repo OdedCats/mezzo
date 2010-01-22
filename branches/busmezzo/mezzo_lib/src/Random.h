@@ -77,6 +77,9 @@ public:
   int binrandom (int n, double p); // using a cdf inverse
   int binrandom1 (int n, double p); // using calls to Bernoulli
 
+  // decision from a set of alternatives 
+  int mrandom (vector<double> probs);
+
   // exponential with parameter r
 
   double erandom(double r);

@@ -117,21 +117,28 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus)
 					break;
 				}
 			}
+			/* not needed once you have logsum
 			if ((*iter_paths)->get_arriving_bus_rellevant() == false) // if the arriving bus isn't a possible first leg for this path alternative
 			{
 				accumlated_frequency_staying_alts += (60 / (*iter_paths)->calc_curr_leg_headway(first_leg_lines)); 
 				// aggregates the frequencies of all the options that does not include the arriving bus
 			}
+			*/
 		}
 		for (vector<Pass_path*>::iterator iter_paths = path_set.begin(); iter_paths < path_set.end(); iter_paths++)
 		{
 			if ((*iter_paths)->get_arriving_bus_rellevant() == false)
 			{
+				/*
 				double relative_frequency = (60/(*iter_paths)->calc_curr_leg_headway(first_leg_lines)) / accumlated_frequency_staying_alts;
 				// weighting factor for each path alternative that does not include the arriving bus
 				staying_utility += relative_frequency * (*iter_paths)->calc_waiting_utility(this);
+				*/
+				// logsum calculation
+				staying_utility += (*iter_paths)->calc_waiting_utility(this);
 			}
 		}
+		staying_utility = log (staying_utility);
 		return calc_binary_logit(boarding_utility, staying_utility); // calculate the probability to board
 	}
 	// what to do if the arriving bus is not included in any of the alternatives?
@@ -147,6 +154,17 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus)
 double ODstops::calc_binary_logit (double utility_i, double utility_j)
 {
 	return ((exp(utility_i)) / (exp(utility_i) + exp (utility_j)));
+}
+
+double ODstops::calc_combined_set_utility (Passenger* pass)
+{
+	// calc logsum over all the paths from this origin stop
+	staying_utility = 0.0;
+	for (vector <Pass_path*>::iterator paths = path_set.begin(); paths < path_set.end(); paths++)
+	{
+		staying_utility += (*paths)->calc_waiting_utility(this);
+	}
+	return log(staying_utility);
 }
 
 void ODstops::record_passenger_boarding_decision (Passenger* pass, Bustrip* trip, double time, bool boarding_decision)  // creates a log-file for stop-related info

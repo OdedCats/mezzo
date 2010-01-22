@@ -210,6 +210,7 @@ Random::binrandom (int n, double p) // using a cdf inverse
 	return Min(counter,n);
 }
 
+
 int 
 Random::binrandom1 (int n, double p) // using calls to Bernoulli
 {
@@ -219,6 +220,32 @@ Random::binrandom1 (int n, double p) // using calls to Bernoulli
 		sum += brandom (p);
 	}
 	return sum;
+}
+
+// decision from a set of alternatives, returns the location of the chosen alternative
+
+int 
+Random::mrandom (vector<double> probs)
+{
+	double cdf = 0.0;
+	vector<double> accumlated_probs;
+	accumlated_probs.push_back(0.0);
+	double value = urandom();
+	int position = 1;
+	for (vector<double>::iterator iter = probs.begin(); iter < probs.end(); iter++)
+	{
+		cdf += (*iter);
+		accumlated_probs.push_back (cdf);
+	}
+	for (vector<double>::iterator iter1 = accumlated_probs.begin(); iter1 < accumlated_probs.end(); iter1++)
+	{
+		if (value > (*iter1) && value < (*(iter1+1)))
+		{
+			return position;
+		}
+		position++;
+	}
+	return 1;
 }
 
 // Generates a random number uniformly distributed between (a, b].
