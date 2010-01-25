@@ -2170,7 +2170,11 @@ void Network::find_all_paths ()
 	// merge alternative paths
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{
-		merge_paths_stops(*basic_origin);
+		merge_paths_by_stops(*basic_origin);
+	}
+	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
+	{
+		merge_paths_by_common_lines(*basic_origin);
 	}
 }
 
@@ -2216,13 +2220,13 @@ void Network:: find_recursive_connection (Busstop* origin, Busstop* destination)
 	return;
 }
 
-void Network::merge_paths_stops (Busstop* stop) // aimed to merge paths with same lines for all legs (only different transfer stops)
-// TO DO: merge for different lines with same route between trnasfer stops?
+void Network::merge_paths_by_stops (Busstop* stop) // merge paths with same lines for all legs (only different transfer stops)
 {
 	map <Busstop*, ODstops*> od_as_origin = stop->get_stop_as_origin();
 	for (map <Busstop*, ODstops*>::iterator odpairs = od_as_origin.begin(); odpairs != od_as_origin.end(); odpairs++)
 	{
 		vector <Pass_path*> path_set = odpairs->second->get_path_set();
+		// go over all the OD pairs of stops that have more than a single alternative
 		if (path_set.size() > 1)
 		{
 			map <Pass_path*,bool> paths_to_be_deleted;
@@ -2241,7 +2245,8 @@ void Network::merge_paths_stops (Busstop* stop) // aimed to merge paths with sam
 				{
 					for (vector <Pass_path*>::iterator path2 = path1 + 1; path2 < path_set.end(); path2++)
 					{
-						if (compare_same_lines_paths ((*path1), (*path2)) == true) // both have exactly the same lines for all legs 
+						if (compare_same_lines_paths ((*path1), (*path2)) == true) 
+						// both have exactly the same lines for all legs 
 						{
 							vector <vector <Busstop*>> stops2 = (*path2)->get_alt_transfer__stops();
 							vector <vector <Busstop*>>::iterator stops2_iter = stops2.begin();
@@ -2249,6 +2254,7 @@ void Network::merge_paths_stops (Busstop* stop) // aimed to merge paths with sam
 							{
 								for (vector<Busstop*>::iterator stops2_leg = (*stops2_iter).begin(); stops2_leg < (*stops2_iter).end(); stops2_leg++)
 								{
+									// search for the stops that you want to copy (union of two sets)
 									bool no_identical = true;
 									for (vector<Busstop*>::iterator stops1_leg = (*stops1_iter).begin(); stops1_leg < (*stops1_iter).end(); stops1_leg++)
 									{
@@ -2259,6 +2265,7 @@ void Network::merge_paths_stops (Busstop* stop) // aimed to merge paths with sam
 										}
 									}
 									if (no_identical == true)
+									// add those non-shared stops to the stops set
 									{
 										(*stops1_iter).push_back((*stops2_leg));
 										flagged_paths[(*path2)] = true;
@@ -2273,28 +2280,15 @@ void Network::merge_paths_stops (Busstop* stop) // aimed to merge paths with sam
 					}
 				}
 				if (perform_merge == true)
+				// generate a new path with the joined stops set
 				{
 					Pass_path* merged_path = new Pass_path(pathid, (*path1)->get_alt_lines(), stops1);
 					pathid++;
 					merged_paths_to_be_added.push_back(merged_path);
 				}
 			}
-			/*
-			for (vector <Pass_path*>::iterator delete_iter = paths_to_be_deleted.begin(); delete_iter < paths_to_be_deleted.end(); delete_iter++)
-			{
-				vector<Pass_path*>::iterator path_to_delete;
-				for (vector<Pass_path*>::iterator paths_iter = path_set.begin(); paths_iter < path_set.end(); paths_iter++)
-				{
-					if (compare_same_lines_paths((*delete_iter),(*paths_iter)) == true && compare_same_stops_paths((*delete_iter),(*paths_iter)) == true)
-					{
-						path_to_delete = paths_iter;
-						break;
-					}
-				}
-				path_set.erase(path_to_delete);
-			}
-			*/
 			for (map <Pass_path*,bool>::iterator delete_iter = paths_to_be_deleted.begin(); delete_iter != paths_to_be_deleted.end(); delete_iter++)
+			// delete all the paths that were used as source for the merged paths
 			{
 				vector<Pass_path*>::iterator path_to_delete;
 				for (vector<Pass_path*>::iterator paths_iter = path_set.begin(); paths_iter < path_set.end(); paths_iter++)
@@ -2311,30 +2305,145 @@ void Network::merge_paths_stops (Busstop* stop) // aimed to merge paths with sam
 				}
 			}
 			for (vector<Pass_path*>::iterator adding_iter = merged_paths_to_be_added.begin(); adding_iter < merged_paths_to_be_added.end(); adding_iter++)
+			// add the new merged paths to the path set
 			{
 				path_set.push_back((*adding_iter));
 			}
-			/*
-				vector <Pass_path*>::iterator update_iter = paths_to_be_updated.begin();
-				for (vector <Pass_path*>::iterator replace_iter = paths_to_be_replaced.begin(); replace_iter < paths_to_be_replaced.end(); replace_iter++)
+
+		}
+		odpairs->second->set_path_set(path_set);
+	}
+}
+
+void Network::merge_paths_by_common_lines (Busstop* stop)  // merge paths with lines that have identical route between consecutive stops
+{
+	map <Busstop*, ODstops*> od_as_origin = stop->get_stop_as_origin();
+	for (map <Busstop*, ODstops*>::iterator odpairs = od_as_origin.begin(); odpairs != od_as_origin.end(); odpairs++)
+	{
+		vector <Pass_path*> path_set = odpairs->second->get_path_set();
+		if (path_set.size() > 1)
+		{
+			// go over all the OD pairs of stops that have more than a single alternative
+			map <Pass_path*,bool> paths_to_be_deleted;
+			vector <Pass_path*> merged_paths_to_be_added;
+			map <Pass_path*,bool> flagged_paths;
+			for (vector <Pass_path*>::iterator path_iter = path_set.begin(); path_iter < path_set.end(); path_iter++)
+			{
+				flagged_paths[(*path_iter)] = false;
+				paths_to_be_deleted[(*path_iter)] = false;
+			}
+			for (vector <Pass_path*>::iterator path1 = path_set.begin(); path1 < path_set.end()-1; path1++)
+			{
+				bool perform_merge = false;
+				vector<vector<Busline*>> transfer_lines1_ = (*path1)->get_alt_lines();						
+				vector<vector<Busline*>>::iterator transfer_lines1 = transfer_lines1_.begin();
+				vector<vector<Busstop*>> transfer_stops1_ = (*path1)->get_alt_transfer__stops();
+				if (flagged_paths[(*path1)] == false)
 				{
-					vector<Pass_path*>::iterator path_to_replace;
-					for (vector<Pass_path*>::iterator paths_iter = path_set.begin(); paths_iter < path_set.end(); paths_iter++)
+					for (vector <Pass_path*>::iterator path2 = path1 + 1; path2 < path_set.end(); path2++)
 					{
-						if (compare_same_lines_paths((*replace_iter),(*paths_iter)) == true && compare_same_stops_paths((*replace_iter),(*paths_iter)) == true)
+						int counter_in_row = 0;
+						vector<vector<Busstop*>> transfer_stops2_ = (*path2)->get_alt_transfer__stops();
+						vector<vector<Busline*>> transfer_lines2_ = (*path2)->get_alt_lines();
+						vector<vector<Busstop*>>::iterator transfer_stops2 = transfer_stops2_.begin();
+						vector<vector<Busline*>>::iterator transfer_lines2 = transfer_lines2_.begin();
+						for (vector<vector<Busstop*>>::iterator transfer_stops1 = transfer_stops1_.begin(); transfer_stops1 < transfer_stops1_.end(); transfer_stops1++)
 						{
-							path_to_replace = paths_iter;
-							break;
+							int counter_shared = 0;
+							// check if the two paths share stops in their transfer points
+							for (vector<Busstop*>::iterator transfer_stop1 = (*transfer_stops1).begin(); transfer_stop1 < (*transfer_stops1).end(); transfer_stop1++)
+							{
+								for (vector<Busstop*>::iterator transfer_stop2 = (*transfer_stops2).begin(); transfer_stop2 < (*transfer_stops2).end(); transfer_stop2++)
+								{
+									if ((*transfer_stop1)->get_id() == (*transfer_stop2)->get_id())
+									{
+										counter_shared++;
+										break;
+									}
+								}
+							}
+							if (counter_shared == (*transfer_stops1).size() && counter_shared == (*transfer_stops2).size()) // the same set of transfer stops
+							{
+								counter_in_row++; // only if ALL the stops are shared 
+							}
+							else
+							{
+								counter_in_row = 0;
+							}
+							if (counter_in_row == 2) // there are two consecutive identical sets of transfer stops
+							{
+								if (compare_common_partial_routes((*transfer_lines1).front(), (*transfer_lines2).front(), (*(transfer_stops1-1)).front(), (*(transfer_stops1)).front()) == true )
+								{
+									// the two lines have the same route between the stops - merge 
+									for (vector<Busline*>::iterator transfer_line2 = (*transfer_lines2).begin(); transfer_line2 < (*transfer_lines2).end(); transfer_line2++)
+									{
+										bool identical_line = false;
+										for (vector<Busline*>::iterator transfer_line1 = (*transfer_lines1).begin(); transfer_line1 < (*transfer_lines1).end(); transfer_line1++)
+										{
+										// check if the identical route is because it is really the same line...
+											if ((*transfer_line1)->get_id() == (*transfer_line2)->get_id())
+											{
+												identical_line = true;
+											}
+										}
+										if (identical_line == false)
+										{
+											(*transfer_lines1).push_back(*transfer_line2);
+										}
+										perform_merge = true;
+										flagged_paths[(*path2)] = true;
+									}
+									paths_to_be_deleted[*path1] = true;
+									paths_to_be_deleted[*path2] = true;
+								}
+								counter_in_row = 1;
+							}
+							// progress all the iterators
+							transfer_stops2++;
+							if (transfer_stops2 == transfer_stops2_.end() || transfer_lines1 == transfer_lines1_.end() || transfer_lines2 == transfer_lines2_.end())
+							{
+								break;
+							}
+							if (transfer_stops1 != transfer_stops1_.begin())
+							{
+								transfer_lines1++;
+								transfer_lines2++;
+							}
 						}
 					}
-					path_set.erase(path_to_replace);
-					path_set.insert(path_to_replace,(*update_iter));
-					update_iter++;
 				}
-			*/
+				if (perform_merge == true)
+				{
+					Pass_path* merged_path = new Pass_path(pathid, transfer_lines1_, (*path1)->get_alt_transfer__stops()); 
+					pathid++;
+					merged_paths_to_be_added.push_back(merged_path);
+				}
 			}
-			odpairs->second->set_path_set(path_set);
+			for (map <Pass_path*,bool>::iterator delete_iter = paths_to_be_deleted.begin(); delete_iter != paths_to_be_deleted.end(); delete_iter++)
+			// delete all the paths that were used as source for the merged paths
+			{
+				vector<Pass_path*>::iterator path_to_delete;
+				for (vector<Pass_path*>::iterator paths_iter = path_set.begin(); paths_iter < path_set.end(); paths_iter++)
+				{
+					if ((*delete_iter).first->get_id() == (*paths_iter)->get_id() && (*delete_iter).second == true)
+					{
+						path_to_delete = paths_iter;
+						break;
+					}
+				}
+				if ((*delete_iter).second == true)
+				{
+					path_set.erase(path_to_delete);
+				}
+			}
+			for (vector<Pass_path*>::iterator adding_iter = merged_paths_to_be_added.begin(); adding_iter < merged_paths_to_be_added.end(); adding_iter++)
+			// add the new merged paths to the path set
+			{
+				path_set.push_back((*adding_iter));
+			}
 		}
+		odpairs->second->set_path_set(path_set);
+	}
 }
 
 bool Network::compare_same_lines_paths (Pass_path* path1, Pass_path* path2)
@@ -2413,6 +2522,54 @@ bool Network::compare_same_stops_paths (Pass_path* path1, Pass_path* path2)
 	}
 }
 
+bool Network::compare_common_partial_routes (Busline* line1, Busline* line2, Busstop* start_section, Busstop* end_section) // checks if two lines have the same route between two given stops
+{
+	vector<Busstop*>::iterator iter_stop1;
+	vector<Busstop*>::iterator iter_stop2;
+	// found the pointer to starting point on both lines
+	int stop_on_route_counter = 0;
+	for (iter_stop1 = line1->stops.begin(); iter_stop1 < line1->stops.end(); iter_stop1++)
+	{
+		if ((*iter_stop1)->get_id() == start_section->get_id())
+		{
+			stop_on_route_counter++;
+			break;
+		}
+	}
+	for (iter_stop2 = line2->stops.begin(); iter_stop2 < line2->stops.end(); iter_stop2++)
+	{
+		if ((*iter_stop2)->get_id() == start_section->get_id())
+		{
+			stop_on_route_counter++;
+			break;
+		}
+	}
+	if (stop_on_route_counter < 2)
+	{
+		return false;
+	}
+	else
+	{
+		for (iter_stop1; (*iter_stop1)->get_id() != end_section->get_id(); iter_stop1++)
+		{
+			if ((*iter_stop1)->get_id() != (*iter_stop2)->get_id())
+			{
+				return false;
+			}
+			iter_stop2++;
+			if (iter_stop2 == line2->stops.end())
+			{
+				return false;
+			}
+		}
+		if ((*(iter_stop2))->get_id() != end_section->get_id())
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 bool Network::check_constraints_paths (Pass_path* path) // checks if the path meets all the constraints
 {
 	if (path->get_alt_transfer__stops().size() == 2)
@@ -2433,6 +2590,8 @@ return true;
 bool Network::check_path_no_repeating_lines (Pass_path* path) // checks if the path does not include going on and off the same bus line at the same stop
 {
 	vector <vector <Busline*>> lines = path->get_alt_lines();
+	vector <vector <Busstop*>> stops_ = path->get_alt_transfer__stops();
+	vector <vector <Busstop*>>::iterator stops = stops_.begin();
 	for (vector <vector <Busline*>>::iterator lines_iter1 = lines.begin(); lines_iter1 < (lines.end()-1); lines_iter1++)
 	{
 		for (vector <Busline*>::iterator leg_lines1 = (*lines_iter1).begin(); leg_lines1 < (*lines_iter1).end(); leg_lines1++)
@@ -2442,14 +2601,15 @@ bool Network::check_path_no_repeating_lines (Pass_path* path) // checks if the p
 			// taking the same line with an intermediate line is allowed (1-2-1)
 			for (vector <Busline*>::iterator leg_lines2 = (*lines_iter2).begin(); leg_lines2 < (*lines_iter2).end(); leg_lines2++)
 			{
-				if ((*leg_lines1)->get_id() == (*leg_lines2)->get_id())
+				if ((*leg_lines1)->get_id() == (*leg_lines2)->get_id() || compare_common_partial_routes((*leg_lines1),(*leg_lines2),(*stops).front(), (*(stops+1)).front()) == true)
 				{
 					return false;
 				}
 			}
 		}
+		stops++;
 	}
-return true;
+	return true;
 }
 
 bool Network::check_path_no_repeating_stops (Pass_path* path) // chceks if the path deos not include going through the same stop more than once
