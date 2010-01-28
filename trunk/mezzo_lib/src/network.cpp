@@ -15,14 +15,18 @@
 //using namespace std;
 
 // initialise the global variables and objects
+VehicleRecycler recycler;    // Global vehicle recycler
 
 long int randseed=0;
 int vid=0;
-VehicleRecycler recycler;    // Global vehicle recycler
+
 double time_alpha=0.2; // smoothing factor for the output link times (uses hist_time & avg_time),
-// 1 = only new times, 0= only old times.
+										// 1 = only new times, 0= only old times.
 
 Parameters* theParameters = new Parameters();
+std::ofstream eout("debug_log.txt"); // for all debugging output
+
+
 
 // compare is a helper functor (function object) to be used in STL algorithms as
 // predicate (for instance in find_if(start_iterator,stop_iterator, Predicate))
@@ -323,7 +327,7 @@ bool Network::readnodes(istream& in)
 	string keyword;
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="nodes:")
 		return false;
@@ -350,7 +354,7 @@ bool Network::readnode(istream& in)
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readfile::readnodes scanner jammed at " << bracket;
+		eout << "readfile::readnodes scanner jammed at " << bracket;
 		return false;
 	}
 	in  >> nid >> type >> x >> y;
@@ -375,7 +379,7 @@ bool Network::readnode(istream& in)
 		nodemap [nid] = optr; // later on take out the vectors. Now we use both map and old vectors
 		originmap [nid] = optr;
 #ifdef _DEBUG_NETWORK
-		cout << " origin " << nid;
+		eout << " origin " << nid;
 #endif //_DEBUG_NETWORK
 	}
 	if (type==2)
@@ -396,7 +400,7 @@ bool Network::readnode(istream& in)
 		if (dptr==NULL)
 		{
 
-			cout << "Read nodes: scanner jammed at destination " << nid << endl;
+			eout << "Read nodes: scanner jammed at destination " << nid << endl;
 			return false;
 		}
 #ifndef _NO_GUI
@@ -411,7 +415,7 @@ bool Network::readnode(istream& in)
 		nodemap [nid] = dptr; // later on take out the vectors. Now we use both map and old vectors
 		destinationmap [nid] = dptr;
 #ifdef _DEBUG_NETWORK  	
-		cout << " destination " << nid ;
+		eout << " destination " << nid ;
 
 #endif //_DEBUG_NETWORK  	
 	}
@@ -431,7 +435,7 @@ bool Network::readnode(istream& in)
 		junctionmap [nid] = jptr;
 
 #ifdef _DEBUG_NETWORK
-		cout << " junction " << nid ;
+		eout << " junction " << nid ;
 #endif //_DEBUG_NETWORK   	
 	}
 	if (type==4)
@@ -451,7 +455,7 @@ bool Network::readnode(istream& in)
 		originmap [nid] = biptr;
 		boundaryins.insert(boundaryins.begin(),biptr);
 #ifdef _DEBUG_NETWORK  	
-		cout << " boundaryin "  << nid;
+		eout << " boundaryin "  << nid;
 #endif //_DEBUG_NETWORK  	
 	}
 
@@ -472,19 +476,19 @@ bool Network::readnode(istream& in)
 		junctionmap [nid] = jptr;
 		boundaryouts.insert(boundaryouts.begin(),jptr);
 #ifdef _DEBUG_NETWORK  	
-		cout << " boundaryout " << nid ;
+		eout << " boundaryout " << nid ;
 #endif //_DEBUG_NETWORK  	
 	}
 
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readnodes scanner jammed at " << bracket;
+		eout << "readfile::readnodes scanner jammed at " << bracket;
 		return false;
 	}
 
 #ifdef _DEBUG_NETWORK
-	cout << "read"<<endl;
+	eout << "read"<<endl;
 #endif //_DEBUG_NETWORK
 	return true;
 }
@@ -495,7 +499,7 @@ bool Network::readsdfuncs(istream& in)
 	string keyword;
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="sdfuncs:")
 		return false;
@@ -519,7 +523,7 @@ bool Network::readsdfunc(istream& in)
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readfile::readsdfuncs scanner jammed at " << bracket;
+		eout << "readfile::readsdfuncs scanner jammed at " << bracket;
 		return false;
 	}
 	in  >> sdid >> type >> vmax >> vmin >> romax >> romin;
@@ -531,7 +535,7 @@ bool Network::readsdfunc(istream& in)
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readsdfuncs scanner jammed at " << bracket;
+		eout << "readfile::readsdfuncs scanner jammed at " << bracket;
 		return false;
 	}
 	Sdfunc* sdptr;
@@ -546,7 +550,7 @@ bool Network::readsdfunc(istream& in)
 	sdfuncmap [sdid] = sdptr;
 
 #ifdef _DEBUG_NETWORK
-	cout << " read a sdfunc"<<endl;
+	eout << " read a sdfunc"<<endl;
 #endif //_DEBUG_NETWORK
 	return true;
 }
@@ -557,7 +561,7 @@ bool Network::readlinks(istream& in)
 	string keyword;
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="links:")
 		return false;
@@ -581,7 +585,7 @@ bool Network::readlink(istream& in)
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readfile::readlinks scanner jammed at " << bracket;
+		eout << "readfile::readlinks scanner jammed at " << bracket;
 		return false;
 	}
 	in  >> lid >> innode >> outnode >> length >> nrlanes >> sdid >> name;
@@ -597,7 +601,7 @@ bool Network::readlink(istream& in)
 	}
 	if (bracket != '}')
 	{
-		cout << "readfile::readlinks scanner jammed at " << bracket;
+		eout << "readfile::readlinks scanner jammed at " << bracket;
 		return false;
 	}
 	// find the nodes and sdfunc pointers
@@ -644,7 +648,7 @@ bool Network::readlink(istream& in)
 	linkmap [lid] = link;
 	//links.insert(links.end(),link);
 #ifdef _DEBUG_NETWORK
-	cout << " read a link"<<endl;
+	eout << " read a link"<<endl;
 #endif //_DEBUG_NETWORK
 	return true;
 }
@@ -656,7 +660,7 @@ bool Network::readvirtuallinks(string name)
 	string keyword;
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="virtuallinks:")
 	{
@@ -684,7 +688,7 @@ bool Network::readvirtuallink(istream& in)
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readfile::readvirtuallinks scanner jammed at " << bracket;
+		eout << "readfile::readvirtuallinks scanner jammed at " << bracket;
 
 		return false;
 	}
@@ -700,7 +704,7 @@ bool Network::readvirtuallink(istream& in)
 
 	if (bracket != '{')
 	{
-		cout << "readfile::readvirtuallinks scanner jammed at " << bracket;
+		eout << "readfile::readvirtuallinks scanner jammed at " << bracket;
 		return false;
 	}
 	for (long i=0; i<nr_v_nodes; i++)
@@ -712,7 +716,7 @@ bool Network::readvirtuallink(istream& in)
 
 	if (bracket != '}')
 	{
-		cout << "readfile::readvirtuallinks scanner jammed at " << bracket;
+		eout << "readfile::readvirtuallinks scanner jammed at " << bracket;
 		return false;
 	}
 #endif //_VISSIMCOM
@@ -720,7 +724,7 @@ bool Network::readvirtuallink(istream& in)
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readvirtuallinks scanner jammed at " << bracket;
+		eout << "readfile::readvirtuallinks scanner jammed at " << bracket;
 		return false;
 	}
 	// find the nodes and sdfunc pointers
@@ -770,7 +774,7 @@ bool Network::readvirtuallink(istream& in)
 	boptr->register_virtual(link);
 
 #ifdef _DEBUG_NETWORK
-	cout << " read a virtual link"<<endl;
+	eout << " read a virtual link"<<endl;
 #endif //_DEBUG_NETWORK
 	return true;
 }
@@ -781,7 +785,7 @@ bool Network::readservers(istream& in)
 	string keyword;
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="servers:")
 		return false;
@@ -804,7 +808,7 @@ bool Network::readserver(istream& in)
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readfile::readservers scanner jammed at " << bracket;
+		eout << "readfile::readservers scanner jammed at " << bracket;
 		return false;
 	}
 	in  >> sid >> stype >> mu >> sd >> delay;
@@ -814,7 +818,7 @@ bool Network::readserver(istream& in)
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readservers scanner jammed at " << bracket;
+		eout << "readfile::readservers scanner jammed at " << bracket;
 		return false;
 	}
 	// type 0= dummy server: Const server
@@ -832,7 +836,7 @@ bool Network::readserver(istream& in)
 	assert (sptr);
 	servermap [sid] = sptr;
 #ifdef _DEBUG_NETWORK
-	cout << " read a server"<<endl;
+	eout << " read a server"<<endl;
 #endif //_DEBUG_NETWORK
 	return true;
 }
@@ -845,7 +849,7 @@ bool Network::readturnings(string name)
 	string keyword;
 	inputfile >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="turnings:")
 	{
@@ -876,7 +880,7 @@ bool Network::readturning(istream& in)
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readfile::readturnings scanner jammed at " << bracket;
+		eout << "readfile::readturnings scanner jammed at " << bracket;
 		return false;
 	}
 
@@ -886,7 +890,7 @@ bool Network::readturning(istream& in)
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readturnings scanner jammed at " << bracket;
+		eout << "readfile::readturnings scanner jammed at " << bracket;
 		return false;
 	}
 	map <int, Node*>::iterator node_iter;
@@ -917,7 +921,7 @@ bool Network::readturning(istream& in)
 	Turning* tptr = new Turning(tid, nptr, sptr, inlinkptr, outlinkptr,size);
 	turningmap [tid] = tptr;
 #ifdef _DEBUG_NETWORK
-	cout << " read a turning"<<endl;
+	eout << " read a turning"<<endl;
 #endif //_DEBUG_NETWORK
 	return true;
 }
@@ -927,7 +931,7 @@ void Network::create_turnings()
 creates automatically new turnings for all junctions, using server nr 0 from the servers list
 */
 {
-	cout << "network::create turnings :" << endl;
+	eout << "network::create turnings :" << endl;
 	int tid=turningmap.size();
 	int size= theParameters->default_lookback_size;
 	vector<Link*> incoming;
@@ -936,21 +940,21 @@ creates automatically new turnings for all junctions, using server nr 0 from the
 	// for all junctions
 	for (map <int, Junction*>::iterator iter1=junctionmap.begin();iter1!=junctionmap.end();iter1++)
 	{
-		cout << " junction id " << (*iter1).second->get_id() << endl;
+		eout << " junction id " << (*iter1).second->get_id() << endl;
 		incoming=(*iter1).second->get_incoming();
-		cout << " nr incoming links "<< incoming.size() << endl;
+		eout << " nr incoming links "<< incoming.size() << endl;
 
 		outgoing=(*iter1).second->get_outgoing();
-		cout << " nr outgoing links "<< outgoing.size() << endl;
+		eout << " nr outgoing links "<< outgoing.size() << endl;
 		// for all incoming links
 		for (vector<Link*>::iterator iter2=incoming.begin();iter2<incoming.end();iter2++)
 		{
-			cout << "incoming link id "<< (*iter2)->get_id() << endl;
+			eout << "incoming link id "<< (*iter2)->get_id() << endl;
 			//for all outgoing links
 			for (vector<Link*>::iterator iter3=outgoing.begin();iter3<outgoing.end();iter3++)
 			{
-				cout << "outcoming link id "<< (*iter3)->get_id() << endl;
-				cout << "turning id "<< tid << endl;
+				eout << "outcoming link id "<< (*iter3)->get_id() << endl;
+				eout << "turning id "<< tid << endl;
 
 				map<int,Turning*>::iterator t_iter;
 				t_iter=	turningmap.find(tid);
@@ -983,7 +987,7 @@ bool Network::readgiveway(istream& in)
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readfile::readgiveway scanner jammed at " << bracket;
+		eout << "readfile::readgiveway scanner jammed at " << bracket;
 		return false;
 	}
 
@@ -999,7 +1003,7 @@ bool Network::readgiveway(istream& in)
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readgiveway scanner jammed at " << bracket;
+		eout << "readfile::readgiveway scanner jammed at " << bracket;
 		return false;
 	}
 
@@ -1011,11 +1015,11 @@ bool Network::readgiveways(istream& in)
 	string keyword;
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="giveways:")
 	{
-		cout << " readgiveways: no << giveways: >> keyword " << endl;
+		eout << " readgiveways: no << giveways: >> keyword " << endl;
 		return false;
 	}
 	int nr;
@@ -1024,7 +1028,7 @@ bool Network::readgiveways(istream& in)
 	{
 		if (!readgiveway(in))
 		{
-			cout << " readgiveways: readgiveway returned false for line nr " << (i+1) << endl;
+			eout << " readgiveways: readgiveway returned false for line nr " << (i+1) << endl;
 			return false;
 		} 
 	}
@@ -1038,12 +1042,13 @@ bool Network::readroutes(istream& in)
 {
 	string keyword;
 	in >> keyword;
+	bool ok=true;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="routes:")
 	{
-		cout << " readroutes: no << routes: >> keyword " << endl;
+		eout << " readroutes: no << routes: >> keyword " << endl;
 		return false;
 	}
 	int nr;
@@ -1052,8 +1057,9 @@ bool Network::readroutes(istream& in)
 	{
 		if (!readroute(in))
 		{
-			cout << " readroutes: readroute returned false for line nr " << (i+1) << endl;
-			return false;
+			eout << " readroutes: readroute returned false for line nr " << (i+1)  << " - route skipped." << endl;
+			ok = false;
+			//return false;
 		} 
 	}
 
@@ -1069,12 +1075,13 @@ bool Network::readroute(istream& in)
 {
 	char bracket;
 	int rid, oid, did, lnr, lid;
+	bool ok = true;
 	vector<Link*> rlinks;
 	map <int,Link*>::iterator link_iter;
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readfile::readroutes scanner jammed at " << bracket;
+		eout << "readfile::readroutes scanner jammed at " << bracket;
 		return false;
 	}
 	in  >> rid >> oid >> did >> lnr;
@@ -1086,7 +1093,7 @@ bool Network::readroute(istream& in)
 
 	if (bracket != '{')
 	{
-		cout << "readfile::readroutes scanner jammed at " << bracket;
+		eout << "readfile::readroutes scanner jammed at " << bracket;
 		return false;
 	}
 	for (int i=0; i<lnr; i++)
@@ -1094,46 +1101,58 @@ bool Network::readroute(istream& in)
 		in >> lid;
 
 		link_iter = linkmap.find(lid);
-		assert (link_iter != linkmap.end());
-		Link* linkptr = (*link_iter).second;
-		rlinks.insert(rlinks.end(),linkptr);
+		//assert (link_iter != linkmap.end());
+		if (link_iter != linkmap.end())
+		{
+			Link* linkptr = (*link_iter).second;
+			rlinks.insert(rlinks.end(),linkptr);
+		}
+		else
+		{
+			ok=false;
+			eout << "reading route: " << rid << " - cannot find link " << lid << endl;
+		}
 #ifdef _DEBUG_NETWORK
-		cout << " inserted link " << lid << " into route " << rid << endl;
+		eout << " inserted link " << lid << " into route " << rid << endl;
 #endif //_DEBUG_NETWORK
 
 	}
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readroutes scanner jammed at " << bracket;
+		eout << "readfile::readroutes scanner jammed at " << bracket;
 		return false;
 	}
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readroutes scanner jammed at " << bracket;
+		eout << "readfile::readroutes scanner jammed at " << bracket;
 		return false;
 	}
-
-	map <int, Origin*>::iterator o_iter; 
-	o_iter = originmap.find(oid);
-	assert (o_iter != originmap.end());
-	Origin* optr = o_iter->second;
-	
-	map <int, Destination*>::iterator d_iter; 
-	d_iter = destinationmap.find(did);
-	assert (d_iter != destinationmap.end());
-	Destination* dptr = d_iter->second;
-#ifdef _DEBUG_NETWORK
-	cout << "found o&d for route" << endl;
-#endif //_DEBUG_NETWORK
-	Route* rptr = new Route(rid, optr, dptr, rlinks);
-	routemap.insert(pair <odval, Route*> (odval(oid,did),rptr));
-	routenr= max(routenr,rid);
-#ifdef _DEBUG_NETWORK
-	cout << " read a route"<<endl;
-#endif //_DEBUG_NETWORK
-	return true;
+	if (ok)
+	{
+		map <int, Origin*>::iterator o_iter; 
+		o_iter = originmap.find(oid);
+		assert (o_iter != originmap.end());
+		Origin* optr = o_iter->second;
+		
+		map <int, Destination*>::iterator d_iter; 
+		d_iter = destinationmap.find(did);
+		assert (d_iter != destinationmap.end());
+		Destination* dptr = d_iter->second;
+	#ifdef _DEBUG_NETWORK
+		eout << "found o&d for route" << endl;
+	#endif //_DEBUG_NETWORK
+		Route* rptr = new Route(rid, optr, dptr, rlinks);
+		routemap.insert(pair <odval, Route*> (odval(oid,did),rptr));
+		routenr= max(routenr,rid);
+	#ifdef _DEBUG_NETWORK
+		eout << " read a route"<<endl;
+	#endif //_DEBUG_NETWORK
+		return true;
+	}
+	else
+		return false;
 }
 
 // read BUS routes
@@ -1144,11 +1163,11 @@ bool Network::readbusroutes(string name) // reads the busroutes, similar to read
 	string keyword;
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="routes:")
 	{
-		cout << " readBusroutes: no << routes: >> keyword " << endl;
+		eout << " readBusroutes: no << routes: >> keyword " << endl;
 		in.close();
 		return false;
 	}
@@ -1158,7 +1177,7 @@ bool Network::readbusroutes(string name) // reads the busroutes, similar to read
 	{
 		if (!readbusroute(in))
 		{
-			cout << " readbusroutes: readbusroute returned false for line nr " << (i+1) << endl;
+			eout << " readbusroutes: readbusroute returned false for line nr " << (i+1) << endl;
 			in.close();
 			return false;
 		} 
@@ -1181,7 +1200,7 @@ bool Network::readbusroute(istream& in)
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readfile::readbusroutes scanner jammed at " << bracket;
+		eout << "readfile::readbusroutes scanner jammed at " << bracket;
 		return false;
 	}
 	in  >> rid >> oid >> did >> lnr;
@@ -1193,7 +1212,7 @@ bool Network::readbusroute(istream& in)
 
 	if (bracket != '{')
 	{
-		cout << "readfile::readbusroutes scanner jammed at " << bracket;
+		eout << "readfile::readbusroutes scanner jammed at " << bracket;
 		return false;
 	}
 	for (int i=0; i<lnr; i++)
@@ -1206,20 +1225,20 @@ bool Network::readbusroute(istream& in)
 
 		rlinks.insert(rlinks.end(),l_iter->second);
 #ifdef _DEBUG_NETWORK
-		cout << " inserted link " << lid << " into busroute " << rid << endl;
+		eout << " inserted link " << lid << " into busroute " << rid << endl;
 #endif //_DEBUG_NETWORK
 
 	}
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readbusroutes scanner jammed at " << bracket;
+		eout << "readfile::readbusroutes scanner jammed at " << bracket;
 		return false;
 	}
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readbusroutes scanner jammed at " << bracket;
+		eout << "readfile::readbusroutes scanner jammed at " << bracket;
 		return false;
 	}
 	// find the origin & dest  pointers
@@ -1232,11 +1251,11 @@ bool Network::readbusroute(istream& in)
 	assert (d_iter != destinationmap.end());
 
 #ifdef _DEBUG_NETWORK
-	cout << "found o&d for route" << endl;
+	eout << "found o&d for route" << endl;
 #endif //_DEBUG_NETWORK
 	busroutes.insert(busroutes.end(),new Busroute(rid, o_iter->second, d_iter->second, rlinks));
 #ifdef _DEBUG_NETWORK
-	cout << " read a route"<<endl;
+	eout << " read a route"<<endl;
 #endif //_DEBUG_NETWORK
 	return true;
 }
@@ -1249,11 +1268,11 @@ bool Network::readbuslines(string name) // reads the busstops, buslines, and tri
 	// First read the busstops
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="busstops:")
 	{
-		cout << " readbuslines: no << stops: >> keyword " << endl;
+		eout << " readbuslines: no << stops: >> keyword " << endl;
 		in.close();
 		return false;
 	}
@@ -1264,7 +1283,7 @@ bool Network::readbuslines(string name) // reads the busstops, buslines, and tri
 	{
 		if (!readbusstop(in))
 		{
-			cout << " readbuslines: readbusstop returned false for line nr " << (i+1) << endl;
+			eout << " readbuslines: readbusstop returned false for line nr " << (i+1) << endl;
 			in.close();
 			return false;
 		} 
@@ -1272,11 +1291,11 @@ bool Network::readbuslines(string name) // reads the busstops, buslines, and tri
 	// Second read the buslines
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="buslines:")
 	{
-		cout << " readbuslines: no << buslines: >> keyword " << endl;
+		eout << " readbuslines: no << buslines: >> keyword " << endl;
 		in.close();
 		return false;
 	}
@@ -1286,7 +1305,7 @@ bool Network::readbuslines(string name) // reads the busstops, buslines, and tri
 	{
 		if (!readbusline(in))
 		{
-			cout << " readbuslines: readbusline returned false for line nr " << (i+1) << endl;
+			eout << " readbuslines: readbusline returned false for line nr " << (i+1) << endl;
 			in.close();
 			return false;
 		} 
@@ -1294,11 +1313,11 @@ bool Network::readbuslines(string name) // reads the busstops, buslines, and tri
 	// Third read the trips
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="bustrips:")
 	{
-		cout << " readbuslines: no << bustrips: >> keyword " << endl;
+		eout << " readbuslines: no << bustrips: >> keyword " << endl;
 		in.close();
 		return false;
 	}
@@ -1308,7 +1327,7 @@ bool Network::readbuslines(string name) // reads the busstops, buslines, and tri
 	{
 		if (!readbustrip(in))
 		{
-			cout << " readbuslines: readbustrip returned false for line nr " << (i+1) << endl;
+			eout << " readbuslines: readbustrip returned false for line nr " << (i+1) << endl;
 			in.close();
 			return false;
 		} 
@@ -1329,7 +1348,7 @@ bool Network::readbusstop (istream& in) // reads a busstop
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readfile::readsbusstop scanner jammed at " << bracket;
+		eout << "readfile::readsbusstop scanner jammed at " << bracket;
 		return false;
 	}
 	in >> stop_id >> link_id >> length >> has_bay >> dwelltime;
@@ -1337,12 +1356,12 @@ bool Network::readbusstop (istream& in) // reads a busstop
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readbusstop scanner jammed at " << bracket;
+		eout << "readfile::readbusstop scanner jammed at " << bracket;
 		return false;
 	}
 	busstops.push_back (st);
 #ifdef _DEBUG_NETWORK
-	cout << " read busstop"<< stop_id <<endl;
+	eout << " read busstop"<< stop_id <<endl;
 #endif //_DEBUG_NETWORK
 	return ok;
 }
@@ -1364,14 +1383,14 @@ bool Network::readbusline(istream& in) // reads a busline
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readfile::readsbusline scanner jammed at " << bracket;
+		eout << "readfile::readsbusline scanner jammed at " << bracket;
 		return false;
 	}
 	in >> busline_id >> name >> ori_id >> dest_id >> route_id >> vehtype >> nr_stops;
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readfile::readsbusline scanner jammed at " << bracket;
+		eout << "readfile::readsbusline scanner jammed at " << bracket;
 		return false;
 	}
 
@@ -1385,7 +1404,7 @@ bool Network::readbusline(istream& in) // reads a busline
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readsbusline scanner jammed at " << bracket;
+		eout << "readfile::readsbusline scanner jammed at " << bracket;
 		return false;
 	}
 
@@ -1401,13 +1420,13 @@ bool Network::readbusline(istream& in) // reads a busline
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readbusstop scanner jammed at " << bracket;
+		eout << "readfile::readbusstop scanner jammed at " << bracket;
 		return false;
 	}
 	// add to buslines vector
 	buslines.push_back (bl);
 #ifdef _DEBUG_NETWORK
-	cout << " read busline"<< stop_id <<endl;
+	eout << " read busline"<< stop_id <<endl;
 #endif //_DEBUG_NETWORK
 	return ok;
 }
@@ -1422,7 +1441,7 @@ bool Network::readbustrip(istream& in) // reads a trip
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readfile::readsbustrip scanner jammed at " << bracket;
+		eout << "readfile::readsbustrip scanner jammed at " << bracket;
 		return false;
 	}
 	in >> trip_id >> busline_id >> start_time >> nr_stops;
@@ -1431,7 +1450,7 @@ bool Network::readbustrip(istream& in) // reads a trip
 		in >> bracket;
 		if (bracket != '{')
 		{
-			cout << "readfile::readsbustrip scanner jammed at " << bracket;
+			eout << "readfile::readsbustrip scanner jammed at " << bracket;
 			return false;
 		}
 		in >> stop_id >> pass_time;
@@ -1443,7 +1462,7 @@ bool Network::readbustrip(istream& in) // reads a trip
 		in >> bracket;
 		if (bracket != '}')
 		{
-			cout << "readfile::readsbustrip scanner jammed at " << bracket;
+			eout << "readfile::readsbustrip scanner jammed at " << bracket;
 			return false;
 		}
 	}
@@ -1456,13 +1475,13 @@ bool Network::readbustrip(istream& in) // reads a trip
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readbusstop scanner jammed at " << bracket;
+		eout << "readfile::readbusstop scanner jammed at " << bracket;
 		return false;
 	}
 	// add to buslines vector
 	//buslines.push_back (bl);
 #ifdef _DEBUG_NETWORK
-	cout << " read busstop"<< stop_id <<endl;
+	eout << " read busstop"<< stop_id <<endl;
 #endif //_DEBUG_NETWORK
 	return ok;	
 	return true;
@@ -1483,7 +1502,7 @@ bool Network::readsignalcontrols(string name)
 	string keyword;
 	inputfile >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="controls:")
 	{
@@ -1513,7 +1532,7 @@ bool Network::readsignalcontrol(istream & in)
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readfile::readsignalcontrol scanner jammed at " << bracket;
+		eout << "readfile::readsignalcontrol scanner jammed at " << bracket;
 		return false;
 	}
 	in >> controlid >> nr_plans;
@@ -1526,12 +1545,12 @@ bool Network::readsignalcontrol(istream & in)
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readsignalcontrol scanner jammed at " << bracket;
+		eout << "readfile::readsignalcontrol scanner jammed at " << bracket;
 		return false;
 	}
 	signalcontrols.push_back(sc);
 #ifdef _DEBUG_NETWORK
-	cout << " read signalcontrol"<< controlid <<endl;
+	eout << " read signalcontrol"<< controlid <<endl;
 #endif //_DEBUG_NETWORK
 	return ok;
 }
@@ -1546,7 +1565,7 @@ bool Network::readsignalplan(istream& in, SignalControl* sc)
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readfile::readsignalplans scanner jammed at " << bracket;
+		eout << "readfile::readsignalplans scanner jammed at " << bracket;
 		return false;
 	}
 	in >> planid >> start >> stop >> offset >> cycletime >> nr_stages;
@@ -1561,13 +1580,13 @@ bool Network::readsignalplan(istream& in, SignalControl* sc)
 	in >> bracket;
 	if (bracket != '}')  
 	{
-		cout << "readfile::readsignalplans scanner jammed at " << bracket;
+		eout << "readfile::readsignalplans scanner jammed at " << bracket;
 		return false;
 	}
 	sc->add_signal_plan(sp);
 	signalplans.push_back(sp);
 #ifdef _DEBUG_NETWORK
-	cout << " read signalplan "<< planid <<endl;
+	eout << " read signalplan "<< planid <<endl;
 #endif //_DEBUG_NETWORK
 	return ok;
 }
@@ -1581,7 +1600,7 @@ bool Network::readstage(istream& in, SignalPlan* sp)
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readfile::readstages scanner jammed at " << bracket;
+		eout << "readfile::readstages scanner jammed at " << bracket;
 		return false;
 	}
 	in  >> stageid >> start >> duration >> nr_turnings;
@@ -1593,7 +1612,7 @@ bool Network::readstage(istream& in, SignalPlan* sp)
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readfile::readsignals scanner jammed at " << bracket;
+		eout << "readfile::readsignals scanner jammed at " << bracket;
 		return false;
 	}
 	for (int i=0; i<nr_turnings; i++)
@@ -1612,13 +1631,13 @@ bool Network::readstage(istream& in, SignalPlan* sp)
 	in >> bracket;
 	if (bracket != '}') // once for the turnings
 	{
-		cout << "readfile::readstages scanner jammed at " << bracket;
+		eout << "readfile::readstages scanner jammed at " << bracket;
 		return false;
 	}
 	in >> bracket; // once for the stage
 	if (bracket != '}')
 	{
-		cout << "readfile::readstages scanner jammed at " << bracket;
+		eout << "readfile::readstages scanner jammed at " << bracket;
 		return false;
 	}
 	// add stage to stages list
@@ -1626,7 +1645,7 @@ bool Network::readstage(istream& in, SignalPlan* sp)
 	// add stage to signal plan
 	sp->add_stage(stageptr);
 #ifdef _DEBUG_NETWORK
-	cout << " read stage "<< stageid <<endl;
+	eout << " read stage "<< stageid <<endl;
 #endif //_DEBUG_NETWORK
 	return true;
 }
@@ -1674,11 +1693,11 @@ bool Network::readods(istream& in)
 	string keyword;
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="od_pairs:")
 	{
-		cout << "stuck at " << keyword << " instead of : od_pairs: " << endl;
+		eout << "stuck at " << keyword << " instead of : od_pairs: " << endl;
 		return false;
 	}
 	int nr;
@@ -1686,7 +1705,7 @@ bool Network::readods(istream& in)
 	in >> keyword;
 	if (keyword!="scale:")
 	{
-		cout << "stuck at " << keyword << " instead of : scale: " << endl;
+		eout << "stuck at " << keyword << " instead of : scale: " << endl;
 		return false;
 	}
 	double scale;
@@ -1696,7 +1715,7 @@ bool Network::readods(istream& in)
 	{
 		if (!readod(in,scale))
 		{
-			cout << "stuck at od pair " << i << " of " << nr << endl;
+			eout << "stuck at od pair " << i << " of " << nr << endl;
 			return false;
 		}
 	}
@@ -1717,7 +1736,7 @@ bool Network::readod(istream& in, double scale)
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readdemandfile::readod scanner jammed at " << bracket;
+		eout << "readdemandfile::readod scanner jammed at " << bracket;
 		return false;
 	}
 	in  >> oid >> did >> rate;
@@ -1728,7 +1747,7 @@ bool Network::readod(istream& in, double scale)
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readdemandfile::readod scanner jammed at " << bracket;
+		eout << "readdemandfile::readod scanner jammed at " << bracket;
 		return false;
 	}
 	// find oid, did
@@ -1742,7 +1761,7 @@ bool Network::readod(istream& in, double scale)
 	assert (d_iter != destinationmap.end());
 
 #ifdef _DEBUG_NETWORK
-	cout << "found o and d " << oid << "," << did << endl;
+	eout << "found o and d " << oid << "," << did << endl;
 #endif //_DEBUG_NETWORK
 	// create odpair
 
@@ -1753,7 +1772,7 @@ bool Network::readod(istream& in, double scale)
 	(o_iter->second)->add_odpair(odpair);
 	// set od list
 #ifdef _DEBUG_NETWORK
-	cout << " read an od"<<endl;
+	eout << " read an od"<<endl;
 #endif //_DEBUG_NETWORK
 	return true;
 }
@@ -1776,7 +1795,7 @@ bool Network::add_od_routes()
 	}
 	nr_deleted = deleted_routes.size();
 	if (nr_deleted > 0 )
-		cout << nr_deleted << " routes deleted" << endl;
+		eout << nr_deleted << " routes deleted" << endl;
 
 	// write the new routes file.
 	vector <Route*>::iterator del=deleted_routes.begin();
@@ -1816,7 +1835,7 @@ bool Network::addroutes (int oid, int did, ODpair* odpair)
 			//Route* rptr=*iter;
 			odpair->add_route(*iter);
 #ifdef _DEBUG_NETWORK	
-			cout << "added route " << ((*iter)->get_id())<< endl;
+			eout << "added route " << ((*iter)->get_id())<< endl;
 #endif //_DEBUG_NETWORK		
 			iter++;
 		}
@@ -1832,7 +1851,7 @@ bool Network::addroutes (int oid, int did, ODpair* odpair)
 	{
 		odpair->add_route((*r_iter).second);
 #ifdef _DEBUG_NETWORK	
-		cout << "added route " << ((*r_iter).first)<< endl;
+		eout << "added route " << ((*r_iter).first)<< endl;
 #endif //_DEBUG_NETWORK		
 	}
 	
@@ -1844,7 +1863,7 @@ bool Network::addroutes (int oid, int did, ODpair* odpair)
 ODRate Network::readrate(istream& in, double scale)
 {
 #ifdef _DEBUG_NETWORK
-	cout << "read a rate" << endl;
+	eout << "read a rate" << endl;
 #endif //_DEBUG_NETWORK	
 	ODRate odrate;
 	odrate.odid=odval(0,0);
@@ -1855,7 +1874,7 @@ ODRate Network::readrate(istream& in, double scale)
 
 	if (bracket != '{')
 	{
-		cout << "readdemandfile::readrate scanner jammed at " << bracket;
+		eout << "readdemandfile::readrate scanner jammed at " << bracket;
 		return odrate;
 	}
 	in  >> oid >> did >> rate;
@@ -1866,7 +1885,7 @@ ODRate Network::readrate(istream& in, double scale)
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readdemandfile::readrate scanner jammed at " << bracket;
+		eout << "readdemandfile::readrate scanner jammed at " << bracket;
 		return odrate;
 	}
 	odrate.odid=odval(oid,did);
@@ -1882,33 +1901,33 @@ bool Network::readrates(istream& in)
 	string keyword;
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="od_pairs:")
 	{
-		cout << "stuck at " << keyword << " instead of : od_pairs: " << endl;
+		eout << "stuck at " << keyword << " instead of : od_pairs: " << endl;
 		return false;
 	}
 	int nr;
 	in >> nr;
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="scale:")
 	{
-		cout << "stuck at " << keyword << " instead of : scale: " << endl;
+		eout << "stuck at " << keyword << " instead of : scale: " << endl;
 		return false;
 	}
 	double scale;
 	in >> scale;
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="loadtime:")
 	{
-		cout << "stuck at " << keyword << " instead of : loadtime: " << endl;
+		eout << "stuck at " << keyword << " instead of : loadtime: " << endl;
 		return false;
 	}
 	double loadtime;
@@ -1918,7 +1937,7 @@ bool Network::readrates(istream& in)
 		ODRate odrate=readrate(in,scale);
 		if (odrate.rate==-1)
 		{
-			cout << "stuck at od readrates. load time : "<< loadtime << " od nr " << i << " of " <<nr << endl;
+			eout << "stuck at od readrates. load time : "<< loadtime << " od nr " << i << " of " <<nr << endl;
 
 			return false;
 		}
@@ -1927,7 +1946,7 @@ bool Network::readrates(istream& in)
 	}
 	odmatrix.add_slice(loadtime,odslice);
 #ifdef _DEBUG_NETWORK
-	cout << " added a slice " << endl;
+	eout << " added a slice " << endl;
 #endif //_DEBUG_NETWORK
 	// MatrixAction* mptr adds itself into the eventlist, and will be cleared up when executed.
 	// it is *not* a dangling pointer 
@@ -1935,7 +1954,7 @@ bool Network::readrates(istream& in)
 	assert (mptr != NULL);
 #ifdef _DEBUG_NETWORK
 
-	cout << " added a matrixaction " << endl;
+	eout << " added a matrixaction " << endl;
 #endif //_DEBUG_NETWORK
 	return true;	
 }
@@ -1947,7 +1966,7 @@ bool Network::readserverrates(string name)
 	string keyword;
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="rates:")
 	{
@@ -1971,7 +1990,7 @@ bool Network::readserverrates(string name)
 bool Network::readserverrate(istream& in)
 {
 #ifdef _DEBUG_NETWORK
-	cout << "read a rate" << endl;
+	eout << "read a rate" << endl;
 #endif //_DEBUG_NETWORK	
 	char bracket;
 	int sid;
@@ -1979,7 +1998,7 @@ bool Network::readserverrate(istream& in)
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readserverrate::readserverrate scanner jammed at " << bracket;
+		eout << "readserverrate::readserverrate scanner jammed at " << bracket;
 		return  false;
 	}
 	in  >> sid >> time >> mu >> sd;
@@ -1988,7 +2007,7 @@ bool Network::readserverrate(istream& in)
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readserverrate::readserverrate scanner jammed at " << bracket;
+		eout << "readserverrate::readserverrate scanner jammed at " << bracket;
 		return false;
 	}
 	//Server* sptr=*(find_if (servers.begin(),servers.end(), compare <Server> (sid)));
@@ -2009,7 +2028,7 @@ bool Network::readdemandfile(string name)
 		string keyword;
 		inputfile >> keyword;
 #ifdef _DEBUG_NETWORK
-		cout << keyword << endl;
+		eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 		if (keyword!="slices:")
 		{
@@ -2045,7 +2064,7 @@ bool Network::readvtype (istream & in)
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readfile::readvtypes scanner jammed at " << bracket;
+		eout << "readfile::readvtypes scanner jammed at " << bracket;
 		return false;
 	}
 	in  >> id >> label >> prob >> length;
@@ -2054,7 +2073,7 @@ bool Network::readvtype (istream & in)
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readvtypes scanner jammed at " << bracket;
+		eout << "readfile::readvtypes scanner jammed at " << bracket;
 		return false;
 	}
 	vehtypes.vtypes.insert(vehtypes.vtypes.end(), new Vtype (id,label,prob,length));
@@ -2071,7 +2090,7 @@ bool Network::readvtypes (string name)
 
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="vtypes:")
 	{
@@ -2186,7 +2205,7 @@ bool Network::readtimes(istream& in)
 	string keyword;
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="links:")
 		return false;
@@ -2194,14 +2213,14 @@ bool Network::readtimes(istream& in)
 	in >> nr;
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="periods:")
 		return false;
 	in >> nrperiods;
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="periodlength:")
 		return false;
@@ -2211,7 +2230,7 @@ bool Network::readtimes(istream& in)
 	{
 		if (!readtime(in))
 		{
-			cout << " readtimes for link : " << i << " failed " << endl;
+			eout << " readtimes for link : " << i << " failed " << endl;
 			return false;
 
 		} 
@@ -2219,11 +2238,11 @@ bool Network::readtimes(istream& in)
 
 	if (nr == 0) // create the histtimes from freeflow times
 	{
-		cout << " creating linktimes from freeflow times " << endl;
+		eout << " creating linktimes from freeflow times " << endl;
 #ifdef _DEBUG_NETWORK
-		cout << " creating linktimes from freeflow times " << endl;
-		cout << " linkmap.size() " << linkmap.size() << endl;
-		cout << " virtuallinks.size() " << virtuallinks.size() << endl;
+		eout << " creating linktimes from freeflow times " << endl;
+		eout << " linkmap.size() " << linkmap.size() << endl;
+		eout << " virtuallinks.size() " << virtuallinks.size() << endl;
 #endif _DEBUG_NETWORK
 		for (map<int,Link*>::iterator iter=linkmap.begin();iter!=linkmap.end();iter++)
 		{
@@ -2250,39 +2269,49 @@ bool Network::readtime(istream& in)
 	char bracket;
 	int lid;
 	double linktime;
-	LinkTime* ltime=new LinkTime();
-	ltime->periodlength=periodlength;
-	ltime->nrperiods=nrperiods;
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readfile::readtimes scanner jammed at " << bracket;
+		eout << "readfile::readtimes scanner jammed at " << bracket;
 		return false;
 	}
 	in  >> lid ;
-	ltime->id=lid;
-	for (int i=0;i<nrperiods;i++)
+	if (linkmap.count(lid)!=0)
 	{
-		in >> linktime;
-		//(ltime->times).push_back(linktime);
-		(ltime->times) [i] = linktime;
+		LinkTime* ltime=new LinkTime();
+		ltime->periodlength=periodlength;
+		ltime->nrperiods=nrperiods;
+		ltime->id=lid;
+		for (int i=0;i<nrperiods;i++)
+		{
+			in >> linktime;
+			(ltime->times) [i] = linktime;
+		}
+		map <int,Link*>::iterator l_iter;
+		l_iter = linkmap.find(lid);
+		assert (l_iter!=linkmap.end());
+		assert ( linktime >= 0.0 );
+		(*l_iter).second->set_hist_time(linktime);
+		(*l_iter).second->set_histtimes(ltime);
+		linkinfo->times.insert(pair<int,LinkTime*> (lid,ltime));
 	}
-	map <int,Link*>::iterator l_iter;
-	l_iter = linkmap.find(lid);
-	//   assert  ( l_iter < links.end() );     // lid exists
-	assert (l_iter!=linkmap.end());
-	assert ( linktime >= 0.0 );
+	else // skip the linktimes for this link.
+	{
+		for (int i=0;i<nrperiods;i++)
+		{
+			in >> linktime;
+		}
+	}
+
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readtimes scanner jammed at " << bracket;
+		eout << "readfile::readtimes scanner jammed at " << bracket;
 		return false;
 	}
-	(*l_iter).second->set_hist_time(linktime);
-	(*l_iter).second->set_histtimes(ltime);
-	linkinfo->times.insert(pair<int,LinkTime*> (lid,ltime));
+	
 #ifdef _DEBUG_NETWORK
-	cout << " read a linktime"<<endl;
+	eout << " read a linktime"<<endl;
 #endif //_DEBUG_NETWORK
 	return true;
 }
@@ -2308,7 +2337,7 @@ bool Network::readincident (istream & in)
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readfile::readincident scanner jammed at " << bracket;
+		eout << "readfile::readincident scanner jammed at " << bracket;
 		return false;
 
 	}
@@ -2321,7 +2350,7 @@ bool Network::readincident (istream & in)
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readincident scanner jammed at " << bracket;
+		eout << "readfile::readincident scanner jammed at " << bracket;
 		return false;
 
 	}
@@ -2338,7 +2367,7 @@ bool Network::readincident (istream & in)
 #endif
 	incidents.insert(incidents.begin(), incident); // makes the incident and initialises its start in the eventlist
 #ifdef _DEBUG_NETWORK
-	cout <<"incident from " << start << " to " << stop << " on link nr " << lid << endl;
+	eout <<"incident from " << start << " to " << stop << " on link nr " << lid << endl;
 #endif //_DEBUG_NETWORK
 	return find_alternatives_all(lid,penalty,incident);    // make the alternatives
 }
@@ -2349,7 +2378,7 @@ bool Network::readincidents (istream & in)
 	string keyword;
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="incidents:")
 		return false;
@@ -2369,7 +2398,7 @@ bool Network::readincidentparams (istream &in)
 	in >> keyword;
 
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="parameters:")
 		return false;
@@ -2392,18 +2421,18 @@ bool Network::readincidentparam (istream &in)
 	in >> bracket;
 	if (bracket != '{')
 	{
-		cout << "readfile::readincidentparam scanner jammed at " << bracket;
+		eout << "readfile::readincidentparam scanner jammed at " << bracket;
 		return false;
 	}
 	in  >> mu  >> sd ;
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readincidentparam scanner jammed at " << bracket;
+		eout << "readfile::readincidentparam scanner jammed at " << bracket;
 		return false;
 	}
 	incident_parameters.push_back(mu);
-	//  cout << "checking: mu " << mu << " first of list " << incident_parameters[0] << endl;
+	//  eout << "checking: mu " << mu << " first of list " << incident_parameters[0] << endl;
 	incident_parameters.push_back(sd);
 
 	return true;
@@ -2415,7 +2444,7 @@ bool Network::readx1 (istream &in)
 	char bracket;
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="X1:")
 		return false;
@@ -2489,7 +2518,7 @@ bool Network::readassignmentlinksfile(string name)
 	in >> keyword;
 
 #ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
+	eout << keyword << endl;
 #endif //_DEBUG_NETWORK
 	if (keyword!="no_obs_links:")
 	{
@@ -2549,7 +2578,7 @@ bool Network::init_shortest_path()
 		random->randomize();
 
 #ifdef _DEBUG_SP
-	cout << "network::init_shortest path, routes.size  " << routenr << ", linkmap.size " << linkmap.size() << ", nodemap.size " << nodemap.size() << endl;
+	eout << "network::init_shortest path, routes.size  " << routenr << ", linkmap.size " << linkmap.size() << ", nodemap.size " << nodemap.size() << endl;
 #endif //_DEBUG_SP
 	// CREATE THE GRAPH
 #ifndef _USE_VAR_TIMES
@@ -2568,7 +2597,7 @@ bool Network::init_shortest_path()
 		sd=disturbance*mu;
 		cost=mu;
 #ifdef _DEBUG_SP
-		cout << " graph->addlink: link " << lid << ", innode " << in << ", outnode " << out << ", cost " << cost << endl;
+		eout << " graph->addlink: link " << lid << ", innode " << in << ", outnode " << out << ", cost " << cost << endl;
 #endif //_DEBUG_SP
 		graph->addLink(lid,in,out,cost);
 	}
@@ -2593,26 +2622,26 @@ bool Network::init_shortest_path()
 vector<Link*> Network::get_path(int destid)  // get the path from
 {
 #ifdef _DEBUG_SP
-	cout << "shortest path to " << destid << endl << " with " ;
+	eout << "shortest path to " << destid << endl << " with " ;
 #endif //_DEBUG_SP
-	//cout << "...calling  shortest_path_vector...." << endl;
+
 	vector <int> linkids=graph->shortest_path_vector(destid);  // get out the shortest path current root link to Destination (*iter3)
-	//cout << "...exited shortest path vector call" << endl;
+
 #ifdef _DEBUG_SP
-	cout << linkids.size() << " links " << endl << "  : " ;
+	eout << linkids.size() << " links " << endl << "  : " ;
 #endif //_DEBUG_SP
 	vector <Link*> rlinks;
 
 	if (linkids.empty())
 	{
-		cout << "Shortest path: get_path : PROBLEM OBTAINING links in path to  dest " << destid << endl;
+		eout << "Shortest path: get_path : PROBLEM OBTAINING links in path to  dest " << destid << endl;
 		return rlinks;
 	}	
 	for (vector<int>::iterator iter4=linkids.begin();iter4<linkids.end();iter4++) // find all the links
 	{
 		int lid=(*iter4);
 #ifdef _DEBUG_SP					
-		cout << lid << " , ";
+		eout << lid << " , ";
 #endif //_DEBUG_SP
 		map <int,Link*>::iterator l_iter;
 		l_iter=linkmap.find(lid);
@@ -2642,7 +2671,9 @@ bool Network::shortest_paths_all()
 			// For each origin in OD pairs, find the destinations that need another route
 			Origin* ori = (*iter1)->get_origin();
 			lastorigin = ori->get_id();
-			cout << "last origin: " << lastorigin << endl;
+#ifdef _DEBUG_SP
+			eout << "last origin: " << lastorigin << endl;
+#endif // _DEBUG_SP
 			vector <Destination*> dests;
 			bool exitloop = false;
 			while  (!exitloop)
@@ -2659,14 +2690,16 @@ bool Network::shortest_paths_all()
 					if (((*iter1)->get_origin()->get_id()) != lastorigin )
 						exitloop = true;
 			}
-			cout << " dests size is: " << dests.size() << endl;
+#ifdef _DEBUG_SP
+			eout << " dests size is: " << dests.size() << endl;
+#endif //_DEBUG_SP
 			vector<Link*> outgoing=ori->get_links();
 			for (vector<Link*>::iterator iter2=outgoing.begin();iter2<outgoing.end();iter2++)
 			{
 
-				//	 #ifdef _DEBUG_SP
-				cout << "shortest_paths_all: starting label correcting from root " << (*iter2)->get_id() << endl;
-				//	#endif //_DEBUG_SP
+#ifdef _DEBUG_SP
+				eout << "shortest_paths_all: starting label correcting from root " << (*iter2)->get_id() << endl;
+#endif //_DEBUG_SP
 #ifndef _USE_VAR_TIMES
 				graph->labelCorrecting((*iter2)->get_id());  // find the shortest path from Link (*iter2) to ALL nodes
 #else
@@ -2676,39 +2709,39 @@ bool Network::shortest_paths_all()
 					graph->labelCorrecting((*iter2)->get_id());  // find the shortest path from Link (*iter2) to ALL nodes NO LINKINFO
 #endif // _USE_VAR_TIMES
 #ifdef _DEBUG_SP
-				cout << "finished label correcting for root link "<<(*iter2)->get_id() << endl;
+				eout << "finished label correcting for root link "<<(*iter2)->get_id() << endl;
 #endif //_DEBUG_SP
 				for (vector<Destination*>::iterator iter3=dests.begin();iter3<dests.end();iter3++)
 				{				
 #ifdef _DEBUG_SP
-					cout << " see if we can reach destination " << (*iter3)->get_id()<< endl;
+					eout << " see if we can reach destination " << (*iter3)->get_id()<< endl;
 #endif //_DEBUG_SP
 					if (graph->reachable((*iter3)->get_id())) // if the destination is reachable from this link...
 					{
 #ifdef _DEBUG_SP
-						cout << " it's reachable.." << endl;
+						eout << " it's reachable.." << endl;
 #endif //_DEBUG_SP
 						vector<Link*> rlinks=get_path((*iter3)->get_id());
 #ifdef _DEBUG_SP
-						cout << " gotten path" << endl;
+						eout << " gotten path" << endl;
 #endif //_DEBUG_SP
 						if (rlinks.size() > 0)
 						{
 							int frontid=(rlinks.front())->get_id();
 #ifdef _DEBUG_SP
-							cout << " gotten front " << endl;
+							eout << " gotten front " << endl;
 #endif //_DEBUG_SP
 							if (frontid!=(*iter2)->get_id())
 								rlinks.insert(rlinks.begin(),(*iter2)); // add the root link to the path
 							routenr++;
 #ifdef _DEBUG_SP
-							cout << " checking if the routenr does not already exist " << endl;
+							eout << " checking if the routenr does not already exist " << endl;
 #endif //_DEBUG_SP
 							odval val = odval(ori->get_id(), (*iter3)->get_id());
 							assert (!exists_route(routenr,val)); // Check that no route exists with same routeid, at least for this OD pair
 							//assert ( (find_if (routes.begin(),routes.end(), compare <Route> (routenr))) == routes.end() ); // No route with routenr exists
 #ifdef _DEBUG_SP
-							cout << " making route " << endl;
+							eout << " making route " << endl;
 #endif //_DEBUG_SP
 							Route* rptr=new  Route(routenr, ori, (*iter3), rlinks);
 							bool exists=true;
@@ -2831,7 +2864,7 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 
 					 vector<Link*> rlinks=get_path((*di));
 #ifdef _DEBUG_SP
-					 cout << " network::shortest_alternatives from link " << root << " to destination " << (*di) << endl;
+					 eout << " network::shortest_alternatives from link " << root << " to destination " << (*di) << endl;
 					 graph->printPathToNode((*di));
 #endif //_DEBUG_SP
 					 //save the found remainder in the link table
@@ -2848,8 +2881,8 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 		}
 	}
 	//Now select all links that are affected:
-	cout << " nr of routes affected by incident " << i_routemap.size() << endl;
-	//	cout << " nr of links without alternatives " << affected_links_without_alternative.size() << endl;
+	eout << " nr of routes affected by incident " << i_routemap.size() << endl;
+	//	eout << " nr of links without alternatives " << affected_links_without_alternative.size() << endl;
 	return true;
 }
 
@@ -3101,7 +3134,7 @@ bool Network::readmaster(string name)
 	inputfile >> temp;
 	if (temp!="vissimfile=")
 	{
-		//cout << "No vissimfile specified in masterfile" << endl;
+		//eout << "No vissimfile specified in masterfile" << endl;
 		inputfile.close();
 		return true;
 	}
@@ -3114,7 +3147,7 @@ bool Network::readmaster(string name)
 	inputfile >> temp;
 	if (temp!="background=")
 	{
-		//cout << "No background specified in masterfile" << endl;
+		//eout << "No background specified in masterfile" << endl;
 		inputfile.close();
 		return true;
 
@@ -3133,49 +3166,49 @@ double Network::executemaster(QPixmap * pm_,QMatrix * wm_)
 	wm=wm_;
 	time=0.0;
 	if (!readparameters(filenames [18]))
-		cout << "Problem reading parameters: " << filenames [18] << endl; // read parameters first
+		eout << "Problem reading parameters: " << filenames [18] << endl; // read parameters first
 
 	if (!readvtypes(filenames[7]))
-		cout << "Problem reading vtypes: " << filenames [6] << endl; // read the vehicle types first
+		eout << "Problem reading vtypes: " << filenames [7] << endl; // read the vehicle types first
 	if (!readnetwork(filenames[0]))
-		cout << "Problem reading network: " << filenames [0] << endl; // read the network configuration
+		eout << "Problem reading network: " << filenames [0] << endl; // read the network configuration
 	if(!readvirtuallinks(filenames[8]))
-		cout << "Problem reading virtuallinks: " << filenames [7] << endl;	//read the virtual links
+		eout << "Problem reading virtuallinks: " << filenames [8] << endl;	//read the virtual links
 	if(!readserverrates(filenames[9]))
-		cout << "Problem reading serverrates: " << filenames [8] << endl;	//read the virtual links		
+		eout << "Problem reading serverrates: " << filenames [9] << endl;	//read the virtual links		
 	if (!register_links())
-		cout << "Problem reading registering links at nodes "<< endl; // register the links at the destinations, junctions and origins
+		eout << "Problem reading registering links at nodes "<< endl; // register the links at the destinations, junctions and origins
 	if (!(readturnings(filenames[1])))
 	{
-		cout << "no turnings read, making new ones...." << endl;
+		eout << "no turnings read, making new ones...." << endl;
 		create_turnings(); // creates the turning movements for all junctions    if not read by file
 		writeturnings(filenames[1]); // writes the new turnings
 	}
 
 	if (!(readlinktimes(filenames[3])))
 	{
-		cout << "no linktimes read, taking freeflow times... " << endl;
+		eout << "no linktimes read, taking freeflow times... " << endl;
 		set_freeflow_linktimes();  //read the historical link times if exist, otherwise set them to freeflow link times.
 	}
 
 	// 2005-11-28 put the reading of OD matrix before the paths...
 	if (!readdemandfile(filenames[5]))
-		cout << "Problem reading OD matrix " << filenames [5] << endl; // generate the odpairs.
+		eout << "Problem reading OD matrix " << filenames [5] << endl; // generate the odpairs.
 	//Sort the ODpairs
 	sort (odpairs.begin(), odpairs.end(), od_less_than);
 
 
 	if (!(readpathfile(filenames[4]))) // read the known paths
 	{
-		cout << "no routes read from the pathfile" << endl;
+		eout << "no routes read from the pathfile" << endl;
 		calc_paths=true; // so that new ones are calculated.
 	}
 	if (calc_paths)
 	{
 		if (!init_shortest_path())
-			cout << "Problem starting init shortest path " << endl; // init the shortest paths
+			eout << "Problem starting init shortest path " << endl; // init the shortest paths
 		if (!shortest_paths_all())
-			cout << "Problem calculating shortest paths for all OD pairs " << endl; // see if there are new routes based on shortest path
+			eout << "Problem calculating shortest paths for all OD pairs " << endl; // see if there are new routes based on shortest path
 	}
 	// Sort the routes by OD pair
 	// NOTE: Obsolete, routemap is always sorted by OD pair
@@ -3183,15 +3216,8 @@ double Network::executemaster(QPixmap * pm_,QMatrix * wm_)
 
 	// add the routes to the OD pairs AND delete the 'bad routes'
 	add_od_routes(); 
-//	renum_routes (); // renum the routes
+	//renum_routes (); // renum the routes
 	writepathfile(filenames[4]); // write back the routes.
-	// end temporary
-	if (calc_paths)
-	{
-		//delete_spurious_routes();
-		writepathfile(filenames[4]); // write back the routes.
-	}
-
 	this->readsignalcontrols(filenames[2]);
 	// NEW 2007_03_08
 #ifdef _BUSES
@@ -3200,9 +3226,9 @@ double Network::executemaster(QPixmap * pm_,QMatrix * wm_)
 	this->readbuslines (workingdir + "buslines.dat"); //FIX IN THE MAIN READ & WRITE
 #endif // _BUSES
 	if (!init())
-		cout << "Problem initialising " << endl;
+		eout << "Problem initialising " << endl;
 	if (!readincidentfile(filenames[6]))
-		cout << "Problem reading incident file " << filenames [5] << endl; // reads the incident file   and makes all the alternative routes at all  links
+		eout << "Problem reading incident file " << filenames [6] << endl; // reads the incident file   and makes all the alternative routes at all  links
 	if (filenames.size() >= 20)
 		drawing->set_background(filenames[19].c_str());	
 	if (theParameters->use_ass_matrix) 
@@ -3218,62 +3244,56 @@ double Network::executemaster()
 {
 	time=0.0;
 	if (!readparameters(filenames [18]))
-		cout << "Problem reading parameters: " << filenames [18] << endl; // read parameters first
+		eout << "Problem reading parameters: " << filenames [18] << endl; // read parameters first
 
 	if (!readvtypes(filenames[7]))
-		cout << "Problem reading vtypes: " << filenames [6] << endl; // read the vehicle types
+		eout << "Problem reading vtypes: " << filenames [7] << endl; // read the vehicle types
 	if (!readnetwork(filenames[0]))
-		cout << "Problem reading network: " << filenames [0] << endl; // read the network configuration
+		eout << "Problem reading network: " << filenames [0] << endl; // read the network configuration
 	if(!readvirtuallinks(filenames[8]))
-		cout << "Problem reading virtuallinks: " << filenames [7] << endl;	//read the virtual links
+		eout << "Problem reading virtuallinks: " << filenames [8] << endl;	//read the virtual links
 	if(!readserverrates(filenames[9]))
-		cout << "Problem reading serverrates: " << filenames [8] << endl;	//read the virtual links
+		eout << "Problem reading serverrates: " << filenames [9] << endl;	//read the virtual links
 	if (!register_links())
-		cout << "Problem reading registering links at nodes "<< endl; // register the links at the destinations, junctions and origins
+		eout << "Problem reading registering links at nodes "<< endl; // register the links at the destinations, junctions and origins
 	if (!(readturnings(filenames[1])))
 	{
-		cout << "no turnings read, making new ones...." << endl;
+		eout << "no turnings read, making new ones...." << endl;
 		create_turnings(); // creates the turning movements for all junctions    if not read by file
 		writeturnings(filenames[1]); // writes the new turnings
 	}
 	if (!(readlinktimes(filenames[3])))
 	{
-		cout << "no linktimes read, taking freeflow times... " << endl;
+		eout << "no linktimes read, taking freeflow times... " << endl;
 		set_freeflow_linktimes();  //read the historical link times if exist, otherwise set them to freeflow link times.
 	}
 	// New 2005-11-28 put the reading of OD matrix before the paths...
 	if (!readdemandfile(filenames[5]))
-		cout << "Problem reading OD matrix " << filenames [4] << endl; // generate the odpairs.
+		eout << "Problem reading OD matrix " << filenames [5] << endl; // generate the odpairs.
 	//Sort the ODpairs
 	sort (odpairs.begin(), odpairs.end(), od_less_than);
 
 
 	if (!(readpathfile(filenames[4]))) // read the known paths
 	{
-		cout << "no routes read from the pathfile" << endl;
+		eout << "no routes read from the pathfile" << endl;
 		calc_paths=true; // so that new ones are calculated.
 	}   
 	if (calc_paths)
 	{
 		if (!init_shortest_path())
-			cout << "Problem starting init shortest path " << endl; // init the shortest paths
+			eout << "Problem starting init shortest path " << endl; // init the shortest paths
 		if (!shortest_paths_all())
-			cout << "Problem calculating shortest paths for all OD pairs " << endl; // see if there are new routes based on shortest path
+			eout << "Problem calculating shortest paths for all OD pairs " << endl; // see if there are new routes based on shortest path
 	}
 	// Sort the routes by OD pair
 	//sort(routes.begin(), routes.end(), route_less_than);
-	// add the routes to the OD pairs
+	
+	// add the routes to the OD pairs & delete spurious routes
 	add_od_routes();
-//	renum_routes ();
-	// temporary
+	//renum_routes ();
+	
 	writepathfile(filenames[4]); // write back the routes.
-	// end temporary
-	if (calc_paths)
-	{
-		//delete_spurious_routes();
-		writepathfile(filenames[4]); // write back the routes.
-	}
-
 	readsignalcontrols(filenames[2]);
 #ifdef _BUSES
 	// NEW 2007_03_08
@@ -3283,9 +3303,9 @@ double Network::executemaster()
 #endif //_BUSES
 
 	if (!init())
-		cout << "Problem initialising " << endl;
+		eout << "Problem initialising " << endl;
 	if (!readincidentfile(filenames[6]))
-		cout << "Problem reading incident file " << filenames [5] << endl; // reads the incident file   and makes all the alternative routes at all  links
+		eout << "Problem reading incident file " << filenames [5] << endl; // reads the incident file   and makes all the alternative routes at all  links
 	if (theParameters->use_ass_matrix) 
 	{
 		this->readassignmentlinksfile (workingdir + "assign_links.dat"); // !!! WE NEED TO FIX THIS INTO THE MAIN READ& WRITE
@@ -3339,7 +3359,7 @@ bool Network::writeall(unsigned int repl)
 
 bool Network::writeallmoes(string name)
 {
-	//cout << "going to write to this file: " << name << endl;
+	//eout << "going to write to this file: " << name << endl;
 	ofstream out(name.c_str());
 	assert(out);
 
@@ -3555,7 +3575,7 @@ bool Network::init()
 	{
 		(*iter1)->execute(eventlist,initvalue);
 		initvalue += 0.000001;
-		//	cout << "Signal control initialised " << endl;
+		//	eout << "Signal control initialised " << endl;
 	}
 #ifdef _BUSES
 	// Initialise the buslines
@@ -3566,7 +3586,7 @@ bool Network::init()
 	}
 #endif //_BUSES
 #ifdef _DEBUG_NETWORK	
-	cout << "turnings initialised" << endl;
+	eout << "turnings initialised" << endl;
 #endif //_DEBUG_NETWORK	
 	// initialise the od pairs and their events
 	for(vector<ODpair*>::iterator iter0=odpairs.begin(); iter0<odpairs.end();)
@@ -3574,7 +3594,7 @@ bool Network::init()
 		if ((*iter0)->get_nr_routes() == 0) //chuck out the OD pairs without paths
 		{
 			//#ifdef _DEBUG_NETWORK
-			cout << "OD pair " << (*iter0)->get_origin()->get_id() << " - " <<
+			eout << "OD pair " << (*iter0)->get_origin()->get_id() << " - " <<
 				(*iter0)->get_destination()->get_id() << " does not have any route connecting them. deleting..." << endl;
 			//#endif //_DEBUG_NETWORK
 			delete *iter0;
@@ -3589,8 +3609,8 @@ bool Network::init()
 	}
 
 #ifdef _DEBUG_NETWORK	
-	cout << "odpairs initialised" << endl;
-	cout << "number of destinations " <<destinations.size() <<endl;
+	eout << "odpairs initialised" << endl;
+	eout << "number of destinations " <<destinations.size() <<endl;
 #endif //_DEBUG_NETWORK	
 	// initialise the destination events
 	//	register_links();
@@ -3656,7 +3676,7 @@ bool Network::run(int period)
 	}
 	double tstop=timestamp();
 
-	//cout << "running time " << (tstop-t0) << endl;
+	//eout << "running time " << (tstop-t0) << endl;
 	return 0;
 
 }
@@ -3703,7 +3723,7 @@ void Network::recenter_image()
 	double scale_y = (pm->height()) / height_y;
 
 	scale = _MIN (scale_x,scale_y);
-	// cout << "scales. x: " << scale_x << " y: " << scale_y <<" scale: " << scale <<  endl;
+	// eout << "scales. x: " << scale_x << " y: " << scale_y <<" scale: " << scale <<  endl;
 	wm->translate(boundaries[0],boundaries[1]); // so that (minx,miny)=(0,0)
 
 	// center the image
@@ -3781,7 +3801,7 @@ void Network::redraw() // redraws the image
 
 void Network::set_incident(int lid, int sid, bool blocked, double blocked_until)
 {
-	//cout << "incident start on link " << lid << endl;
+	//eout << "incident start on link " << lid << endl;
 	//Link* lptr=(*(find_if (links.begin(),links.end(), compare <Link> (lid) ))) ;
 	Link* lptr = linkmap [lid];
 	//Sdfunc* sdptr=(*(find_if (sdfuncs.begin(),sdfuncs.end(), compare <Sdfunc> (sid) ))) ;
@@ -3791,7 +3811,7 @@ void Network::set_incident(int lid, int sid, bool blocked, double blocked_until)
 
 void Network::unset_incident(int lid)
 {
-	//cout << "end of incident on link  "<< lid << endl;
+	//eout << "end of incident on link  "<< lid << endl;
 	//Link* lptr=(*(find_if (links.begin(),links.end(), compare <Link> (lid) ))) ;
 	Link* lptr = linkmap [lid];
 	lptr->unset_incident ();
@@ -3800,7 +3820,7 @@ void Network::unset_incident(int lid)
 void Network::broadcast_incident_start(int lid)
 {
 	// for all links inform and if received, apply switch algorithm
-	//cout << "BROADCAST incident on link  "<< lid << endl;
+	//eout << "BROADCAST incident on link  "<< lid << endl;
 	for (map <int,Link*>::iterator iter=linkmap.begin();iter!=linkmap.end();iter++)
 	{
 		(*iter).second->broadcast_incident_start(lid,incident_parameters);  	
@@ -3815,7 +3835,7 @@ void Network::broadcast_incident_start(int lid)
 
 
 void Network::broadcast_incident_stop(int lid)
-{	//cout << "BROADCAST END of incident on link  "<< lid << endl;
+{	//eout << "BROADCAST END of incident on link  "<< lid << endl;
 	// for all origins: stop the automatic switching stuff
 	for (map <int,Origin*>::iterator iter=originmap.begin();iter!=originmap.end();iter++)
 	{
@@ -3883,7 +3903,7 @@ info_start(info_start_), info_stop(info_stop_), lid(lid_), sid(sid_),network(net
 
 bool Incident::execute(Eventlist* eventlist, double time)
 {
-	//cout << "incident_execute time: " << time << endl;
+	//eout << "incident_execute time: " << time << endl;
 
 	// In case no information is Broadcasted:
 	if ((info_start < 0.0) || (info_stop<0.0)) // there is no information broadcast
@@ -4007,7 +4027,7 @@ MatrixAction::MatrixAction(Eventlist* eventlist, double time, ODSlice* slice_, v
 bool MatrixAction::execute(Eventlist* eventlist, double time)
 {
 	assert (eventlist != NULL);
-	//cout << time << " : MATRIXACTION:: set new rates "<< endl;
+	//eout << time << " : MATRIXACTION:: set new rates "<< endl;
 	// for all odpairs in slice
 
 	for (vector <ODRate>::iterator iter=slice->rates.begin();iter<slice->rates.end();iter++)

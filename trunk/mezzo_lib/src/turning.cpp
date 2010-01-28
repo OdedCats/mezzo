@@ -1,4 +1,5 @@
 #include "turning.h"
+#include "network.h"
 
 
 
@@ -13,8 +14,8 @@ Turning::Turning(int id_, Node* node_, Server* server_, Link* inlink_, Link* out
 			turnactions.push_back(new TurnAction(this));
 		delay=server->get_delay();
 #ifdef _DEBUG_TURNING	
-		cout << "new turning: tid,nid,sid,in,out " << id << node->get_id();
-		cout << server->get_id() << inlink->get_id() << outlink->get_id() << endl;
+		eout << "new turning: tid,nid,sid,in,out " << id << node->get_id();
+		eout << server->get_id() << inlink->get_id() << outlink->get_id() << endl;
 #endif //_DEBUG_TURNING
 		waiting_since = 0.0;
 		waiting = false;
@@ -84,7 +85,7 @@ bool Turning::process_veh(double time)
 				 return true;
 			   else
 			   {
-				 cout << " turning " << id << " dropped a vehicle, because outlink couldnt enter vehicle" << endl;
+				 eout << " turning " << id << " dropped a vehicle, because outlink couldnt enter vehicle" << endl;
 				 nexttime=inlink->next_action(time);
 				 delete veh;
 				 return false;
@@ -94,7 +95,7 @@ bool Turning::process_veh(double time)
 			{
 				nexttime=inlink->next_action(time);
 			   if (nexttime <= time)
-				   cout << "nexttime <= time in Turning::process_veh, from inlink::next_action " << endl;
+				   eout << "nexttime <= time in Turning::process_veh, from inlink::next_action " << endl;
 			  return false;
 			}
 		}
@@ -213,14 +214,14 @@ bool TurnAction::execute (Eventlist* eventlist, double time)
     		new_time=turning->nexttime; // otherwise the function process_veh has provided a next time.
 			if (new_time < time)
 			{
-				cout << "trouble in the turning action:: exectute. newtime < current time " << endl;
+				eout << "trouble in the turning action:: exectute. newtime < current time " << endl;
 				new_time=time+0.1;
 			}
 		 }
     
 	#ifdef _DEBUG_TURNING	
-		cout <<"Turnaction::execute...result: " << exec_ok;
-   		cout << " ...next turnaction @ " << new_time << endl;
+		eout <<"Turnaction::execute...result: " << exec_ok;
+   		eout << " ...next turnaction @ " << new_time << endl;
 	#endif //_DEBUG_TURNING
 		// book myself in Eventlist with new time;
 		eventlist->add_event(new_time,this);

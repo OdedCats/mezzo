@@ -1,5 +1,5 @@
 #include "od.h"
-#include "network.h"
+//#include "network.h"
 #include <math.h>
 #include "Mmath.h"
 /*
@@ -33,7 +33,7 @@ bool compare_route_cost(Route* r1, Route* r2)
 ODaction::ODaction(ODpair* odpair_):odpair(odpair_)
 {
 #ifdef _DEBUG_OD
-	cout << "ODaction::ODaction odpair->get_rate() : " << odpair->get_rate() << endl;
+	eout << "ODaction::ODaction odpair->get_rate() : " << odpair->get_rate() << endl;
 #endif //_DEBUG_OD
 	double rate = odpair->get_rate();
 	double mu = 0.0;
@@ -72,7 +72,7 @@ bool ODaction::execute(Eventlist* eventlist, double time)
   {
 	  bool ok=false;
 	#ifdef _DEBUG_OD
-  			cout << "ODaction @ " << time;
+  			eout << "ODaction @ " << time;
 	#endif //_DEBUG_OD
 	  // select route(origin, destination) and make a new vehicle
 	  Route* route=odpair->select_route(time);
@@ -86,14 +86,14 @@ bool ODaction::execute(Eventlist* eventlist, double time)
 	  else
   		{
   			ok=false; // if there's no room on the inputqueue (should never happen) we just drop the vehicle.
-  			cout << "OD action:: dropped a vehicle " << veh->get_id() << endl;
+  			eout << "OD action:: dropped a vehicle " << veh->get_id() << endl;
   			//delete veh; // so we're not creating memory leaks...
   			recycler.addVehicle(veh);
   		}	
 	  // get next time from now on
 	  double new_time=server->next(time);
 	#ifdef _DEBUG_OD
- 		 cout << " ...next ODaction @ " << new_time << endl;
+ 		 eout << " ...next ODaction @ " << new_time << endl;
 	#endif //_DEBUG_OD
 	  // book myself in eventlist
 	  eventlist->add_event(new_time,this);
@@ -160,12 +160,15 @@ void ODpair::add_route(Route* route)
 
 /**
 * a heuristic to delete spurious route
+* limits nr of routes per OD pair based on:
+* - Small OD rates
+* - Extreme route cost
 */
 vector <Route*> ODpair::delete_spurious_routes(double time)
-// finds routes that are more than 
+
 {
 
-	unsigned int maxroutes=10;
+	unsigned int maxroutes=50;
 	double threshold =0.0;
 	vector <Route*> thrown;
 	string reason ="";
@@ -181,22 +184,17 @@ vector <Route*> ODpair::delete_spurious_routes(double time)
 	  }
 	}
 	
-	if (rate < theParameters->small_od_rate ) // if the rate is small there should be no route choice
+	if (rate < theParameters->small_od_rate )  // if small OD rate
 	{
-		threshold = 1.5; // all other routes will be deleted
-		maxroutes = 5;
-		reason = " small OD ";
+		threshold = 1.5; // all  routes > 1.5*min_cost will be deleted
+		maxroutes = static_cast <int>(rate +1); // if the rate is small there should be few routes only
+		reason = " small OD, large cost ";
 	}
 	else
 	{
-		
-		double r = (rate/theParameters->small_od_rate); // even for larger OD pairs, limit nr of routes by rate
-		//if (routes.size() > r)
-	//		threshold = 1.50; // only good routes 
-	//	else
-		maxroutes = static_cast <int> (r+1);	
-		threshold = theParameters->max_rel_route_cost;
-		reason = " large cost ";
+		maxroutes = static_cast <int> (rate/2+1);	 
+		threshold = theParameters->max_rel_route_cost; 
+		reason = " large cost "; 
 	}
 
 	iter1=routes.begin();
@@ -206,7 +204,7 @@ vector <Route*> ODpair::delete_spurious_routes(double time)
 	  {
 		  // remove from route choice set
 		  
-		  cout << " erased route " << (*iter1)->get_id() << " from route choice set for OD pair ("
+		  eout << " erased route " << (*iter1)->get_id() << " from route choice set for OD pair ("
 			  << odids().first << "," << odids().second << ") because: " << reason << ", cost: "<< (*iter1)->cost(time) << 
 			  ", mincost: " << min_cost << ", rate: " << rate << endl;
 		  thrown.push_back((*iter1));
@@ -217,13 +215,15 @@ vector <Route*> ODpair::delete_spurious_routes(double time)
 	// delete if there are too many routes
 	
 	sort (routes.begin(), routes.end(), compare_route_cost);
-	cout << "cost of sorted routes " << endl;
+	//eout << "cost of sorted routes " << endl;
 	reason = " Max nr routes reached ";
+	/*******
 	vector <Route*>::iterator r_iter = routes.begin();
+	
 	for (r_iter; r_iter < routes.end(); r_iter++)
 	{
-		cout << " route " << (*r_iter)->get_id() << " costs " << (*r_iter)->cost(0.0) << endl;
-	}	
+		eout << " route " << (*r_iter)->get_id() << " costs " << (*r_iter)->cost(0.0) << endl;
+	}*/	
 
 	if (maxroutes < routes.size())
 	{	
@@ -232,7 +232,7 @@ vector <Route*> ODpair::delete_spurious_routes(double time)
 		{
 			r=routes.end();
 			r--;
-			cout << " erased route " << (*r)->get_id() << " from route choice set for OD pair ("
+			eout << " erased route " << (*r)->get_id() << " from route choice set for OD pair ("
 			  << odids().first << "," << odids().second << ") because: " << reason << ", cost: "<< (*r)->cost(time) << 
 			  ", mincost: " << min_cost << ", rate: " << rate << endl;
 			 thrown.push_back((*r));
@@ -256,14 +256,14 @@ Route* ODpair::select_route(double time)          // to be changed
 	int n=routes.size();
    if (n==0)
    {
-      cout << " No Route from Origin " << this->origin->get_id();
-      cout << " to destination " << this->destination->get_id() << endl;
+      eout << " No Route from Origin " << this->origin->get_id();
+      eout << " to destination " << this->destination->get_id() << endl;
    }
   assert (routes.size() > 0); // so the program breaks here if anything goes wrong.
   if (n==1)
 		return routes.front();
 #ifdef _DEBUG_OD
-	cout << " ODpair::select_route(). nr routes: " << n << endl;
+	eout << " ODpair::select_route(). nr routes: " << n << endl;
 #endif //_DEBUG_OD
 
 
@@ -286,7 +286,7 @@ Route* ODpair::select_route(double time)          // to be changed
 	{
 	 	subU+=utilities[i];
 	#ifdef _DEBUG_OD
-       cout << " subcost: " << subU << "; choice: " << choice<< endl;
+       eout << " subcost: " << subU << "; choice: " << choice<< endl;
 	#endif //_DEBUG_OD	 		 	
 	 	if (( (subU) / totalU) >= choice) // 
 	 	{
@@ -295,7 +295,7 @@ Route* ODpair::select_route(double time)          // to be changed
 	}
 
 	// if it exits the loop without selecting a route
-	cout << "TROUBLE: No Route selected! Returning the first in list" <<  endl;
+	eout << "TROUBLE: No Route selected! Returning the first in list" <<  endl;
 	return routes.front(); // to be sure that in any case a route is returned
 }
  	

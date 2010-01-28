@@ -16,13 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*****************************************
-* last modified by Xiaoliang Ma
-*
-* ! add access to all routes in ODpair
-* 
-* 2007-07-22
-*/
+
 
 #ifndef OD_HH
 #define OD_HH
@@ -38,6 +32,7 @@
 #include <iostream>
 
 //#define _DEBUG_OD
+#define _DEBUG_OD_ROUTES
 
 class Route;
 class Origin;

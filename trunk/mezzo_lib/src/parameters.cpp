@@ -1,6 +1,9 @@
 #include "parameters.h"
 #include <iostream>
 
+
+
+
 Parameters::Parameters ()
 // Later this will be read from a file
 

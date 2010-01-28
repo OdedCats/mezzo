@@ -25,6 +25,8 @@
 */
 #include <string>
 #include <vector>
+#include <iostream>
+#include <fstream>
 #include "Random.h"
 
 #ifndef _NO_GUI
@@ -39,12 +41,13 @@
 #define _DETERMINISTIC_VTYPES
 //#define _MULTINOMIAL_LOGIT
 #define _UNSAFE // faster reading, but less checking of input data
-//#define _BUSES
+
 
 // GLOBAL VARIABLES
 extern long int randseed; // random seed
 extern int vid;     // global vehicle id nr.
 extern double time_alpha;
+extern std::ofstream eout; // for all debugging output
 
 // OLD Network.hh parameters
 

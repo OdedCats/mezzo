@@ -221,6 +221,7 @@ int VISSIMCOM::send (double time)
 		}
 	// set the virtual vehicles for all boundaries
 
+
 		for (vector <BoundaryIn*>::iterator iter3=(*boundaryins).begin();iter3<(*boundaryins).end();iter3++)
 		{
 			// set the correct conditions 
@@ -228,46 +229,49 @@ int VISSIMCOM::send (double time)
 			
 			// for each virtual link belonging to the boundary (for now just one)!!!!
 			// !!! CHANGE !!!
-			vector<VirtualLink*>::iterator iter4= ((*iter3)->get_virtual_links()).begin();
-			long lastlinkid= (*iter4)->lastlink;
-			
-			ILinkPtr lastlink=spLinks->GetLinkByNumber(lastlinkid);
-	
-			long length=lastlink->GetAttValue("LENGTH");
-			long numlanes= lastlink->GetAttValue("NUMLANES");
-			IVehiclesPtr vehs =lastlink->GetVehicles();
-			long vehcount= vehs->GetCount();
-			//cout << "At this moment there are " << vehcount << " vehicles on the link" << endl;
-			// virtual vehicles
-			if (vehcount >= numlanes) //if there are more vehicles than lanes
+			if ( ((*iter3)->get_virtual_links()).size() !=0)
 			{
-				// get the vehicles in an array
-				IEnumVARIANTPtr vehenum(vehs->Get_NewEnum());
-				unsigned long ulFetched;
-				_variant_t* avar= new _variant_t[vehcount];
-				vehenum->Reset ();
-				vehenum->Next(vehcount, avar, &ulFetched);
-				for (int a=0; a < vehcount-1; a++) //  adjust the speed of vehicles
+				vector<VirtualLink*>::iterator iter4= ((*iter3)->get_virtual_links()).begin();
+				long lastlinkid= (*iter4)->lastlink;
+				
+				ILinkPtr lastlink=spLinks->GetLinkByNumber(lastlinkid);
+		
+				long length=lastlink->GetAttValue("LENGTH");
+				long numlanes= lastlink->GetAttValue("NUMLANES");
+				IVehiclesPtr vehs =lastlink->GetVehicles();
+				long vehcount= vehs->GetCount();
+				//cout << "At this moment there are " << vehcount << " vehicles on the link" << endl;
+				// virtual vehicles
+				if (vehcount >= numlanes) //if there are more vehicles than lanes
 				{
-					IVehiclePtr veh=(IVehiclePtr)avar[a].pdispVal;
-					long pos = veh->GetAttValue("LINKCOORD");
-					if ((length-pos) < 20.0)
+					// get the vehicles in an array
+					IEnumVARIANTPtr vehenum(vehs->Get_NewEnum());
+					unsigned long ulFetched;
+					_variant_t* avar= new _variant_t[vehcount];
+					vehenum->Reset ();
+					vehenum->Next(vehcount, avar, &ulFetched);
+					for (int a=0; a < vehcount-1; a++) //  adjust the speed of vehicles
 					{
-						// Set both the desired speed and current speed
-						veh->PutAttValue("SPEED",speed); // this includes setting speed to 0.0 is downstream is blocked.
-						veh->PutAttValue("DESIREDSPEED",speed); 
-					}
-					else
-					{
-						if ((length-pos) < 50.0)
+						IVehiclePtr veh=(IVehiclePtr)avar[a].pdispVal;
+						long pos = veh->GetAttValue("LINKCOORD");
+						if ((length-pos) < 20.0)
 						{
-							//long newspeed = speed + (oldspeed-speed)/2; // reduce the speed difference by 1/2
-							// Set the desired speed only
+							// Set both the desired speed and current speed
+							veh->PutAttValue("SPEED",speed); // this includes setting speed to 0.0 is downstream is blocked.
 							veh->PutAttValue("DESIREDSPEED",speed); 
 						}
+						else
+						{
+							if ((length-pos) < 50.0)
+							{
+								//long newspeed = speed + (oldspeed-speed)/2; // reduce the speed difference by 1/2
+								// Set the desired speed only
+								veh->PutAttValue("DESIREDSPEED",speed); 
+							}
+						}
 					}
-				}
-			}	
+				}	
+			}
 		}
 	
 		return count; // temporary return till function is filled in
