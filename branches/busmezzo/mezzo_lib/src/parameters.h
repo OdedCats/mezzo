@@ -163,13 +163,16 @@ public:
    int mime_min_queue_length; //!< min queue length for stopping / starting shockwaves
    double mime_queue_dis_speed; //!< queue dissipation speed if not calculated from flow & density data
 
-// demand parameters:
+// transit demand parameters:
    int demand_format;
    double demand_scale; // !< currently for demand format 1 only - multiplies the hourly arrival rate
    double transfer_coefficient;
    double in_vehicle_time_coefficient;
    double waiting_time_coefficient;
+   double walking_time_coefficient;
    int max_nr_extra_transfers;
+   double max_in_vehicle_time_ratio;
+   double max_total_time_ratio;
 
 // TODO: Implement the use of the following paramaters
    double vissim_step; //!< time step for the VISSIM micro model

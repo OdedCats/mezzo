@@ -161,7 +161,7 @@ double ODstops::calc_combined_set_utility (Passenger* pass, Bustrip* bus_on_boar
 	staying_utility = 0.0;
 	for (vector <Pass_path*>::iterator paths = path_set.begin(); paths < path_set.end(); paths++)
 	{
-		staying_utility += exp(theParameters->in_vehicle_time_coefficient * bus_on_board->get_line()->calc_curr_line_ivt(pass->get_OD_stop()->get_origin(),origin_stop) + theParameters->transfer_coefficient +  (*paths)->calc_waiting_utility(this));
+		staying_utility += exp(random->nrandom(theParameters->in_vehicle_time_coefficient, theParameters->in_vehicle_time_coefficient / 4 ) * bus_on_board->get_line()->calc_curr_line_ivt(pass->get_OD_stop()->get_origin(),origin_stop) + random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4 ) +  (*paths)->calc_waiting_utility(this));
 		// taking into account IVT till this intermediate stop, transfer penalty and the utility of the path from this transfer stop till the final destination
 	}
 	return log(staying_utility);

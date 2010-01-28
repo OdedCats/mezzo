@@ -15,6 +15,33 @@ Pass_path:: Pass_path (int path_id, vector<vector<Busline*>> alt_lines_, vector 
 	alt_lines = alt_lines_;
 	alt_transfer_stops = alt_transfer_stops_;
 	number_of_transfers = find_number_of_transfers();
+	random = new (Random);
+	if (randseed != 0)
+		{
+		random->seed(randseed);
+		}
+	else
+	{
+		random->randomize();
+	}
+}
+
+Pass_path::Pass_path (int path_id, vector<vector<Busline*>> alt_lines_, vector <vector <Busstop*>> alt_transfer_stops_, vector<double> walking_distances_)
+{
+	p_id = path_id;
+	alt_lines = alt_lines_;
+	alt_transfer_stops = alt_transfer_stops_;
+	walking_distances = walking_distances_;
+	number_of_transfers = find_number_of_transfers();
+	random = new (Random);
+	if (randseed != 0)
+		{
+		random->seed(randseed);
+		}
+	else
+	{
+		random->randomize();
+	}
 }
 
 Pass_path::~Pass_path()
@@ -33,7 +60,12 @@ void Pass_path::reset()
 
 int Pass_path::find_number_of_transfers ()
 {
-	return (alt_transfer_stops.size()-2); // omitting origin and destination stops
+	int nr_trans = ((alt_transfer_stops.size()-2)/2)-1;
+	if (nr_trans < 0)
+	{
+		nr_trans = 0; // in case it is only a walking alternative (no buslines included)
+	}
+	return (nr_trans); // omitting origin and destination stops
 }
 
 double Pass_path::calc_total_scheduled_in_vehicle_time (ODstops* odstops)
@@ -70,12 +102,12 @@ double Pass_path::calc_curr_leg_headway (vector<Busline*> leg_lines)
 double Pass_path::calc_arriving_utility (ODstops* odstop)
 // this function currently assumes direct paths (has to include waiting times at transfers)
 {
-	return (theParameters->transfer_coefficient * number_of_transfers + theParameters->in_vehicle_time_coefficient * calc_total_scheduled_in_vehicle_time(odstop));
+	return (random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4) * number_of_transfers + random->nrandom(theParameters->in_vehicle_time_coefficient, theParameters->in_vehicle_time_coefficient / 4 ) * calc_total_scheduled_in_vehicle_time(odstop));
 }
 
 double Pass_path::calc_waiting_utility (ODstops* odstop)
 {
-	return (theParameters->transfer_coefficient * number_of_transfers + theParameters->in_vehicle_time_coefficient * calc_total_scheduled_in_vehicle_time(odstop) + theParameters->waiting_time_coefficient * calc_estimated_waiting_time());
+	return (random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4) * number_of_transfers + random->nrandom(theParameters->in_vehicle_time_coefficient, theParameters->in_vehicle_time_coefficient / 4 ) * calc_total_scheduled_in_vehicle_time(odstop) + random->nrandom(theParameters->waiting_time_coefficient, theParameters->waiting_time_coefficient / 4) * calc_estimated_waiting_time());
 }
 
 double Pass_path::calc_estimated_waiting_time ()

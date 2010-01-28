@@ -59,6 +59,7 @@ public:
 	Busline (int id_, string name_, Busroute* busroute_, vector <Busstop*> stops_, Vtype* vtype_, ODpair* odpair_, int average_headway_, float ratio_headway_holding_, int holding_strategy_); //!< Initialising constructor
 	virtual ~Busline(); //!< destructor
 	void reset ();
+	void reset_curr_trip (); // initialize after reading bustrips
 
 	// Gets and sets
 	int get_id () {return id;} //!< returns id, used in the compare  functions for find and find_if algorithms
@@ -251,6 +252,7 @@ public:
 	double get_exit_time() { return exit_time;}
 	void set_position (double position_ ) {position = position_;}
 	vector <Busline*> get_lines () {return lines;}
+	map<Busstop*,double> get_walking_distances () {return distances;}
 	void save_previous_arrival_rates () {previous_arrival_rates.swap(arrival_rates);}
 	void save_previous_alighting_fractions () {previous_alighting_fractions.swap(alighting_fractions);}
 
@@ -262,8 +264,11 @@ public:
 	void add_line_nr_boarding(Busline* line, double value){arrival_rates[line] = value;}
 	void add_line_nr_alighting(Busline* line, double value){alighting_fractions[line]= value;}
 	void add_line_update_rate_time(Busline* line, double time){update_rates_times[line].push_back(time);}
+	
+// functions for initializing stop-specific input (relevant for demand format 3 only)	
 	void add_odstops_as_origin(Busstop* destination_stop, ODstops* od_stop){stop_as_origin[destination_stop]= od_stop; is_origin = true;}
 	void add_odstops_as_destination(Busstop* origin_stop, ODstops* od_stop){stop_as_destination[origin_stop]= od_stop; is_destination = true;}
+	void add_distance_between_stops (Busstop* stop, double distance) {distances[stop] = distance;}
 
 //	Action for visits to stop
 	bool execute(Eventlist* eventlist, double time); //!< is executed by the eventlist and means a bus needs to be processed
@@ -281,13 +286,13 @@ public:
 	double get_time_since_arrival (Bustrip* trip, double time); //!< calculates the headway (defined as the differnece in time between sequential arrivals) 
 	double get_time_since_departure (Bustrip* trip, double time); //!< calculates the headway (defined as the differnece in time between sequential departures) 
 
-	// output-related functions
+// output-related functions
 	void write_output(ostream & out);
 	void record_busstop_visit ( Bustrip* trip, double enter_time); //!< creates a log-file for stop-related info
 	void calculate_sum_output_stop_per_line(int line_id); // calculates for a single line that visits the stop (identified by line_id)
 	int calc_total_nr_waiting ();
 
-	// relevant only for demand format 2
+// relevant only for demand format 2
 	multi_rates multi_arrival_rates; //!< parameter lambda that defines the poission proccess of passengers arriving at the stop for each sequential stop
 
 protected:
@@ -330,6 +335,9 @@ protected:
 	ODs_for_stop stop_as_destination; // a map of all the OD's that this busstop is their destination
 	bool is_origin; // indicates if this busstop serves as an origin for some passenger demand
 	bool is_destination; // indicates if this busstop serves as an destination for some passenger demand
+
+	// walking distances between stops (relevant only for demand format 3)
+	map<Busstop*,double> distances; // contains the distances [meters] from other bus stops
 
 	// output structures
 	list <Busstop_Visit> output_stop_visits; //!< list of output data for buses visiting stops

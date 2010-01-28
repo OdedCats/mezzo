@@ -43,12 +43,9 @@ Busline::Busline ()
 
 Busline::Busline (int id_, string name_, Busroute* busroute_, vector<Busstop*> stops_, Vtype* vtype_, ODpair* odpair_, int average_headway_, float ratio_headway_holding_, int holding_strategy_):
 	id(id_), name(name_), busroute(busroute_), stops(stops_), vtype(vtype_), odpair(odpair_), average_headway(average_headway_), ratio_headway_holding(ratio_headway_holding_), holding_strategy(holding_strategy_) 
-
 {
 	active=false;
-
 }
-
 
 Busline::~Busline()
 {}
@@ -60,6 +57,11 @@ void Busline::reset ()
 	average_headway = 0;
 	ratio_headway_holding = 0;
 	holding_strategy = 0; 
+}
+
+void Busline::reset_curr_trip ()
+{
+	curr_trip = trips.begin();
 }
 
 bool Busline::execute(Eventlist* eventlist, double time)

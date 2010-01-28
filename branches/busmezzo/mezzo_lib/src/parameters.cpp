@@ -80,10 +80,13 @@ Parameters::Parameters ()
 // demand parameters:
    demand_format = 1;
    demand_scale = 1.0;
-   transfer_coefficient = 0; 
-   in_vehicle_time_coefficient = 0;
-   waiting_time_coefficient = 0;
-   max_nr_extra_transfers = 1;
+   transfer_coefficient = 0.0; 
+   in_vehicle_time_coefficient = 0.0;
+   waiting_time_coefficient = 0.0;
+   walking_time_coefficient= 0.0;
+   max_nr_extra_transfers = 1.0;
+   max_in_vehicle_time_ratio = 2.0;
+   max_total_time_ratio = 2.0;
 }
 
 bool Parameters::read_parameters (istream & in )
@@ -476,7 +479,7 @@ bool Parameters::read_parameters (istream & in )
 	}
 	in >> sim_speed_factor;
 	in >> keyword;
-	if (keyword!= "#demand_parameters")
+	if (keyword!= "#transit_demand_parameters")
 	{
 		cout << "ERROR reading Parameters file, expecting: #demand_parameters, read: " << keyword << endl;
 		return false;
@@ -517,12 +520,34 @@ bool Parameters::read_parameters (istream & in )
 	}
 	in >> waiting_time_coefficient;
 	in >> keyword;
+	if (keyword!= "walking_time_coefficient=")
+	{
+		cout << "ERROR reading Parameters file, expecting: walking_time_coefficient=, read: " << keyword << endl;
+		return false;
+	}
+	in >> walking_time_coefficient;
+	in >> keyword;
 	if (keyword!= "max_nr_extra_transfers=")
 	{
 		cout << "ERROR reading Parameters file, expecting: max_nr_extra_transfers=, read: " << keyword << endl;
 		return false;
 	}
 	in >> max_nr_extra_transfers;
+	in >> keyword;
+	if (keyword!= "max_in_vehicle_time_ratio=")
+
+	{
+		cout << "ERROR reading Parameters file, expecting: max_in_vehicle_time_ratio=, read: " << keyword << endl;
+		return false;
+	}
+	in >> max_in_vehicle_time_ratio;
+	in >> keyword;
+	if (keyword!= "max_total_time_ratio=")
+	{
+		cout << "ERROR reading Parameters file, expecting: max_total_time_ratio=, read: " << keyword << endl;
+		return false;
+	}
+	in >> max_total_time_ratio;
 	return true;
 }
 

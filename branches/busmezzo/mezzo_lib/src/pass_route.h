@@ -4,6 +4,7 @@
 #include "busline.h"
 #include "parameters.h" 
 #include "od_stops.h"
+#include "Random.h"
 
 class Busline;
 class Busstop;
@@ -15,6 +16,7 @@ class Pass_path
 	Pass_path ();
 	Pass_path (int path_id, vector<vector<Busline*>> alt_lines_);
 	Pass_path (int path_id, vector<vector<Busline*>> alt_lines_, vector <vector <Busstop*>> alt_transfer_stops_);
+	Pass_path (int path_id, vector<vector<Busline*>> alt_lines_, vector <vector <Busstop*>> alt_transfer_stops_, vector<double> walking_distances_);
 	~Pass_path ();
 	void reset();
 
@@ -22,6 +24,7 @@ class Pass_path
 	int get_id () {return p_id;}
 	vector <vector <Busline*>> get_alt_lines () {return alt_lines;}
 	vector <vector <Busstop*>> get_alt_transfer__stops () {return alt_transfer_stops;}
+	vector <double> get_walking_distances () {return walking_distances;};
 	int get_number_of_transfers () {return number_of_transfers;}
 	void set_alt_transfer_stops (vector <vector <Busstop*>> trans_stops) {alt_transfer_stops = trans_stops;}
 	bool get_arriving_bus_rellevant () {return arriving_bus_rellevant;}
@@ -38,8 +41,10 @@ class Pass_path
 
 protected:
 	int p_id;
+	Random* random;
 	vector <vector <Busline*>> alt_lines;
 	vector <vector <Busstop*>> alt_transfer_stops;
+	vector <double> walking_distances;
 	int number_of_transfers;
 	double scheduled_in_vehicle_time;
 	double scheduled_headway;

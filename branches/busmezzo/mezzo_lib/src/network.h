@@ -249,14 +249,16 @@ public:
   bool read_passenger_rates_format1_TD_basic (istream& in, int nr_rates);
   bool read_passenger_rates_format1_TD_slices (istream& in);
   bool read_passenger_rates_format2 (istream& in); // reads the passenger rates in the format of arrival rate per line, origin stop and destination stop combination
-   bool read_passenger_rates_format3 (istream& in); // reads the passenger rates in the format of arrival rate per OD in terms of stops (no path is pre-determined)
+  bool read_passenger_rates_format3 (istream& in); // reads the passenger rates in the format of arrival rate per OD in terms of stops (no path is pre-determined)
+  bool readbusstops_distances (istream& in); // !< reads a busstop distance matrix (to other busstops) - relevant only for demand format 3
   bool read_bustype (istream& in); // reads a bus type
   bool read_busvehicle(istream& in); // reads a bus vehicle 
   void generate_consecutive_stops (); // stores for each stop all the stops that can be reached within a direct trip
   bool find_direct_paths (Busstop* bs_origin, Busstop* bs_destination); // finds direct paths and generate new direct paths
   void generate_indirect_paths (); // generates new indirect paths
   void find_all_paths (); // goes over all OD stop pairs to generate their path choice set
-  void find_recursive_connection (Busstop* origin, Busstop* destination); // search recursively for a path (forward - from origin to destination)
+  void find_recursive_connection (Busstop* origin, Busstop* destination); // search recursively for a path (forward - from origin to destination) WITHOUT walking links
+  void find_recursive_connection_with_walking (Busstop* origin, Busstop* destination, Busstop* final_destination); // search recursively for a path (forward - from origin to destination) WITH walking links
   void merge_paths_by_stops (Busstop* stop);  // merge paths with same lines for all legs (only different transfer stops)
   void merge_paths_by_common_lines (Busstop* stop);  // merge paths with lines that have identical route between consecutive stops
   bool compare_same_lines_paths (Pass_path* path1, Pass_path* path2); // checks if two paths are identical in terms of lines
@@ -265,6 +267,8 @@ public:
   bool check_constraints_paths (Pass_path* path); // checks if the path meets all the constraints
   bool check_path_no_repeating_lines (Pass_path* path); // checks if the path does not include going on and off the same bus line at the same stop
   bool check_path_no_repeating_stops (Pass_path* path); // chceks if the path deos not include going through the same stop more than once
+  void static_dominancy_rules (Busstop* stop); // delete paths which are dominated by other alterantive paths
+
 #ifndef _NO_GUI
 	double get_width_x() {return width_x;} //!< returns image width in original coordinate system
 	double get_height_y() {return height_y;} //!< ... height ...
@@ -318,6 +322,7 @@ protected:
     vector <Bus*> busvehicles; // a list of the bus vehicles
 	vector <ODstops*> odstops;
 	vector<Busstop*> collect_im_stops; // compose the list of stops for a path
+	vector<double> collect_walking_distances; // compose the list of walking distances for a path
 	map<int,map<int, vector<Busline*>>> direct_lines; // contains all direct lines between a couple of stops
 	map<Busstop*,vector<Busstop*>> consecutive_stops; // contains all the stops that can be reached within no transfer per stop
 
