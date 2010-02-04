@@ -214,7 +214,7 @@ void MOE::fill_missing (const int nr_periods, const double default_value)
 void MOE::write_values(ostream & out, int nrperiods)
 {
   #ifdef _DEBUG_MOE
-  cout << "values write size: " << values.size() << endl;
+  eout << "values write size: " << values.size() << endl;
   #endif
   list <double>::iterator iter=values.begin();
   for  (int i = 0; (i < nrperiods) && (iter!=values.end()); i++)

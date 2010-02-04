@@ -103,7 +103,7 @@ void Origin::register_links(map <int,Link*> linkmap)
  		{
 			outgoing.insert(outgoing.begin(), (*iter).second);
    		#ifdef _DEBUG_NODE
- 	 			cout << "Registered link " << (*iter)->get_id() << " @ origin " << id << endl;
+ 	 			eout << "Registered link " << (*iter)->get_id() << " @ origin " << id << endl;
  	 		#endif //_DEBUG_NODE
 		}
  	 }	
@@ -130,7 +130,7 @@ bool Origin::insert_veh(Vehicle* veh, double time)
 		Link* link=veh->get_route()->firstlink();
 		if (!link)
 		{
-		 cout << " first link is corrupt " << endl;
+		 eout << " first link is corrupt " << endl;
 		 return false;		
 		}
 		
@@ -150,7 +150,7 @@ bool Origin::insert_veh(Vehicle* veh, double time)
 			}
 			else
 			{
-			 	cout << " Origin:: insertveh inputqueue->enterveh doesnt work " << endl;
+			 	eout << " Origin:: insertveh inputqueue->enterveh doesnt work " << endl;
 	    		return false;
 			}
 		}	
@@ -168,7 +168,7 @@ bool Origin::insert_veh(Vehicle* veh, double time)
         		}
 				else
         		{
-	    	   		cout << " Origin:: insertveh link->enterveh doesnt work " << endl;
+	    	   		eout << " Origin:: insertveh link->enterveh doesnt work " << endl;
 			      	return false;
 	        	}
         	}
@@ -179,12 +179,12 @@ bool Origin::insert_veh(Vehicle* veh, double time)
 	        			return true;
 	        		else
 	        			{
-	    	   			  cout << " Origin:: insertveh transferveh doesnt work " << endl;
+	    	   			  eout << " Origin:: insertveh transferveh doesnt work " << endl;
 			        		return false;
 	        			}
 	        	else
 	        	{
-			  		cout << " Origin:: insertveh inputqueue->enterveh doesnt work " << endl;
+			  		eout << " Origin:: insertveh inputqueue->enterveh doesnt work " << endl;
 	        		return false;
 	      		}
         	}
@@ -192,7 +192,7 @@ bool Origin::insert_veh(Vehicle* veh, double time)
   	}
   	else
   	{
-  		cout << " Origin:: insertveh either no veh, or input queue full " << endl;
+  		eout << " Origin:: insertveh either no veh, or input queue full " << endl;
   		return false;
   	}
 }
@@ -226,13 +226,13 @@ bool Origin::transfer_veh(Link* link, double time)
 						}
 						else
 						{
-							cout << "transfer: could not enter vehicle in link " << endl;
+							eout << "transfer: could not enter vehicle in link " << endl;
 							return false;
 						}
 				 	}
 				 	else
 			   	 	{
-					    cout << "transfer: vehicle disappeared " << endl;
+					    eout << "transfer: vehicle disappeared " << endl;
 						return false;
 					}
 				}
@@ -244,7 +244,7 @@ bool Origin::transfer_veh(Link* link, double time)
 	}
 	else
 	{
-		cout << "transfer: no valid link " << endl;
+		eout << "transfer: no valid link " << endl;
 		return false;
 	}
 }
@@ -278,14 +278,14 @@ void Junction::register_links(map <int,Link*> linkmap)
  		{
 			outgoing.insert(outgoing.begin(), (*iter).second);
            #ifdef _DEBUG_NODE
- 	 			cout << "Registered outgoing link " << (*iter).second->get_id() << " @ junction " << id << endl;
+ 	 			eout << "Registered outgoing link " << (*iter).second->get_id() << " @ junction " << id << endl;
  	 		#endif //_DEBUG_NODE
 		}
 		else if ((*iter).second->get_out_node_id()==id)
 		{
 			incoming.insert(incoming.begin(), (*iter).second);
            #ifdef _DEBUG_NODE
- 	 			cout << "Registered incoming link " << (*iter).second->get_id() << " @ junction " << id << endl;
+ 	 			eout << "Registered incoming link " << (*iter).second->get_id() << " @ junction " << id << endl;
  	 		#endif //_DEBUG_NODE
 		}
  	 }	
@@ -325,7 +325,7 @@ void Destination::register_links(map <int,Link*> linkmap)
 			for (int i=0; i< (*iter).second->get_nr_lanes(); i++)
 				dactions.insert(dactions.begin(),new Daction((*iter).second,this,server)); // CHANGED 2003-10-10: 1 for each lane
  		#ifdef _DEBUG_NODE
- 	 		cout << "Registered link " << (*iter)->get_id() << " @ dest " << id << endl;
+ 	 		eout << "Registered link " << (*iter)->get_id() << " @ dest " << id << endl;
  	 	#endif //_DEBUG_NODE
  	 	}
  	}
@@ -334,7 +334,7 @@ void Destination::register_links(map <int,Link*> linkmap)
 bool Destination::execute(Eventlist* eventlist, double time)
 {
 #ifdef _DEBUG_NODE
-	cout << "Destination execute" << endl;
+	eout << "Destination execute" << endl;
 #endif //_DEBUG_NODE
 	bool ok=true;
  	for (vector<Daction*>::iterator iter=dactions.begin(); iter<dactions.end(); iter++)
@@ -398,7 +398,7 @@ void BoundaryOut::add_signature (Signature* sig)
 
 vector <Signature*> & BoundaryOut::get_signatures() 
 {
-	//cout << " returning signatures " << signatures.size() << endl;
+	//eout << " returning signatures " << signatures.size() << endl;
 	return signatures;
 }
 
@@ -418,7 +418,7 @@ void BoundaryOut::block(int code,double speed) // spread the news to the virtual
          blocked_=false;
          (*iter)->set_density(code);
          (*iter)->set_speed(speed);
-         cout << " set the density " << code << " for virtual link " << (*iter)->get_id() << endl; 
+         eout << " set the density " << code << " for virtual link " << (*iter)->get_id() << endl; 
        }
     }
 }
@@ -501,13 +501,13 @@ int BoundaryIn::send_message(PVM* com, double time)
 	    	speed=0.0;
 	    	distance=0.0;	
 	    }	
-	 //   cout <<" looking for speed at link number : " << lpt->get_id() << endl;
+	 //   eout <<" looking for speed at link number : " << lpt->get_id() << endl;
 		 else
 		 {
 			speed = ((lastveh ->get_curr_link())->speed(time));
 			distance =(time -  lastveh->get_entry_time() )* speed;
 		}
-//		cout << " Mezzo boundary in:: speed " << speed << " distance " << distance << " time now " << time << " entrytime  " << lastveh->get_entry_time() << endl;
+//		eout << " Mezzo boundary in:: speed " << speed << " distance " << distance << " time now " << time << " entrytime  " << lastveh->get_entry_time() << endl;
 	}
 	else
 	{
@@ -578,7 +578,7 @@ bool BoundaryIn::newvehicle(Signature* sig)
 			  if (odptr)
 			  {
 			  		
-					//cout << "BoundaryIn:: found od" << endl;
+					//eout << "BoundaryIn:: found od" << endl;
 			  		//Route* rptr=*(find_if(routes->begin(), routes->end(), compare <Route> (sig->path)));
 					odval val = odptr->odids();
 					Route* rptr= find_route(val, sig->path);
@@ -644,8 +644,8 @@ bool Daction::execute(Eventlist* eventlist, double time)
 	else
 		new_time=server->next(time);
 #ifdef _DEBUG_NODE
-	  cout <<"Daction::execute...result: " << exec_ok;
-   	  cout << " ...next Daction @ " << new_time << endl;
+	  eout <<"Daction::execute...result: " << exec_ok;
+   	  eout << " ...next Daction @ " << new_time << endl;
 #endif //_DEBUG_NODE
 	// book myself in Eventlist with new time;
 	eventlist->add_event(new_time,this);
@@ -660,10 +660,10 @@ bool Daction::process_veh(double time)
   if (ok)
   {
  #ifdef _DEBUG_NODE
- 	cout << "Daction::process_veh detete veh" << endl;
- 	cout << "Vehicle exit time " << (veh->get_exit_time());
-	cout << "link exit ok?: " << link-> exit_ok() << endl;
- 	cout << "link id "<<link->get_id()<< endl;
+ 	eout << "Daction::process_veh detete veh" << endl;
+ 	eout << "Vehicle exit time " << (veh->get_exit_time());
+	eout << "link exit ok?: " << link-> exit_ok() << endl;
+ 	eout << "link id "<<link->get_id()<< endl;
  #endif //_DEBUG_NODE
  		veh->report(time);
   	recycler.addVehicle(veh);

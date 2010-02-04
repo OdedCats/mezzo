@@ -9,7 +9,7 @@ Link::Link(int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* s
 {
 	maxcap=static_cast<int> (length*nr_lanes/theParameters->standard_veh_length);
 #ifdef _DEBUG_LINK	
-	cout << "link " << id << " maxcap " << maxcap << endl;
+	eout << "link " << id << " maxcap " << maxcap << endl;
 #endif //_DEBUG_LINK
 	
 #ifdef _COLLECT_TRAVELTIMES
@@ -191,7 +191,7 @@ const double Link::next_action (double time)
 		else
 			newtime= queue->next();
       if (newtime <= time)
-        cout << "Link::nextaction: newtime= " << newtime << " and time = " << time <<  " and freeflowtime = " << freeflowtime << endl;
+        eout << "Link::nextaction: newtime= " << newtime << " and time = " << time <<  " and freeflowtime = " << freeflowtime << endl;
       return newtime;
 	}	 // optimisation: return freeflow time if queue is empty
 
@@ -356,7 +356,7 @@ void Link::update_exit_times(double time,Link* nextlink, int lookback)
     
    if (k_dnstr>=kjam)
   {
-      cout << " Big trouble!  upstream density >= downstream in queue dissipation..." << endl;
+      eout << " Big trouble!  upstream density >= downstream in queue dissipation..." << endl;
       blocked_until=-1.0;
       return; // no updating of times
     }
@@ -367,8 +367,8 @@ void Link::update_exit_times(double time,Link* nextlink, int lookback)
    }
     */
 #ifdef _DEBUG_LINK
-    cout << " VEXIT = " << v_exit << endl;
-    cout << " VSHOCKWAVE = " << v_shockwave << endl;
+    eout << " VEXIT = " << v_exit << endl;
+    eout << " VSHOCKWAVE = " << v_shockwave << endl;
 #endif //_DEBUG_LINK
 	//double v_shockwave=((kjam*vjam*3.6 - k_dnstr*v_exit*3.6)/(kjam-k_dnstr))/3.6;
    //double v_shockwave=5.0;
@@ -379,8 +379,8 @@ void Link::update_exit_times(double time,Link* nextlink, int lookback)
    {
           blocked_until=(length/v_shockwave)+time; // time when shockwave reaches the upstream node
 #ifdef _DEBUG_LINK
-          cout << "shockwave at link " << id << ", blocked until " << blocked_until <<". Time now " << time ;
-          cout << ", v_exit = " << v_exit << ", v_shockwave = " << v_shockwave << ", kdownstr = " << k_dnstr << endl;
+          eout << "shockwave at link " << id << ", blocked until " << blocked_until <<". Time now " << time ;
+          eout << ", v_exit = " << v_exit << ", v_shockwave = " << v_shockwave << ", kdownstr = " << k_dnstr << endl;
 #endif // _DEBUG_LINK
    }
 }   // exit speed is based on downstream density
@@ -398,9 +398,9 @@ double Link::speed(double time)
 		ro=density();
 	#endif	// _RUNNING_ONLY
 #endif // _RUNNING
-//	cout << "Link::speed: ro_runningonly = " << ro << " speed is " << sdfunc->speed(ro) ;
-//	cout << " ro normal is " << density() <<" nr running " << queue->nr_running(time) <<  endl;
-//	cout << " the ro for density_running " << density_running(time) << endl;
+//	eout << "Link::speed: ro_runningonly = " << ro << " speed is " << sdfunc->speed(ro) ;
+//	eout << " ro normal is " << density() <<" nr running " << queue->nr_running(time) <<  endl;
+//	eout << " the ro for density_running " << density_running(time) << endl;
 	
 	return (sdfunc->speed(ro));	
 }
@@ -436,7 +436,7 @@ bool Link::enter_veh(Vehicle* veh, double time)
     if (current_outflow > 0.0)          // if < 0.0 then there is no value for outflow, so no queue delay either
       exp_delay=3600.0*(queue->queue(time))/current_outflow;  */
     exit_time=exit_time+exp_delay;
-    cout << "link_enter:: exp_delay = " << exp_delay << endl;
+    eout << "link_enter:: exp_delay = " << exp_delay << endl;
     #endif //_USE_EXPECTED_DELAY
    veh->set_exit_time(exit_time);
    veh->set_curr_link(this);
@@ -455,12 +455,12 @@ bool Link::enter_veh(Vehicle* veh, double time)
 	grid->insert_row(collector);
 #endif //_COLLECT_ALL
 #ifdef _DEBUG_LINK
-		cout <<"Link::enter_veh lid:  " << id;
-		cout <<" time: " << time;
-		cout <<" density: " << ro ;
-       cout << "  speed:  "<< speed << " m/s";
-		cout << "  exit_time: " << exit_time;
-	   	cout << " queue size: " << (queue->size()+1) << endl;
+		eout <<"Link::enter_veh lid:  " << id;
+		eout <<" time: " << time;
+		eout <<" density: " << ro ;
+       eout << "  speed:  "<< speed << " m/s";
+		eout << "  exit_time: " << exit_time;
+	   	eout << " queue size: " << (queue->size()+1) << endl;
 #endif //_DEBUG_LINK	
 	// report the ass_matrix contribution
 	if (use_ass_matrix)
@@ -635,8 +635,8 @@ const double Link::density_running_only(double time)
   double running_length=length-queue_space;
  
   	#ifdef _DEBUG_LINK
-   	 // cout << "density_running_only:: nr_running " << nr_running;
-   	  cout << " queue_space " << queue_space << endl;
+   	 // eout << "density_running_only:: nr_running " << nr_running;
+   	  eout << " queue_space " << queue_space << endl;
    	#endif
     if (nr_running && running_length)
    	{
@@ -777,8 +777,8 @@ void Link::update_icon(double time)
 	//running_percentage=(runningsize/cap);
 	running_percentage = density_running_only(time)/140; // density as percentage of jamdensity
 #ifdef _DEBUG_LINK	
-	cout << " runningsize " << runningsize;
-	cout << "  queueingsize " << queuesize << endl;
+	eout << " runningsize " << runningsize;
+	eout << "  queueingsize " << queuesize << endl;
 #endif //_DEBUG_LINK	
 }
 // INCIDENT FUNCTIONS
@@ -825,7 +825,7 @@ void Link::unset_incident()
 	sdfunc=temp_sdfunc;
 	blocked=false;
 	blocked_until=-1.0; // unblocked
-	cout << "the incident on link " << id << " is over. " << endl;
+	eout << "the incident on link " << id << " is over. " << endl;
 }
 
 
@@ -1015,7 +1015,7 @@ const  bool VirtualLink::full()
  {
 			double entrytime=veh->get_entry_time();
 			double traveltime=(time-entrytime);
-			//cout << "virtuallink::exit_veh: entrytime: " << entrytime << " exittime " << time << endl;
+			//eout << "virtuallink::exit_veh: entrytime: " << entrytime << " exittime " << time << endl;
 			avg_time=(nr_passed*avg_time + traveltime)/(nr_passed+1); // update of the average
 			if ((curr_period+1)*(avgtimes->periodlength) < entrytime )
 			{	

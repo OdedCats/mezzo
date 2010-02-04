@@ -27,7 +27,7 @@
 				ReBuildCommandLine="qmake&#x0D;&#x0A;nmake clean&#x0D;&#x0A;nmake debug"
 				CleanCommandLine="nmake clean"
 				Output="Debug\mezzo_hybrid_lib.lib"
-				PreprocessorDefinitions="WIN32;_DEBUG"
+				PreprocessorDefinitions="WIN32;_DEBUG;_VISSIMCOM"
 				IncludeSearchPath=""
 				ForcedIncludes=""
 				AssemblySearchPath=""

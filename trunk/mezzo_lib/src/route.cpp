@@ -28,13 +28,13 @@ Route::Route(int id_, Origin* origin_, Destination* destination_, vector <Link*>
 			linkmap [link->get_id()]=link;
 	}
 #ifdef _DEBUG_ROUTE 	
- 	cout << "new route: rid,oid,did : lid* " << id << ","<< origin->get_id();
-	cout << "," << destination->get_id() << " : ";
+ 	eout << "new route: rid,oid,did : lid* " << id << ","<< origin->get_id();
+	eout << "," << destination->get_id() << " : ";
 	for (vector<Link*>::iterator iter=links.begin();iter<links.end();iter++)
 	{
-		cout << (*iter)->get_id() << " ";
+		eout << (*iter)->get_id() << " ";
 	}
-	cout << endl;
+	eout << endl;
 #endif // _DEBUG_ROUTE		
 }
 
@@ -144,7 +144,7 @@ Link* Route::nextlink(Link* currentlink)
  {
  	return *iter;
  }
- cout << "Route::nextlink: error! there is no next link! " << endl;
+ eout << "Route::nextlink: error! there is no next link! " << endl;
  return NULL;
 }
 

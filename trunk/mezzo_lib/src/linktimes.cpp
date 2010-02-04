@@ -18,6 +18,7 @@
  #include "linktimes.h"
  #include <algorithm>
  #include <iostream>
+#include "parameters.h"
 
 
  template<class T>
@@ -115,7 +116,7 @@ const double LinkTimeInfo::cost (const int i, const double time)  // to be repai
  		return (*iter).second->cost(time);
  	else
  	{	
- 		cout << "LinkTimeInfo:: cost  : Error, can't find the link i = " << i << endl;
+ 		eout << "LinkTimeInfo:: cost  : Error, can't find the link i = " << i << endl;
  		return 0.1; // NEVER RETURN 0
    }
 }

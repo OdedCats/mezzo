@@ -16,7 +16,7 @@ Server::Server(const int id_, const int type_, const double mu_, const double sd
 Server::~Server()
 {
   #ifdef _DEBUG_SERVERS
-  cout << " deleting server id " << id << endl;
+  eout << " deleting server id " << id << endl;
   #endif // _DEBUG SERVERS
 	delete (random);
 }
@@ -99,12 +99,12 @@ double OServer::next(const double time)
 	if (bound < alpha)
 	{
 		temp=_MAX(min_hdway,random->nrandom(cf_hdway,sd_cf_hdway));  //
-		//cout << "bound : " << temp << endl;
+		//eout << "bound : " << temp << endl;
 	}
 	else	
 	{
 		temp=max_cf_hdway+(random->rrandom(mu_unbound-max_cf_hdway)); // shifted neg exp.
-		//cout << "unbound : " << temp << endl;
+		//eout << "unbound : " << temp << endl;
 	}
 	temp=temp/lanes; // make it per lane.
 	return time+temp;

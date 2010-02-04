@@ -87,14 +87,14 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "#drawing_parameters")
 	{
-		cout << "ERROR reading Parameters file, expecting: #drawing_parameters, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: #drawing_parameters, read: " << keyword << endl;
 		return false;
 	}
 
 	in >> keyword;
 	if (keyword!= "draw_link_ids=")
 	{
-		cout << "ERROR reading Parameters file, expecting: draw_link_ids=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: draw_link_ids=, read: " << keyword << endl;
 		return false;
 	}
 	in >> draw_link_ids;
@@ -102,7 +102,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "link_thickness=")
 	{
-		cout << "ERROR reading Parameters file, expecting: link_thickness=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: link_thickness=, read: " << keyword << endl;
 		return false;
 	}
 	in >> link_thickness;
@@ -110,7 +110,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "node_thickness=")
 	{
-		cout << "ERROR reading Parameters file, expecting: node_thickness=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: node_thickness=, read: " << keyword << endl;
 		return false;
 	}
 	in >> node_thickness;
@@ -118,7 +118,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "node_radius=")
 	{
-		cout << "ERROR reading Parameters file, expecting: node_radius=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: node_radius=, read: " << keyword << endl;
 		return false;
 	}
 	in >> node_radius;
@@ -126,7 +126,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "queue_thickness=")
 	{
-		cout << "ERROR reading Parameters file, expecting: queue_thickness=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: queue_thickness=, read: " << keyword << endl;
 		return false;
 	}
 	in >> queue_thickness;
@@ -135,7 +135,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "selected_thickness=")
 	{
-		cout << "ERROR reading Parameters file, expecting: selected_thickness=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: selected_thickness=, read: " << keyword << endl;
 		return false;
 	}
 	in >> selected_thickness;
@@ -143,7 +143,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "show_background_image=")
 	{
-		cout << "ERROR reading Parameters file, expecting: show_background_image=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: show_background_image=, read: " << keyword << endl;
 		return false;
 	}
 	in >> show_background;
@@ -151,7 +151,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "linkcolor=")
 	{
-		cout << "ERROR reading Parameters file, expecting: linkcolor=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: linkcolor=, read: " << keyword << endl;
 		return false;
 	}
 	in >> temp;
@@ -162,7 +162,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "nodecolor=")
 	{
-		cout << "ERROR reading Parameters file, expecting: nodecolor=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: nodecolor=, read: " << keyword << endl;
 		return false;
 	}
 	in >> temp;
@@ -173,7 +173,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "queuecolor=")
 	{
-		cout << "ERROR reading Parameters file, expecting: queuecolor=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: queuecolor=, read: " << keyword << endl;
 		return false;
 	}
 	in >> temp;
@@ -184,7 +184,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "backgroundcolor=")
 	{
-		cout << "ERROR reading Parameters file, expecting: backgroundcolor=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: backgroundcolor=, read: " << keyword << endl;
 		return false;
 	}
 	in >> temp;
@@ -195,7 +195,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "selectedcolor=")
 	{
-		cout << "ERROR reading Parameters file, expecting: selectedcolor=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: selectedcolor=, read: " << keyword << endl;
 		return false;
 	}
 
@@ -207,7 +207,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "gui_update_step=")
 	{
-		cout << "ERROR reading Parameters file, expecting: gui_update_step=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: gui_update_step=, read: " << keyword << endl;
 		return false;
 	}
 	in >> gui_update_step;
@@ -215,14 +215,14 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "#moe_parameters")
 	{
-		cout << "ERROR reading Parameters file, expecting: #moe_parameters, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: #moe_parameters, read: " << keyword << endl;
 		return false;
 	}
 
 	in >> keyword;
 	if (keyword!= "moe_speed_update=")
 	{
-		cout << "ERROR reading Parameters file, expecting: moe_speed_update=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: moe_speed_update=, read: " << keyword << endl;
 		return false;
 	}
 	in >> moe_speed_update;
@@ -230,7 +230,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "moe_inflow_update=")
 	{
-		cout << "ERROR reading Parameters file, expecting: moe_inflow_update=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: moe_inflow_update=, read: " << keyword << endl;
 		return false;
 	}
 	in >> moe_inflow_update;
@@ -238,7 +238,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "moe_outflow_update=")
 	{
-		cout << "ERROR reading Parameters file, expecting: moe_outflow_update=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: moe_outflow_update=, read: " << keyword << endl;
 		return false;
 	}
 	in >> moe_outflow_update;
@@ -246,7 +246,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "moe_queue_update=")
 	{
-		cout << "ERROR reading Parameters file, expecting: moe_queue_update=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: moe_queue_update=, read: " << keyword << endl;
 		return false;
 	}
 	in >> moe_queue_update;
@@ -254,7 +254,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "moe_density_update=")
 	{
-		cout << "ERROR reading Parameters file, expecting: moe_density_update=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: moe_density_update=, read: " << keyword << endl;
 		return false;
 	}
 	in >> moe_density_update;
@@ -262,7 +262,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "linktime_alpha=")
 	{
-		cout << "ERROR reading Parameters file, expecting: linktime_alpha=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: linktime_alpha=, read: " << keyword << endl;
 		return false;
 	}
 	in >> linktime_alpha;
@@ -271,14 +271,14 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "#assignment_matrix_parameters")
 	{
-		cout << "ERROR reading Parameters file, expecting: #assignment_matrix_parameters, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: #assignment_matrix_parameters, read: " << keyword << endl;
 		return false;
 	}
 
 	in >> keyword;
 	if (keyword!= "use_ass_matrix=")
 	{
-		cout << "ERROR reading Parameters file, expecting: use_ass_matrix=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: use_ass_matrix=, read: " << keyword << endl;
 		return false;
 	}
 	in >> use_ass_matrix;
@@ -286,7 +286,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "ass_link_period=")
 	{
-		cout << "ERROR reading Parameters file, expecting: ass_link_period=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: ass_link_period=, read: " << keyword << endl;
 		return false;
 	}
 	in >> ass_link_period;
@@ -294,7 +294,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "ass_od_period=")
 	{
-		cout << "ERROR reading Parameters file, expecting: ass_od_period=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: ass_od_period=, read: " << keyword << endl;
 		return false;
 	}
 	in >> ass_od_period;
@@ -302,14 +302,14 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "#turning_parameters")
 	{
-		cout << "ERROR reading Parameters file, expecting: #turning_parameters, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: #turning_parameters, read: " << keyword << endl;
 		return false;
 	}
 
 	in >> keyword;
 	if (keyword!= "default_lookback_size=")
 	{
-		cout << "ERROR reading Parameters file, expecting: default_lookback_size=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: default_lookback_size=, read: " << keyword << endl;
 		return false;
 	}
 	in >> default_lookback_size;
@@ -317,7 +317,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "turn_penalty_cost=")
 	{
-		cout << "ERROR reading Parameters file, expecting: turn_penalty_cost=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: turn_penalty_cost=, read: " << keyword << endl;
 		return false;
 	}
 	in >> turn_penalty_cost;
@@ -325,14 +325,14 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "#server_parameters")
 	{
-		cout << "ERROR reading Parameters file, expecting: #server_parameters, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: #server_parameters, read: " << keyword << endl;
 		return false;
 	}
 
 	in >> keyword;
 	if (keyword!= "od_servers_deterministic=")
 	{
-		cout << "ERROR reading Parameters file, expecting: od_servers_deterministic=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: od_servers_deterministic=, read: " << keyword << endl;
 		return false;
 	}
 	in >> od_servers_deterministic;
@@ -340,7 +340,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "odserver_sigma=")
 	{
-		cout << "ERROR reading Parameters file, expecting: odserver_sigma=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: odserver_sigma=, read: " << keyword << endl;
 		return false;
 	}
 	in >> odserver_sigma;
@@ -348,14 +348,14 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "#vehicle_parameters")
 	{
-		cout << "ERROR reading Parameters file, expecting: #vehicle_parameters, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: #vehicle_parameters, read: " << keyword << endl;
 		return false;
 	}
 
 	in >> keyword;
 	if (keyword!= "standard_veh_length=")
 	{
-		cout << "ERROR reading Parameters file, expecting: standard_veh_length=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: standard_veh_length=, read: " << keyword << endl;
 		return false;
 	}
 	in >> standard_veh_length;
@@ -363,14 +363,14 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "#route_parameters")
 	{
-		cout << "ERROR reading Parameters file, expecting: #route_parameters, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: #route_parameters, read: " << keyword << endl;
 		return false;
 	}
 
 	in >> keyword;
 	if (keyword!= "update_interval_routes=")
 	{
-		cout << "ERROR reading Parameters file, expecting: update_interval_routes=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: update_interval_routes=, read: " << keyword << endl;
 		return false;
 	}
 	in >> update_interval_routes;
@@ -378,7 +378,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "mnl_theta=")
 	{
-		cout << "ERROR reading Parameters file, expecting: mnl_theta=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: mnl_theta=, read: " << keyword << endl;
 		return false;
 	}
 	in >> mnl_theta;
@@ -386,7 +386,7 @@ bool Parameters::read_parameters (istream & in )
     in >> keyword;
 	if (keyword!= "kirchoff_alpha=")
 	{
-		cout << "ERROR reading Parameters file, expecting: kirchoff_alpha=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: kirchoff_alpha=, read: " << keyword << endl;
 		return false;
 	}
 	in >> kirchoff_alpha;
@@ -394,7 +394,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "delete_bad_routes=")
 	{
-		cout << "ERROR reading Parameters file, expecting: delete_bad_routes=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: delete_bad_routes=, read: " << keyword << endl;
 		return false;
 	}
 	in >> delete_bad_routes;
@@ -402,7 +402,7 @@ bool Parameters::read_parameters (istream & in )
     in >> keyword;
 	if (keyword!= "max_rel_route_cost=")
 	{
-		cout << "ERROR reading Parameters file, expecting: max_rel_route_cost=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: max_rel_route_cost=, read: " << keyword << endl;
 		return false;
 	}
 	in >> max_rel_route_cost;
@@ -410,7 +410,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "small_od_rate=")
 	{
-		cout << "ERROR reading Parameters file, expecting: small_od_rate=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: small_od_rate=, read: " << keyword << endl;
 		return false;
 	}
 	in >> small_od_rate;
@@ -419,14 +419,14 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "#mime_parameters")
 	{
-		cout << "ERROR reading Parameters file, expecting: #mime_parameters, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: #mime_parameters, read: " << keyword << endl;
 		return false;
 	}
 
 	in >> keyword;
 	if (keyword!= "mime_comm_step=")
 	{
-		cout << "ERROR reading Parameters file, expecting: mime_comm_step=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: mime_comm_step=, read: " << keyword << endl;
 		return false;
 	}
 	in >> mime_comm_step;
@@ -434,7 +434,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "mime_min_queue_length=")
 	{
-		cout << "ERROR reading Parameters file, expecting: mime_min_queue_length=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: mime_min_queue_length=, read: " << keyword << endl;
 		return false;
 	}
 	in >> mime_min_queue_length;
@@ -442,7 +442,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "mime_queue_dis_speed=")
 	{
-		cout << "ERROR reading Parameters file, expecting: mime_queue_dis_speed=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: mime_queue_dis_speed=, read: " << keyword << endl;
 		return false;
 	}
 	in >> mime_queue_dis_speed;
@@ -450,7 +450,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "vissim_step=")
 	{
-		cout << "ERROR reading Parameters file, expecting: vissim_step=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: vissim_step=, read: " << keyword << endl;
 		return false;
 	}
 	in >> vissim_step;
@@ -458,7 +458,7 @@ bool Parameters::read_parameters (istream & in )
 	in >> keyword;
 	if (keyword!= "sim_speed_factor=")
 	{
-		cout << "ERROR reading Parameters file, expecting: sim_speed_factor=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: sim_speed_factor=, read: " << keyword << endl;
 		return false;
 	}
 	in >> sim_speed_factor;

@@ -8,7 +8,7 @@ bool SignalControl::execute(Eventlist* eventlist, double time)
 		assert (signalplans.size() > 0);
 		active = true;
 #ifdef _DEBUG_SIGNALS
-		cout << "Signal control " << id << " activated. " << endl;
+		eout << "Signal control " << id << " activated. " << endl;
 #endif // _DEBUG_SIGNALS	
 
 	}
@@ -40,14 +40,14 @@ bool SignalPlan::execute(Eventlist* eventlist, double time)
 		current_stage = stages.begin(); // start at the first stage when this plan becomes active
 		active = true;
 #ifdef _DEBUG_SIGNALS
-		cout << "Signal plan " << id << " activated. Nr of stages " << stages.size() << endl;
+		eout << "Signal plan " << id << " activated. Nr of stages " << stages.size() << endl;
 #endif // _DEBUG_SIGNALS	
 
 	}
 	if (time < stop)
 	{
 #ifdef _DEBUG_SIGNALS
-		cout << "Calling stage " << (*current_stage)->get_id() << endl;
+		eout << "Calling stage " << (*current_stage)->get_id() << endl;
 #endif // _DEBUG_SIGNALS
 		(*current_stage)->execute(eventlist,time); // activate stage. It will book an event for itself to determine when to stop.
 		double next_stage_time= time + ((*current_stage)->get_duration());
@@ -58,7 +58,7 @@ bool SignalPlan::execute(Eventlist* eventlist, double time)
 		}
 		// book the activation of the next stage
 #ifdef _DEBUG_SIGNALS
-		cout << "Next stage will be " << (*current_stage)->get_id() << " at time " << next_stage_time << endl;
+		eout << "Next stage will be " << (*current_stage)->get_id() << " at time " << next_stage_time << endl;
 #endif // _DEBUG_SIGNALS
 
 		eventlist->add_event(next_stage_time,this);
@@ -97,7 +97,7 @@ bool Stage::execute(Eventlist* eventlist, double time)
 		}
 		active = true;
 #ifdef _DEBUG_SIGNALS
-		cout << "Stage " << id << " activated. " << endl;
+		eout << "Stage " << id << " activated. " << endl;
 #endif // _DEBUG_SIGNALS	
 
 	    eventlist->add_event(time+duration,this); // add the event to stop this stage
@@ -106,7 +106,7 @@ bool Stage::execute(Eventlist* eventlist, double time)
 	{
 		stop();
 #ifdef _DEBUG_SIGNALS
-		cout << "Stage " << id << " stopped. " << endl;
+		eout << "Stage " << id << " stopped. " << endl;
 #endif // _DEBUG_SIGNALS	
 
 	}

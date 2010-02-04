@@ -85,13 +85,13 @@ VISSIMCOM::VISSIMCOM(const string & configfile)
 	hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	if (FAILED(hr))
 	{
-		cout << "VISSIMCOM Error: problem with CoInitialize() " << endl;
+		eout << "VISSIMCOM Error: problem with CoInitialize() " << endl;
 	}
 
 	try 
 	{
 		// Create the Vissim object (connection to VISSIM COM server)
-		cout << "Mezzo: Creating a Vissim instance " << endl;
+		eout << "Mezzo: Creating a Vissim instance " << endl;
 		spVissim=IVissimPtr(__uuidof(Vissim));
 
 		// Create a Simulation object
@@ -104,7 +104,7 @@ VISSIMCOM::VISSIMCOM(const string & configfile)
 	}
 	catch (_com_error &error) 
 	{
-		cout << "VISSIMCOM Error: " << (char*)(error.Description()) << endl;
+		eout << "VISSIMCOM Error: " << (char*)(error.Description()) << endl;
 	}
 }
 
@@ -139,9 +139,9 @@ bool VISSIMCOM::init(const string& configfile, const int runtime)
 	
 			spPaths = spNet->GetPaths();  // to make sure it contains the latest set of paths
 			spPaths->GetCount();
-			cout << "gotten paths" << endl;
+			eout << "gotten paths" << endl;
 			IPathPtr p= AddPath((*iter0)->pathid,(*iter0)->get_v_path_ids(), spPaths);
-			cout << "added path " << (*iter0)->pathid << endl;
+			eout << "added path " << (*iter0)->pathid << endl;
 		}
 
 	}
@@ -149,10 +149,10 @@ bool VISSIMCOM::init(const string& configfile, const int runtime)
 	{
 		if (error.ErrorInfo())
 		{
-			cout << "VISSIMCOM Error: " << (char*)(error.Description()) << endl;
+			eout << "VISSIMCOM Error: " << (char*)(error.Description()) << endl;
 		}
 		else
-			cout << "VISSIMCOM Error, No Description available" << endl;
+			eout << "VISSIMCOM Error, No Description available" << endl;
 		return false;
 	}
 	return true;
@@ -160,7 +160,7 @@ bool VISSIMCOM::init(const string& configfile, const int runtime)
 VISSIMCOM::~VISSIMCOM()
 {
  // clean up
-	cout << "Mezzo: Deleting the Vissim instance. " << nr_veh_entered << " vehicles entered, and " << 
+	eout << "Mezzo: Deleting the Vissim instance. " << nr_veh_entered << " vehicles entered, and " << 
 		nr_veh_exited << " vehicles exited." << endl;
 	spSim->Stop();
 	//CoUninitialize ();
@@ -184,7 +184,7 @@ int VISSIMCOM::send (double time)
 		
 				IParkingLotPtr parking = p_lots->GetParkingLotByNumber((*iter2)->parkinglot); // change this to get it from the virtual link
 				long nr_parked= parking->GetAttValue("NVEHICLES");
-				//cout << "nr vehicles on parking is " << nr_parked << endl;
+				//eout << "nr vehicles on parking is " << nr_parked << endl;
 				// !!!!!!!!!! CHANGE to do only for particular vlink!!!!!!!!!
 				if (nr_parked > 5) // buffer to make up for communication delay of Block/unblock messages
 				{
@@ -202,7 +202,7 @@ int VISSIMCOM::send (double time)
 		
 			// put the vehicles 
 			vector <Signature*> & signatures =(*iter1)->get_signatures() ;
-			//cout << " Boundaryout: sending signatures : " << signatures.size() << endl;
+			//eout << " Boundaryout: sending signatures : " << signatures.size() << endl;
 			for (iter0=signatures.begin();iter0<signatures.end();)
 			{
 				//check space in VISSIM
@@ -240,7 +240,7 @@ int VISSIMCOM::send (double time)
 				long numlanes= lastlink->GetAttValue("NUMLANES");
 				IVehiclesPtr vehs =lastlink->GetVehicles();
 				long vehcount= vehs->GetCount();
-				//cout << "At this moment there are " << vehcount << " vehicles on the link" << endl;
+				//eout << "At this moment there are " << vehcount << " vehicles on the link" << endl;
 				// virtual vehicles
 				if (vehcount >= numlanes) //if there are more vehicles than lanes
 				{
@@ -280,10 +280,10 @@ int VISSIMCOM::send (double time)
 	{
 		if (error.ErrorInfo())
 		{
-			cout << "VISSIMCOM Error: " << (char*)(error.Description()) << endl;
+			eout << "VISSIMCOM Error: " << (char*)(error.Description()) << endl;
 		}
 		else
-			cout << "VISSIMCOM Error, No Description available" << endl;
+			eout << "VISSIMCOM Error, No Description available" << endl;
 		return 0;
 	}
 
@@ -309,7 +309,7 @@ bool VISSIMCOM::add_veh(unsigned long vehtype, unsigned long parkinglot, long pa
 	}
 	catch (_com_error &error) 
 	{
-		cout << "VISSIMCOM Error: " << (char*)(error.Description()) << endl;
+		eout << "VISSIMCOM Error: " << (char*)(error.Description()) << endl;
 		return false;
 	}
 }
@@ -362,17 +362,17 @@ int VISSIMCOM::receive (double time)
 					
 					ok &=(*iptr)->newvehicle(sig);
 					if (!ok)
-						cout << " could not create vehicle from signature" << endl;
+						eout << " could not create vehicle from signature" << endl;
 					// delete signature	
 					vehicles_in_vissim.erase(sig_iter);
 					delete sig;
 					// delete vehicle in VISSIM
 					spVehicles->RemoveVehicle(id);
-					//cout << "Vehicle arrived " << id << endl;
+					//eout << "Vehicle arrived " << id << endl;
 					nr_veh_exited++;
 				}
 				else
-					cout << "cannot find boundaryin node " << sig->tmpdestination << endl;	
+					eout << "cannot find boundaryin node " << sig->tmpdestination << endl;	
 
 			}	   
 		}
@@ -380,13 +380,13 @@ int VISSIMCOM::receive (double time)
 	}
 	catch (_com_error &error) 
 	{
-	//	cout << "VISSIMCOM Error: " << (char*)(error.Description()) << endl;
+	//	eout << "VISSIMCOM Error: " << (char*)(error.Description()) << endl;
 		if (error.ErrorInfo())
 		{
-			cout << "VISSIMCOM Error: " << (char*)(error.Description()) << endl;
+			eout << "VISSIMCOM Error: " << (char*)(error.Description()) << endl;
 		}
 		else
-			cout << "VISSIMCOM Error, No Description available" << endl;
+			eout << "VISSIMCOM Error, No Description available" << endl;
 	}
 
 
@@ -408,11 +408,11 @@ bool VISSIMCOM::execute(Eventlist* eventlist, double time)
 		{
 			double current_timestamp = timest();
 			double expected_timestamp = (last_timestamp + ((theParameters->vissim_step)/ theParameters->sim_speed_factor));
-			//cout << "synching. current time " << current_timestamp << " waiting till " << expected_timestamp << endl;
+			//eout << "synching. current time " << current_timestamp << " waiting till " << expected_timestamp << endl;
 			while ( expected_timestamp > current_timestamp)
 			{
 				current_timestamp = timest();
-				//cout << "synching. current time " << current_timestamp << " waiting  for " << expected_timestamp-current_timestamp << " secs "
+				//eout << "synching. current time " << current_timestamp << " waiting  for " << expected_timestamp-current_timestamp << " secs "
 				//<< endl;
 			}
 			last_timestamp = current_timestamp;
@@ -426,10 +426,10 @@ bool VISSIMCOM::execute(Eventlist* eventlist, double time)
 		{
 			if (error.ErrorInfo())
 			{
-				cout << "VISSIMCOM Error: " << (char*)(error.Description()) << endl;
+				eout << "VISSIMCOM Error: " << (char*)(error.Description()) << endl;
 			}
 			else
-				cout << "VISSIMCOM Error, No Description available" << endl;
+				eout << "VISSIMCOM Error, No Description available" << endl;
 		}
 		
 		// do this always!
@@ -466,7 +466,7 @@ bool VISSIMCOM::execute(Eventlist* eventlist, double time)
 		}
 		catch (_com_error &error) 
 		{
-			cout << "VISSIMCOM Error: " << (char*)(error.Description()) << endl;
+			eout << "VISSIMCOM Error: " << (char*)(error.Description()) << endl;
 		}
 		int sigcount=send(time); // send the info to VISSIM
 		int rec=receive(time);	// receive the info from VISSIM

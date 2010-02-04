@@ -326,7 +326,7 @@ void Q::switchroute(Vehicle* veh, Route* curr_route, Route* alt_route, vector <d
  	    X1=random->lnrandom(parameters[8],parameters[9]);
  	    Vh=beta1*X1+beta4; 	
  	}
-	//cout << "Route change: Vh= " << Vh << " and Va= " << Va << endl;
+	//eout << "Route change: Vh= " << Vh << " and Va= " << Va << endl;
 	Pa=(exp(Va)/(exp(Va)+exp(Vh)));
 	if (random->urandom() <= Pa)
 		veh->set_route(alt_route); // switched=1 automatically set by changing route

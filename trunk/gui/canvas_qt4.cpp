@@ -272,7 +272,7 @@ void MainForm::process_masterfile()
 			runtime=theNetwork->executemaster(&pm2,&wm);
 		else
 		{
-			cout << "ERROR READING THE MASTER FILE: " << name.c_str() << " Exiting" << endl;
+			eout << "ERROR READING THE MASTER FILE: " << name.c_str() << " Exiting" << endl;
 			close();
 		}
 		
