@@ -2593,7 +2593,7 @@ void Network::merge_paths_by_common_lines (Busstop* stop)  // merge paths with l
 void Network::static_dominancy_rules (Busstop* stop)
 {
 	// applying static dominancy rules on the transit path choice set
-	// currently include 3 dominancy criteria: max number of extra; max ratio between IVT; max ratio between total travel time;
+	// currently include 3 dominancy criteria: max number of extra transfers; max ratio between IVT; max ratio between total travel time;
 	map <Busstop*, ODstops*> od_as_origin = stop->get_stop_as_origin();
 	for (map <Busstop*, ODstops*>::iterator odpairs = od_as_origin.begin(); odpairs != od_as_origin.end(); odpairs++)
 	{
@@ -2790,7 +2790,7 @@ bool Network::compare_common_partial_routes (Busline* line1, Busline* line2, Bus
 
 bool Network::check_constraints_paths (Pass_path* path) // checks if the path meets all the constraints
 {
-	if (path->get_alt_transfer__stops().size() == 2)
+	if (path->get_alt_transfer__stops().size() == 4)
 	{
 		return true;
 	}
@@ -2830,7 +2830,7 @@ bool Network::check_path_no_repeating_lines (Pass_path* path) // checks if the p
 	return true;
 }
 
-bool Network::check_path_no_repeating_stops (Pass_path* path) // chceks if the path deos not include going through the same stop more than once
+bool Network::check_path_no_repeating_stops (Pass_path* path) // chceks if the path does not include going through the same stop more than once
 {
 	vector <vector <Busstop*>> stops = path->get_alt_transfer__stops();	
 	for (vector <vector <Busstop*>>::iterator stops_iter1 = stops.begin(); stops_iter1 < stops.end(); stops_iter1++)

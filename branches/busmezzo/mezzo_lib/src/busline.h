@@ -82,11 +82,15 @@ public:
 	bool is_line_timepoint (Busstop* stop); //!< returns true if stops is a time point for this busline, otherwise it returns false
 	bool check_first_stop (Busstop* stop); // returns true if the stop is the first stop on the bus line, otherwise it returns false 
 	bool check_first_trip (Bustrip* trip); // returns true if the trip is the first trip on the bus line, otherwise it returns false  
-	
+	bool check_last_trip (Bustrip* trip); // returns true if the trip is the last trip on the bus line, otherwise it returns false  
+	Bustrip* get_next_trip (Bustrip* reference_trip); //!< returns the trip after the reference trip on the trips vector	
+	Bustrip* get_previous_trip (Bustrip* reference_trip); //!< returns the trip before the reference trip on the trips vector
+
 	bool execute(Eventlist* eventlist, double time); //!< re-implemented from virtual function in Action this function does the real work. It initiates the current Bustrip and books the next one
 	
 	// calc attributes (for pass_paths)
 	double calc_curr_line_headway ();
+	double calc_curr_line_headway_forward ();
 	double calc_curr_line_ivt (Busstop* start_stop, Busstop* end_stop);
 	
 	// output-related functions
@@ -146,7 +150,6 @@ public:
 	void book_stop_visit (double time, Bus* bus); //!< books a visit to the stop
 	bool check_end_trip (); //!< returns 1 if true, 0 if false
 	double calc_departure_time (double time); //!< calculates departure time from origin according to arrival time and schedule (including layover effect)
-	
 
 // public vectors
 	vector <Visit_stop*> stops; //!< contains all the busstops and the times that they are supposed to be served. NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
@@ -252,6 +255,7 @@ public:
 	double get_exit_time() { return exit_time;}
 	void set_position (double position_ ) {position = position_;}
 	vector <Busline*> get_lines () {return lines;}
+	double get_last_departure (Busline* line) {return last_departures[line];}
 	map<Busstop*,double> get_walking_distances () {return distances;}
 	void save_previous_arrival_rates () {previous_arrival_rates.swap(arrival_rates);}
 	void save_previous_alighting_fractions () {previous_alighting_fractions.swap(alighting_fractions);}
