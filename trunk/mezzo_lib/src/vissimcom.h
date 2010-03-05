@@ -34,7 +34,9 @@
 #include "parameters.h"
 #include "signature.h"
 
+
 #define _WIN32_DCOM
+#include <objbase.h>
 
 #include <iostream>
 #include <vector>
@@ -44,7 +46,7 @@ using namespace std;
 
 // import of all VISSIM COM server interfaces
 
-#import "C:\Program Files\PTV_Vision\VISSIM510\Exe\vissim.exe"
+#import "C:\Program Files\PTV_Vision\VISSIM520\Exe\vissim.exe" 
 
 //using namespace VISSIM_COMSERVERLib;
 
@@ -97,6 +99,7 @@ class VISSIMCOM : public Action
 		VISSIM_COMSERVERLib::IPathsPtr spPaths;
 		VISSIM_COMSERVERLib::IVehiclesPtr spVehicles; //  DYNAMIC, NEEDS TO BE RE_ASSIGNED
 		VISSIM_COMSERVERLib::IVehiclesPtr spArrived; // DYNAMIC, NEEDS TO BE RE_ASSIGNED
+		VISSIM_COMSERVERLib::IVehiclesPtr spParked; // DYNAMIC, NEEDS TO BE RE_ASSIGNED
 };
 
 #endif //_VISSIMCOM

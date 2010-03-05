@@ -24,7 +24,7 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="qmake&#x0D;&#x0A;nmake debug"
+				BuildCommandLine="del .\debug\mezzo_gui_hybrid.exe&#x0D;&#x0A;qmake&#x0D;&#x0A;nmake debug"
 				ReBuildCommandLine="qmake&#x0D;&#x0A;nmake clean&#x0D;&#x0A;nmake debug&#x0D;&#x0A;"
 				CleanCommandLine="nmake clean"
 				Output=".\debug\mezzo_gui_hybrid.exe"

@@ -254,6 +254,7 @@ int VISSIMCOM::send (double time)
 					{
 						IVehiclePtr veh=(IVehiclePtr)avar[a].pdispVal;
 						long pos = veh->GetAttValue("LINKCOORD");
+						
 						if ((length-pos) < 20.0)
 						{
 							// Set both the desired speed and current speed
@@ -296,9 +297,18 @@ bool VISSIMCOM::add_veh(unsigned long vehtype, unsigned long parkinglot, long pa
 	{
 			
 		spVehicles=spNet->GetVehicles(); // gets the CURRENT list of vehicles
+		
+		// The original way
 		IVehiclePtr spVehicle = spVehicles->AddVehicleInParkingLot(vehtype,parkinglot); // add vehicle in parking lot
 		spVehicle->PutAttValue("PATH",(_variant_t) pathid); // assign path
 		
+
+		/*
+		// test with zones and dynamic paths
+		IVehiclePtr spVehicle = spVehicles->AddVehicleInParkingLot(vehtype,1); // add vehicle in parking lot
+	//	spVehicle->PutAttValue("DESTZONE", (_variant_t) 2);
+		spVehicle->PutAttValue("DESTPARKLOT", (_variant_t) 2);
+*/
 		//update signature and add to vehicle list
 
 		sig->v_id=spVehicle->GetID();
@@ -324,7 +334,11 @@ int VISSIMCOM::receive (double time)
 	{
 		spVehicles=spNet->GetVehicles(); // get the current vehicles
 		spArrived=spVehicles->GetArrived(); // get the vehicles that have arrived in the last timestep
+		spParked=spVehicles->GetParked(); // get the parked vehicles;
+		long nr_parked=spParked->GetCount();
 		long nr_arrived=spArrived->GetCount();
+
+/*	
 		if (nr_arrived > 0)
 		{
 			// get the arrived vehicles in an array
@@ -333,48 +347,67 @@ int VISSIMCOM::receive (double time)
 			_variant_t* avar= new _variant_t[nr_arrived];
 			vehenum->Reset ();
 			vehenum->Next(nr_arrived, avar, &ulFetched);
-			for (int a=0; a < nr_arrived-1; a++) //  adjust the speed of vehicles
+			for (long a=0; a < nr_arrived; a++) // for all vehicles in the Arrived array avar
 			{
 				IVehiclePtr spVehArrived=(IVehiclePtr)avar[a].pdispVal;
-						
-			/* OLD WAY
-			IVehiclePtr spVehArrived;
-			_variant_t m=1L;
-			for (long l=0; l < nr_arrived; m=l,l++)
-			{
-				
-				spVehArrived=spArrived->GetItem(m);
-			*/	
 				long id = spVehArrived->GetID();
-				
-				// find vehicle in signatures list.
-				vector <Signature*>::iterator sig_iter = (find_if(vehicles_in_vissim.begin(), vehicles_in_vissim.end(), compare<Signature>(id)));
-				Signature* sig = *sig_iter;
-				assert (sig != NULL);
-				
-				//update timestamp in signature
-				sig->timestamp = time;
-
-				// find the boundaryIn node
-				vector <BoundaryIn*>::iterator iptr=find_if(boundaryins->begin(),boundaryins->end(),compare <BoundaryIn> (sig->tmpdestination));
-				if (iptr < (*boundaryins).end() )
+*/
+		// temporary fix to avoid  missing vehicles with GetArrived.
+		// uses GetParked and checks if the current link they're on is a 'finishing link'
+		if (nr_parked > 0)
+		{
+			// get the arrived vehicles in an array
+			IEnumVARIANTPtr vehenum(spParked->Get_NewEnum());
+			unsigned long ulFetched;
+			_variant_t* avar= new _variant_t[nr_parked];
+			vehenum->Reset ();
+			vehenum->Next(nr_parked, avar, &ulFetched);
+			for (long a=0; a < nr_parked; a++) // for all vehicles in the Arrived array avar
+			{
+				IVehiclePtr spVehArrived=(IVehiclePtr)avar[a].pdispVal;
+// check current link
+				long curlink=spVehArrived->GetAttValue("LINK");
+				bool at_last_link=false;
+				for (vector <VirtualLink*>::iterator iter = virtuallinks->begin(); iter != virtuallinks->end(); iter++)
 				{
 					
-					ok &=(*iptr)->newvehicle(sig);
-					if (!ok)
-						eout << " could not create vehicle from signature" << endl;
-					// delete signature	
-					vehicles_in_vissim.erase(sig_iter);
-					delete sig;
-					// delete vehicle in VISSIM
-					spVehicles->RemoveVehicle(id);
-					//eout << "Vehicle arrived " << id << endl;
-					nr_veh_exited++;
+					if ( (*iter)->lastlink == curlink)
+					{
+						at_last_link=true;
+						break;
+					}
 				}
-				else
-					eout << "cannot find boundaryin node " << sig->tmpdestination << endl;	
+				if (at_last_link)
+				{
+					long id = spVehArrived->GetID();
+					// find vehicle in signatures list.
+					vector <Signature*>::iterator sig_iter = (find_if(vehicles_in_vissim.begin(), vehicles_in_vissim.end(), compare<Signature>(id)));
+					Signature* sig = *sig_iter;
+					assert (sig != NULL);
+					
+					//update timestamp in signature
+					sig->timestamp = time;
 
-			}	   
+					// find the boundaryIn node
+					vector <BoundaryIn*>::iterator iptr=find_if(boundaryins->begin(),boundaryins->end(),compare <BoundaryIn> (sig->tmpdestination));
+					if (iptr < (*boundaryins).end() )
+					{
+						
+						ok &=(*iptr)->newvehicle(sig);
+						if (!ok)
+							eout << " could not create vehicle " << id << " from signature" << endl;
+						// delete signature	
+						vehicles_in_vissim.erase(sig_iter);
+						delete sig;
+						// delete vehicle in VISSIM
+						spVehicles->RemoveVehicle(id);
+						//eout << "Vehicle arrived " << id << endl;
+						nr_veh_exited++;
+					}
+					else
+						eout << "cannot find boundaryin node " << sig->tmpdestination << endl;	
+				}
+			}
 		}
 	
 	}
@@ -454,35 +487,6 @@ bool VISSIMCOM::execute(Eventlist* eventlist, double time)
 	
 	return true; // temp return value
 }
-/* OLD METHOD
-bool VISSIMCOM::execute(Eventlist* eventlist, double time)
-{
-	if (booked)
-	{
-		bool ok=false;
-		try
-		{
-			spSim->RunSingleStep(); // advance the VISSIM simulation one step
-		}
-		catch (_com_error &error) 
-		{
-			eout << "VISSIMCOM Error: " << (char*)(error.Description()) << endl;
-		}
-		int sigcount=send(time); // send the info to VISSIM
-		int rec=receive(time);	// receive the info from VISSIM
-	}
-	else 
-		booked=true;
 
-	double new_time=time+theParameters->mime_comm_step; // re-book myself in the event list
-	if (!exit)
-		eventlist->add_event(new_time,this);	// if the exit flag is turned on, no more messages will come...
-	//return ok;
-	
-	return true; // temp return value
-}
-
-
-*/
 
 #endif //_VISSIMCOM
