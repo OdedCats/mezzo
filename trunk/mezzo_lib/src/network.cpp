@@ -3478,47 +3478,49 @@ bool Network::writemoes(string ending)
 	string name=filenames[13] + ending; // speeds
 	ofstream out(name.c_str());
 	assert(out);
-	
+	int nrperiods_speeds=static_cast<int>((runtime / theParameters->moe_speed_update)+0.5);
 	for (map<int,Link*>::iterator iter=linkmap.begin();iter!=linkmap.end();iter++)
 	{
 
-		(*iter).second->write_speeds(out,nrperiods);
+		(*iter).second->write_speeds(out,nrperiods_speeds);
 	}
 	out.close();
+
 	name=filenames[14] + ending; // inflows
 	out.open(name.c_str());
 	assert(out);
-
+	int nrperiods_inflows=static_cast<int>((runtime / theParameters->moe_inflow_update)+0.5);
 	for (map<int,Link*>::iterator iter1=linkmap.begin();iter1!=linkmap.end();iter1++)
 	{
-		(*iter1).second->write_inflows(out,nrperiods);
+		(*iter1).second->write_inflows(out,nrperiods_inflows);
 	}
 	out.close();
+
 	name=filenames[15] + ending; // outflows
 	out.open(name.c_str());
 	assert(out);
-
+	int nrperiods_outflows=static_cast<int>((runtime / theParameters->moe_outflow_update)+0.5);
 	for (map<int,Link*>::iterator iter2=linkmap.begin();iter2!=linkmap.end();iter2++)
 	{
-		(*iter2).second->write_outflows(out,nrperiods);
+		(*iter2).second->write_outflows(out,nrperiods_outflows);
 	}
 	out.close();
 	name=filenames[16] + ending; // queues
 	out.open(name.c_str());
 	assert(out);
-
+	int nrperiods_queues=static_cast<int>((runtime / theParameters->moe_queue_update)+0.5);
 	for (map<int,Link*>::iterator iter3=linkmap.begin();iter3!=linkmap.end();iter3++)
 	{
-		(*iter3).second->write_queues(out,nrperiods);
+		(*iter3).second->write_queues(out,nrperiods_queues);
 	}
 	out.close();
 	name=filenames[17] + ending; // densities
 	out.open(name.c_str());
 	assert(out);
-
+	int nrperiods_densities=static_cast<int>((runtime / theParameters->moe_density_update)+0.5);
 	for (map<int,Link*>::iterator iter4=linkmap.begin();iter4!=linkmap.end();iter4++)
 	{
-		(*iter4).second->write_densities(out,nrperiods);
+		(*iter4).second->write_densities(out,nrperiods_densities);
 	}
 	out.close();
 	return true;
