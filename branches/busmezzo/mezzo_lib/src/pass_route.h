@@ -33,6 +33,7 @@ class Pass_path
 	// Attributes of path alternative
 	int find_number_of_transfers ();
 	double calc_total_scheduled_in_vehicle_time (ODstops* odstops);
+	double calc_total_walking_distance ();
 	double calc_total_scheduled_headway ();
 	double calc_curr_leg_headway (vector<Busline*> leg_lines);
 	double calc_estimated_waiting_time ();

@@ -172,7 +172,8 @@ public:
    double walking_time_coefficient;
    int max_nr_extra_transfers;
    double max_in_vehicle_time_ratio;
-   double max_total_time_ratio;
+   double max_walking_distance;
+   double dominancy_perception_threshold;
 
 // TODO: Implement the use of the following paramaters
    double vissim_step; //!< time step for the VISSIM micro model

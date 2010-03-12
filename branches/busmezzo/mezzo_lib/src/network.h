@@ -267,7 +267,8 @@ public:
   bool check_constraints_paths (Pass_path* path); // checks if the path meets all the constraints
   bool check_path_no_repeating_lines (Pass_path* path); // checks if the path does not include going on and off the same bus line at the same stop
   bool check_path_no_repeating_stops (Pass_path* path); // chceks if the path deos not include going through the same stop more than once
-  void static_dominancy_rules (Busstop* stop); // delete paths which are dominated by other alterantive paths
+  void static_filtering_rules (Busstop* stop); // delete paths which do not fulfill the global filtering rules
+  void dominancy_rules (Busstop* stop); // delete paths which are dominated by other alterantive paths
 
 #ifndef _NO_GUI
 	double get_width_x() {return width_x;} //!< returns image width in original coordinate system

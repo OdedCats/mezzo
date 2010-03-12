@@ -77,7 +77,7 @@ Parameters::Parameters ()
    vissim_step= 0.1;
    sim_speed_factor= 0.0;
 
-// demand parameters:
+// transit demand parameters:
    demand_format = 1;
    demand_scale = 1.0;
    transfer_coefficient = 0.0; 
@@ -86,7 +86,8 @@ Parameters::Parameters ()
    walking_time_coefficient= 0.0;
    max_nr_extra_transfers = 1.0;
    max_in_vehicle_time_ratio = 2.0;
-   max_total_time_ratio = 2.0;
+   max_walking_distance = 2500;
+   dominancy_perception_threshold = 0;
 }
 
 bool Parameters::read_parameters (istream & in )
@@ -542,12 +543,19 @@ bool Parameters::read_parameters (istream & in )
 	}
 	in >> max_in_vehicle_time_ratio;
 	in >> keyword;
-	if (keyword!= "max_total_time_ratio=")
+	if (keyword!= "max_walking_distance=")
 	{
-		cout << "ERROR reading Parameters file, expecting: max_total_time_ratio=, read: " << keyword << endl;
+		cout << "ERROR reading Parameters file, expecting: max_walking_distance=, read: " << keyword << endl;
 		return false;
 	}
-	in >> max_total_time_ratio;
+	in >> max_walking_distance;
+	in >> keyword;
+	if (keyword!= "dominancy_perception_threshold=")
+	{
+		cout << "ERROR reading Parameters file, expecting: dominancy_perception_threshold=, read: " << keyword << endl;
+		return false;
+	}
+	in >> dominancy_perception_threshold;
 	return true;
 }
 

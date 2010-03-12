@@ -2244,7 +2244,11 @@ void Network::find_all_paths ()
 	// apply static dominancy rules
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{
-		static_dominancy_rules(*basic_origin);
+		static_filtering_rules(*basic_origin);
+	}
+	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
+	{
+		dominancy_rules(*basic_origin);
 	}
 }
 
@@ -2481,6 +2485,10 @@ void Network::merge_paths_by_common_lines (Busstop* stop)  // merge paths with l
 				vector<vector<Busline*>> transfer_lines1_ = (*path1)->get_alt_lines();						
 				vector<vector<Busline*>>::iterator transfer_lines1 = transfer_lines1_.begin();
 				vector<vector<Busstop*>> transfer_stops1_ = (*path1)->get_alt_transfer__stops();
+				if (transfer_lines1_.size() == 0) // a walking-only path - there is no need in merging
+				{
+					break;
+				}
 				if (flagged_paths[(*path1)] == false)
 				{
 					for (vector <Pass_path*>::iterator path2 = path1 + 1; path2 < path_set.end(); path2++)
@@ -2490,6 +2498,10 @@ void Network::merge_paths_by_common_lines (Busstop* stop)  // merge paths with l
 						vector<vector<Busline*>> transfer_lines2_ = (*path2)->get_alt_lines();
 						vector<vector<Busstop*>>::iterator transfer_stops2 = transfer_stops2_.begin()+1;
 						vector<vector<Busline*>>::iterator transfer_lines2 = transfer_lines2_.begin();
+						if (transfer_lines2_.size() == 0) // a walking-only path - there is no need in merging
+						{
+							break;
+						}
 						for (vector<vector<Busstop*>>::iterator transfer_stops1 = transfer_stops1_.begin()+1; transfer_stops1 < transfer_stops1_.end(); transfer_stops1 = transfer_stops1 + 2)
 						{
 							int counter_shared = 0;
@@ -2518,20 +2530,20 @@ void Network::merge_paths_by_common_lines (Busstop* stop)  // merge paths with l
 								if (compare_common_partial_routes((*(transfer_lines1-1)).front(), (*(transfer_lines2-1)).front(), (*(transfer_stops1-2)).front(), (*(transfer_stops1)).front()) == true )
 								{
 									// the two lines have the same route between the stops - merge 
-									for (vector<Busline*>::iterator transfer_line2 = (*transfer_lines2).begin(); transfer_line2 < (*transfer_lines2).end(); transfer_line2++)
+									for (vector<Busline*>::iterator transfer_line2 = (*(transfer_lines2-1)).begin(); transfer_line2 < (*(transfer_lines2-1)).end(); transfer_line2++)
 									{
 										bool identical_line = false;
-										for (vector<Busline*>::iterator transfer_line1 = (*transfer_lines1).begin(); transfer_line1 < (*transfer_lines1).end(); transfer_line1++)
+										for (vector<Busline*>::iterator transfer_line1 = (*(transfer_lines1-1)).begin(); transfer_line1 < (*(transfer_lines1-1)).end(); transfer_line1++)
 										{
-										// check if the identical route is because it is really the same line...
-										if ((*transfer_line1)->get_id() == (*transfer_line2)->get_id())
+											// check if the identical route is because it is really the same line...
+											if ((*transfer_line1)->get_id() == (*transfer_line2)->get_id())
 											{
 												identical_line = true;
 											}
 										}
 										if (identical_line == false)
 										{
-											(*transfer_lines1).push_back(*transfer_line2);
+											(*(transfer_lines1-1)).push_back(*transfer_line2);
 										}
 										perform_merge = true;
 										flagged_paths[(*path2)] = true;
@@ -2544,7 +2556,7 @@ void Network::merge_paths_by_common_lines (Busstop* stop)  // merge paths with l
 							// progress all the iterators
 							transfer_stops2++;
 							transfer_stops2++;
-							if (transfer_stops2 >= transfer_stops2_.end()-3 || transfer_lines1 >= transfer_lines1_.end() || transfer_lines2 == transfer_lines2_.end())
+							if (transfer_stops2 >= transfer_stops2_.end()-2 || transfer_lines1 >= transfer_lines1_.end() || transfer_lines2 == transfer_lines2_.end())
 							{
 								break;
 							}
@@ -2590,10 +2602,63 @@ void Network::merge_paths_by_common_lines (Busstop* stop)  // merge paths with l
 	}
 }
 
-void Network::static_dominancy_rules (Busstop* stop)
+void Network::static_filtering_rules (Busstop* stop)
+{
+	// includes the following filtering rules: (1) max walking distance; (2) max IVT ratio; (3) maybe worthwhile to way.
+	map <Busstop*, ODstops*> od_as_origin = stop->get_stop_as_origin();
+	for (map <Busstop*, ODstops*>::iterator odpairs = od_as_origin.begin(); odpairs != od_as_origin.end(); odpairs++)
+	{
+		vector <Pass_path*> path_set = odpairs->second->get_path_set();
+		map <Pass_path*,bool> paths_to_be_deleted;
+		
+		// calculate the minimum total IVT for this OD pair
+		double min_total_scheduled_in_vehicle_time = path_set.front()->calc_total_scheduled_in_vehicle_time(odpairs->second);
+		for (vector <Pass_path*>::iterator path_iter = path_set.begin()+1; path_iter < path_set.end(); path_iter++)
+		{
+			min_total_scheduled_in_vehicle_time = min (min_total_scheduled_in_vehicle_time, (*path_iter)->calc_total_scheduled_in_vehicle_time(odpairs->second));
+		}
+
+		for (vector <Pass_path*>::iterator path_iter = path_set.begin(); path_iter < path_set.end(); path_iter++)
+		{
+			paths_to_be_deleted[(*path_iter)] = false;
+		}
+		for (vector <Pass_path*>::iterator path = path_set.begin(); path < path_set.end()-1; path++)
+		{
+			if ((*path)->calc_total_walking_distance() > theParameters->max_walking_distance)
+			{
+				paths_to_be_deleted[(*path)] = true;
+				break;
+			}
+			if ((*path)->calc_total_scheduled_in_vehicle_time(odpairs->second) > min_total_scheduled_in_vehicle_time * theParameters->max_in_vehicle_time_ratio)
+			{
+				paths_to_be_deleted[(*path)] = true;
+				break;
+			}
+		}
+		for (map <Pass_path*,bool>::iterator delete_iter = paths_to_be_deleted.begin(); delete_iter != paths_to_be_deleted.end(); delete_iter++)	
+		// delete all the paths that did not fulfill the filtering rules
+		{
+			vector<Pass_path*>::iterator path_to_delete;
+			for (vector<Pass_path*>::iterator paths_iter = path_set.begin(); paths_iter < path_set.end(); paths_iter++)
+			{
+				if ((*delete_iter).first->get_id() == (*paths_iter)->get_id() && (*delete_iter).second == true)
+				{
+					path_to_delete = paths_iter;
+					break;
+				}
+			}
+			if ((*delete_iter).second == true)
+			{
+				path_set.erase(path_to_delete);
+			}
+		}
+	}
+}
+
+void Network::dominancy_rules (Busstop* stop)
 {
 	// applying static dominancy rules on the transit path choice set
-	// currently include 3 dominancy criteria: max number of extra transfers; max ratio between IVT; max ratio between total travel time;
+	// relevant aspects: number of transfers, total IVT, total walking distance
 	map <Busstop*, ODstops*> od_as_origin = stop->get_stop_as_origin();
 	for (map <Busstop*, ODstops*>::iterator odpairs = od_as_origin.begin(); odpairs != od_as_origin.end(); odpairs++)
 	{
@@ -2611,35 +2676,42 @@ void Network::static_dominancy_rules (Busstop* stop)
 				for (vector <Pass_path*>::iterator path2 = path1 + 1; path2 < path_set.end(); path2++)
 				{
 					// check if path1 dominates path2
-					if ((*path1)->find_number_of_transfers() < (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second) * theParameters->max_in_vehicle_time_ratio <= (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second) && ((*path1)->calc_estimated_waiting_time() + (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second)) * theParameters->max_total_time_ratio <= (*path2)->calc_estimated_waiting_time() + (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second))
+					if ((*path1)->find_number_of_transfers() < (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second) * (1 + theParameters->dominancy_perception_threshold) <= (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second) && (*path1)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold) <= (*path2)->calc_total_walking_distance())
 					{
 						paths_to_be_deleted[(*path2)] = true;
+						break;
 					}
-					if ((*path1)->find_number_of_transfers() <= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second) * theParameters->max_in_vehicle_time_ratio < (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second) && ((*path1)->calc_estimated_waiting_time() + (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second)) * theParameters->max_total_time_ratio <= (*path2)->calc_estimated_waiting_time() + (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second))
+					if ((*path1)->find_number_of_transfers() <= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second) * (1 + theParameters->dominancy_perception_threshold) < (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second) && (*path1)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold) <= (*path2)->calc_total_walking_distance())
 					{
 						paths_to_be_deleted[(*path2)] = true;
+						break;
 					}
-					if ((*path1)->find_number_of_transfers() <= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second) * theParameters->max_in_vehicle_time_ratio <= (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second) && ((*path1)->calc_estimated_waiting_time() + (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second))* theParameters->max_total_time_ratio < (*path2)->calc_estimated_waiting_time() + (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second))
+					if ((*path1)->find_number_of_transfers() <= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second) * (1 + theParameters->dominancy_perception_threshold) <= (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second)&& (*path1)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold) < (*path2)->calc_total_walking_distance())
 					{
 						paths_to_be_deleted[(*path2)] = true;
+						break;
 					}
 					// check if path2 dominates path1
-					if ((*path1)->find_number_of_transfers() > (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second) >= (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second) * theParameters->max_in_vehicle_time_ratio && ((*path1)->calc_estimated_waiting_time() + (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second)) >= ((*path2)->calc_estimated_waiting_time() + (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second)) * theParameters->max_total_time_ratio)
+					if ((*path1)->find_number_of_transfers() > (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second) >= (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second) * (1+ theParameters->dominancy_perception_threshold)&& (*path1)->calc_total_walking_distance() >= (*path2)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold)) 
 					{
 						paths_to_be_deleted[(*path1)] = true;
+						break;
 					}
-					if ((*path1)->find_number_of_transfers() >= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second) > (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second) * theParameters->max_in_vehicle_time_ratio && ((*path1)->calc_estimated_waiting_time() + (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second)) >= ((*path2)->calc_estimated_waiting_time() + (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second)) * theParameters->max_total_time_ratio)
-					{
+					if ((*path1)->find_number_of_transfers() >= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second) > (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second) * (1+ theParameters->dominancy_perception_threshold)&& (*path1)->calc_total_walking_distance() >= (*path2)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold)) 
+					{ 
+					
 						paths_to_be_deleted[(*path1)] = true;
+						break;
 					}
-					if ((*path1)->find_number_of_transfers() >= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second) >= (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second) * theParameters->max_in_vehicle_time_ratio && ((*path1)->calc_estimated_waiting_time() + (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second)) > ((*path2)->calc_estimated_waiting_time() + (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second)) * theParameters->max_total_time_ratio)
+					if ((*path1)->find_number_of_transfers() >= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second) >= (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second) * (1+ theParameters->dominancy_perception_threshold)&& (*path1)->calc_total_walking_distance() > (*path2)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold)) 
 					{
 						paths_to_be_deleted[(*path1)] = true;
+						break;
 					}
 				}
 			}
 			for (map <Pass_path*,bool>::iterator delete_iter = paths_to_be_deleted.begin(); delete_iter != paths_to_be_deleted.end(); delete_iter++)	
-			// delete all the paths that were used as source for the merged paths
+			// delete all the dominated paths
 			{
 				vector<Pass_path*>::iterator path_to_delete;
 				for (vector<Pass_path*>::iterator paths_iter = path_set.begin(); paths_iter < path_set.end(); paths_iter++)
@@ -2790,7 +2862,7 @@ bool Network::compare_common_partial_routes (Busline* line1, Busline* line2, Bus
 
 bool Network::check_constraints_paths (Pass_path* path) // checks if the path meets all the constraints
 {
-	if (path->get_alt_transfer__stops().size() == 4)
+	if (path->get_alt_transfer__stops().size() <= 4)
 	{
 		return true;
 	}

@@ -72,12 +72,24 @@ double Pass_path::calc_total_scheduled_in_vehicle_time (ODstops* odstops)
 {
 	double sum_in_vehicle_time = 0.0;
 	vector<vector <Busstop*>>::iterator iter_alt_transfer_stops = alt_transfer_stops.begin();
+	iter_alt_transfer_stops++; // starting from the second stop
 	for (vector<vector <Busline*>>::iterator iter_alt_lines = alt_lines.begin(); iter_alt_lines < alt_lines.end(); iter_alt_lines++)
 	{
 		sum_in_vehicle_time += (*iter_alt_lines).front()->calc_curr_line_ivt((*iter_alt_transfer_stops).front(),(*(iter_alt_transfer_stops+1)).front());
 		iter_alt_transfer_stops++;
+		iter_alt_transfer_stops++; 
 	}
 	return (sum_in_vehicle_time/60); // minutes
+}
+
+double Pass_path::calc_total_walking_distance()
+{
+	double sum_walking_distance = 0.0;
+	for (vector <double>::iterator iter_walking = walking_distances.begin(); iter_walking < walking_distances.end(); iter_walking++)
+	{
+		sum_walking_distance += (*iter_walking);
+	}
+	return (sum_walking_distance); // minutes
 }
 
 double Pass_path::calc_total_scheduled_headway ()
