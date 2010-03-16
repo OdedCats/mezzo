@@ -131,6 +131,26 @@ bool Busline::check_last_trip (Bustrip* trip)
 return false;
 }
 
+bool Busline::check_line_availability (Busstop* stop, double time)
+{
+	vector <Visit_stop*> line_stops = (*curr_trip).first->stops;
+	vector <Visit_stop*>::iterator decision_stop;
+	for (vector <Visit_stop*>::iterator stop_iter = line_stops.begin(); stop_iter < line_stops.end(); stop_iter++)
+	{
+		Busstop* check_stop = (*stop_iter)->first;
+		if (stop->get_id() == check_stop->get_id())
+		{
+			decision_stop = stop_iter;
+			break;
+		}
+	}
+	if ((*decision_stop)->second - time > theParameters->max_waiting_time)
+	{
+		return false;
+	}
+	return true;
+}
+
 double Busline::calc_curr_line_headway ()
 {
 	if (curr_trip == trips.end()) 

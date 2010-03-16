@@ -69,7 +69,7 @@ bool ODstops::execute (Eventlist* eventlist, double curr_time) // generate passe
 	return true;
 }
 
-double ODstops::calc_boarding_probability (Busline* arriving_bus)
+double ODstops::calc_boarding_probability (Busline* arriving_bus, double time)
 {
 	// initialization
 	boarding_utility = 0.0;
@@ -115,26 +115,14 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus)
 					break;
 				}
 			}
-			/* not needed once you have logsum
-			if ((*iter_paths)->get_arriving_bus_rellevant() == false) // if the arriving bus isn't a possible first leg for this path alternative
-			{
-				accumlated_frequency_staying_alts += (60 / (*iter_paths)->calc_curr_leg_headway(first_leg_lines)); 
-				// aggregates the frequencies of all the options that does not include the arriving bus
-			}
-			*/
 		}
 		boarding_utility = log (boarding_utility);
 		for (vector<Pass_path*>::iterator iter_paths = path_set.begin(); iter_paths < path_set.end(); iter_paths++)
 		{
 			if ((*iter_paths)->get_arriving_bus_rellevant() == false)
 			{
-				/*
-				double relative_frequency = (60/(*iter_paths)->calc_curr_leg_headway(first_leg_lines)) / accumlated_frequency_staying_alts;
-				// weighting factor for each path alternative that does not include the arriving bus
-				staying_utility += relative_frequency * (*iter_paths)->calc_waiting_utility(this);
-				*/
 				// logsum calculation
-				staying_utility += exp((*iter_paths)->calc_waiting_utility(this));
+				staying_utility += exp((*iter_paths)->calc_waiting_utility(this, time));
 			}
 		}
 		staying_utility = log (staying_utility);
@@ -155,13 +143,13 @@ double ODstops::calc_binary_logit (double utility_i, double utility_j)
 	return ((exp(utility_i)) / (exp(utility_i) + exp (utility_j)));
 }
 
-double ODstops::calc_combined_set_utility (Passenger* pass, Bustrip* bus_on_board)
+double ODstops::calc_combined_set_utility (Passenger* pass, Bustrip* bus_on_board, double time)
 {
 	// calc logsum over all the paths from this origin stop
 	staying_utility = 0.0;
 	for (vector <Pass_path*>::iterator paths = path_set.begin(); paths < path_set.end(); paths++)
 	{
-		staying_utility += exp(random->nrandom(theParameters->in_vehicle_time_coefficient, theParameters->in_vehicle_time_coefficient / 4 ) * bus_on_board->get_line()->calc_curr_line_ivt(pass->get_OD_stop()->get_origin(),origin_stop) + random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4 ) +  (*paths)->calc_waiting_utility(this));
+		staying_utility += exp(random->nrandom(theParameters->in_vehicle_time_coefficient, theParameters->in_vehicle_time_coefficient / 4 ) * bus_on_board->get_line()->calc_curr_line_ivt(pass->get_OD_stop()->get_origin(),origin_stop) + random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4 ) +  (*paths)->calc_waiting_utility(this, time));
 		// taking into account IVT till this intermediate stop, transfer penalty and the utility of the path from this transfer stop till the final destination
 	}
 	return log(staying_utility);

@@ -36,7 +36,7 @@ void Passenger::init (int pass_id, double start_time_, ODstops* OD_stop_)
 
 bool Passenger:: make_boarding_decision (Bustrip* arriving_bus, double time) 
 {
-	boarding_decision = random ->brandom(OD_stop->calc_boarding_probability(arriving_bus->get_line()));
+	boarding_decision = random ->brandom(OD_stop->calc_boarding_probability(arriving_bus->get_line(), time));
 	OD_stop->record_passenger_boarding_decision (this, arriving_bus, time, boarding_decision);
 	return boarding_decision;
 }
@@ -81,7 +81,7 @@ Busstop* Passenger::make_alighting_decision (Bustrip* boarding_bus, double time)
 					else
 					// in case it is an intermediate transfer stop
 					{
-						candidate_transfer_stops_u[(*first_transfer_stops)] = left_od_stop->calc_combined_set_utility (this, boarding_bus);
+						candidate_transfer_stops_u[(*first_transfer_stops)] = left_od_stop->calc_combined_set_utility (this, boarding_bus, time);
 						// the utility is combined for all paths from this transfer stop (incl. travel time till their and transfer penalty)
 					}
 					// note - this may be called several times, but result with the same calculation

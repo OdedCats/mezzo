@@ -91,9 +91,9 @@ public:
 
 	// Path set - not operative yet
 	void add_paths (Pass_path* pass_path_) {path_set.push_back(pass_path_);}
-	double calc_boarding_probability (Busline* arriving_bus);
+	double calc_boarding_probability (Busline* arriving_bus, double time);
 	double calc_binary_logit (double utility_i, double utility_j);
-	double calc_combined_set_utility (Passenger* pass, Bustrip* bus_on_board); // the trip that the pass. is currently on-board when calc. utility from downstream stop
+	double calc_combined_set_utility (Passenger* pass, Bustrip* bus_on_board, double time); // the trip that the pass. is currently on-board when calc. utility from downstream stop
 
 	// output-related functions
 	void record_passenger_boarding_decision (Passenger* pass, Bustrip* trip, double time, bool boarding_decision); //!< creates a log-file for boarding decision related info

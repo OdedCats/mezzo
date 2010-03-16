@@ -2227,7 +2227,7 @@ void Network::find_all_paths ()
 		{
 			collect_im_stops.push_back(*basic_origin);
 			Busstop* basic_destination = (*iter).first;
-			find_recursive_connection_with_walking ((*basic_origin), basic_destination, basic_destination);
+			find_recursive_connection_with_walking ((*basic_origin), basic_destination);
 			collect_im_stops.clear();
 			collect_walking_distances.clear();
 		}
@@ -2294,7 +2294,7 @@ void Network:: find_recursive_connection (Busstop* origin, Busstop* destination)
 	return;
 }
 
-void Network:: find_recursive_connection_with_walking (Busstop* origin, Busstop* destination, Busstop* final_destination)
+void Network:: find_recursive_connection_with_walking (Busstop* origin, Busstop* destination)
 // search recursively for a path (forward - from origin to destination) with walking links
 {
 	map <Busstop*, double> possible_origins = origin->get_walking_distances();
@@ -2354,7 +2354,7 @@ void Network:: find_recursive_connection_with_walking (Busstop* origin, Busstop*
 							}
 							else
 							{
-								find_recursive_connection_with_walking (intermediate_destination, destination, destination);
+								find_recursive_connection_with_walking (intermediate_destination, destination);
 							}
 						}
 						collect_im_stops.pop_back();
@@ -2624,11 +2624,13 @@ void Network::static_filtering_rules (Busstop* stop)
 		}
 		for (vector <Pass_path*>::iterator path = path_set.begin(); path < path_set.end()-1; path++)
 		{
+			// max walking distance
 			if ((*path)->calc_total_walking_distance() > theParameters->max_walking_distance)
 			{
 				paths_to_be_deleted[(*path)] = true;
 				break;
 			}
+			// max IVT ratio
 			if ((*path)->calc_total_scheduled_in_vehicle_time(odpairs->second) > min_total_scheduled_in_vehicle_time * theParameters->max_in_vehicle_time_ratio)
 			{
 				paths_to_be_deleted[(*path)] = true;
@@ -2909,7 +2911,6 @@ bool Network::check_path_no_repeating_stops (Pass_path* path) // chceks if the p
 	{	
 		for (vector <Busstop*>::iterator leg_stops1 = (*stops_iter1).begin(); leg_stops1 < (*stops_iter1).end()-1; leg_stops1++)
 		{
-			Busstop* check_stop = (*leg_stops1);
 			for (vector <Busstop*>::iterator leg_stops2 = leg_stops1 + 1; leg_stops1 < (*stops_iter1).end(); leg_stops1++)
 			// go over the consecutive stops in the same leg
 			{

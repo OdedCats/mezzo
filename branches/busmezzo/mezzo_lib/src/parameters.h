@@ -173,6 +173,7 @@ public:
    int max_nr_extra_transfers;
    double max_in_vehicle_time_ratio;
    double max_walking_distance;
+   double max_waiting_time;
    double dominancy_perception_threshold;
 
 // TODO: Implement the use of the following paramaters

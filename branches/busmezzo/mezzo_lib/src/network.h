@@ -258,7 +258,7 @@ public:
   void generate_indirect_paths (); // generates new indirect paths
   void find_all_paths (); // goes over all OD stop pairs to generate their path choice set
   void find_recursive_connection (Busstop* origin, Busstop* destination); // search recursively for a path (forward - from origin to destination) WITHOUT walking links
-  void find_recursive_connection_with_walking (Busstop* origin, Busstop* destination, Busstop* final_destination); // search recursively for a path (forward - from origin to destination) WITH walking links
+  void find_recursive_connection_with_walking (Busstop* origin, Busstop* destination); // search recursively for a path (forward - from origin to destination) WITH walking links
   void merge_paths_by_stops (Busstop* stop);  // merge paths with same lines for all legs (only different transfer stops)
   void merge_paths_by_common_lines (Busstop* stop);  // merge paths with lines that have identical route between consecutive stops
   bool compare_same_lines_paths (Pass_path* path1, Pass_path* path2); // checks if two paths are identical in terms of lines

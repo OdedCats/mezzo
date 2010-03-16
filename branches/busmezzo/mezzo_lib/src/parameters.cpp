@@ -87,6 +87,7 @@ Parameters::Parameters ()
    max_nr_extra_transfers = 1.0;
    max_in_vehicle_time_ratio = 2.0;
    max_walking_distance = 2500;
+   max_waiting_time = 1800.0;
    dominancy_perception_threshold = 0;
 }
 
@@ -549,6 +550,13 @@ bool Parameters::read_parameters (istream & in )
 		return false;
 	}
 	in >> max_walking_distance;
+	in >> keyword;
+	if (keyword!= "max_waiting_time=")
+	{
+		cout << "ERROR reading Parameters file, expecting: max_waiting_time=, read: " << keyword << endl;
+		return false;
+	}
+	in >> max_waiting_time;
 	in >> keyword;
 	if (keyword!= "dominancy_perception_threshold=")
 	{
