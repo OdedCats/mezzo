@@ -380,6 +380,7 @@ bool BoundaryOut::process_veh(Vehicle* veh, double time)
 					veh->get_oid(),veh->get_did(),veh->get_type(), veh->get_length(), (veh->get_route()->get_id()),tmppath, tmpori, tmpdest);
 #ifdef _VISSIMCOM
 				sig->v_parkinglot=lptr->parkinglot;
+				sig->v_exitparkinglot=lptr->exitparkinglot;
 				sig->v_path=lptr->pathid;
 #endif // _VISSIMCOM
 				
@@ -423,7 +424,13 @@ void BoundaryOut::block(int code,double speed) // spread the news to the virtual
     }
 }
 
-
+void BoundaryOut::register_virtual(VirtualLink* vl) 
+{	
+	vlinks.insert(vlinks.begin(),vl);
+#ifdef _VISSIMCOM
+	parkinglots.insert(vl->parkinglot);
+#endif //_VISSIMCOM
+}
 #ifdef _PVM
 int BoundaryOut::send_message(PVM* com)
 
@@ -455,6 +462,16 @@ BoundaryIn::BoundaryIn (int id_):Origin(id_)
 BoundaryIn::~BoundaryIn ()
 {
 //  this->Origin::~Origin();
+}
+
+void BoundaryIn::register_virtual(VirtualLink* vl)
+{	
+	vlinks.insert(vlinks.begin(),vl);
+#ifdef _VISSIMCOM
+	parkinglots.insert(vl->exitparkinglot);
+	lastlinks.insert(vl->lastlink);
+#endif 
+
 }
 
 #ifdef _VISSIMCOM
@@ -592,10 +609,12 @@ bool BoundaryIn::newvehicle(Signature* sig)
 			  			// register the time on the virtual link
 			  		   VirtualLink* vlptr=NULL;
 			  		   Link* lptr=NULL;
+
 			  		   for (vector<VirtualLink*>::iterator iter=vlinks.begin(); iter<vlinks.end(); iter++)
 			  		   {
-			  		     if ((*iter)->get_in_node_id()==sig->tmporigin)
-			  		     	vlptr=*iter;
+			  		     //if ( ((*iter)->get_in_node_id()==sig->tmporigin) && ((*iter)->get_out_node_id()==sig->tmpdestination) )
+						   if ((*iter)->get_id() == sig->path)
+			  		     		vlptr=*iter;
 			  		   }
 			  			if (vlptr)
 			  			{

@@ -1,11 +1,14 @@
 
 TEMPLATE = lib
-CONFIG += staticlib
+CONFIG += staticlib debug
 TARGET = mezzo_hybrid_lib
 DEPENDPATH += . ../src
-INCLUDEPATH += $(QTDIR)/include $(QTDIR)/include/Qt3Support 
-LIBS+=  -L$(QTDIR)/lib -lQtCore -lQtGui -lQt3Support 
-QT+= core gui qt3support 
+INCLUDEPATH += $(QTDIR)/include
+# $(QTDIR)/include/Qt3Support 
+LIBS+=  -L$(QTDIR)/lib -lQtCore -lQtGui 
+#-lQt3Support 
+QT+= core gui 
+#qt3support 
 QMAKE= $(QTDIR)/bin/qmake
 DEFINES += _MIME _VISSIMCOM
 

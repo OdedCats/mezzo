@@ -30,6 +30,7 @@
 
 #include "link.h"
 #include <vector>
+#include <set>
 #include <string>
 #include "turning.h"
 #include "q.h"
@@ -171,7 +172,7 @@ class BoundaryOut : public Junction
  	~BoundaryOut();
 	virtual const string className(){return "BoundaryOut";}
  	void block(int code,double speed); // spread the news to the virtual links (setting full to true/false)
- 	void register_virtual(VirtualLink* vl) { vlinks.insert(vlinks.begin(),vl);}
+ 	void register_virtual(VirtualLink* vl) ; // register the virtual links
 	vector <VirtualLink*> & get_virtual_links() {return vlinks;}
 #ifdef _MIME
 	vector <Signature*> & get_signatures() ;
@@ -189,9 +190,11 @@ class BoundaryOut : public Junction
 
 	bool blocked() {return blocked_;}
  	bool process_veh(Vehicle* veh, double time);
+	set <long> parkinglots;  // should move this to protected and create accessors etc, in case we end up using this.
 
  protected:
- 	vector <VirtualLink*> vlinks;
+ 	vector <VirtualLink*> vlinks; // old structure
+	
 #ifdef _MIME
  	vector <Signature*> signatures;
 #endif //_MIME
@@ -208,7 +211,7 @@ class BoundaryIn : public Origin
 	public:
 	BoundaryIn (int id_);
 	~BoundaryIn ();
-	void register_virtual(VirtualLink* vl) { vlinks.insert(vlinks.begin(),vl);}
+	void register_virtual(VirtualLink* vl) ;
 	//void register_routes(vector<Route*> * routes_){routes=routes_;}
 	void register_routes (multimap<odval,Route*> * routemap_) {routemap=routemap_;}
 	void register_busroutes (vector<Busroute*> * busroutes_) {busroutes=busroutes_;}
@@ -223,7 +226,8 @@ class BoundaryIn : public Origin
 	// do something similar as the PVM case
 		double get_speed(double time); // sends the speed assigned to the last vehicle that entered
 #endif //_VISSIMCOM
-
+	set <long> parkinglots;
+	set <long> lastlinks;
 
 #ifdef _MIME // common functions for both the PVM implementation (Mitsim) and the COM implementation  (VISSIM)
 	bool newvehicle(Signature* sig);

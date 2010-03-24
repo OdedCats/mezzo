@@ -83,6 +83,7 @@ class Signature
 		int v_id; // id of vehicle in VISSIM
 		long v_path; // path id in VISSIM, comes from virtual link
 		long v_parkinglot; // parking lot in VISSIM, comes from virtual link
+		long v_exitparkinglot; // exit parking lot in VISSIM
 		double speed;
 		double timestamp;
 		double entrytime;
@@ -92,7 +93,7 @@ class Signature
 		int destination;
 		int type;
 		double length;
-		int path;
+		int path; // virtual link id
     int tmppath;
 		int tmporigin;
 		int tmpdestination;

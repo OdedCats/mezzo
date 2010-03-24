@@ -28,7 +28,7 @@
 				ReBuildCommandLine="qmake&#x0D;&#x0A;nmake clean&#x0D;&#x0A;nmake debug&#x0D;&#x0A;"
 				CleanCommandLine="nmake clean"
 				Output=".\debug\mezzo_gui_hybrid.exe"
-				PreprocessorDefinitions="WIN32;_DEBUG"
+				PreprocessorDefinitions="WIN32;_DEBUG;_VISSIMCOM;_MIME"
 				IncludeSearchPath=""
 				ForcedIncludes=""
 				AssemblySearchPath=""
@@ -44,11 +44,11 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="qmake&#x0D;&#x0A;nmake release"
+				BuildCommandLine="del Release\*.exe&#x0D;&#x0A;qmake&#x0D;&#x0A;nmake release"
 				ReBuildCommandLine="qmake &#x0D;&#x0A;nmake clean&#x0D;&#x0A;nmake release"
 				CleanCommandLine="nmake clean"
 				Output=".\release\mezzo_gui_hybrid.exe"
-				PreprocessorDefinitions="WIN32;NDEBUG"
+				PreprocessorDefinitions="WIN32;NDEBUG_;VISSIMCOM;_MIME"
 				IncludeSearchPath=""
 				ForcedIncludes=""
 				AssemblySearchPath=""

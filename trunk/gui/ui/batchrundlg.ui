@@ -13,7 +13,8 @@
    <string>Batch Run</string>
   </property>
   <property name="windowIcon" >
-   <iconset resource="../canvas_qt4.qrc" >:/images/batchrun.gif</iconset>
+   <iconset resource="../canvas_qt4.qrc" >
+    <normaloff>:/images/batchrun.gif</normaloff>:/images/batchrun.gif</iconset>
   </property>
   <widget class="QDialogButtonBox" name="buttonBox" >
    <property name="geometry" >
@@ -28,7 +29,7 @@
     <enum>Qt::Horizontal</enum>
    </property>
    <property name="standardButtons" >
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
    </property>
   </widget>
   <widget class="QTabWidget" name="tabWidget" >
@@ -148,7 +149,7 @@
        <string>0.00; </string>
       </property>
       <property name="text" >
-       <string>0.02</string>
+       <string>0.05</string>
       </property>
       <property name="maxLength" >
        <number>4</number>
@@ -425,7 +426,8 @@
       <string>...</string>
      </property>
      <property name="icon" >
-      <iconset resource="../canvas_qt4.qrc" >:/images/bt_play.png</iconset>
+      <iconset resource="../canvas_qt4.qrc" >
+       <normaloff>:/images/bt_play.png</normaloff>:/images/bt_play.png</iconset>
      </property>
     </widget>
     <widget class="QToolButton" name="stopButton" >
@@ -444,7 +446,8 @@
       <string>...</string>
      </property>
      <property name="icon" >
-      <iconset resource="../canvas_qt4.qrc" >:/images/bt_stop.png</iconset>
+      <iconset resource="../canvas_qt4.qrc" >
+       <normaloff>:/images/bt_stop.png</normaloff>:/images/bt_stop.png</iconset>
      </property>
     </widget>
     <widget class="QToolButton" name="saveButton" >
@@ -463,7 +466,8 @@
       <string>...</string>
      </property>
      <property name="icon" >
-      <iconset resource="../canvas_qt4.qrc" >:/images/filesave.png</iconset>
+      <iconset resource="../canvas_qt4.qrc" >
+       <normaloff>:/images/filesave.png</normaloff>:/images/filesave.png</iconset>
      </property>
     </widget>
    </widget>
@@ -480,6 +484,7 @@
   </widget>
  </widget>
  <resources>
+  <include location="../canvas_qt4.qrc" />
   <include location="../canvas_qt4.qrc" />
  </resources>
  <connections>

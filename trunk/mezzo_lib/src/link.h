@@ -33,6 +33,10 @@
 
 
 */
+#ifndef _VISSIMCOM
+	#define _VISSIMCOM
+	#define _MIME
+#endif
 
 #ifndef LINK_HH
 #define LINK_HH
@@ -105,18 +109,12 @@ public:
 	const int get_nr_lanes() {return nr_lanes;}
 	const string get_name() {return name;}
 	void set_name(string name_) {name=name_;}
-	//const int Link::size();
 	const int size();
 	pair<double,double> set_output_moe_thickness(unsigned int val); // sets the output MOE for the link icon returns min/max
 	pair <double,double>  set_output_moe_colour(unsigned int val); // sets the output MOE for the link icon returns min/max
 	void set_hist_time(double time) {	hist_time=time;}
 	void set_histtimes(LinkTime* ltime) {
 		histtimes=ltime;
-		/*
-		avgtimes->nrperiods=histtimes->nrperiods;
-		avgtimes->periodlength=histtimes->periodlength;
-		avgtimes->times = histtimes->times;
-		*/
 		avgtimes = new LinkTime(*histtimes);
 		curr_period=0;
 		tmp_avg=0.0;
@@ -208,9 +206,10 @@ public:
 	double calc_sumsq_input_output_linktimes ();
 
 #ifdef _VISSIMCOM
-	long parkinglot;
+	long parkinglot;// entering parkinglot
+	long exitparkinglot; // exit parking lot
 	long pathid;
-	long lastlink;
+	long lastlink; // last link in VISSIM before exiting (for adjustment of speed)
 #endif //_VISSIMCOM
 
 
@@ -273,7 +272,7 @@ class InputLink : public Link
     	bool enter_veh(Vehicle* veh, double time);
     	
 		Vehicle* exit_veh(double time, Link* link, int lookback);
-	private:
+protected:
 };
 
 
@@ -283,6 +282,8 @@ class VirtualLink : public Link
 
     VirtualLink():Link() {blocked=false; linkdensity=0.0;}
     VirtualLink(int id_, Node* in_, Node* out_, int length_=1000, int nr_lanes_=1, Sdfunc* sdfunc_=NULL);
+//	VirtualLink(int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* sdfunc_);
+
     bool enter_veh(Vehicle* veh, double time); // overloaded from link. Places vehicle on sendlist.
     bool exit_veh(Vehicle* veh, double time);   // overloaded from link. Reports travel time for virtual link.
 	void block (int code){ blocked=(code<0 ? true:false);}

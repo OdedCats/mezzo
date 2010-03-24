@@ -3,7 +3,7 @@
 TEMPLATE = app
 TARGET = mezzo_gui_hybrid
 INCLUDEPATH += .. . $(QTDIR)/include $(QTDIR)/include/QtCore $(QTDIR)/include/QtGui $(QTDIR)/include/QtDesigner $(QTDIR)/include/QtNetwork $(QTDIR)/include/ActiveQt 
-#$(QTDIR)/include/Qt3Support
+# $(QTDIR)/include/Qt3Support
 DEFINES += _VISSIMCOM -MIME
 
 CONFIG(debug, debug|release) {
@@ -26,3 +26,6 @@ HEADERS += ../canvas_qt4.h ../parametersdialog_qt4.h ../src/nodedlg.h ../src/bat
 FORMS += ../canvas_qt4.ui ../parametersdialog_qt4.ui ../ui/nodedlg.ui ../ui/batchrundlg.ui ../ui/outputview.ui ../ui/positionbackground.ui
 SOURCES += ../canvas_qt4.cpp ../main.cpp ../parametersdialog_qt4.cpp ../src/nodedlg.cpp ../src/batchrundlg.cpp ../src/outputview.cpp ../src/positionbackground.cpp
 RESOURCES += ../canvas_qt4.qrc
+RC_FILE = ../mezzo.rc
+DEPENDPATH += . ../src ../../mezzo_lib/src
+

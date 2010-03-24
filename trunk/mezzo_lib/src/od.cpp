@@ -26,7 +26,7 @@ struct compare
 
 bool compare_route_cost(Route* r1, Route* r2)
 {
-	return (r1->cost(0.0) < r2->cost(0.0));
+	return (r1->cost(900.0) < r2->cost(900.0));
 }
 
 
@@ -168,7 +168,7 @@ vector <Route*> ODpair::delete_spurious_routes(double time)
 
 {
 
-	unsigned int maxroutes=50;
+	unsigned int maxroutes=100;
 	double threshold =0.0;
 	vector <Route*> thrown;
 	string reason ="";
@@ -186,13 +186,14 @@ vector <Route*> ODpair::delete_spurious_routes(double time)
 	
 	if (rate < theParameters->small_od_rate )  // if small OD rate
 	{
-		threshold = 1.5; // all  routes > 1.5*min_cost will be deleted
-		maxroutes = static_cast <int>(rate +1); // if the rate is small there should be few routes only
+		//threshold = 1.5; // all  routes > 1.5*min_cost will be deleted
+		threshold=theParameters->max_rel_route_cost;
+		//maxroutes = static_cast <int>(rate +1); // if the rate is small there should be few routes only
 		reason = " small OD, large cost ";
 	}
 	else
 	{
-		maxroutes = static_cast <int> (rate/2+1);	 
+		//maxroutes = static_cast <int> (rate/2+1);	 
 		threshold = theParameters->max_rel_route_cost; 
 		reason = " large cost "; 
 	}
@@ -212,18 +213,13 @@ vector <Route*> ODpair::delete_spurious_routes(double time)
 	  }
 	  else iter1++;
 	}
+/*
 	// delete if there are too many routes
 	
 	sort (routes.begin(), routes.end(), compare_route_cost);
-	//eout << "cost of sorted routes " << endl;
+
 	reason = " Max nr routes reached ";
-	/*******
-	vector <Route*>::iterator r_iter = routes.begin();
-	
-	for (r_iter; r_iter < routes.end(); r_iter++)
-	{
-		eout << " route " << (*r_iter)->get_id() << " costs " << (*r_iter)->cost(0.0) << endl;
-	}*/	
+
 
 	if (maxroutes < routes.size())
 	{	
@@ -240,6 +236,7 @@ vector <Route*> ODpair::delete_spurious_routes(double time)
 		}
 
 	}
+	*/
 	return thrown;
 }
 

@@ -131,19 +131,21 @@ bool VISSIMCOM::init(const string& configfile, const int runtime)
 		spSim->PutResolution(vissim_resolution);
 
 		// set the paths in VISSIM
-		// TO DO change this so it is done for all paths.
+		
 		vector <VirtualLink*>::iterator iter0 = virtuallinks->begin();
+/*		
 		assert (iter0<virtuallinks->end());
 		for (iter0;iter0<virtuallinks->end();iter0++)
 		{
 	
 			spPaths = spNet->GetPaths();  // to make sure it contains the latest set of paths
-			spPaths->GetCount();
-			eout << "gotten paths" << endl;
+			eout << " Adding path nr " << (*iter0)->pathid << endl;
 			IPathPtr p= AddPath((*iter0)->pathid,(*iter0)->get_v_path_ids(), spPaths);
-			eout << "added path " << (*iter0)->pathid << endl;
+			eout << "Successfully added path " << (*iter0)->pathid << endl;
 		}
-
+		long nr = spPaths->GetCount();
+		eout << "VISSIM contains " << nr <<" paths "<<  endl;
+*/
 	}
 	catch (_com_error &error) 
 	{
@@ -168,45 +170,50 @@ VISSIMCOM::~VISSIMCOM()
 
 int VISSIMCOM::send (double time)
 {
-// put the vehicle signatures in
+// Sends the vehicles from Mezzo Boundary Outs to VISSIM
+// Checks which VISSIM entry parking lots are full, and blocks/unblocks the respective BoundaryOut and Virtual Links
 	try
 	{
-		unsigned short count=0;
+		long count=0;
+		long buffersize=5;
+		
 		vector <Signature*>::iterator iter0;
 		bool ok=true;
 		IParkingLotsPtr p_lots = spNet->GetParkingLots();
+		// for each boundary out node
 		for (vector <BoundaryOut*>::iterator iter1=(*boundaryouts).begin();iter1<(*boundaryouts).end();iter1++)
 		{
-			vector <VirtualLink*>::iterator iter2;
-			vector <VirtualLink*> vlinks=(*iter1)->get_virtual_links();
-			for (iter2=vlinks.begin(); iter2< vlinks.end(); iter2++)
+			long remaining_space = buffersize;
+			//Check which parking lots are full, and block/unblock if needed.
+			set<long>::iterator pl_iter = (*iter1)->parkinglots.begin();
+			for (pl_iter; pl_iter!=(*iter1)->parkinglots.end(); pl_iter++)
 			{
-		
-				IParkingLotPtr parking = p_lots->GetParkingLotByNumber((*iter2)->parkinglot); // change this to get it from the virtual link
+				IParkingLotPtr parking = p_lots->GetParkingLotByNumber(*pl_iter); 
 				long nr_parked= parking->GetAttValue("NVEHICLES");
-				//eout << "nr vehicles on parking is " << nr_parked << endl;
-				// !!!!!!!!!! CHANGE to do only for particular vlink!!!!!!!!!
-				if (nr_parked > 5) // buffer to make up for communication delay of Block/unblock messages
+				// << "nr vehicles on  entry parking " << *pl_iter << " is " << nr_parked << endl;
+				remaining_space = buffersize-nr_parked; // should generalize this using a map with values for all parking lots, but for now there is only one parking lot per boundary out anyway.
+
+				if (nr_parked > buffersize) // buffer to make up for communication delay of Block/unblock messages
 				{
-					(*iter1)->block(-1,10.0);
+					(*iter1)->block(-1,10.0); // block the BoundaryOut, which will notify the respective virtual links.
 				}
 				else
 				{
-					if ((*iter1)->blocked())
+					if ((*iter1)->blocked()) // if blocked, unblock, with respective density and dissipation speed
 					{
 						(*iter1)->block(50,20.0);
 					}
 				}
-			}			
-			
-		
-			// put the vehicles 
+			}
+
+			// SEND the vehicles for this Boundary Out
+			count = 0;
 			vector <Signature*> & signatures =(*iter1)->get_signatures() ;
 			//eout << " Boundaryout: sending signatures : " << signatures.size() << endl;
 			for (iter0=signatures.begin();iter0<signatures.end();)
 			{
-				//check space in VISSIM
-				if (count < 3) // change to reflect nr of lanes, simulation step etc etc...
+				// checking space
+				if (count <= remaining_space) 
 				{
 					//then add vehicle
 					ok &= add_veh((*iter0)->type,(*iter0)->v_parkinglot,(*iter0)->v_path,(*iter0));
@@ -215,7 +222,7 @@ int VISSIMCOM::send (double time)
 					count ++;
 				}
 				else 
-					iter0=signatures.end(); // will force an exit from code
+					iter0=signatures.end(); // will force an exit from loop
 			}
 			
 		}
@@ -224,54 +231,51 @@ int VISSIMCOM::send (double time)
 
 		for (vector <BoundaryIn*>::iterator iter3=(*boundaryins).begin();iter3<(*boundaryins).end();iter3++)
 		{
-			// set the correct conditions 
+			// set the speeds of the exiting vehicles according to downstream conditions
 			double speed = 3.6 * ((*iter3)->get_speed(time)); // speed ahead in km/h
-			
-			// for each virtual link belonging to the boundary (for now just one)!!!!
-			// !!! CHANGE !!!
-			if ( ((*iter3)->get_virtual_links()).size() !=0)
+			if (speed < 20) // to limit the number of COM calls
 			{
-				vector<VirtualLink*>::iterator iter4= ((*iter3)->get_virtual_links()).begin();
-				long lastlinkid= (*iter4)->lastlink;
-				
-				ILinkPtr lastlink=spLinks->GetLinkByNumber(lastlinkid);
-		
-				long length=lastlink->GetAttValue("LENGTH");
-				long numlanes= lastlink->GetAttValue("NUMLANES");
-				IVehiclesPtr vehs =lastlink->GetVehicles();
-				long vehcount= vehs->GetCount();
-				//eout << "At this moment there are " << vehcount << " vehicles on the link" << endl;
-				// virtual vehicles
-				if (vehcount >= numlanes) //if there are more vehicles than lanes
+				for (set<long>::iterator l_iter = (*iter3)->lastlinks.begin(); l_iter!=(*iter3)->lastlinks.end(); l_iter++)
 				{
-					// get the vehicles in an array
-					IEnumVARIANTPtr vehenum(vehs->Get_NewEnum());
-					unsigned long ulFetched;
-					_variant_t* avar= new _variant_t[vehcount];
-					vehenum->Reset ();
-					vehenum->Next(vehcount, avar, &ulFetched);
-					for (int a=0; a < vehcount-1; a++) //  adjust the speed of vehicles
+
+					ILinkPtr lastlink=spLinks->GetLinkByNumber(*l_iter);
+				
+					long length=lastlink->GetAttValue("LENGTH");
+					long numlanes= lastlink->GetAttValue("NUMLANES");
+					IVehiclesPtr vehs =lastlink->GetVehicles();
+					long vehcount= vehs->GetCount();
+				
+					// regulate the speeds 
+					if (vehcount >= numlanes) //if there are less vehicles than lanes than I assume the downstream link is open.
 					{
-						IVehiclePtr veh=(IVehiclePtr)avar[a].pdispVal;
-						long pos = veh->GetAttValue("LINKCOORD");
-						
-						if ((length-pos) < 20.0)
+						// get the vehicles in an array
+						IEnumVARIANTPtr vehenum(vehs->Get_NewEnum());
+						unsigned long ulFetched;
+						_variant_t* avar= new _variant_t[vehcount];
+						vehenum->Reset ();
+						vehenum->Next(vehcount, avar, &ulFetched);
+						for (int a=0; a < vehcount-1; a++) //  adjust the speed of vehicles
 						{
-							// Set both the desired speed and current speed
-							veh->PutAttValue("SPEED",speed); // this includes setting speed to 0.0 is downstream is blocked.
-							veh->PutAttValue("DESIREDSPEED",speed); 
-						}
-						else
-						{
-							if ((length-pos) < 50.0)
+							IVehiclePtr veh=(IVehiclePtr)avar[a].pdispVal;
+							long pos = veh->GetAttValue("LINKCOORD");
+							
+							if ((length-pos) < 15.0)
 							{
-								//long newspeed = speed + (oldspeed-speed)/2; // reduce the speed difference by 1/2
-								// Set the desired speed only
+								
+								veh->PutAttValue("SPEED",speed); // this includes setting speed to 0.0 is downstream is blocked.
 								veh->PutAttValue("DESIREDSPEED",speed); 
 							}
+							else
+							{
+								if ((length-pos) < 50.0)
+								{
+									// Set the desired speed only
+									veh->PutAttValue("DESIREDSPEED",speed); 
+								}
+							}
 						}
-					}
-				}	
+					}	
+				}
 			}
 		}
 	
@@ -297,18 +301,18 @@ bool VISSIMCOM::add_veh(unsigned long vehtype, unsigned long parkinglot, long pa
 	{
 			
 		spVehicles=spNet->GetVehicles(); // gets the CURRENT list of vehicles
-		
+	/*
 		// The original way
 		IVehiclePtr spVehicle = spVehicles->AddVehicleInParkingLot(vehtype,parkinglot); // add vehicle in parking lot
 		spVehicle->PutAttValue("PATH",(_variant_t) pathid); // assign path
-		
+	*/
 
-		/*
+		
 		// test with zones and dynamic paths
-		IVehiclePtr spVehicle = spVehicles->AddVehicleInParkingLot(vehtype,1); // add vehicle in parking lot
-	//	spVehicle->PutAttValue("DESTZONE", (_variant_t) 2);
-		spVehicle->PutAttValue("DESTPARKLOT", (_variant_t) 2);
-*/
+		IVehiclePtr spVehicle = spVehicles->AddVehicleInParkingLot(vehtype,parkinglot); // add vehicle in parking lot
+	
+		spVehicle->PutAttValue("DESTPARKLOT", (_variant_t) sig->v_exitparkinglot);
+
 		//update signature and add to vehicle list
 
 		sig->v_id=spVehicle->GetID();

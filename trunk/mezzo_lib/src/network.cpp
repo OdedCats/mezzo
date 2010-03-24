@@ -697,9 +697,9 @@ bool Network::readvirtuallink(istream& in)
 	// assert (!exists (lid) &&exists(innode) && exists(outnode) && length >0 && 0<nrlanes && exists(sdid) )
 #ifdef _VISSIMCOM
 	// read the virtual path link ids and parking place as well
-	long enterparkinglot, lastlink, nr_v_nodes, v_node;
+	long enterparkinglot, exitparkinglot, lastlink, nr_v_nodes, v_node;
 	vector <long> ids;
-	in >> enterparkinglot >> lastlink >> nr_v_nodes;
+	in >> enterparkinglot >> exitparkinglot >> lastlink >> nr_v_nodes;
 	in >> bracket;
 
 	if (bracket != '{')
@@ -707,10 +707,15 @@ bool Network::readvirtuallink(istream& in)
 		eout << "readfile::readvirtuallinks scanner jammed at " << bracket;
 		return false;
 	}
-	for (long i=0; i<nr_v_nodes; i++)
+	long previous = -1;
+	for (long i=0; i<nr_v_nodes; i++) // skips double nodes
 	{
 		in >> v_node;
-		ids.push_back(v_node);
+		if (v_node != previous)
+		{
+			ids.push_back(v_node);
+		}
+		previous = v_node;
 	}
 	in >> bracket;
 
@@ -759,6 +764,7 @@ bool Network::readvirtuallink(istream& in)
 #ifdef _VISSIMCOM
 	// add the id tags
 	link->parkinglot = enterparkinglot;
+	link->exitparkinglot = exitparkinglot;
 	link->lastlink = lastlink;
 	link->set_v_path_ids(ids);
 #endif //_VISSIMCOM
@@ -4036,8 +4042,13 @@ bool MatrixAction::execute(Eventlist* eventlist, double time)
 	{
 		// find odpair
 		ODpair* odptr=(*(find_if (ods->begin(),ods->end(), compareod (iter->odid) )));
+		if (!odptr)
+			eout << "MatrixAction::execute at t= " << time << " - cannot find odpair (" << iter->odid.first  << ',' << iter->odid.second << ')' << endl;
+		else
+		{
 		//init new rate
-		odptr->set_rate(iter->rate);
+			odptr->set_rate(iter->rate);
+		}
 	}
 	return true;
 }
