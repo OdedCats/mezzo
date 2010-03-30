@@ -28,6 +28,7 @@ class Bustype;
 class Passenger;
 class ODstops;
 class Change_arrival_rate;
+class Bustrip_assign;
 
 typedef pair<Bustrip*,double> Start_trip;
 typedef vector <Passenger*> passengers;
@@ -56,7 +57,7 @@ class Busline: public Action
 {
 public:
 	Busline (); //!< simple constructor
-	Busline (int id_, string name_, Busroute* busroute_, vector <Busstop*> stops_, Vtype* vtype_, ODpair* odpair_, int average_headway_, float ratio_headway_holding_, int holding_strategy_); //!< Initialising constructor
+	Busline (int id_, string name_, Busroute* busroute_, vector <Busstop*> stops_, Vtype* vtype_, ODpair* odpair_, int holding_strategy_, float ratio_headway_holding_); //!< Initialising constructor
 	virtual ~Busline(); //!< destructor
 	void reset ();
 	void reset_curr_trip (); // initialize after reading bustrips
@@ -67,7 +68,6 @@ public:
 	Vtype* get_vtype() {return vtype;} //!< returns Vtype
 	ODpair* get_odpair() {return odpair;} //!< returns ODpair
 	vector <Start_trip>::iterator get_curr_trip() {return curr_trip;} 
-	int get_average_headway() {return average_headway;} //!< returns avg headway to previous bus
 	float get_ratio_headway_holding() {return ratio_headway_holding;} //!< returns ratio_headway_holding
 	int get_holding_strategy() {return holding_strategy;} //!< returns the holding strategy
 	void set_curr_trip(vector <Start_trip>::iterator curr_trip_) {curr_trip = curr_trip_;}
@@ -92,6 +92,7 @@ public:
 	// calc attributes (for pass_paths)
 	double calc_curr_line_headway ();
 	double calc_curr_line_headway_forward ();
+	double calc_max_headway ();
 	double calc_curr_line_ivt (Busstop* start_stop, Busstop* end_stop);
 	
 	// output-related functions
@@ -109,7 +110,6 @@ protected:
 	Busroute* busroute; //!< the route (in terms of links) that the busses follow
 	Vtype* vtype; //!< the type of vehicle for the buses to be generated.
 	ODpair* odpair; 
-	int average_headway;
 	float ratio_headway_holding;
 	int holding_strategy; 
 	bool active; //!< is true when the busline has started generating trips
@@ -118,6 +118,21 @@ protected:
 };
 
 typedef pair<Busstop*,double> Visit_stop;
+
+class Bustrip_assign // container object holding output data for trip assignments
+{
+public:
+	Bustrip_assign (int line_id_,	int trip_id_,	int vehicle_id_, int start_stop_id_, int end_stop_id_,	int passenger_load_):
+							line_id(line_id_),trip_id(trip_id_),vehicle_id(vehicle_id_), start_stop_id(start_stop_id_),end_stop_id(end_stop_id_),passenger_load(passenger_load_) {}
+	void write (ostream& out) { out << line_id << '\t'<< trip_id << '\t'<< vehicle_id << '\t'<< start_stop_id<< '\t'<<end_stop_id << '\t'<< passenger_load  << '\t'	<< endl; }
+	void reset () {line_id = 0 ; trip_id = 0; vehicle_id = 0; start_stop_id = 0; end_stop_id = 0; passenger_load = 0;}
+	int line_id;
+	int trip_id;
+	int vehicle_id;
+	int start_stop_id;
+	int end_stop_id;
+	int passenger_load;
+};
 
 class Bustrip 
 {
@@ -151,9 +166,14 @@ public:
 	void book_stop_visit (double time, Bus* bus); //!< books a visit to the stop
 	bool check_end_trip (); //!< returns 1 if true, 0 if false
 	double calc_departure_time (double time); //!< calculates departure time from origin according to arrival time and schedule (including layover effect)
+	
+// output-related functions
+	void write_assign_segments_output(ostream & out);
+	void record_passenger_loads (vector <Visit_stop*>::iterator start_stop); //!< creates a log-file for passenegr load assignment info
 
 // public vectors
 	vector <Visit_stop*> stops; //!< contains all the busstops and the times that they are supposed to be served. NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
+	map <Busstop*, int > assign_segements; //!< records the number of pass. that use the segment that starts at this stop up to the next stop, during the simulation running time
 	vector <Start_trip*> driving_roster; //!< trips assignment for each bus vehicle.
 	map <Busstop*, passengers> passengers_on_board; // passenger on-board storaged by their alighting stop (format 3)
 	map <Busstop*, int> nr_expected_alighting; //!< number of passengers expected to alight at the busline's stops (format 2)
@@ -167,6 +187,7 @@ protected:
 	double starttime; //!< when the trip is schedule to departure from the origin
 	vector <Visit_stop*> :: iterator next_stop; 
 	Random* random;
+	list <Bustrip_assign> output_passenger_load; 
 	double enter_time; // the time it entered the most recently bus stop
 //	map <Busstop*,bool> trips_timepoint; //!< will be relevant only when time points are trip-specific. binary map with time point indicatons for stops on route only (according to the schedule input file)  
 	Eventlist* eventlist; //!< for use by busstops etc to book themselves.
@@ -277,9 +298,9 @@ public:
 
 //	Action for visits to stop
 	bool execute(Eventlist* eventlist, double time); //!< is executed by the eventlist and means a bus needs to be processed
-	double passenger_activity_at_stop (Bustrip* trip, double time); //!< progress passengers at stop: waiting, boarding and alighting
+	double passenger_activity_at_stop (Eventlist* eventlist, Bustrip* trip, double time); //!< progress passengers at stop: waiting, boarding and alighting
 	void book_bus_arrival(Eventlist* eventlist, double time, Bus* bus);  //!< add to expected arrivals
-	double calc_exiting_time (Bustrip* trip, double time); //!< To be implemented when time-points will work
+	double calc_exiting_time (Eventlist* eventlist, Bustrip* trip, double time); //!< To be implemented when time-points will work
 	
 // dwell-time calculation related functions	
 	double calc_dwelltime (Bustrip* trip); //!< calculates the dwelltime of each bus serving this stop. currently includes: passenger service times ,out of stop, bay/lane		

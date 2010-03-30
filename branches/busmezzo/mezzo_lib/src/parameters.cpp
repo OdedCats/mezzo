@@ -84,6 +84,7 @@ Parameters::Parameters ()
    in_vehicle_time_coefficient = 0.0;
    waiting_time_coefficient = 0.0;
    walking_time_coefficient= 0.0;
+   average_walking_speed = 4000.0;
    max_nr_extra_transfers = 1.0;
    max_in_vehicle_time_ratio = 2.0;
    max_walking_distance = 2500;
@@ -500,70 +501,79 @@ bool Parameters::read_parameters (istream & in )
 		return false;
 	}
 	in >> demand_scale;
-	in >> keyword;
-	if (keyword!= "transfer_coefficient=")
+	if (demand_format == 3)
 	{
-		cout << "ERROR reading Parameters file, expecting: transfer_coefficient=, read: " << keyword << endl;
-		return false;
+		in >> keyword;
+		if (keyword!= "transfer_coefficient=")
+		{
+			cout << "ERROR reading Parameters file, expecting: transfer_coefficient=, read: " << keyword << endl;
+			return false;
+		}
+		in >> transfer_coefficient;
+		in >> keyword;
+		if (keyword!= "in_vehicle_time_coefficient=")
+		{
+			cout << "ERROR reading Parameters file, expecting: in_vehicle_time_coefficient=, read: " << keyword << endl;
+			return false;
+		}
+		in >> in_vehicle_time_coefficient;
+		in >> keyword;
+		if (keyword!= "waiting_time_coefficient=")
+		{
+			cout << "ERROR reading Parameters file, expecting: waiting_time_coefficient=, read: " << keyword << endl;
+			return false;
+		}
+		in >> waiting_time_coefficient;
+		in >> keyword;
+		if (keyword!= "walking_time_coefficient=")
+		{
+			cout << "ERROR reading Parameters file, expecting: walking_time_coefficient=, read: " << keyword << endl;
+			return false;
+		}
+		in >> walking_time_coefficient;
+		in >> keyword;
+		if (keyword!= "average_walking_speed=")
+		{
+			cout << "ERROR reading Parameters file, expecting: average_walking_speed=, read: " << keyword << endl;
+			return false;
+		}
+		in >> average_walking_speed;
+		in >> keyword;
+		if (keyword!= "max_nr_extra_transfers=")
+		{
+			cout << "ERROR reading Parameters file, expecting: max_nr_extra_transfers=, read: " << keyword << endl;
+			return false;
+		}
+		in >> max_nr_extra_transfers;
+		in >> keyword;
+		if (keyword!= "max_in_vehicle_time_ratio=")
+		{
+			cout << "ERROR reading Parameters file, expecting: max_in_vehicle_time_ratio=, read: " << keyword << endl;
+			return false;
+		}
+		in >> max_in_vehicle_time_ratio;
+		in >> keyword;
+		if (keyword!= "max_walking_distance=")
+		{
+			cout << "ERROR reading Parameters file, expecting: max_walking_distance=, read: " << keyword << endl;
+			return false;
+		}
+		in >> max_walking_distance;
+		in >> keyword;
+		if (keyword!= "max_waiting_time=")
+		{
+			cout << "ERROR reading Parameters file, expecting: max_waiting_time=, read: " << keyword << endl;
+			return false;
+		}
+		in >> max_waiting_time;
+		in >> keyword;
+		if (keyword!= "dominancy_perception_threshold=")
+		{
+			cout << "ERROR reading Parameters file, expecting: dominancy_perception_threshold=, read: " << keyword << endl;
+			return false;
+		}
+		in >> dominancy_perception_threshold;
 	}
-	in >> transfer_coefficient;
-	in >> keyword;
-	if (keyword!= "in_vehicle_time_coefficient=")
-	{
-		cout << "ERROR reading Parameters file, expecting: in_vehicle_time_coefficient=, read: " << keyword << endl;
-		return false;
-	}
-	in >> in_vehicle_time_coefficient;
-	in >> keyword;
-	if (keyword!= "waiting_time_coefficient=")
-	{
-		cout << "ERROR reading Parameters file, expecting: waiting_time_coefficient=, read: " << keyword << endl;
-		return false;
-	}
-	in >> waiting_time_coefficient;
-	in >> keyword;
-	if (keyword!= "walking_time_coefficient=")
-	{
-		cout << "ERROR reading Parameters file, expecting: walking_time_coefficient=, read: " << keyword << endl;
-		return false;
-	}
-	in >> walking_time_coefficient;
-	in >> keyword;
-	if (keyword!= "max_nr_extra_transfers=")
-	{
-		cout << "ERROR reading Parameters file, expecting: max_nr_extra_transfers=, read: " << keyword << endl;
-		return false;
-	}
-	in >> max_nr_extra_transfers;
-	in >> keyword;
-	if (keyword!= "max_in_vehicle_time_ratio=")
-
-	{
-		cout << "ERROR reading Parameters file, expecting: max_in_vehicle_time_ratio=, read: " << keyword << endl;
-		return false;
-	}
-	in >> max_in_vehicle_time_ratio;
-	in >> keyword;
-	if (keyword!= "max_walking_distance=")
-	{
-		cout << "ERROR reading Parameters file, expecting: max_walking_distance=, read: " << keyword << endl;
-		return false;
-	}
-	in >> max_walking_distance;
-	in >> keyword;
-	if (keyword!= "max_waiting_time=")
-	{
-		cout << "ERROR reading Parameters file, expecting: max_waiting_time=, read: " << keyword << endl;
-		return false;
-	}
-	in >> max_waiting_time;
-	in >> keyword;
-	if (keyword!= "dominancy_perception_threshold=")
-	{
-		cout << "ERROR reading Parameters file, expecting: dominancy_perception_threshold=, read: " << keyword << endl;
-		return false;
-	}
-	in >> dominancy_perception_threshold;
 	return true;
 }
 

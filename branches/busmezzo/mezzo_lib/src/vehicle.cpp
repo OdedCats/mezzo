@@ -169,8 +169,8 @@ Bustype::Bustype ()
 {
 }
 
-Bustype::Bustype (int type_id_, double length_, int number_seats_, int capacity_):
-	type_id(type_id_), length(length_), number_seats(number_seats_), capacity(capacity_)
+Bustype::Bustype (int type_id_, string bus_type_name_, double length_, int number_seats_, int capacity_):
+	type_id(type_id_), bus_type_name(bus_type_name_), length(length_), number_seats(number_seats_), capacity(capacity_)
 {
 
 }

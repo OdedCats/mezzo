@@ -1391,7 +1391,7 @@ in >> keyword;
 			} 
 			i = limit;
 		}
-		else if (format == 2)
+		if (format == 2)
 		{
 			if (!read_passenger_rates_format2(in))
 			{
@@ -1399,7 +1399,7 @@ in >> keyword;
    				return false;
 			} 
 		}
-		else if (format == 3)
+		if (format == 3)
 		{
 			if (!read_passenger_rates_format3(in))
 			{
@@ -1407,7 +1407,7 @@ in >> keyword;
    				return false;
 			} 
 		}
-		else
+		if (format!=1 && format!=2 && format!=3 && format!=10)
 		{
 			cout << " readbuslines: read_passenger_rates returned false for wrong format coding " << (i+1) << endl;
    			return false;
@@ -1519,11 +1519,11 @@ bool Network::readbusstop (istream& in) // reads a busstop
 bool Network::readbusline(istream& in) // reads a busline
 {
 	//  buslines: nr_buslines
-	//{	id	name	origin	destination	route_id	vehtype mean_total_driving_time(ex. dwell time) average_headway ratio_headway_holding holding_strategy 	
+	//{	id	name	origin	destination	route_id	vehtype mean_total_driving_time(ex. dwell time) ratio_headway_holding holding_strategy 	
 	//	nr_stops	{	stop_id1  stop_id2  stop_id3  ...	stop_idn	} nr_time_points { stop_id1 ... stop_idn }
 	//}
   char bracket;
-  int busline_id, ori_id, dest_id, route_id, vehtype, average_headway, holding_strategy, nr_stops, stop_id, nr_tp, tp_id;
+  int busline_id, ori_id, dest_id, route_id, vehtype, holding_strategy, nr_stops, stop_id, nr_tp, tp_id;
   float ratio_headway_holding;
 	string name;
   vector <Busstop*> stops, line_timepoint;
@@ -1536,7 +1536,7 @@ bool Network::readbusline(istream& in) // reads a busline
 		cout << "readfile::readsbusline scanner jammed at " << bracket;
 		return false;
 	}
-	in >> busline_id >> name >> ori_id >> dest_id >> route_id >> vehtype >> average_headway >> ratio_headway_holding >> holding_strategy >> nr_stops;
+	in >> busline_id >> name >> ori_id >> dest_id >> route_id >> vehtype >> holding_strategy >> ratio_headway_holding >> nr_stops;
 	in >> bracket;
 	if (bracket != '{')
 	{
@@ -1562,7 +1562,7 @@ bool Network::readbusline(istream& in) // reads a busline
 	ODpair* odptr=(*(find_if (odpairs.begin(),odpairs.end(), compareod (odid) )));
 	Busroute* br=(*(find_if(busroutes.begin(), busroutes.end(), compare <Route> (route_id) )));
 	Vtype* vt= (*(find_if(vehtypes.vtypes.begin(), vehtypes.vtypes.end(), compare <Vtype> (vehtype) )));
-	Busline* bl= new Busline (busline_id,name,br,stops,vt,odptr,average_headway,ratio_headway_holding,holding_strategy);
+	Busline* bl= new Busline (busline_id,name,br,stops,vt,odptr,holding_strategy,ratio_headway_holding);
 	
 	for (vector<Busstop*>::iterator stop_iter = bl->stops.begin(); stop_iter < bl->stops.end(); stop_iter++)
 	{
@@ -1898,6 +1898,7 @@ bool Network::read_passenger_rates_format3 (istream& in) // reads the passenger 
   Busstop* bs_d=(*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (destination_stop_id) ))); 
   ODstops* od_stop = new ODstops (bs_o, bs_d, arrival_rate);
   odstops.push_back(od_stop);
+  odstops_demand.push_back(od_stop);
   bs_o->add_odstops_as_origin(bs_d, od_stop);
   bs_d->add_odstops_as_destination(bs_o, od_stop);
   in >> bracket;
@@ -2209,19 +2210,47 @@ void Network::find_all_paths ()
 // goes over all OD stop pairs to generate their path choice set
 {
 	generate_consecutive_stops();
+
+	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
+	{
+		for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
+		{
+			map <Busstop*, ODstops*> od_as_origin = (*basic_origin)->get_stop_as_origin();
+			if (od_as_origin[(*basic_destination)] == NULL)
+			{
+				if ((*basic_origin)->get_id() != (*basic_destination)->get_id())
+				{
+					ODstops* od_stop = new ODstops ((*basic_origin),(*basic_destination),0.0);
+					odstops.push_back(od_stop);
+					(*basic_origin)->add_odstops_as_origin((*basic_destination), od_stop);
+					(*basic_destination)->add_odstops_as_destination((*basic_origin), od_stop);
+				}
+			}
+		}
+	}
 	// first - generate all direct paths
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{
+		/*
 		map <Busstop*, ODstops*> od_as_origin = (*basic_origin)->get_stop_as_origin();
 		for (map<Busstop*, ODstops*>::iterator iter = od_as_origin.begin(); iter != od_as_origin.end(); iter++)
 		{
 			Busstop* basic_destination = (*iter).first;
 			find_direct_paths ((*basic_origin), basic_destination);
 		}
+		*/
+		for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
+		{
+			if ((*basic_origin)->get_id() != (*basic_destination)->get_id())
+			{
+				find_direct_paths ((*basic_origin), (*basic_destination));
+			}
+		}
 	}
 	// second - generate indirect paths with walking distances
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{
+		/*
 		map <Busstop*, ODstops*> od_as_origin = (*basic_origin)->get_stop_as_origin();
 		for (map<Busstop*, ODstops*>::iterator iter = od_as_origin.begin(); iter != od_as_origin.end(); iter++)
 		{
@@ -2230,6 +2259,17 @@ void Network::find_all_paths ()
 			find_recursive_connection_with_walking ((*basic_origin), basic_destination);
 			collect_im_stops.clear();
 			collect_walking_distances.clear();
+		}
+		*/
+		for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
+		{
+			if ((*basic_origin)->get_id() != (*basic_destination)->get_id())
+			{
+				collect_im_stops.push_back(*basic_origin);
+				find_recursive_connection_with_walking ((*basic_origin), (*basic_destination));
+				collect_im_stops.clear();
+				collect_walking_distances.clear();
+			}
 		}
 	}
 	// merge alternative paths
@@ -2609,49 +2649,89 @@ void Network::static_filtering_rules (Busstop* stop)
 	for (map <Busstop*, ODstops*>::iterator odpairs = od_as_origin.begin(); odpairs != od_as_origin.end(); odpairs++)
 	{
 		vector <Pass_path*> path_set = odpairs->second->get_path_set();
-		map <Pass_path*,bool> paths_to_be_deleted;
-		
-		// calculate the minimum total IVT for this OD pair
-		double min_total_scheduled_in_vehicle_time = path_set.front()->calc_total_scheduled_in_vehicle_time(odpairs->second);
-		for (vector <Pass_path*>::iterator path_iter = path_set.begin()+1; path_iter < path_set.end(); path_iter++)
+		if (path_set.empty() == false)
 		{
-			min_total_scheduled_in_vehicle_time = min (min_total_scheduled_in_vehicle_time, (*path_iter)->calc_total_scheduled_in_vehicle_time(odpairs->second));
-		}
-
-		for (vector <Pass_path*>::iterator path_iter = path_set.begin(); path_iter < path_set.end(); path_iter++)
-		{
-			paths_to_be_deleted[(*path_iter)] = false;
-		}
-		for (vector <Pass_path*>::iterator path = path_set.begin(); path < path_set.end()-1; path++)
-		{
-			// max walking distance
-			if ((*path)->calc_total_walking_distance() > theParameters->max_walking_distance)
+			map <Pass_path*,bool> paths_to_be_deleted;
+			// calculate the minimum total IVT for this OD pair
+			double min_total_scheduled_in_vehicle_time = path_set.front()->calc_total_scheduled_in_vehicle_time();
+			for (vector <Pass_path*>::iterator path_iter = path_set.begin()+1; path_iter < path_set.end(); path_iter++)
 			{
-				paths_to_be_deleted[(*path)] = true;
-				break;
+				min_total_scheduled_in_vehicle_time = min (min_total_scheduled_in_vehicle_time, (*path_iter)->calc_total_scheduled_in_vehicle_time());
 			}
-			// max IVT ratio
-			if ((*path)->calc_total_scheduled_in_vehicle_time(odpairs->second) > min_total_scheduled_in_vehicle_time * theParameters->max_in_vehicle_time_ratio)
+			for (vector <Pass_path*>::iterator path_iter = path_set.begin(); path_iter < path_set.end(); path_iter++)
 			{
-				paths_to_be_deleted[(*path)] = true;
-				break;
+				paths_to_be_deleted[(*path_iter)] = false;
 			}
-		}
-		for (map <Pass_path*,bool>::iterator delete_iter = paths_to_be_deleted.begin(); delete_iter != paths_to_be_deleted.end(); delete_iter++)	
-		// delete all the paths that did not fulfill the filtering rules
-		{
-			vector<Pass_path*>::iterator path_to_delete;
-			for (vector<Pass_path*>::iterator paths_iter = path_set.begin(); paths_iter < path_set.end(); paths_iter++)
+			for (vector <Pass_path*>::iterator path = path_set.begin(); path < path_set.end()-1; path++)
 			{
-				if ((*delete_iter).first->get_id() == (*paths_iter)->get_id() && (*delete_iter).second == true)
+				// max walking distance
+				if ((*path)->calc_total_walking_distance() > theParameters->max_walking_distance)
 				{
-					path_to_delete = paths_iter;
+					paths_to_be_deleted[(*path)] = true;
 					break;
 				}
+				// max IVT ratio
+				if ((*path)->calc_total_scheduled_in_vehicle_time() > min_total_scheduled_in_vehicle_time * theParameters->max_in_vehicle_time_ratio)
+				{
+					paths_to_be_deleted[(*path)] = true;
+					break;
+				}
+				// maybe worthwhile to wait (with worst case headway)
+				vector<vector<Busline*>> alt_lines = (*path)->get_alt_lines();
+				for (vector<vector<Busline*>>::iterator line_set_iter = alt_lines.begin(); line_set_iter < alt_lines.end(); line_set_iter++)
+				{
+					map <Busline*,bool> lines_to_be_deleted;
+					for (vector <Busline*>::iterator line_iter = (*line_set_iter).begin(); line_iter < (*line_set_iter).end(); line_iter++)
+					{
+						lines_to_be_deleted[(*line_iter)] = false;
+					}
+					vector<vector<Busstop*>> alt_stops = (*path)->get_alt_transfer__stops();
+					vector<vector<Busstop*>>::iterator stop_iter = alt_stops.begin();
+					stop_iter++;
+					map<Busline*, bool> lines_to_include = (*path)->check_maybe_worthwhile_to_wait((*path)->get_alt_lines().front(), stop_iter, 0);
+					for (map<Busline*, bool>::iterator lines_to_include_iter = lines_to_include.begin(); lines_to_include_iter != lines_to_include.end(); lines_to_include_iter++)
+					{
+						if ((*lines_to_include_iter).second == false)
+						// delete the lines that are not worthwhile to wait for
+						{
+							lines_to_be_deleted[(*lines_to_include_iter).first] = true;
+						}
+					}
+					for (map <Busline*,bool>::iterator delete_iter = lines_to_be_deleted.begin(); delete_iter != lines_to_be_deleted.end(); delete_iter++)	
+					// delete all the lines that did not fulfill the maybe worthwhile to wait rule
+					{
+						vector<Busline*>::iterator line_to_delete;
+						for (vector<Busline*>::iterator lines_iter = (*line_set_iter).begin(); lines_iter < (*line_set_iter).end(); lines_iter++)
+						{
+							if ((*delete_iter).first->get_id() == (*lines_iter)->get_id() && (*delete_iter).second == true)
+							{
+								line_to_delete = lines_iter;
+								break;
+							}
+						}
+						if ((*delete_iter).second == true)
+						{
+							(*line_set_iter).erase(line_to_delete);
+						}
+					}
+				}
 			}
-			if ((*delete_iter).second == true)
+			for (map <Pass_path*,bool>::iterator delete_iter = paths_to_be_deleted.begin(); delete_iter != paths_to_be_deleted.end(); delete_iter++)	
+			// delete all the paths that did not fulfill the filtering rules
 			{
-				path_set.erase(path_to_delete);
+				vector<Pass_path*>::iterator path_to_delete;
+				for (vector<Pass_path*>::iterator paths_iter = path_set.begin(); paths_iter < path_set.end(); paths_iter++)
+				{
+					if ((*delete_iter).first->get_id() == (*paths_iter)->get_id() && (*delete_iter).second == true)
+					{
+						path_to_delete = paths_iter;
+						break;
+					}
+				}
+				if ((*delete_iter).second == true)
+				{
+					path_set.erase(path_to_delete);
+				}
 			}
 		}
 	}
@@ -2678,34 +2758,34 @@ void Network::dominancy_rules (Busstop* stop)
 				for (vector <Pass_path*>::iterator path2 = path1 + 1; path2 < path_set.end(); path2++)
 				{
 					// check if path1 dominates path2
-					if ((*path1)->find_number_of_transfers() < (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second) * (1 + theParameters->dominancy_perception_threshold) <= (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second) && (*path1)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold) <= (*path2)->calc_total_walking_distance())
+					if ((*path1)->find_number_of_transfers() < (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time() * (1 + theParameters->dominancy_perception_threshold) <= (*path2)->calc_total_scheduled_in_vehicle_time() && (*path1)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold) <= (*path2)->calc_total_walking_distance())
 					{
 						paths_to_be_deleted[(*path2)] = true;
 						break;
 					}
-					if ((*path1)->find_number_of_transfers() <= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second) * (1 + theParameters->dominancy_perception_threshold) < (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second) && (*path1)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold) <= (*path2)->calc_total_walking_distance())
+					if ((*path1)->find_number_of_transfers() <= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time() * (1 + theParameters->dominancy_perception_threshold) < (*path2)->calc_total_scheduled_in_vehicle_time() && (*path1)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold) <= (*path2)->calc_total_walking_distance())
 					{
 						paths_to_be_deleted[(*path2)] = true;
 						break;
 					}
-					if ((*path1)->find_number_of_transfers() <= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second) * (1 + theParameters->dominancy_perception_threshold) <= (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second)&& (*path1)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold) < (*path2)->calc_total_walking_distance())
+					if ((*path1)->find_number_of_transfers() <= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time() * (1 + theParameters->dominancy_perception_threshold) <= (*path2)->calc_total_scheduled_in_vehicle_time()&& (*path1)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold) < (*path2)->calc_total_walking_distance())
 					{
 						paths_to_be_deleted[(*path2)] = true;
 						break;
 					}
 					// check if path2 dominates path1
-					if ((*path1)->find_number_of_transfers() > (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second) >= (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second) * (1+ theParameters->dominancy_perception_threshold)&& (*path1)->calc_total_walking_distance() >= (*path2)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold)) 
+					if ((*path1)->find_number_of_transfers() > (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time() >= (*path2)->calc_total_scheduled_in_vehicle_time() * (1+ theParameters->dominancy_perception_threshold)&& (*path1)->calc_total_walking_distance() >= (*path2)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold)) 
 					{
 						paths_to_be_deleted[(*path1)] = true;
 						break;
 					}
-					if ((*path1)->find_number_of_transfers() >= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second) > (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second) * (1+ theParameters->dominancy_perception_threshold)&& (*path1)->calc_total_walking_distance() >= (*path2)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold)) 
+					if ((*path1)->find_number_of_transfers() >= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time() > (*path2)->calc_total_scheduled_in_vehicle_time() * (1+ theParameters->dominancy_perception_threshold)&& (*path1)->calc_total_walking_distance() >= (*path2)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold)) 
 					{ 
 					
 						paths_to_be_deleted[(*path1)] = true;
 						break;
 					}
-					if ((*path1)->find_number_of_transfers() >= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(odpairs->second) >= (*path2)->calc_total_scheduled_in_vehicle_time(odpairs->second) * (1+ theParameters->dominancy_perception_threshold)&& (*path1)->calc_total_walking_distance() > (*path2)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold)) 
+					if ((*path1)->find_number_of_transfers() >= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time() >= (*path2)->calc_total_scheduled_in_vehicle_time() * (1+ theParameters->dominancy_perception_threshold)&& (*path1)->calc_total_walking_distance() > (*path2)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold)) 
 					{
 						paths_to_be_deleted[(*path1)] = true;
 						break;
@@ -2944,6 +3024,7 @@ bool Network::read_bustype (istream& in) // reads a bustype
   char bracket;
   int type_id, number_seats, capacity;
   double length;
+  string bus_type_name;
   bool ok= true;
   vector <Bustype*> types;
   in >> bracket;
@@ -2952,8 +3033,8 @@ bool Network::read_bustype (istream& in) // reads a bustype
   	cout << "readfile::readsbusstop scanner jammed at " << bracket;
   	return false;
   }
-  in >> type_id  >> length >> number_seats >> capacity;
-  Bustype* bt= new Bustype (type_id, length, number_seats, capacity);
+  in >> type_id  >> bus_type_name >> length >> number_seats >> capacity;
+  Bustype* bt= new Bustype (type_id, bus_type_name, length, number_seats, capacity);
   in >> bracket;
   if (bracket != '}')
   {
@@ -3698,7 +3779,7 @@ bool Network::writeheadways(string name)
 
 }
 
-bool Network::write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6)
+bool Network::write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8)
 {
 	ofstream out1(name1.c_str(),ios_base::app);
 	ofstream out2(name2.c_str(),ios_base::app);
@@ -3706,12 +3787,16 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 	ofstream out4(name4.c_str(),ios_base::app);
 	ofstream out5(name5.c_str(),ios_base::app);
 	ofstream out6(name6.c_str(),ios_base::app);
+	ofstream out7(name7.c_str(),ios_base::app);
+	ofstream out8(name8.c_str(),ios_base::app);
 	assert(out1);
 	assert(out2);
 	assert(out3);
 	assert(out4);
 	assert(out5);
 	assert(out6);
+	assert(out7);
+	assert(out8);
 	// writing the crude data and summary outputs for each bus stop
 	for (vector<Busstop*>::iterator iter = busstops.begin();iter != busstops.end();iter++)
 	{	
@@ -3746,9 +3831,11 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 		for (map<Passenger*,list<Pass_boarding_decision>>::iterator pass_iter1 = boarding_decisions.begin(); pass_iter1 != boarding_decisions.end(); pass_iter1++)
 		{
 			(*od_iter)->write_boarding_output(out5, (*pass_iter1).first);
+			(*pass_iter1).first->write_selected_path(out8);
 		}
 	}
 	out5.close();
+	out8.close();
 	// writing the alighting decisions of passenger
 	for (vector<ODstops*>::iterator od_iter = odstops.begin(); od_iter < odstops.end(); od_iter++)
 	{
@@ -3759,6 +3846,12 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 		}
 	}
 	out6.close();
+	// writing the assignment results in terms of each segment on individual trips
+	for (vector<Bustrip*>::iterator iter = bustrips.begin(); iter!= bustrips.end(); iter++)
+	{
+		(*iter)->write_assign_segments_output(out7);
+	}
+	out7.close();
 	return true;
 }
 
@@ -4954,7 +5047,7 @@ bool Network::writeall(unsigned int repl)
 	//writeheadways("timestamps.dat"); // commented out, since no-one uses them 
 	writeassmatrices(assignmentmatfile);
 	write_v_queues(vqueuesfile);
-	this->write_busstop_output(workingdir + "buslog_out.dat", workingdir + "busstop_sum.dat", workingdir + "busline_sum.dat", workingdir + "bus_trajectory.dat", workingdir + "passenger_boarding.dat", workingdir + "passenger_alighting.dat");
+	this->write_busstop_output(workingdir + "buslog_out.dat", workingdir + "busstop_sum.dat", workingdir + "busline_sum.dat", workingdir + "bus_trajectory.dat", workingdir + "passenger_boarding.dat", workingdir + "passenger_alighting.dat", workingdir + "assignment_segments.dat", workingdir + "selected_paths.dat");
 	return true;
 }
 
@@ -5185,9 +5278,9 @@ bool Network::init()
 		(*iter3)->execute(eventlist,initvalue);
 		initvalue+=0.00001;
 	}
-	for (vector<ODstops*>::iterator iter_odstops = odstops.begin(); iter_odstops < odstops.end(); iter_odstops++ )
+	for (vector<ODstops*>::iterator iter_odstops = odstops_demand.begin(); iter_odstops < odstops_demand.end(); iter_odstops++ )
 	{
-		(*iter_odstops)->execute(eventlist,initvalue); // adds an event for the generation time for the first passenger per OD in terms of stops
+		(*iter_odstops)->execute(eventlist,initvalue); // adds an event for the generation time of the first passenger per OD in terms of stops
 		initvalue+=0.00001;
 	}
 

@@ -68,7 +68,7 @@ int Pass_path::find_number_of_transfers ()
 	return (nr_trans); // omitting origin and destination stops
 }
 
-double Pass_path::calc_total_scheduled_in_vehicle_time (ODstops* odstops)
+double Pass_path::calc_total_scheduled_in_vehicle_time ()
 {
 	double sum_in_vehicle_time = 0.0;
 	vector<vector <Busstop*>>::iterator iter_alt_transfer_stops = alt_transfer_stops.begin();
@@ -92,23 +92,27 @@ double Pass_path::calc_total_walking_distance()
 	return (sum_walking_distance); // minutes
 }
 
-double Pass_path::calc_total_scheduled_headway (ODstops* odstop, double time)
+double Pass_path::calc_total_scheduled_headway (double time)
 {
 	double sum_headway_time = 0.0;
+	vector <vector <Busstop*>>::iterator alt_transfer_stops_iter = alt_transfer_stops.begin();
+	alt_transfer_stops_iter++;
 	for (vector<vector <Busline*>>::iterator iter_alt_lines = alt_lines.begin(); iter_alt_lines < alt_lines.end(); iter_alt_lines++)
 	{
-		sum_headway_time += calc_curr_leg_headway(*iter_alt_lines, odstop, time);
+		sum_headway_time += calc_curr_leg_headway((*iter_alt_lines), alt_transfer_stops_iter, time);
+		alt_transfer_stops_iter++;
+		alt_transfer_stops_iter++;
 	}
 	return sum_headway_time; // minutes
 }
 
-double Pass_path::calc_curr_leg_headway (vector<Busline*> leg_lines, ODstops* odstop, double time)
+double Pass_path::calc_curr_leg_headway (vector<Busline*> leg_lines, vector <vector <Busstop*>>::iterator stop_iter, double time)
 {
 	double accumlated_frequency = 0.0;
-	map<Busline*, bool> worth_to_wait = check_maybe_worthwhile_to_wait(leg_lines, odstop);
+	map<Busline*, bool> worth_to_wait = check_maybe_worthwhile_to_wait(leg_lines, stop_iter, 1);
 	for (vector<Busline*>::iterator iter_leg_lines = leg_lines.begin(); iter_leg_lines < leg_lines.end(); iter_leg_lines++)
 	{
-		if ((*iter_leg_lines)->check_line_availability(odstop->get_origin(), time) == true && worth_to_wait[(*iter_leg_lines)] == true) 
+		if ((*iter_leg_lines)->check_line_availability((*stop_iter).front(), time) == true && worth_to_wait[(*iter_leg_lines)] == true) 
 			// dynamic filtering rules - consider only if it is available in a pre-defined time frame and it is maybe worthwhile to wait for it
 		{
 			accumlated_frequency += 3600.0 / ((*iter_leg_lines)->calc_curr_line_headway ());
@@ -121,49 +125,69 @@ double Pass_path::calc_curr_leg_headway (vector<Busline*> leg_lines, ODstops* od
 	return (60/accumlated_frequency); // minutes
 }
 
-double Pass_path::calc_arriving_utility (ODstops* odstop)
+double Pass_path::calc_arriving_utility ()
 // this function currently assumes direct paths (has to include waiting times at transfers)
 {
-	return (random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4) * number_of_transfers + random->nrandom(theParameters->in_vehicle_time_coefficient, theParameters->in_vehicle_time_coefficient / 4 ) * calc_total_scheduled_in_vehicle_time(odstop) + random->nrandom(theParameters->walking_time_coefficient, theParameters->walking_time_coefficient/4) * calc_total_walking_distance());
+	return (random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4) * number_of_transfers + random->nrandom(theParameters->in_vehicle_time_coefficient, theParameters->in_vehicle_time_coefficient / 4 ) * calc_total_scheduled_in_vehicle_time() + random->nrandom(theParameters->walking_time_coefficient, theParameters->walking_time_coefficient/4) * (calc_total_walking_distance() / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4)));
 }
 
-double Pass_path::calc_waiting_utility (ODstops* odstop, double time)
+double Pass_path::calc_waiting_utility (vector <vector <Busstop*>>::iterator stop_iter, double time)
 {	
-	// a dynamic filtering rule - if there is only one line in the first leg and it is not available - then this waiting alternative is irrelevant
+	stop_iter++;
 	vector<vector <Busline*>>::iterator iter_alt_lines = alt_lines.begin(); 
+	if (alt_transfer_stops.size() == 2) // in case is is walking-only path
+	{
+		return (random->nrandom(theParameters->walking_time_coefficient, theParameters->walking_time_coefficient/4) * calc_total_walking_distance()/ random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4));
+	}
 	if ((*iter_alt_lines).size() == 1)
 	{
-		if ((*iter_alt_lines).front()->check_line_availability(odstop->get_origin(),time) == false)
+		// a dynamic filtering rule - if there is only one line in the first leg and it is not available - then this waiting alternative is irrelevant
+		if ((*iter_alt_lines).front()->check_line_availability((*stop_iter).front(),time) == false)
 		{
 			return -10.0;
 		}
 	}
-	return (random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4) * number_of_transfers + random->nrandom(theParameters->in_vehicle_time_coefficient, theParameters->in_vehicle_time_coefficient / 4 ) * calc_total_scheduled_in_vehicle_time(odstop) + random->nrandom(theParameters->waiting_time_coefficient, theParameters->waiting_time_coefficient / 4) * calc_estimated_waiting_time(odstop, time) + random->nrandom(theParameters->walking_time_coefficient, theParameters->walking_time_coefficient/4) * calc_total_walking_distance());
+	return (random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4) * number_of_transfers + random->nrandom(theParameters->in_vehicle_time_coefficient, theParameters->in_vehicle_time_coefficient / 4 ) * calc_total_scheduled_in_vehicle_time() + random->nrandom(theParameters->waiting_time_coefficient, theParameters->waiting_time_coefficient / 4) * calc_estimated_waiting_time(time) + random->nrandom(theParameters->walking_time_coefficient, theParameters->walking_time_coefficient/4) * calc_total_walking_distance()/ random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4));
 }
 
-double Pass_path::calc_estimated_waiting_time (ODstops* odstop, double time)
+double Pass_path::calc_estimated_waiting_time (double time)
 {	
-	return (calc_total_scheduled_headway(odstop, time)/2);
+	return (calc_total_scheduled_headway(time)/2);
 }
 
-map<Busline*, bool> Pass_path::check_maybe_worthwhile_to_wait (vector<Busline*> leg_lines, ODstops* odstop)
+map<Busline*, bool> Pass_path::check_maybe_worthwhile_to_wait (vector<Busline*> leg_lines, vector <vector <Busstop*>>::iterator stop_iter, bool dynamic_indicator)
 {
 	// based on the complete headway
-	vector <vector <Busstop*>>::iterator alt_transfer_stops_iter = alt_transfer_stops.begin();
-	alt_transfer_stops_iter++; // the second stops set on the path
+	stop_iter++; // the second stops set on the path
 	map <Busline*,bool> worth_to_wait;
 	for (vector<Busline*>::iterator iter_leg_lines = leg_lines.begin(); iter_leg_lines < leg_lines.end(); iter_leg_lines++)
 	{
 		worth_to_wait[(*iter_leg_lines)] = true;
 	}
-	for (vector<Busline*>::iterator iter_leg_lines = leg_lines.begin(); iter_leg_lines < leg_lines.end(); iter_leg_lines++)
+	if (leg_lines.size() > 1)
+		// only if there is what to compare
 	{
-		for (vector<Busline*>::iterator iter1_leg_lines = leg_lines.begin(); iter1_leg_lines < leg_lines.end(); iter1_leg_lines++)
+		for (vector<Busline*>::iterator iter_leg_lines = leg_lines.begin(); iter_leg_lines < leg_lines.end()-1; iter_leg_lines++)
 		{
-			if ((*iter_leg_lines)->calc_curr_line_ivt(odstop->get_origin(),(*alt_transfer_stops_iter).front()) + (*iter_leg_lines)->calc_curr_line_headway() < (*iter1_leg_lines)->calc_curr_line_ivt(odstop->get_origin(),(*alt_transfer_stops_iter).front()))
+			for (vector<Busline*>::iterator iter1_leg_lines = iter_leg_lines+1; iter1_leg_lines < leg_lines.end(); iter1_leg_lines++)
 			{
-				// if IVT(1) + H (1) < IVT (2) then line 2 is not worthwhile to wait for
-				worth_to_wait[(*iter1_leg_lines)] = false;
+				if (dynamic_indicator == 0) // in case it is a static filtering rule
+				{
+					if ((*iter_leg_lines)->calc_curr_line_ivt((*stop_iter).front(),(*(stop_iter+1)).front()) + (*iter_leg_lines)->calc_max_headway() < (*iter1_leg_lines)->calc_curr_line_ivt((*stop_iter).front(),(*(stop_iter+1)).front()))		
+					{
+						// if IVT(1) + Max H (1) < IVT (2) then line 2 is not worthwhile to wait for
+						worth_to_wait[(*iter1_leg_lines)] = false;
+					}
+				}
+				// in case it is a dynamic filtering rule
+				else 
+				{
+					if ((*iter_leg_lines)->calc_curr_line_ivt((*stop_iter).front(),(*(stop_iter+1)).front()) + (*iter_leg_lines)->calc_curr_line_headway() < (*iter1_leg_lines)->calc_curr_line_ivt((*stop_iter).front(),(*(stop_iter+1)).front()))
+					{
+						// if IVT(1) + H (1) < IVT (2) then line 2 is not worthwhile to wait for
+						worth_to_wait[(*iter1_leg_lines)] = false;
+					}
+				}
 			}
 		}
 	}

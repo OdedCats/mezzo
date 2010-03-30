@@ -88,7 +88,7 @@ class Bustype
 {
 public:
 	Bustype ();
-	Bustype (int type_id_, double length_, int number_seats_, int capacity_);
+	Bustype (int type_id_, string bus_type_name, double length_, int number_seats_, int capacity_);
 	~Bustype ();
 	double get_length () {return length;}
 	int get_number_seats () {return number_seats;}
@@ -96,6 +96,7 @@ public:
 	int get_id () {return type_id;}
 protected:
 	int type_id;	// bus type id
+	string bus_type_name;
 	double length;
 	int number_seats;
 	int capacity;

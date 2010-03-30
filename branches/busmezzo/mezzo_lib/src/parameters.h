@@ -170,6 +170,7 @@ public:
    double in_vehicle_time_coefficient;
    double waiting_time_coefficient;
    double walking_time_coefficient;
+   double average_walking_speed;
    int max_nr_extra_transfers;
    double max_in_vehicle_time_ratio;
    double max_walking_distance;

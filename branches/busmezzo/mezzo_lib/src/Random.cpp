@@ -239,6 +239,10 @@ Random::mrandom (vector<double> probs)
 	}
 	for (vector<double>::iterator iter1 = accumlated_probs.begin(); iter1 < accumlated_probs.end(); iter1++)
 	{
+		if (value == 1.0)
+		{
+			return probs.size();
+		}
 		if (value > (*iter1) && value < (*(iter1+1)))
 		{
 			return position;
