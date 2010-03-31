@@ -3779,7 +3779,7 @@ bool Network::writeheadways(string name)
 
 }
 
-bool Network::write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8)
+bool Network::write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9)
 {
 	ofstream out1(name1.c_str(),ios_base::app);
 	ofstream out2(name2.c_str(),ios_base::app);
@@ -3789,6 +3789,7 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 	ofstream out6(name6.c_str(),ios_base::app);
 	ofstream out7(name7.c_str(),ios_base::app);
 	ofstream out8(name8.c_str(),ios_base::app);
+	ofstream out9(name9.c_str(),ios_base::app);
 	assert(out1);
 	assert(out2);
 	assert(out3);
@@ -3797,6 +3798,7 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 	assert(out6);
 	assert(out7);
 	assert(out8);
+	assert(out9);
 	// writing the crude data and summary outputs for each bus stop
 	for (vector<Busstop*>::iterator iter = busstops.begin();iter != busstops.end();iter++)
 	{	
@@ -3816,8 +3818,11 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 	{	
 		(*iter)->calculate_sum_output_line();
 		(*iter)->get_output_summary().write(out3,(*iter)->get_id());
+		(*iter)->calc_line_assignment();
+		(*iter)->write_assign_output(out9);
 	}
 	out3.close();
+	out9.close();
 	// writing the trajectory output for each bus vehicle (by stops)
 	for (vector<Bus*>::iterator iter = busvehicles.begin(); iter!= busvehicles.end(); iter++)
 	{
@@ -5047,7 +5052,7 @@ bool Network::writeall(unsigned int repl)
 	//writeheadways("timestamps.dat"); // commented out, since no-one uses them 
 	writeassmatrices(assignmentmatfile);
 	write_v_queues(vqueuesfile);
-	this->write_busstop_output(workingdir + "buslog_out.dat", workingdir + "busstop_sum.dat", workingdir + "busline_sum.dat", workingdir + "bus_trajectory.dat", workingdir + "passenger_boarding.dat", workingdir + "passenger_alighting.dat", workingdir + "assignment_segments.dat", workingdir + "selected_paths.dat");
+	this->write_busstop_output(workingdir + "buslog_out.dat", workingdir + "busstop_sum.dat", workingdir + "busline_sum.dat", workingdir + "bus_trajectory.dat", workingdir + "passenger_boarding.dat", workingdir + "passenger_alighting.dat", workingdir + "segments_trip_loads.dat", workingdir + "selected_paths.dat", workingdir + "segments_line_loads.dat");
 	return true;
 }
 

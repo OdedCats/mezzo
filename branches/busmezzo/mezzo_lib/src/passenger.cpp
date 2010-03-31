@@ -77,40 +77,43 @@ Busstop* Passenger::make_alighting_decision (Bustrip* boarding_bus, double time)
 	for (vector <Pass_path*>::iterator path_iter = path_set.begin(); path_iter < path_set.end(); path_iter++)
 	{
 		vector<vector<Busline*>> alt_lines = (*path_iter)->get_alt_lines();
-		vector<vector<Busline*>>::iterator first_leg = alt_lines.begin();
-		for (vector <Busline*>::iterator first_leg_lines = (*first_leg).begin(); first_leg_lines < (*first_leg).end(); first_leg_lines++)
+		if (alt_lines.empty() == false) // in case it is not a walking-only alternative
 		{
-			/*
-			// currently alights at the first possible transfer stop
-			if (boarding_bus->get_line()->get_id() == (*first_leg_lines)->get_id())
+			vector<vector<Busline*>>::iterator first_leg = alt_lines.begin();
+			for (vector <Busline*>::iterator first_leg_lines = (*first_leg).begin(); first_leg_lines < (*first_leg).end(); first_leg_lines++)
 			{
-				vector<vector<Busstop*>> alt_stops = (*path_iter)->get_alt_transfer__stops();
-				vector<vector<Busstop*>>::iterator stops_iter = alt_stops.begin();
-				stops_iter++;
-				return (*stops_iter).front();
-			}
-			*/
-			if (boarding_bus->get_line()->get_id() == (*first_leg_lines)->get_id())
-			{
-				vector<vector<Busstop*>> alt_stops = (*path_iter)->get_alt_transfer__stops();
-				vector<vector<Busstop*>>::iterator stops_iter = alt_stops.begin() + 1;
-				for (vector<Busstop*>::iterator first_transfer_stops = (*stops_iter).begin(); first_transfer_stops < (*stops_iter).end(); first_transfer_stops++)
+				/*
+				// currently alights at the first possible transfer stop
+				if (boarding_bus->get_line()->get_id() == (*first_leg_lines)->get_id())
 				{
-					map <Busstop*, ODstops*> od_stops = (*first_transfer_stops)->get_stop_as_origin();
-					ODstops* left_od_stop = od_stops[this->get_OD_stop()->get_destination()];	
-					if ((*first_transfer_stops)->get_id() == OD_stop->get_destination()->get_id())
-					// in case it is the final destination for this passeneger
+					vector<vector<Busstop*>> alt_stops = (*path_iter)->get_alt_transfer__stops();
+					vector<vector<Busstop*>>::iterator stops_iter = alt_stops.begin();
+					stops_iter++;
+					return (*stops_iter).front();
+				}
+				*/
+				if (boarding_bus->get_line()->get_id() == (*first_leg_lines)->get_id())
+				{
+					vector<vector<Busstop*>> alt_stops = (*path_iter)->get_alt_transfer__stops();
+					vector<vector<Busstop*>>::iterator stops_iter = alt_stops.begin() + 2; // pointing to the third place - the first transfer stop
+					for (vector<Busstop*>::iterator first_transfer_stops = (*stops_iter).begin(); first_transfer_stops < (*stops_iter).end(); first_transfer_stops++)
 					{
-						candidate_transfer_stops_u[(*first_transfer_stops)] = theParameters->in_vehicle_time_coefficient * (boarding_bus->get_line()->calc_curr_line_ivt(OD_stop->get_origin(),OD_stop->get_destination()))/60;
-						// the only utility component is the IVT till the destination
-					} 
-					else
-					// in case it is an intermediate transfer stop
-					{
-						candidate_transfer_stops_u[(*first_transfer_stops)] = left_od_stop->calc_combined_set_utility_for_alighting (this, boarding_bus, time);
-						// the utility is combined for all paths from this transfer stop (incl. travel time till there and transfer penalty)
+						map <Busstop*, ODstops*> od_stops = (*first_transfer_stops)->get_stop_as_origin();
+						ODstops* left_od_stop = od_stops[this->get_OD_stop()->get_destination()];	
+						if ((*first_transfer_stops)->get_id() == OD_stop->get_destination()->get_id())
+						// in case it is the final destination for this passeneger
+						{
+							candidate_transfer_stops_u[(*first_transfer_stops)] = theParameters->in_vehicle_time_coefficient * (boarding_bus->get_line()->calc_curr_line_ivt(OD_stop->get_origin(),OD_stop->get_destination()))/60;
+							// the only utility component is the IVT till the destination
+						} 
+						else
+						// in case it is an intermediate transfer stop
+						{
+							candidate_transfer_stops_u[(*first_transfer_stops)] = left_od_stop->calc_combined_set_utility_for_alighting (this, boarding_bus, time);
+							// the utility is combined for all paths from this transfer stop (incl. travel time till there and transfer penalty)
+						}
+						// note - this may be called several times, but result with the same calculation
 					}
-					// note - this may be called several times, but result with the same calculation
 				}
 			}
 		}
@@ -158,7 +161,7 @@ Busstop* Passenger::make_alighting_decision (Bustrip* boarding_bus, double time)
 	return candidate_transfer_stops_p.begin()->first; // arbitary choice in case something failed
 }
 
-Busstop* Passenger::make_connection_decision (Busstop* first_stop, double time)
+Busstop* Passenger::make_connection_decision (double time)
 {
 	map <Busstop*, double> candidate_connection_stops_u; // the double value is the utility associated with the respective stop
 	map <Busstop*, double> candidate_connection_stops_p; // the double value is the probability associated with the respective stop
@@ -166,7 +169,7 @@ Busstop* Passenger::make_connection_decision (Busstop* first_stop, double time)
 	for (vector <Pass_path*>::iterator path_iter = path_set.begin(); path_iter < path_set.end(); path_iter++)
 	{
 		vector<vector<Busstop*>> alt_stops = (*path_iter)->get_alt_transfer__stops();
-		vector<vector<Busstop*>>::iterator stops_iter = alt_stops.begin();
+		vector<vector<Busstop*>>::iterator stops_iter = alt_stops.begin()+1;
 		for (vector<Busstop*>::iterator connected_stop = (*stops_iter).begin(); connected_stop < (*stops_iter).end(); connected_stop++)
 		// going over all the stops at the second (connected) set
 		{

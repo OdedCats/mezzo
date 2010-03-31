@@ -53,6 +53,19 @@ public:
 	double line_late;
 };
 
+class Busline_assign // container object holding output data for trip assignments
+{
+public:
+	Busline_assign (int line_id_, int start_stop_id_, int end_stop_id_,	int passenger_load_):
+							line_id(line_id_), start_stop_id(start_stop_id_),end_stop_id(end_stop_id_),passenger_load(passenger_load_) {}
+	void write (ostream& out) { out << line_id << '\t'<< start_stop_id<< '\t'<<end_stop_id << '\t'<< passenger_load  << '\t' << endl; }
+	void reset () {line_id = 0 ; start_stop_id = 0; end_stop_id = 0; passenger_load = 0;}
+	int line_id;
+	int start_stop_id;
+	int end_stop_id;
+	int passenger_load;
+};
+
 class Busline: public Action
 {
 public:
@@ -97,6 +110,9 @@ public:
 	
 	// output-related functions
 	void calculate_sum_output_line(); 
+	void calc_line_assignment();
+	void record_passenger_loads (vector<Busstop*>::iterator stop_iter); //!< creates a log-file for passenegr load assignment info
+	void write_assign_output(ostream & out);
 
 	vector <Busstop*>  stops; //!< contains all the stops on this line
 
@@ -115,6 +131,8 @@ protected:
 	bool active; //!< is true when the busline has started generating trips
 	vector <Start_trip>::iterator curr_trip; //!< indicates the next trip
 	Output_Summary_Line output_summary;
+	map <Busstop*, int> stop_pass;
+	list <Busline_assign> output_line_assign;
 };
 
 typedef pair<Busstop*,double> Visit_stop;
@@ -155,6 +173,7 @@ public:
 	vector <Visit_stop*> :: iterator& get_next_stop() {return next_stop;} //!< returns pointer to next stop
 	void set_enter_time (double enter_time_) {enter_time = enter_time_;}
 	double get_enter_time () {return enter_time;}
+	list <Bustrip_assign> get_output_passenger_load() {return output_passenger_load;}
 
 // other functions:	
 //	bool is_trip_timepoint(Busstop* stop); //!< returns 1 if true, 0 if false, -1 if busstop not found
@@ -173,11 +192,11 @@ public:
 
 // public vectors
 	vector <Visit_stop*> stops; //!< contains all the busstops and the times that they are supposed to be served. NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
-	map <Busstop*, int > assign_segements; //!< records the number of pass. that use the segment that starts at this stop up to the next stop, during the simulation running time
 	vector <Start_trip*> driving_roster; //!< trips assignment for each bus vehicle.
 	map <Busstop*, passengers> passengers_on_board; // passenger on-board storaged by their alighting stop (format 3)
 	map <Busstop*, int> nr_expected_alighting; //!< number of passengers expected to alight at the busline's stops (format 2)
-	
+	map <Busstop*, int> assign_segements; // contains the number of pass. travelling between trip segments
+
 protected:
 	int id; //!< course nr
 	Bus* busv; //!< pointer to the bus vehicle
@@ -187,7 +206,7 @@ protected:
 	double starttime; //!< when the trip is schedule to departure from the origin
 	vector <Visit_stop*> :: iterator next_stop; 
 	Random* random;
-	list <Bustrip_assign> output_passenger_load; 
+	list <Bustrip_assign> output_passenger_load;  // contains the information on travelling on the segment starting at stop
 	double enter_time; // the time it entered the most recently bus stop
 //	map <Busstop*,bool> trips_timepoint; //!< will be relevant only when time points are trip-specific. binary map with time point indicatons for stops on route only (according to the schedule input file)  
 	Eventlist* eventlist; //!< for use by busstops etc to book themselves.

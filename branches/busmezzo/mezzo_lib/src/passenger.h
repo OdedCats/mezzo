@@ -34,7 +34,7 @@ public:
 	// Passenger decision processes - currently the simplest case possible is assumed
 	bool make_boarding_decision (Bustrip* arriving_bus, double time); // boarding decision making 
 	Busstop* make_alighting_decision (Bustrip* boarding_bus, double time); // alighting decision making 
-	Busstop* make_connection_decision (Busstop* first_stop, double time); // connection link decision (walking between stops)
+	Busstop* make_connection_decision (double time); // connection link decision (walking between stops)
 
 	// output-related 
 	void write_selected_path(ostream& out);

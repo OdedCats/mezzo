@@ -56,7 +56,7 @@ bool ODstops::execute (Eventlist* eventlist, double curr_time) // generate passe
 		pid++; 
 		pass->init (pid, curr_time, this);
 		pass->add_to_selected_path_stop(origin_stop);
-		Busstop* connection_stop = pass->make_connection_decision(origin_stop, curr_time);
+		Busstop* connection_stop = pass->make_connection_decision(curr_time);
 		if (connection_stop->get_id() == origin_stop->get_id())
 		{
 			map<Busstop*,double> walk_dis = origin_stop->get_walking_distances();
@@ -95,13 +95,16 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus, double time)
 		{
 			break;
 		}
-		vector <vector <Busline*>> alt_lines = (*path)->get_alt_lines();
-		vector <Busline*> first_lines = alt_lines.front(); // need to check only for the first leg
-		for (vector <Busline*>::iterator line = first_lines.begin(); line < first_lines.end(); line++)
+		if ((*path)->get_alt_lines().empty() == false) // in case it is not a walk-only alternative
 		{
-			if ((*line)->get_id() == arriving_bus->get_id())
+			vector <vector <Busline*>> alt_lines = (*path)->get_alt_lines();
+			vector <Busline*> first_lines = alt_lines.front(); // need to check only for the first leg
+			for (vector <Busline*>::iterator line = first_lines.begin(); line < first_lines.end(); line++)
 			{
-				in_alt = true;
+				if ((*line)->get_id() == arriving_bus->get_id())
+				{
+					in_alt = true;
+				}
 			}
 		}
 	}
@@ -116,14 +119,17 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus, double time)
 		for (vector<Pass_path*>::iterator iter_paths = path_set.begin(); iter_paths < path_set.end(); iter_paths++)
 		{
 			(*iter_paths)->set_arriving_bus_rellevant(false);
-			first_leg_lines = (*iter_paths)->get_alt_lines().front();
-			for(vector<Busline*>::iterator iter_first_leg_lines = first_leg_lines.begin(); iter_first_leg_lines < first_leg_lines.end(); iter_first_leg_lines++)
+			if ((*iter_paths)->get_alt_lines().empty() == false) //  in case it is not a walking-only alternative
 			{
-				if ((*iter_first_leg_lines)->get_id() == arriving_bus->get_id()) // if the arriving bus is a possible first leg for this path alternative
+				first_leg_lines = (*iter_paths)->get_alt_lines().front();
+				for(vector<Busline*>::iterator iter_first_leg_lines = first_leg_lines.begin(); iter_first_leg_lines < first_leg_lines.end(); iter_first_leg_lines++)
 				{
-					boarding_utility += exp((*iter_paths)->calc_arriving_utility()); 
-					(*iter_paths)->set_arriving_bus_rellevant(true);
-					break;
+					if ((*iter_first_leg_lines)->get_id() == arriving_bus->get_id()) // if the arriving bus is a possible first leg for this path alternative
+					{
+						boarding_utility += exp((*iter_paths)->calc_arriving_utility()); 
+						(*iter_paths)->set_arriving_bus_rellevant(true);
+						break;
+					}
 				}
 			}
 		}

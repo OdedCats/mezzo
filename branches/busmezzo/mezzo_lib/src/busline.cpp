@@ -295,6 +295,41 @@ void Busline::calculate_sum_output_line()
 	output_summary.line_late = output_summary.line_late / stops.size();
 }
 
+void Busline::calc_line_assignment()
+{
+	for (vector <Busstop*>::iterator stop_nr = stops.begin(); stop_nr < stops.end() - 1; stop_nr++) // initialize
+	{
+		stop_pass [(*stop_nr)] = 0;
+	}
+	for (vector <Start_trip>::iterator trip_iter = trips.begin(); trip_iter < trips.end(); trip_iter++) // calculating
+	{
+		vector <Busstop*>::iterator line_stop = stops.begin();
+		list <Bustrip_assign> list_ass = (*trip_iter).first->get_output_passenger_load();
+		for (list <Bustrip_assign>::iterator stop_iter = list_ass.begin(); stop_iter != list_ass.end(); stop_iter++)
+		{
+			stop_pass [(*line_stop)] += (*stop_iter).passenger_load;
+			line_stop++;
+		}
+	}
+	for (vector <Busstop*>::iterator stop_nr = stops.begin(); stop_nr < stops.end() - 1; stop_nr++) // recording
+	{
+		record_passenger_loads(stop_nr);
+	}
+}
+
+void Busline::record_passenger_loads (vector<Busstop*>::iterator stop_iter)
+{
+	output_line_assign.push_back(Busline_assign(id, (*stop_iter)->get_id() , (*(stop_iter+1))->get_id()  ,stop_pass[(*stop_iter)]));
+}
+
+
+void Busline::write_assign_output(ostream & out)
+{
+	for (list <Busline_assign>::iterator iter = output_line_assign.begin(); iter != output_line_assign.end(); iter++)
+	{
+		(*iter).write(out);
+	}
+}
 // ***** Bustrip Functions *****
 
 Bustrip::Bustrip ()
@@ -510,18 +545,14 @@ double Bustrip::scheduled_arrival_time (Busstop* stop) // finds the scheduled ar
 
 void Bustrip::write_assign_segments_output(ostream & out)
 {
-	for (list <Bustrip_assign>::iterator iter = output_passenger_load.begin(); iter!=output_passenger_load.end(); iter++)
+	for (list <Bustrip_assign>::iterator iter = output_passenger_load.begin(); iter != output_passenger_load.end(); iter++)
 	{
-		for (vector <Visit_stop*>::iterator stop_iter = stops.begin(); stop_iter < stops.end()-1; stop_iter ++)
-		{
-			iter->write(out);
-		}
+		(*iter).write(out);
 	}
 }
 
 void Bustrip::record_passenger_loads (vector <Visit_stop*>::iterator start_stop)
-{
-	
+{	
 	output_passenger_load.push_back(Bustrip_assign(id, line->get_id() , busv->get_id(), (*start_stop)->first->get_id() , (*(start_stop+1))->first->get_id()  ,assign_segements[(*start_stop)->first]));
 }
 
@@ -595,7 +626,14 @@ void Busstop::reset()
 void Busstop::book_bus_arrival(Eventlist* eventlist, double time, Bus* bus)
 {
 	// books an event for the arrival of a bus at a bus stop by adding it to the expected arrivals at the stop 
-	expected_arrivals [time] = bus; // not sure if we really want to index them by time? maybe simply by bus id?
+	if (expected_arrivals[time] == NULL)
+	{
+		expected_arrivals [time] = bus; // not sure if we really want to index them by time? maybe simply by bus id?
+	}
+	else
+	{
+		expected_arrivals [time + 0.01* random->urandom()] = bus;
+	}
 	eventlist->add_event(time,this);
 } 
 
@@ -857,7 +895,7 @@ double Busstop::passenger_activity_at_stop (Eventlist* eventlist, Bustrip* trip,
 				ODstops* odstop = (*alighting_passenger)->get_OD_stop();
 				if (odstop->get_waiting_passengers().size() != 0)
 				{
-					Busstop* next_stop =(*alighting_passenger)->make_connection_decision(this,time);
+					Busstop* next_stop =(*alighting_passenger)->make_connection_decision(time);
 					if (next_stop->get_id() == this->get_id())  // pass stays at the same stop
 					{
 						passengers wait_pass = odstop->get_waiting_passengers(); // add him to the waiting queue on his new OD
@@ -902,7 +940,6 @@ double Busstop::passenger_activity_at_stop (Eventlist* eventlist, Bustrip* trip,
 					if ((*check_pass)->make_boarding_decision(trip, time) == true)
 					{
 						// if the passenger decided to board this bus
-						(*check_pass)->add_to_selected_path_stop(this);
 						if ((starting_occupancy + get_nr_boarding() - get_nr_alighting()) < trip->get_busv()->get_capacity()) 
 						{
 							// if the bus is not completly full - then the passenger boards
@@ -947,7 +984,11 @@ double Busstop::passenger_activity_at_stop (Eventlist* eventlist, Bustrip* trip,
 		}	
 	}	
 	trip->get_busv()->set_occupancy(starting_occupancy + get_nr_boarding() - get_nr_alighting()); // updating the occupancy
-	trip->assign_segements[this] = trip->get_busv()->get_occupancy();
+	if (id != trip->stops.back()->first->get_id()) // if it is not the last stop for this trip
+	{
+		trip->assign_segements[this] = trip->get_busv()->get_occupancy();
+		trip->record_passenger_loads(trip->get_next_stop());
+	}
 	return calc_dwelltime (trip); 
 }
 
