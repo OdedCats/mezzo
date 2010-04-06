@@ -4,6 +4,7 @@ Passenger::Passenger ()
 {
 	boarding_decision = false;
 	already_walked = false;
+	end_time = 0;
 	random = new (Random);
 	if (randseed != 0)
 	{
@@ -25,12 +26,14 @@ void Passenger::reset()
 	boarding_decision = false;
 	already_walked = false;
 	start_time = 0; 
+	end_time = 0;
 
 }
 void Passenger::init (int pass_id, double start_time_, ODstops* OD_stop_)
 {
 	passenger_id = pass_id;
 	start_time = start_time_;
+	end_time = 0;
 	original_origin = OD_stop_->get_origin();
 	OD_stop = OD_stop_;
 	boarding_decision = false;
@@ -48,13 +51,14 @@ bool Passenger::execute(Eventlist *eventlist, double time)
 	}
 	else
 	{
-		if (OD_stop->get_origin()->get_id() == OD_stop->get_origin()->get_id()) // this may happend if the passenger walked to his final stop
+		if (OD_stop->get_origin()->get_id() == OD_stop->get_destination()->get_id()) // this may happend if the passenger walked to his final stop
 		{
+			end_time = time;
 			pass_recycler.addPassenger(this); // terminate passenger
 		}
 		else // push passenger at the waiting list of his OD
 		{
-			OD_stop->get_waiting_passengers().push_back (this);
+			OD_stop->add_pass_waiting (this);
 		}
 		already_walked = false;
 	}
@@ -163,6 +167,12 @@ Busstop* Passenger::make_alighting_decision (Bustrip* boarding_bus, double time)
 
 Busstop* Passenger::make_connection_decision (double time)
 {
+	if (OD_stop->get_origin()->get_id() == OD_stop->get_destination()->get_id())
+		// in case pass. alighted at this final destination stop
+	{
+		selected_path_stops.push_back(OD_stop->get_destination());
+		return (OD_stop->get_destination());
+	}
 	map <Busstop*, double> candidate_connection_stops_u; // the double value is the utility associated with the respective stop
 	map <Busstop*, double> candidate_connection_stops_p; // the double value is the probability associated with the respective stop
 	vector<Pass_path*> path_set = OD_stop->get_path_set();
@@ -227,7 +237,7 @@ Busstop* Passenger::make_connection_decision (double time)
 				alighting_MNL[(*iter_p).first].second = (*iter_p).second;
 			}
 			selected_path_stops.push_back((*stops_probs).first);
-			return ((*stops_probs).first); // rerurn the chosen stop by MNL choice model
+			return ((*stops_probs).first); // return the chosen stop by MNL choice model
 		}
 	}
 	selected_path_stops.push_back(candidate_connection_stops_p.begin()->first);
@@ -236,7 +246,7 @@ Busstop* Passenger::make_connection_decision (double time)
 
 void Passenger::write_selected_path(ostream& out)
 {
-	out << passenger_id << '\t'<< start_time << '\t';
+	out << passenger_id << '\t'<< original_origin->get_id() << '\t' << OD_stop->get_destination()->get_id() << '\t' << start_time << '\t' << end_time << '\t';
 	for (vector <Busstop*>::iterator stop_iter = selected_path_stops.begin(); stop_iter < selected_path_stops.end(); stop_iter++)
 	{
 		out << (*stop_iter)->get_id() << '\t';

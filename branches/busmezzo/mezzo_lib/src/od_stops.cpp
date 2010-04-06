@@ -53,12 +53,16 @@ bool ODstops::execute (Eventlist* eventlist, double curr_time) // generate passe
 	{	
 		//Passenger* pass = pass_recycler.newPassenger();
 		Passenger* pass = new Passenger;
+		passengers_during_simulation.push_back(pass);
 		pid++; 
 		pass->init (pid, curr_time, this);
 		pass->add_to_selected_path_stop(origin_stop);
 		Busstop* connection_stop = pass->make_connection_decision(curr_time);
-		if (connection_stop->get_id() == origin_stop->get_id())
+		if (connection_stop->get_id() != origin_stop->get_id()) // if the pass. walks to another stop
 		{
+			// set connected_stop as the new origin
+			map <Busstop*, ODstops*> ods_at_origin = connection_stop->get_stop_as_origin();
+			pass->set_ODstop(ods_at_origin[destination_stop]); // set this stop as his new origin (new OD)
 			map<Busstop*,double> walk_dis = origin_stop->get_walking_distances();
 			pass->execute(eventlist, curr_time + walk_dis[connection_stop] / random->nrandom (theParameters->average_walking_speed, theParameters->average_walking_speed/4));
 		}
@@ -126,7 +130,7 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus, double time)
 				{
 					if ((*iter_first_leg_lines)->get_id() == arriving_bus->get_id()) // if the arriving bus is a possible first leg for this path alternative
 					{
-						boarding_utility += exp((*iter_paths)->calc_arriving_utility()); 
+						boarding_utility += exp((*iter_paths)->calc_arriving_utility(time)); 
 						(*iter_paths)->set_arriving_bus_rellevant(true);
 						break;
 					}
@@ -191,15 +195,10 @@ double ODstops::calc_combined_set_utility_for_connection (Passenger* pass, doubl
 				without_walking_first = true;
 			}
 		}
-		if (without_walking_first == true)
+		if (without_walking_first == true) // considering only no multi-walking alternatives
 		{
-
 			connection_utility += exp(random->nrandom(theParameters->waiting_time_coefficient, theParameters->waiting_time_coefficient/4) * walking_distance / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed / 4) + (*paths)->calc_waiting_utility(alt_stops_iter, time));
 			// taking into account CT (walking time) till this connected stop and the utility of the path from this connected stop till the final destination
-		}
-		else
-		{
-			return -10.0; // no multi-walking alternatives
 		}
 	}
 	return log(connection_utility);

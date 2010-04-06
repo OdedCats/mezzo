@@ -84,12 +84,14 @@ public:
 	void set_min_transfers (int min_transfers_) {min_transfers = min_transfers_;}
 	map <Passenger*,list<Pass_boarding_decision>> get_boarding_output () {return output_pass_boarding_decision;}
 	map <Passenger*,list<Pass_alighting_decision>> get_alighting_output () {return output_pass_alighting_decision;}
-
+	vector <Passenger*> get_passengers_during_simulation () {return passengers_during_simulation;}
+	void add_pass_waiting (Passenger* add_pass) {waiting_passengers.push_back(add_pass);}
+	
 	// Passengers processes
 	void book_next_passenger (double curr_time);
 	bool execute(Eventlist* eventlist, double time);
 
-	// Path set - not operative yet
+	// Path set
 	void add_paths (Pass_path* pass_path_) {path_set.push_back(pass_path_);}
 	double calc_boarding_probability (Busline* arriving_bus, double time);
 	double calc_binary_logit (double utility_i, double utility_j);
@@ -116,6 +118,7 @@ protected:
 	// output structures
 	map <Passenger*,list<Pass_boarding_decision>> output_pass_boarding_decision;
 	map <Passenger*,list<Pass_alighting_decision>> output_pass_alighting_decision;
+	vector <Passenger*> passengers_during_simulation;
 
 	Random* random;
 	Eventlist* eventlist; //!< to book passenger generation events

@@ -22,6 +22,8 @@ public:
 	// Gets and sets:
 	int get_id () {return passenger_id;}
 	double get_start_time () {return start_time;}
+	void set_end_time (double end_time_) {end_time = end_time_;}
+	double get_end_time () {return end_time;}
 	ODstops* get_OD_stop () {return OD_stop;}
 	Busstop* get_original_origin () {return original_origin;}
 	void set_ODstop (ODstops* ODstop_) {OD_stop = ODstop_;}
@@ -42,6 +44,7 @@ public:
 protected:
 	int passenger_id;
 	double start_time;
+	double end_time;
 	Busstop* original_origin;
 	ODstops* OD_stop;
 	bool boarding_decision;

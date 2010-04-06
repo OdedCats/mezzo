@@ -2218,13 +2218,13 @@ void Network::find_all_paths ()
 			map <Busstop*, ODstops*> od_as_origin = (*basic_origin)->get_stop_as_origin();
 			if (od_as_origin[(*basic_destination)] == NULL)
 			{
-				if ((*basic_origin)->get_id() != (*basic_destination)->get_id())
-				{
+				//if ((*basic_origin)->get_id() != (*basic_destination)->get_id())
+				//{
 					ODstops* od_stop = new ODstops ((*basic_origin),(*basic_destination),0.0);
 					odstops.push_back(od_stop);
 					(*basic_origin)->add_odstops_as_origin((*basic_destination), od_stop);
 					(*basic_destination)->add_odstops_as_destination((*basic_origin), od_stop);
-				}
+				//}
 			}
 		}
 	}
@@ -2969,14 +2969,19 @@ bool Network::check_path_no_repeating_lines (Pass_path* path) // checks if the p
 		for (vector <Busline*>::iterator leg_lines1 = (*lines_iter1).begin(); leg_lines1 < (*lines_iter1).end(); leg_lines1++)
 		{
 			vector <vector <Busline*>>::iterator lines_iter2 = lines_iter1 + 1;
+			int counter_sim = 0; 
 			// checking only for the same line in consecutive legs
 			// taking the same line with an intermediate line is allowed (1-2-1)
 			for (vector <Busline*>::iterator leg_lines2 = (*lines_iter2).begin(); leg_lines2 < (*lines_iter2).end(); leg_lines2++)
 			{
 				if ((*leg_lines1)->get_id() == (*leg_lines2)->get_id() || compare_common_partial_routes((*leg_lines1),(*leg_lines2),(*stops).front(), (*(stops+1)).front()) == true)
 				{
-					return false;
+					counter_sim++;
 				}
+			}
+			if (counter_sim == ((*lines_iter2).size()))
+			{
+				return false;
 			}
 		}
 		stops++;
@@ -3836,7 +3841,11 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 		for (map<Passenger*,list<Pass_boarding_decision>>::iterator pass_iter1 = boarding_decisions.begin(); pass_iter1 != boarding_decisions.end(); pass_iter1++)
 		{
 			(*od_iter)->write_boarding_output(out5, (*pass_iter1).first);
-			(*pass_iter1).first->write_selected_path(out8);
+		}
+		vector<Passenger*> pass_vec = (*od_iter)->get_passengers_during_simulation();
+		for (vector<Passenger*>::iterator pass_iter = pass_vec.begin(); pass_iter < pass_vec.end(); pass_iter++) 
+		{
+			(*pass_iter)->write_selected_path(out8);
 		}
 	}
 	out5.close();
@@ -5285,8 +5294,11 @@ bool Network::init()
 	}
 	for (vector<ODstops*>::iterator iter_odstops = odstops_demand.begin(); iter_odstops < odstops_demand.end(); iter_odstops++ )
 	{
-		(*iter_odstops)->execute(eventlist,initvalue); // adds an event for the generation time of the first passenger per OD in terms of stops
-		initvalue+=0.00001;
+		if ((*iter_odstops)->get_arrivalrate() != 0.0 )
+		{
+			(*iter_odstops)->execute(eventlist,initvalue); // adds an event for the generation time of the first passenger per OD in terms of stops
+			initvalue+=0.00001;
+		}
 	}
 
 #endif //_BUSES

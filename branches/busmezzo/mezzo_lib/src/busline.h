@@ -96,7 +96,9 @@ public:
 	bool check_first_stop (Busstop* stop); // returns true if the stop is the first stop on the bus line, otherwise it returns false 
 	bool check_first_trip (Bustrip* trip); // returns true if the trip is the first trip on the bus line, otherwise it returns false  
 	bool check_last_trip (Bustrip* trip); // returns true if the trip is the last trip on the bus line, otherwise it returns false  
-	bool check_line_availability (Busstop* stop, double time); // returns true if the next trip on this line is scheduled to arrive at a stop in a pre-defined time frame
+//	double calc_next_scheduled_arrival_at_stop (Busstop* stop, double time); // returns the remaining time till the next trip on this line is scheduled to arrive at a stop (according to schedule only) 
+	Bustrip* find_next_scheduled_trip_at_stop (Busstop* stop, double time); // returns the trip which is scheduled to arrive next at stop
+	double time_till_next_arrival_at_stop (Busstop* stop, double time); // returns the time left till next trip is expected to arrive at the stop (real-time calculation)
 	Bustrip* get_next_trip (Bustrip* reference_trip); //!< returns the trip after the reference trip on the trips vector	
 	Bustrip* get_previous_trip (Bustrip* reference_trip); //!< returns the trip before the reference trip on the trips vector
 
@@ -185,13 +187,15 @@ public:
 	void book_stop_visit (double time, Bus* bus); //!< books a visit to the stop
 	bool check_end_trip (); //!< returns 1 if true, 0 if false
 	double calc_departure_time (double time); //!< calculates departure time from origin according to arrival time and schedule (including layover effect)
-	
+	void convert_stops_vector_to_map(); // building stops_map
+
 // output-related functions
 	void write_assign_segments_output(ostream & out);
 	void record_passenger_loads (vector <Visit_stop*>::iterator start_stop); //!< creates a log-file for passenegr load assignment info
 
 // public vectors
 	vector <Visit_stop*> stops; //!< contains all the busstops and the times that they are supposed to be served. NOTE: this can be a subset of the total nr of stops in the Busline (according to the schedule input file)
+	map <Busstop*, double> stops_map;
 	vector <Start_trip*> driving_roster; //!< trips assignment for each bus vehicle.
 	map <Busstop*, passengers> passengers_on_board; // passenger on-board storaged by their alighting stop (format 3)
 	map <Busstop*, int> nr_expected_alighting; //!< number of passengers expected to alight at the busline's stops (format 2)
@@ -296,7 +300,8 @@ public:
 	double get_exit_time() { return exit_time;}
 	void set_position (double position_ ) {position = position_;}
 	vector <Busline*> get_lines () {return lines;}
-	double get_last_departure (Busline* line) {return last_departures[line];}
+	double get_last_departure (Busline* line) {return last_departures[line].second;}
+	Bustrip* get_last_trip_departure (Busline* line) {return last_departures[line].first;}
 	map<Busstop*,double> get_walking_distances () {return distances;}
 	void save_previous_arrival_rates () {previous_arrival_rates.swap(arrival_rates);}
 	void save_previous_alighting_fractions () {previous_alighting_fractions.swap(alighting_fractions);}
@@ -333,7 +338,7 @@ public:
 
 // output-related functions
 	void write_output(ostream & out);
-	void record_busstop_visit ( Bustrip* trip, double enter_time); //!< creates a log-file for stop-related info
+	void record_busstop_visit (Bustrip* trip, double enter_time); //!< creates a log-file for stop-related info
 	void calculate_sum_output_stop_per_line(int line_id); // calculates for a single line that visits the stop (identified by line_id)
 	int calc_total_nr_waiting ();
 
@@ -357,8 +362,8 @@ protected:
 	vector <Busline*> lines;
 	map <double,Bus*> expected_arrivals; //!< booked arrivals of buses on the link on their way to the stop
 	map <double,Bus*> buses_at_stop; //!< buses currently visiting stop
-	map <Busline*, double> last_arrivals; //!< contains the arrival time of the last bus from each line that stops at the stop (can result headways)
-	map <Busline*, double> last_departures; //!< contains the departure time of the last bus from each line that stops at the stop (can result headways)
+	map <Busline*, pair<Bustrip*, double>> last_arrivals; //!< contains the arrival time of the last bus from each line that stops at the stop (can result headways)
+	map <Busline*, pair<Bustrip*, double>> last_departures; //!< contains the departure time of the last bus from each line that stops at the stop (can result headways)
 
 	// relevant only for demand format 1
 	map <Busline*, double> arrival_rates; //!< parameter lambda that defines the poission proccess of passengers arriving at the stop
