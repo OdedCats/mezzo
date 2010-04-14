@@ -225,7 +225,7 @@ typedef map <Busstop*, ODstops*> ODs_for_stop;
 class Busstop_Visit // container object holding output data for stop visits
 {
 public:
-	Busstop_Visit (int line_id_,	int trip_id_,	int vehicle_id_,	 int stop_id_, double entering_time_,	double sched_arr_time_,	double dwell_time_,	double lateness_,	
+	Busstop_Visit (int line_id_, int trip_id_,	int vehicle_id_,	 int stop_id_, double entering_time_,	double sched_arr_time_,	double dwell_time_,	double lateness_,	
 							double exit_time_,double time_since_arr_, double time_since_dep_,int nr_alighting_,	int nr_boarding_,	int occupancy_,	int nr_waiting_,	double holding_time_):
 							line_id(line_id_),trip_id(trip_id_),vehicle_id(vehicle_id_), stop_id(stop_id_),entering_time(entering_time_),sched_arr_time(sched_arr_time_),dwell_time(dwell_time_),
 							lateness(lateness_), exit_time (exit_time_),time_since_arr(time_since_arr_),time_since_dep(time_since_dep_),nr_alighting(nr_alighting_),nr_boarding(nr_boarding_),occupancy(occupancy_),nr_waiting(nr_waiting_),
@@ -257,7 +257,7 @@ public:
 class Output_Summary_Stop_Line // container object holding output data for stop visits
 {
 public:
-	void write (ostream& out, int stop_id, int line_id) { out << stop_id <<  '\t'<< line_id <<  '\t'<<stop_avg_headway << '\t'<< stop_avg_DT << '\t'<< stop_avg_abs_deviation << '\t'<< stop_avg_waiting_per_stop<< '\t'<< stop_total_boarding << '\t'<< stop_sd_headway << '\t'
+	void write (ostream& out, int stop_id, int line_id, string name) { out << stop_id <<  '\t' << name << '\t' << line_id <<  '\t'<<stop_avg_headway << '\t'<< stop_avg_DT << '\t'<< stop_avg_abs_deviation << '\t'<< stop_avg_waiting_per_stop<< '\t'<< stop_total_boarding << '\t'<< stop_sd_headway << '\t'
 		<< stop_sd_DT << '\t'<< stop_on_time << '\t'<< stop_early <<'\t'<< stop_late << '\t'<< endl; }
 	void reset () { stop_avg_headway = 0; stop_avg_DT = 0; stop_avg_abs_deviation = 0; stop_avg_waiting_per_stop = 0; stop_total_boarding = 0;
 	stop_sd_headway = 0; stop_sd_DT = 0; stop_on_time = 0; stop_early = 0; stop_late = 0; }
@@ -278,12 +278,13 @@ class Busstop : public Action
 public:
 	Busstop ();
 	~Busstop ();
-	Busstop (int id_, int link_id_, double position_, double length_, bool has_bay_, double dwelltime_);
+	Busstop (int id_, string name_, int link_id_, double position_, double length_, bool has_bay_, double dwelltime_);
 	void reset (); 
 
 // GETS & SETS:
 	int get_id () {return id;} //!< returns id, used in the compare <..> functions for find and find_if algorithms
 	int get_link_id() {return link_id;}
+	string get_name() {return name;}
 	double get_arrival_rates (Bustrip* trip) {return arrival_rates[trip->get_line()];}
 	double get_alighting_fractions (Bustrip* trip) {return alighting_fractions[trip->get_line()];}
 	ODs_for_stop get_stop_as_origin () {return stop_as_origin;}
@@ -347,7 +348,7 @@ public:
 
 protected:
 	int id; //!< stop id
-	string name; //!< name of the bus stop "Ziv plaza"
+	string name; //!< name of the bus stop "T-centralen"
 	int link_id; //!< link it is on, maybe later a pointer to the respective link if needed
 	bool has_bay; //!< TRUE if it has a bay, so that vehicles on same lane can pass.
 	double length; //!< length of the busstop, determines how many buses can be served at the same time

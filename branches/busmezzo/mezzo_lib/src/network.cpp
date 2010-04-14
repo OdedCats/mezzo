@@ -1342,14 +1342,33 @@ in >> keyword;
 	}
 	in >> nr;
 	limit = i + nr;
+	in >> keyword;
+	if (keyword!="format:")
+	{
+		cout << " readbuslines: no << format: >> keyword " << endl;
+		return false;
+	}
+	in >> format; // Give an indication for time-table format
 	for (i; i<limit;i++)
 	{
-		if (!readbustrip(in))
+		if (format == 1 )
 		{
-			cout << " readbuslines: readbustrip returned false for line nr " << (i+1) << endl;
-			in.close();
-			return false;
-		} 
+			if (!readbustrip_format1(in))
+			{
+				cout << " readbuslines: readbustrip returned false for line nr " << (i+1) << endl;
+				in.close();
+				return false;
+			} 
+		}
+		if (format == 2 )
+		{
+			if (!readbustrip_format2(in))
+			{
+				cout << " readbuslines: readbustrip returned false for line nr " << (i+1) << endl;
+				in.close();
+				return false;
+			} 
+		}
 		// set busline to trip
 	}
 	// Forth read the passengers rates
@@ -1491,6 +1510,7 @@ bool Network::readbusstop (istream& in) // reads a busstop
   char bracket;
   int stop_id, link_id;
   double position, length, dwelltime;
+  string name;
 	bool has_bay ;
 	bool ok= true;
 	in >> bracket;
@@ -1499,8 +1519,8 @@ bool Network::readbusstop (istream& in) // reads a busstop
 		cout << "readfile::readsbusstop scanner jammed at " << bracket;
 		return false;
 	}
-  in >> stop_id >> link_id >> position >> length >> has_bay >> dwelltime;
-  Busstop* st= new Busstop (stop_id, link_id, position, length, has_bay, dwelltime);
+  in >> stop_id >> name >> link_id >> position >> length >> has_bay >> dwelltime;
+  Busstop* st= new Busstop (stop_id, name, link_id, position, length, has_bay, dwelltime);
 	in >> bracket;
 	if (bracket != '}')
 	{
@@ -1609,7 +1629,7 @@ bool Network::readbusline(istream& in) // reads a busline
 	return ok;
 }
 
-bool Network::readbustrip(istream& in) // reads a trip
+bool Network::readbustrip_format1(istream& in) // reads a trip
 {
 	char bracket;
 	int trip_id, busline_id, nr_stops, stop_id;
@@ -1668,8 +1688,79 @@ bool Network::readbustrip(istream& in) // reads a trip
 	return true;
 }
 
-
-
+bool Network::readbustrip_format2(istream& in) // reads a trip
+{
+	char bracket;
+	int busline_id, nr_stops, nr_trips;
+	double arrival_time_at_stop, dispatching_time;
+	vector <Visit_stop*> delta_at_stops;
+	in >> bracket;
+	if (bracket != '{')
+	{
+		cout << "readfile::readsbustrip scanner jammed at " << bracket;
+		return false;
+	}
+	in >> busline_id >>  nr_stops;
+	Busline* bl=(*(find_if(buslines.begin(), buslines.end(), compare <Busline> (busline_id) )));
+	vector <Busstop*>::iterator stops_iter = bl->stops.begin();
+	in >> bracket;
+	if (bracket != '{')
+	{
+		cout << "readfile::readsbustrip scanner jammed at " << bracket;
+		return false;
+	}
+	for (int i=0; i < nr_stops; i++)
+	{
+		in >> arrival_time_at_stop;
+		// create the Visit_stop
+		// find the stop in the list
+		Visit_stop* vs = new Visit_stop ((*stops_iter), arrival_time_at_stop);
+		delta_at_stops.push_back(vs);
+		stops_iter++;
+	}
+	in >> bracket;
+	if (bracket != '}')
+	{
+		cout << "readfile::readsbustrip scanner jammed at " << bracket;
+		return false;
+	}
+	
+	in >> nr_trips;
+	if (bracket != '{')
+	{
+		cout << "readfile::readsbustrip scanner jammed at " << bracket;
+		return false;
+	}
+	for (int i=1; i < nr_trips+1; i++)
+	{
+		in >> dispatching_time;
+		vector <Visit_stop*> curr_trip;
+		for (vector <Visit_stop*>::iterator iter = delta_at_stops.begin(); iter < delta_at_stops.end(); iter++)
+		{
+			Visit_stop* vs_ct = new Visit_stop ((*iter)->first, dispatching_time + (*iter)->second);
+			curr_trip.push_back(vs_ct);
+		}
+		Bustrip* trip= new Bustrip (busline_id*10 + i, dispatching_time); // e.g. line 2, 3rd trip: trip_id = 23
+		trip->add_stops(curr_trip);
+		bl->add_trip(trip,dispatching_time);
+		bl->reset_curr_trip();
+		trip->set_line(bl);
+		bustrips.push_back (trip); // add to bustrips vector
+	}
+	in >> bracket;
+	if (bracket != '}')
+	{
+		cout << "readfile::readsbustrip scanner jammed at " << bracket;
+		return false;
+	}
+	in >> bracket;
+	if (bracket != '}')
+	{
+		cout << "readfile::readbusstop scanner jammed at " << bracket;
+		return false;
+	}
+	return true;
+}
 
 bool Network::read_passenger_rates_format1 (istream& in) // reads the passenger rates in the format of arrival rate and alighting fraction per line and stop combination
 {
@@ -2715,6 +2806,51 @@ void Network::static_filtering_rules (Busstop* stop)
 						}
 					}
 				}
+				/*
+				// apply dominancy rule at stop level
+				vector<vector<Busstop*>> alt_stops = (*path)->get_alt_transfer__stops();
+				for (vector<vector<Busstop*>>::iterator stop_set_iter = alt_stops.begin()+1; stop_set_iter < alt_stops.end(); stop_set_iter+2) 
+					// goes over connected stops (even locations - 2,4,...)
+				{
+					map <Busstop*,bool> stops_to_be_deleted;
+					for (vector <Busstop*>::iterator stop_iter = (*stop_set_iter).begin(); stop_iter < (*stop_set_iter).end(); stop_iter++)
+					{
+						stops_to_be_deleted[(*stop_iter)] = false;
+					}
+					for (vector <Busstop*>::iterator stop_iter = (*stop_set_iter).begin(); stop_iter < (*stop_set_iter).end()-1; stop_iter++)
+					{
+						for (vector <Busstop*>::iterator stop_iter1 = stop_iter + 1; stop_iter < (*stop_set_iter).end(); stop_iter1++)
+						{
+							if 
+						}
+					}
+					for (map<Busline*, bool>::iterator lines_to_include_iter = lines_to_include.begin(); lines_to_include_iter != lines_to_include.end(); lines_to_include_iter++)
+					{
+						if ((*lines_to_include_iter).second == false)
+						// delete the stop that is been dominated
+						{
+							stops_to_be_deleted[(*stops_to_include_iter).first] = true;
+						}
+					}
+					for (map <Busstop*,bool>::iterator delete_iter = stops_to_be_deleted.begin(); delete_iter != stops_to_be_deleted.end(); delete_iter++)	
+					// delete all the stops that are been dominated
+					{
+						vector<Busstop*>::iterator stop_to_delete;
+						for (vector<Busstop*>::iterator stops_iter = (*stop_set_iter).begin(); stops_iter < (*stop_set_iter).end(); stops_iter++)
+						{
+							if ((*delete_iter).first->get_id() == (*stops_iter)->get_id() && (*delete_iter).second == true)
+							{
+								stop_to_delete = stops_iter;
+								break;
+							}
+						}
+						if ((*delete_iter).second == true)
+						{
+							(*stop_set_iter).erase(stop_to_delete);
+						}
+					}
+				}
+				*/
 			}
 			for (map <Pass_path*,bool>::iterator delete_iter = paths_to_be_deleted.begin(); delete_iter != paths_to_be_deleted.end(); delete_iter++)	
 			// delete all the paths that did not fulfill the filtering rules
@@ -3812,7 +3948,7 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 		for (vector <Busline*>::iterator lines = stop_lines.begin(); lines != stop_lines.end(); lines++)
 		{
 			(*iter)->calculate_sum_output_stop_per_line((*lines)->get_id());
-			(*iter)->get_output_summary((*lines)->get_id()).write(out2,(*iter)->get_id(),(*lines)->get_id());
+			(*iter)->get_output_summary((*lines)->get_id()).write(out2,(*iter)->get_id(),(*lines)->get_id(), (*iter)->get_name());
 			// this summary file contains for each stop a record for each line thats use it
 		}
 	}

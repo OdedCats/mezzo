@@ -244,7 +244,8 @@ public:
 	bool readbuslines(string name); //!< reads the busstops, buslines, and trips
 	bool readbusstop (istream& in); //!< reads a busstop
 	bool readbusline(istream& in); //!< reads a busline
-	bool readbustrip(istream& in); //!< reads a trip
+	bool readbustrip_format1(istream& in); //!< reads a trip based on detailed time-table
+	bool readbustrip_format2(istream& in); //!< reads a trip based on dispatching time-table (time-independent intervals between stops)
   bool read_passenger_rates_format1 (istream& in); // reads the passenger rates in the format of arrival rate and alighting fraction per line and stop combination
   bool read_passenger_rates_format1_TD_basic (istream& in, int nr_rates);
   bool read_passenger_rates_format1_TD_slices (istream& in);

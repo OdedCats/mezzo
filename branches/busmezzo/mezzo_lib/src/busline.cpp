@@ -622,8 +622,8 @@ Busstop::Busstop()
 	dwelltime = 12.5;
 }
 
-Busstop::Busstop (int id_, int link_id_, double position_, double length_, bool has_bay_, double dwelltime_):
-	id(id_), link_id(link_id_), position (position_), length(length_), has_bay(has_bay_), dwelltime(dwelltime_)
+Busstop::Busstop (int id_, string name_, int link_id_, double position_, double length_, bool has_bay_, double dwelltime_):
+	id(id_), name(name_), link_id(link_id_), position (position_), length(length_), has_bay(has_bay_), dwelltime(dwelltime_)
 {
 	avaliable_length = length;
 	nr_boarding = 0;
