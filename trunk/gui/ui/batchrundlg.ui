@@ -198,7 +198,7 @@
        <rect>
         <x>260</x>
         <y>80</y>
-        <width>71</width>
+        <width>86</width>
         <height>20</height>
        </rect>
       </property>
@@ -211,7 +211,7 @@
        <rect>
         <x>280</x>
         <y>100</y>
-        <width>41</width>
+        <width>56</width>
         <height>16</height>
        </rect>
       </property>
@@ -227,7 +227,7 @@
        <rect>
         <x>280</x>
         <y>120</y>
-        <width>41</width>
+        <width>56</width>
         <height>16</height>
        </rect>
       </property>
@@ -361,7 +361,7 @@
        </rect>
       </property>
       <property name="text" >
-       <string>Current Iteration</string>
+       <string>Curr. Iteration</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_4" >
@@ -468,6 +468,22 @@
      <property name="icon" >
       <iconset resource="../canvas_qt4.qrc" >
        <normaloff>:/images/filesave.png</normaloff>:/images/filesave.png</iconset>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="overwriteHisttimes" >
+     <property name="geometry" >
+      <rect>
+       <x>180</x>
+       <y>290</y>
+       <width>161</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Overwrite hist. times</string>
+     </property>
+     <property name="checked" >
+      <bool>true</bool>
      </property>
     </widget>
    </widget>

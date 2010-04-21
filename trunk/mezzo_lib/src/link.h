@@ -33,10 +33,13 @@
 
 
 */
+
+/******* Uncomment for debugging VISSIMCOM
 #ifndef _VISSIMCOM
 	#define _VISSIMCOM
 	#define _MIME
 #endif
+*****************/
 
 #ifndef LINK_HH
 #define LINK_HH

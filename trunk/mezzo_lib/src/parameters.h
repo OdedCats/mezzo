@@ -159,6 +159,8 @@ public:
 
    // statevar:
    bool shortest_paths_initialised; //!< true if shortest paths have been initialised
+   int veh_in_network; // nr of vehicles in network at any moment
+   bool overwrite_histtimes; // if true the input (historical) link travel times are overwritten when output files are saved.
 // #mime_parameters: ONLY for use in HYBRID situations
    double mime_comm_step; //!< Communication step for MICRO-MESO information exchange
    int mime_min_queue_length; //!< min queue length for stopping / starting shockwaves

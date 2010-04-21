@@ -8,9 +8,9 @@ Link::Link(int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* s
 		out_node(out_), length(length_), nr_lanes(nr_lanes_), sdfunc(sdfunc_)
 {
 	maxcap=static_cast<int> (length*nr_lanes/theParameters->standard_veh_length);
-//#ifdef _DEBUG_LINK	
+#ifdef _DEBUG_LINK	
 	eout << "link " << id << " maxcap " << maxcap << endl;
-//#endif //_DEBUG_LINK
+#endif //_DEBUG_LINK
 	
 #ifdef _COLLECT_TRAVELTIMES
 	const int nr_fields=3;

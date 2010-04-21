@@ -686,6 +686,7 @@ bool Daction::process_veh(double time)
  #endif //_DEBUG_NODE
  		veh->report(time);
   	recycler.addVehicle(veh);
+	theParameters->veh_in_network--;
   }
   return ok;
 }

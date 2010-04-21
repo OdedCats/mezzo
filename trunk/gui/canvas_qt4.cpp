@@ -522,6 +522,10 @@ void MainForm::loop()
 	currtime=theNetwork->step(((updatefac/100)*msecs/1000.0));
 	progressbar->setValue(static_cast<int>(100.0*currtime/runtime));
 	displaytime(currtime);
+
+	QString mesg=QString("Veh:%1").arg(theParameters->veh_in_network);
+	status_label->setText(mesg);
+
 	if (currtime>=runtime)
 	{
 		//breaknow=false;

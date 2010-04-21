@@ -54,7 +54,7 @@ class Vehicle
    const int get_type() {return type;}
    int get_oid();
    int get_did();
-	void set_entered() {entered=true;}
+	void set_entered() {entered=true;theParameters->veh_in_network++;}
 	void add_meters(int meters_) {meters+=meters_;}
 	void set_meters(int meters_) {meters=meters_;}
 	int get_meters () {return meters;}

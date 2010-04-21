@@ -146,10 +146,10 @@ void OutputView::set_thickness_unit(int val)
 		text="";
 		break;
 	case 1:
-		text="veh/h/lane";
+		text="veh (count)";
 		break;
 	case 2:
-		text="veh/h/lane";
+		text="veh (count)";
 		break;
 	case 3:
 		text="m/s";

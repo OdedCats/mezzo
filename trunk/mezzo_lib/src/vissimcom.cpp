@@ -184,24 +184,27 @@ int VISSIMCOM::send (double time)
 		for (vector <BoundaryOut*>::iterator iter1=(*boundaryouts).begin();iter1<(*boundaryouts).end();iter1++)
 		{
 			long remaining_space = buffersize;
-			//Check which parking lots are full, and block/unblock if needed.
-			set<long>::iterator pl_iter = (*iter1)->parkinglots.begin();
-			for (pl_iter; pl_iter!=(*iter1)->parkinglots.end(); pl_iter++)
-			{
-				IParkingLotPtr parking = p_lots->GetParkingLotByNumber(*pl_iter); 
-				long nr_parked= parking->GetAttValue("NVEHICLES");
-				// << "nr vehicles on  entry parking " << *pl_iter << " is " << nr_parked << endl;
-				remaining_space = buffersize-nr_parked; // should generalize this using a map with values for all parking lots, but for now there is only one parking lot per boundary out anyway.
+			if ((*iter1)->get_signatures().size() > 0) // only check space on park lots for boundaries that actually want to send vehicles
+			{				
+				//Check which parking lots are full, and block/unblock if needed.
+				set<long>::iterator pl_iter = (*iter1)->parkinglots.begin();
+				for (pl_iter; pl_iter!=(*iter1)->parkinglots.end(); pl_iter++)
+				{
+					IParkingLotPtr parking = p_lots->GetParkingLotByNumber(*pl_iter); 
+					long nr_parked= parking->GetAttValue("NVEHICLES");
+					// << "nr vehicles on  entry parking " << *pl_iter << " is " << nr_parked << endl;
+					remaining_space = buffersize-nr_parked; // should generalize this using a map with values for all parking lots, but for now there is only one parking lot per boundary out anyway.
 
-				if (nr_parked > buffersize) // buffer to make up for communication delay of Block/unblock messages
-				{
-					(*iter1)->block(-1,10.0); // block the BoundaryOut, which will notify the respective virtual links.
-				}
-				else
-				{
-					if ((*iter1)->blocked()) // if blocked, unblock, with respective density and dissipation speed
+					if (nr_parked > buffersize) // buffer to make up for communication delay of Block/unblock messages
 					{
-						(*iter1)->block(50,20.0);
+						(*iter1)->block(-1,10.0); // block the BoundaryOut, which will notify the respective virtual links.
+					}
+					else
+					{
+						if ((*iter1)->blocked()) // if blocked, unblock, with respective density and dissipation speed
+						{
+							(*iter1)->block(50,20.0);
+						}
 					}
 				}
 			}
@@ -218,7 +221,7 @@ int VISSIMCOM::send (double time)
 					//then add vehicle
 					ok &= add_veh((*iter0)->type,(*iter0)->v_parkinglot,(*iter0)->v_path,(*iter0));
 					// and take it out of the signatures list
-					iter0=signatures.erase(iter0);
+					iter0=signatures.erase(iter0); // auto advances to next
 					count ++;
 				}
 				else 
@@ -340,7 +343,7 @@ int VISSIMCOM::receive (double time)
 		spArrived=spVehicles->GetArrived(); // get the vehicles that have arrived in the last timestep
 		spParked=spVehicles->GetParked(); // get the parked vehicles;
 		long nr_parked=spParked->GetCount();
-		long nr_arrived=spArrived->GetCount();
+//		long nr_arrived=spArrived->GetCount();
 
 /*	
 		if (nr_arrived > 0)

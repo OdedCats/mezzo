@@ -69,8 +69,10 @@ Parameters::Parameters ()
    max_rel_route_cost = 2.0;
    small_od_rate = 3.0;
    
-	//state var
+	//state vars
    shortest_paths_initialised = false;
+   veh_in_network = 0;
+   overwrite_histtimes=false;
 
 // #mime_parameters
    mime_comm_step= 0.1;

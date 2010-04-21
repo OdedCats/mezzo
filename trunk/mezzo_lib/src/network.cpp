@@ -3327,6 +3327,7 @@ bool Network::writeall(unsigned int repl)
 	string rep="";
 	string cleantimes;
 	end_of_simulation(runtime);
+	string histtimesfile=filenames[3];
 	string linktimesfile = filenames[10];
 	cleantimes=linktimesfile +".clean";
 	string summaryfile=filenames[12];
@@ -3348,8 +3349,9 @@ bool Network::writeall(unsigned int repl)
 		vqueuesfile += rep;
 	}
 	writelinktimes(linktimesfile);
-	// NEW: Write also the non-smoothed times
-	
+	if (theParameters->overwrite_histtimes) // Overwrite the input file if true
+		writelinktimes(histtimesfile);
+
 	time_alpha=1.0;
 	writelinktimes(cleantimes);
 	////////
