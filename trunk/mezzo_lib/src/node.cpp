@@ -613,7 +613,7 @@ bool BoundaryIn::newvehicle(Signature* sig)
 			  		   for (vector<VirtualLink*>::iterator iter=vlinks.begin(); iter<vlinks.end(); iter++)
 			  		   {
 			  		     //if ( ((*iter)->get_in_node_id()==sig->tmporigin) && ((*iter)->get_out_node_id()==sig->tmpdestination) )
-						   if ((*iter)->get_id() == sig->path)
+						   if ((*iter)->get_id() == sig->tmppath)
 			  		     		vlptr=*iter;
 			  		   }
 			  			if (vlptr)
