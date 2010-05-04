@@ -101,6 +101,7 @@ public:
 	double time_till_next_arrival_at_stop (Busstop* stop, double time); // returns the time left till next trip is expected to arrive at the stop (real-time calculation)
 	Bustrip* get_next_trip (Bustrip* reference_trip); //!< returns the trip after the reference trip on the trips vector	
 	Bustrip* get_previous_trip (Bustrip* reference_trip); //!< returns the trip before the reference trip on the trips vector
+	vector<Busstop*>::iterator get_stop_iter (Busstop* stop); // returns the location of stop on the stops sequence for this line
 
 	bool execute(Eventlist* eventlist, double time); //!< re-implemented from virtual function in Action this function does the real work. It initiates the current Bustrip and books the next one
 	
@@ -287,7 +288,8 @@ public:
 	string get_name() {return name;}
 	double get_arrival_rates (Bustrip* trip) {return arrival_rates[trip->get_line()];}
 	double get_alighting_fractions (Bustrip* trip) {return alighting_fractions[trip->get_line()];}
-	ODs_for_stop get_stop_as_origin () {return stop_as_origin;}
+	const ODs_for_stop & get_stop_as_origin () {return stop_as_origin;}
+	ODstops* get_stop_od_as_origin_per_stop (Busstop* stop) {return stop_as_origin[stop];}
 	double get_length () {return length;}
 	double get_avaliable_length () {return avaliable_length;}
 	void set_avaliable_length (double avaliable_length_) {avaliable_length = avaliable_length_;}
@@ -303,9 +305,11 @@ public:
 	vector <Busline*> get_lines () {return lines;}
 	double get_last_departure (Busline* line) {return last_departures[line].second;}
 	Bustrip* get_last_trip_departure (Busline* line) {return last_departures[line].first;}
-	map<Busstop*,double> get_walking_distances () {return distances;}
+	map<Busstop*,double> & get_walking_distances () {return distances;}
+	double get_walking_distance_stop (Busstop* stop) {return distances[stop];}
 	void save_previous_arrival_rates () {previous_arrival_rates.swap(arrival_rates);}
 	void save_previous_alighting_fractions () {previous_alighting_fractions.swap(alighting_fractions);}
+	bool check_walkable_stop (Busstop* stop);
 
 	Output_Summary_Stop_Line get_output_summary (int line_id) {return output_summary[line_id];}
 
@@ -389,7 +393,7 @@ protected:
 
 	// walking distances between stops (relevant only for demand format 3)
 	map<Busstop*,double> distances; // contains the distances [meters] from other bus stops
-
+	
 	// output structures
 	list <Busstop_Visit> output_stop_visits; //!< list of output data for buses visiting stops
 	map<int,Output_Summary_Stop_Line> output_summary; //  int value is line_id

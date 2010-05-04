@@ -102,8 +102,7 @@ Busstop* Passenger::make_alighting_decision (Bustrip* boarding_bus, double time)
 					vector<vector<Busstop*>>::iterator stops_iter = alt_stops.begin() + 2; // pointing to the third place - the first transfer stop
 					for (vector<Busstop*>::iterator first_transfer_stops = (*stops_iter).begin(); first_transfer_stops < (*stops_iter).end(); first_transfer_stops++)
 					{
-						map <Busstop*, ODstops*> od_stops = (*first_transfer_stops)->get_stop_as_origin();
-						ODstops* left_od_stop = od_stops[this->get_OD_stop()->get_destination()];	
+						ODstops* left_od_stop = (*first_transfer_stops)->get_stop_od_as_origin_per_stop(this->get_OD_stop()->get_destination());	
 						if ((*first_transfer_stops)->get_id() == OD_stop->get_destination()->get_id())
 						// in case it is the final destination for this passeneger
 						{
@@ -185,8 +184,7 @@ Busstop* Passenger::make_connection_decision (double time)
 		{
 			if (candidate_connection_stops_u[(*connected_stop)] == NULL)
 			{
-				map <Busstop*, ODstops*> od_stops = (*connected_stop)->get_stop_as_origin();
-				ODstops* left_od_stop = od_stops[this->get_OD_stop()->get_destination()];
+				ODstops* left_od_stop = (*connected_stop)->get_stop_od_as_origin_per_stop(this->get_OD_stop()->get_destination());
 				if ((*connected_stop)->get_id() == OD_stop->get_destination()->get_id())
 				// in case it is the final destination for this passeneger
 				{

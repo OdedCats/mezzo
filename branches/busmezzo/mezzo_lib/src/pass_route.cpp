@@ -60,12 +60,16 @@ void Pass_path::reset()
 
 int Pass_path::find_number_of_transfers ()
 {
-	int nr_trans = ((alt_transfer_stops.size()-2)/2)-1;
-	if (nr_trans < 0)
+	int nr_trans = 0; 
+	if (alt_lines.empty() == true)
 	{
-		nr_trans = 0; // in case it is only a walking alternative (no buslines included)
+		return nr_trans;
 	}
-	return (nr_trans); // omitting origin and destination stops
+	for (vector<vector<Busline*>>::iterator iter_count = alt_lines.begin(); iter_count < alt_lines.end(); iter_count++)
+	{
+		nr_trans++;
+	}	
+	return nr_trans-1; // omitting origin and destination stops
 }
 
 double Pass_path::calc_total_scheduled_in_vehicle_time ()
@@ -206,6 +210,10 @@ double Pass_path::calc_waiting_utility (vector <vector <Busstop*>>::iterator sto
 	for (vector <Busline*>::iterator iter_lines = (*iter_alt_lines).begin(); iter_lines < (*iter_alt_lines).end(); iter_lines++)
 	{
 		Bustrip* next_trip = (*iter_lines)->find_next_scheduled_trip_at_stop((*stop_iter).front(), time);
+		if (next_trip == NULL) // in case there is no next trip planned
+		{
+			return -10.0;
+		}
 		if (next_trip->stops_map[(*stop_iter).front()] - time < theParameters->max_waiting_time)
 		{
 		// a dynamic filtering rule - if there is at least one line in the first leg which is available - then this waiting alternative is relevant

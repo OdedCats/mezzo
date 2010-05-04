@@ -166,12 +166,14 @@ public:
 // transit demand parameters:
    int demand_format;
    double demand_scale; // !< currently for demand format 1 only - multiplies the hourly arrival rate
+   int choice_set_indicator; //!< 0 indicates process path-set generation; 1 indicates read path-set input file
    double transfer_coefficient;
    double in_vehicle_time_coefficient;
    double waiting_time_coefficient;
    double walking_time_coefficient;
    double average_walking_speed;
    int max_nr_extra_transfers;
+   int absolute_max_transfers;
    double max_in_vehicle_time_ratio;
    double max_walking_distance;
    double max_waiting_time;

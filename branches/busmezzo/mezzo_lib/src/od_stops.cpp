@@ -61,8 +61,7 @@ bool ODstops::execute (Eventlist* eventlist, double curr_time) // generate passe
 		if (connection_stop->get_id() != origin_stop->get_id()) // if the pass. walks to another stop
 		{
 			// set connected_stop as the new origin
-			map <Busstop*, ODstops*> ods_at_origin = connection_stop->get_stop_as_origin();
-			pass->set_ODstop(ods_at_origin[destination_stop]); // set this stop as his new origin (new OD)
+			pass->set_ODstop(connection_stop->get_stop_od_as_origin_per_stop(destination_stop)); // set this stop as his new origin (new OD)
 			map<Busstop*,double> walk_dis = origin_stop->get_walking_distances();
 			pass->execute(eventlist, curr_time + walk_dis[connection_stop] / random->nrandom (theParameters->average_walking_speed, theParameters->average_walking_speed/4));
 		}

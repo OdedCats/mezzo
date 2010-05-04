@@ -80,12 +80,14 @@ Parameters::Parameters ()
 // transit demand parameters:
    demand_format = 1;
    demand_scale = 1.0;
+   choice_set_indicator = 0;
    transfer_coefficient = 0.0; 
    in_vehicle_time_coefficient = 0.0;
    waiting_time_coefficient = 0.0;
    walking_time_coefficient= 0.0;
    average_walking_speed = 4000.0;
    max_nr_extra_transfers = 1.0;
+   absolute_max_transfers = 3.0;
    max_in_vehicle_time_ratio = 2.0;
    max_walking_distance = 2500;
    max_waiting_time = 1800.0;
@@ -504,6 +506,13 @@ bool Parameters::read_parameters (istream & in )
 	if (demand_format == 3)
 	{
 		in >> keyword;
+		if (keyword!= "choice_set_indicator=")
+		{
+			cout << "ERROR reading Parameters file, expecting: choice_set_indicator=, read: " << keyword << endl;
+			return false;
+		}
+		in >> choice_set_indicator;
+		in >> keyword;
 		if (keyword!= "transfer_coefficient=")
 		{
 			cout << "ERROR reading Parameters file, expecting: transfer_coefficient=, read: " << keyword << endl;
@@ -545,6 +554,13 @@ bool Parameters::read_parameters (istream & in )
 			return false;
 		}
 		in >> max_nr_extra_transfers;
+		in >> keyword;
+		if (keyword!= "absolute_max_transfers=")
+		{
+			cout << "ERROR reading Parameters file, expecting: absolute_max_transfers=, read: " << keyword << endl;
+			return false;
+		}
+		in >> absolute_max_transfers;
 		in >> keyword;
 		if (keyword!= "max_in_vehicle_time_ratio=")
 		{

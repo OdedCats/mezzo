@@ -92,6 +92,18 @@ bool Busline::execute(Eventlist* eventlist, double time)
 	return true;
 }
 
+vector<Busstop*>::iterator Busline::get_stop_iter (Busstop* stop)
+{
+	for (vector<Busstop*>::iterator stop_iter = stops.begin(); stop_iter < stops.end(); stop_iter++)
+	{
+		if ((*stop_iter)->get_id() == stop->get_id())
+		{
+			return stop_iter;
+		}
+	}
+	return stops.end();
+}
+
 bool Busline::is_line_timepoint (Busstop* stop)
 {
 	for (vector <Busstop*>::iterator tp = line_timepoint.begin(); tp < line_timepoint.end(); tp++ )
@@ -159,7 +171,7 @@ double Busline::calc_next_scheduled_arrival_at_stop (Busstop* stop, double time)
 
 Bustrip* Busline::find_next_scheduled_trip_at_stop (Busstop* stop, double time)
 {
-	for (vector <Start_trip>::iterator trip_iter = trips.begin(); trip_iter < trips.end(); trip_iter)
+	for (vector <Start_trip>::iterator trip_iter = trips.begin(); trip_iter < trips.end(); trip_iter++)
 	{
 		map <Busstop*, double> stop_time = (*trip_iter).first->stops_map;
 		if (stop_time[stop] > time)
@@ -1044,17 +1056,17 @@ double Busstop::passenger_activity_at_stop (Eventlist* eventlist, Bustrip* trip,
 double Busstop::calc_dwelltime (Bustrip* trip)  //!< calculates the dwelltime of each bus serving this stop. currently includes: passenger service times ,out of stop, bay/lane		
 {
 	// Dwell time parameters according to TCQSM
-	double dwell_constant = 5.0; 
-	double out_of_stop_coefficient = 3.0;
-	double bay_coefficient = 7.0;
-	double boarding_coefficient = 3.0;	
-	double alighting_front_coefficient = 2.8;
-	double alighting_rear_coefficient = 1.5;
-	double percent_alighting_front = 0.25;
+	double dwell_constant = 2.0; 
+	double out_of_stop_coefficient = 2.0;
+	double bay_coefficient = 2.0;
+	double boarding_coefficient = 2.0;	
+	double alighting_front_coefficient = 1.0;
+	double alighting_rear_coefficient = 1.0;
+	double percent_alighting_front = 0.0;
 	int boarding_standees;
 	int alighting_standees;
 	bool crowded = 0;
-	double std_error = 2.0;
+	double std_error = 1.0;
 	/* Lin & Wilson version of dwell time function
 	double dwell_constant = 12.5; // Value of the constant component in the dwell time function. 
 	double boarding_coefficient = 0.55;	// Should be read as an input parameter. Would be different for low floor for example.
@@ -1511,6 +1523,15 @@ void Busstop::calculate_sum_output_stop_per_line(int line_id)
 		output_summary[line_id].stop_sd_headway = sqrt(output_summary[line_id].stop_sd_headway/(counter-1));
 	}
 	output_summary[line_id].stop_sd_DT = sqrt(output_summary[line_id].stop_sd_DT/(counter-1));
+}
+
+bool Busstop::check_walkable_stop (Busstop* stop)
+{
+	if (distances.count(stop) > 0)
+	{
+		return true;
+	}
+	return false;
 }
 
 Change_arrival_rate::Change_arrival_rate(double time)
