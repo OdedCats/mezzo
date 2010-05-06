@@ -1754,7 +1754,7 @@ bool Network::readbustrip_format2(istream& in) // reads a trip
 			Visit_stop* vs_ct = new Visit_stop ((*iter)->first, dispatching_time + (*iter)->second);
 			curr_trip.push_back(vs_ct);
 		}
-		Bustrip* trip= new Bustrip (busline_id*10 + i, dispatching_time); // e.g. line 2, 3rd trip: trip_id = 23
+		Bustrip* trip= new Bustrip (busline_id*100 + i, dispatching_time); // e.g. line 2, 3rd trip: trip_id = 23
 		trip->add_stops(curr_trip);
 		bl->add_trip(trip,dispatching_time);
 		bl->reset_curr_trip();
@@ -1824,7 +1824,7 @@ bool Network::readbustrip_format3(istream& in) // reads a trip
 			Visit_stop* vs_ct = new Visit_stop ((*iter)->first, trip_acc_time);
 			curr_trip.push_back(vs_ct);
 		}
-		Bustrip* trip= new Bustrip (busline_id*10 + i, initial_dispatching_time); // e.g. line 2, 3rd trip: trip_id = 23
+		Bustrip* trip= new Bustrip (busline_id*100 + i, initial_dispatching_time); // e.g. line 2, 3rd trip: trip_id = 23
 		trip->add_stops(curr_trip);
 		bl->add_trip(trip,curr_trip.front()->second);
 		bl->reset_curr_trip();
@@ -2448,8 +2448,6 @@ void Network::find_all_paths ()
 			collect_walking_distances.clear();
 		}
 		*/
-		if ((*basic_origin)->get_id() > 21933)
-		{
 		for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
 		{
 			if ((*basic_origin)->get_id() != (*basic_destination)->get_id())
@@ -2460,37 +2458,24 @@ void Network::find_all_paths ()
 				collect_walking_distances.clear();
 			}
 		}
-		}
 	}
 	// merge alternative paths
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{
-		if ((*basic_origin)->get_id() > 21933)
-		{
 		merge_paths_by_stops(*basic_origin);
-		}
 	}
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{
-		if ((*basic_origin)->get_id() > 21933)
-		{	
 		merge_paths_by_common_lines(*basic_origin);
-		}
 	}
 	// apply static dominancy rules
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{
-		if ((*basic_origin)->get_id() > 21933)
-		{
 		static_filtering_rules(*basic_origin);
-		}
 	}
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
-	{
-		if ((*basic_origin)->get_id() > 21933)
-		{	
+	{	
 		dominancy_rules(*basic_origin);
-		}
 	}
 	write_path_set (workingdir + "path_set_generation.dat");
 }
@@ -2757,17 +2742,19 @@ void Network::merge_paths_by_common_lines (Busstop* stop)  // merge paths with l
 			for (vector <Pass_path*>::iterator path1 = path_set.begin(); path1 < path_set.end()-1; path1++)
 			{
 				bool perform_merge = false;
-				vector<vector<Busline*>> transfer_lines1_ = (*path1)->get_alt_lines();						
-				vector<vector<Busline*>>::iterator transfer_lines1 = transfer_lines1_.begin();
-				vector<vector<Busstop*>> transfer_stops1_ = (*path1)->get_alt_transfer__stops();
-				if (transfer_lines1_.size() == 0) // a walking-only path - there is no need in merging
-				{
-					break;
-				}
+				vector<vector<Busline*>> transfer_lines1_collect = (*path1)->get_alt_lines();	
 				if (flagged_paths[(*path1)] == false)
 				{
 					for (vector <Pass_path*>::iterator path2 = path1 + 1; path2 < path_set.end(); path2++)
 					{
+						vector<vector<Busline*>> transfer_lines1_ = (*path1)->get_alt_lines();						
+						vector<vector<Busline*>>::iterator transfer_lines1 = transfer_lines1_.begin();
+						vector<vector<Busline*>>::iterator transfer_lines1_collect_iter = transfer_lines1_collect.begin();
+						vector<vector<Busstop*>> transfer_stops1_ = (*path1)->get_alt_transfer__stops();
+						if (transfer_lines1_.size() == 0) // a walking-only path - there is no need in merging
+						{
+							break;
+						}
 						vector<vector<Busstop*>> transfer_stops2_ = (*path2)->get_alt_transfer__stops();
 						vector<vector<Busline*>> transfer_lines2_ = (*path2)->get_alt_lines();
 						vector<vector<Busstop*>>::iterator transfer_stops2 = transfer_stops2_.begin()+1;
@@ -2822,13 +2809,25 @@ void Network::merge_paths_by_common_lines (Busstop* stop)  // merge paths with l
 										}
 										if (identical_line == false)
 										{
-											(*(transfer_lines1)).push_back(*transfer_line2);
+											bool line_included = false;
+											for (vector<Busline*>::iterator line_iter = (*transfer_lines1_collect_iter).begin(); line_iter < (*transfer_lines1_collect_iter).end(); line_iter++)
+											{
+												if ((*line_iter)->get_id() == (*transfer_line2)->get_id())
+												{
+													line_included = true;
+													break;
+												}
+											}
+											if (line_included == false)
+											{
+												(*transfer_lines1_collect_iter).push_back(*transfer_line2);
+											}
+											perform_merge = true;
+											flagged_paths[(*path2)] = true;
 										}
-										perform_merge = true;
-										flagged_paths[(*path2)] = true;
+										paths_to_be_deleted[*path1] = true;
+										paths_to_be_deleted[*path2] = true;
 									}
-									paths_to_be_deleted[*path1] = true;
-									paths_to_be_deleted[*path2] = true;
 								}
 							}
 							// progress all the iterators
@@ -2838,19 +2837,21 @@ void Network::merge_paths_by_common_lines (Busstop* stop)  // merge paths with l
 							{
 								break;
 							}
-							if (transfer_stops1 != transfer_stops1_.begin())
+							if (transfer_stops1 != transfer_stops1_.end())
 							{
 								transfer_lines1++;
+								transfer_lines1_collect_iter++;
 								transfer_lines2++;
 							}
 						}
+						if (perform_merge == true && path2 == path_set.end()-1)
+						// only after all the required merging took place
+						{
+							Pass_path* merged_path = new Pass_path(pathid, transfer_lines1_collect, (*path1)->get_alt_transfer__stops(), (*path1)->get_walking_distances()); 
+							pathid++;
+							merged_paths_to_be_added.push_back(merged_path);
+						}
 					}
-				}
-				if (perform_merge == true)
-				{
-					Pass_path* merged_path = new Pass_path(pathid, transfer_lines1_, (*path1)->get_alt_transfer__stops(), (*path1)->get_walking_distances()); 
-					pathid++;
-					merged_paths_to_be_added.push_back(merged_path);
 				}
 			}
 			for (map <Pass_path*,bool>::iterator delete_iter = paths_to_be_deleted.begin(); delete_iter != paths_to_be_deleted.end(); delete_iter++)
@@ -2926,9 +2927,7 @@ void Network::static_filtering_rules (Busstop* stop)
 						lines_to_be_deleted[(*line_iter)] = false;
 					}
 					vector<vector<Busstop*>> alt_stops = (*path)->get_alt_transfer__stops();
-					vector<vector<Busstop*>>::iterator stop_iter = alt_stops.begin();
-					stop_iter++;
-					map<Busline*, bool> lines_to_include = (*path)->check_maybe_worthwhile_to_wait((*path)->get_alt_lines().front(), stop_iter, 0);
+					map<Busline*, bool> lines_to_include = (*path)->check_maybe_worthwhile_to_wait((*path)->get_alt_lines().front(), alt_stops.begin(), 0);
 					for (map<Busline*, bool>::iterator lines_to_include_iter = lines_to_include.begin(); lines_to_include_iter != lines_to_include.end(); lines_to_include_iter++)
 					{
 						if ((*lines_to_include_iter).second == false)
@@ -3354,6 +3353,10 @@ bool Network::compare_common_partial_routes (Busline* line1, Busline* line2, Bus
 			{
 				return false;
 			}
+			if (iter_stop1 == line1->stops.end()-1)
+			{
+				return false;
+			}	
 		}
 		if ((*(iter_stop2))->get_id() != end_section->get_id())
 		{
@@ -3503,8 +3506,6 @@ bool Network::write_path_set (string name1)
 	out1 << "transit_paths:" << '\t' ;
 	for (vector<Busstop*>::iterator stop_iter = busstops.begin(); stop_iter < busstops.end(); stop_iter++)
 	{
-		if ((*stop_iter)->get_id() > 21933)
-		{
 			for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
 			{
 			if ((*stop_iter)->get_id() != (*basic_destination)->get_id())
@@ -3545,7 +3546,6 @@ bool Network::write_path_set (string name1)
 				out1 << '}' << endl;	
 			}
 			}
-		}
 		}
 	}
 	out1 << "nr_paths:" << '\t' << pathcounter << '\t' ;

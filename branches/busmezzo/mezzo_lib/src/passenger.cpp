@@ -182,6 +182,10 @@ Busstop* Passenger::make_connection_decision (double time)
 		for (vector<Busstop*>::iterator connected_stop = (*stops_iter).begin(); connected_stop < (*stops_iter).end(); connected_stop++)
 		// going over all the stops at the second (connected) set
 		{
+			if ((*stops_iter).size() == 1) // in case there is no choice, only one option
+			{
+				candidate_connection_stops_u[(*connected_stop)] = 10.0;
+			}
 			if (candidate_connection_stops_u[(*connected_stop)] == NULL)
 			{
 				ODstops* left_od_stop = (*connected_stop)->get_stop_od_as_origin_per_stop(this->get_OD_stop()->get_destination());
