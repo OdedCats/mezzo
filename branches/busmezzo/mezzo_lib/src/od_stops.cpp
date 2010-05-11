@@ -107,6 +107,7 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus, double time)
 				if ((*line)->get_id() == arriving_bus->get_id())
 				{
 					in_alt = true;
+					break;
 				}
 			}
 		}

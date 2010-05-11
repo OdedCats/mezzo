@@ -2396,16 +2396,16 @@ void Network::generate_stop_ods()
 	{
 		for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
 		{
-			if ((*basic_origin)->get_stop_od_as_origin_per_stop(*basic_destination) == NULL)
-			{
-				if ((*basic_origin)->get_id() != (*basic_destination)->get_id())
+			//if ((*basic_origin)->get_id() != (*basic_destination)->get_id())
+			//{	
+				if ((*basic_origin)->get_stop_od_as_origin_per_stop(*basic_destination) == NULL)
 				{
 					ODstops* od_stop = new ODstops ((*basic_origin),(*basic_destination),0.0);
 					odstops.push_back(od_stop);
 					(*basic_origin)->add_odstops_as_origin((*basic_destination), od_stop);
 					(*basic_destination)->add_odstops_as_destination((*basic_origin), od_stop);
 				}
-			}
+			//}
 		}
 	}
 }

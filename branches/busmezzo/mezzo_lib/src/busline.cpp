@@ -169,6 +169,21 @@ double Busline::calc_next_scheduled_arrival_at_stop (Busstop* stop, double time)
 }
 */
 
+double Busline::find_time_till_next_scheduled_trip_at_stop (Busstop* stop, double time)
+{
+	for (vector <Start_trip>::iterator trip_iter = trips.begin(); trip_iter < trips.end(); trip_iter++)
+	{
+		map <Busstop*, double> stop_time = (*trip_iter).first->stops_map;
+		if (stop_time[stop] > time)
+			// assuming that trips are stored according to their chronological order
+		{
+			return ((*trip_iter).second - time);
+		}
+	}
+	// currently - in case that there is no additional trip scheduled - return the time till simulation end
+	return theParameters->running_time - time;
+}
+
 Bustrip* Busline::find_next_scheduled_trip_at_stop (Busstop* stop, double time)
 {
 	for (vector <Start_trip>::iterator trip_iter = trips.begin(); trip_iter < trips.end(); trip_iter++)
@@ -700,27 +715,30 @@ void Busstop::book_bus_arrival(Eventlist* eventlist, double time, Bus* bus)
 bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the eventlist and means a bus needs to be processed
 {
   	// progress the vehicle when entering or exiting a stop
-	//	
+	
 	if (theParameters->demand_format == 3)
 	{
 		for (map <Busstop*, ODstops*>::iterator destination_stop = stop_as_origin.begin(); destination_stop != stop_as_origin.end(); destination_stop++)
 		{
-			passengers pass_waiting_od = (*destination_stop).second->get_waiting_passengers();		
-			passengers::iterator check_pass = pass_waiting_od.begin();
-			//Passenger* next_pass;
-			//bool last_waiting_pass = false;
-			while (check_pass < pass_waiting_od.end())
-			{
-					// progress each waiting passenger   
-				if ((*check_pass)->get_OD_stop()->get_origin()->get_id() != this->get_id())
+			//if (id != destination_stop->first->get_id())
+			//{
+				passengers pass_waiting_od = (*destination_stop).second->get_waiting_passengers();		
+				passengers::iterator check_pass = pass_waiting_od.begin();
+				//Passenger* next_pass;
+				//bool last_waiting_pass = false;
+				while (check_pass < pass_waiting_od.end())
 				{
-					break;
+					// progress each waiting passenger   
+					if ((*check_pass)->get_OD_stop()->get_origin()->get_id() != this->get_id())
+					{
+						break;
+					}
+					check_pass++;
 				}
-			check_pass++;
-			}
+			//}
 		}
 	}
-	//
+	
 	if (buses_at_stop.count(time) > 0) 
 	// if this is for a bus EXITING the stop:
 	{
@@ -945,28 +963,35 @@ double Busstop::passenger_activity_at_stop (Eventlist* eventlist, Bustrip* trip,
 		set_nr_alighting (trip->passengers_on_board[this].size()); 
 		for (vector <Passenger*> ::iterator alighting_passenger = trip->passengers_on_board[this].begin(); alighting_passenger < trip->passengers_on_board[this].end(); alighting_passenger++)
 		{
-			(*alighting_passenger)->set_ODstop(stop_as_origin[(*alighting_passenger)->get_OD_stop()->get_destination()]); // set this stop as his new origin (new OD)
-			Busstop* next_stop =(*alighting_passenger)->make_connection_decision(time);
-			if (next_stop->get_id() == (*alighting_passenger)->get_OD_stop()->get_destination()->get_id()) // if this is the final destination of the passenger
+			(*alighting_passenger)->add_to_selected_path_stop(this);
+			Busstop* next_stop;	
+			if (id == (*alighting_passenger)->get_OD_stop()->get_destination()->get_id()) // if this stop is passenger's destination
 			{
+				// passenger has no further conection choice
+				next_stop = this;
+				(*alighting_passenger)->add_to_selected_path_stop(this);
 				(*alighting_passenger)->set_end_time(time);
 				pass_recycler.addPassenger(*alighting_passenger); // terminate passenger
 			}
-			else // if this is an intermediate transfer stop on passenger route 
+			else
 			{
+				// if this stop is not passenger's final destination then make a connection decision
+				(*alighting_passenger)->set_ODstop(stop_as_origin[(*alighting_passenger)->get_OD_stop()->get_destination()]); // set the connected stop as passenger's new origin (new OD)
+				next_stop =(*alighting_passenger)->make_connection_decision(time);
+				// set connected_stop as the new origin
+				ODstops* new_od = next_stop->get_stop_od_as_origin_per_stop((*alighting_passenger)->get_OD_stop()->get_destination());
+				(*alighting_passenger)->set_ODstop(new_od); // set the connected stop as passenger's new origin (new OD)
 				ODstops* odstop = (*alighting_passenger)->get_OD_stop();
 				if (odstop->get_waiting_passengers().size() != 0)
 				{
 					if (next_stop->get_id() == this->get_id())  // pass stays at the same stop
 					{
-						passengers wait_pass = odstop->get_waiting_passengers(); // add him to the waiting queue on his new OD
+						passengers wait_pass = odstop->get_waiting_passengers(); // add passanger's to the waiting queue on the new OD
 						wait_pass.push_back (*alighting_passenger);
 						odstop->set_waiting_passengers(wait_pass);
 					}
 					else  // pass walks to another stop
 					{
-						// set connected_stop as the new origin
-						(*alighting_passenger)->set_ODstop(stop_as_origin[(*alighting_passenger)->get_OD_stop()->get_destination()]); // set this stop as his new origin (new OD)
 						// booking an event to the arrival time at the new stop
 						(*alighting_passenger)->execute(eventlist, time + distances[next_stop] / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4));
 					}

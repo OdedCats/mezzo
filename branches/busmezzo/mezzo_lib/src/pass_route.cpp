@@ -146,8 +146,8 @@ double Pass_path::calc_curr_leg_headway (vector<Busline*> leg_lines, vector <vec
 	map<Busline*, bool> worth_to_wait = check_maybe_worthwhile_to_wait(leg_lines, stop_iter, 1);
 	for (vector<Busline*>::iterator iter_leg_lines = leg_lines.begin(); iter_leg_lines < leg_lines.end(); iter_leg_lines++)
 	{
-		Bustrip* next_trip = (*iter_leg_lines)->find_next_scheduled_trip_at_stop((*stop_iter).front(), time);
-		if (next_trip->stops_map[(*stop_iter).front()] - time < theParameters->max_waiting_time && worth_to_wait[(*iter_leg_lines)] == true) 
+		double time_till_next_trip = (*iter_leg_lines)->find_time_till_next_scheduled_trip_at_stop((*stop_iter).front(), time);
+		if (time_till_next_trip < theParameters->max_waiting_time && worth_to_wait[(*iter_leg_lines)] == true) 
 			// dynamic filtering rules - consider only if it is available in a pre-defined time frame and it is maybe worthwhile to wait for it
 		{
 			accumlated_frequency += 3600.0 / ((*iter_leg_lines)->calc_curr_line_headway ());
@@ -237,7 +237,6 @@ double Pass_path::calc_estimated_waiting_time_schedule (double time, bool withou
 map<Busline*, bool> Pass_path::check_maybe_worthwhile_to_wait (vector<Busline*> leg_lines, vector <vector <Busstop*>>::iterator stop_iter, bool dynamic_indicator)
 {
 	// based on the complete headway
-	stop_iter++; // the second stops set on the path
 	map <Busline*,bool> worth_to_wait;
 	for (vector<Busline*>::iterator iter_leg_lines = leg_lines.begin(); iter_leg_lines < leg_lines.end(); iter_leg_lines++)
 	{
@@ -252,6 +251,7 @@ map<Busline*, bool> Pass_path::check_maybe_worthwhile_to_wait (vector<Busline*> 
 			{
 				if (dynamic_indicator == 0) // in case it is a static filtering rule
 				{
+					stop_iter++; // the second stops set on the path	
 					if ((*iter_leg_lines)->calc_curr_line_ivt((*stop_iter).front(),(*(stop_iter+1)).front()) + (*iter_leg_lines)->calc_max_headway() < (*iter1_leg_lines)->calc_curr_line_ivt((*stop_iter).front(),(*(stop_iter+1)).front()))		
 					{
 						// if IVT(1) + Max H (1) < IVT (2) then line 2 is not worthwhile to wait for

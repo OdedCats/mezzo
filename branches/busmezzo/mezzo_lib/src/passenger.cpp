@@ -67,7 +67,10 @@ return true;
 
 bool Passenger:: make_boarding_decision (Bustrip* arriving_bus, double time) 
 {
-	boarding_decision = random ->brandom(OD_stop->calc_boarding_probability(arriving_bus->get_line(), time));
+	Busstop* curr_stop = selected_path_stops.back();
+	ODstops* od = curr_stop->get_stop_od_as_origin_per_stop(OD_stop->get_destination());
+	// use the od based on last stop on record (in case of connections)
+	boarding_decision = random ->brandom(od->calc_boarding_probability(arriving_bus->get_line(), time));
 	OD_stop->record_passenger_boarding_decision (this, arriving_bus, time, boarding_decision);
 	return boarding_decision;
 }
@@ -100,6 +103,10 @@ Busstop* Passenger::make_alighting_decision (Bustrip* boarding_bus, double time)
 				{
 					vector<vector<Busstop*>> alt_stops = (*path_iter)->get_alt_transfer__stops();
 					vector<vector<Busstop*>>::iterator stops_iter = alt_stops.begin() + 2; // pointing to the third place - the first transfer stop
+					if (path_set.size() == 1 && (*stops_iter).size() == 1)
+					{
+						candidate_transfer_stops_u[(*stops_iter).front()] == 10; // in case it is the only option
+					}
 					for (vector<Busstop*>::iterator first_transfer_stops = (*stops_iter).begin(); first_transfer_stops < (*stops_iter).end(); first_transfer_stops++)
 					{
 						ODstops* left_od_stop = (*first_transfer_stops)->get_stop_od_as_origin_per_stop(this->get_OD_stop()->get_destination());	
@@ -156,22 +163,14 @@ Busstop* Passenger::make_alighting_decision (Bustrip* boarding_bus, double time)
 				alighting_MNL[(*iter_p).first].second = (*iter_p).second;
 			}
 			OD_stop->record_passenger_alighting_decision(this, boarding_bus, time, (*stops_probs).first, alighting_MNL);
-			selected_path_stops.push_back((*stops_probs).first);
 			return ((*stops_probs).first); // rerurn the chosen stop by MNL choice model
 		}
 	}
-	selected_path_stops.push_back(candidate_transfer_stops_p.begin()->first);
 	return candidate_transfer_stops_p.begin()->first; // arbitary choice in case something failed
 }
 
 Busstop* Passenger::make_connection_decision (double time)
 {
-	if (OD_stop->get_origin()->get_id() == OD_stop->get_destination()->get_id())
-		// in case pass. alighted at this final destination stop
-	{
-		selected_path_stops.push_back(OD_stop->get_destination());
-		return (OD_stop->get_destination());
-	}
 	map <Busstop*, double> candidate_connection_stops_u; // the double value is the utility associated with the respective stop
 	map <Busstop*, double> candidate_connection_stops_p; // the double value is the probability associated with the respective stop
 	vector<Pass_path*> path_set = OD_stop->get_path_set();
@@ -182,10 +181,6 @@ Busstop* Passenger::make_connection_decision (double time)
 		for (vector<Busstop*>::iterator connected_stop = (*stops_iter).begin(); connected_stop < (*stops_iter).end(); connected_stop++)
 		// going over all the stops at the second (connected) set
 		{
-			if ((*stops_iter).size() == 1) // in case there is no choice, only one option
-			{
-				candidate_connection_stops_u[(*connected_stop)] = 10.0;
-			}
 			if (candidate_connection_stops_u[(*connected_stop)] == NULL)
 			{
 				ODstops* left_od_stop = (*connected_stop)->get_stop_od_as_origin_per_stop(this->get_OD_stop()->get_destination());

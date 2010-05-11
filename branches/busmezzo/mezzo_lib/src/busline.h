@@ -97,7 +97,8 @@ public:
 	bool check_first_trip (Bustrip* trip); // returns true if the trip is the first trip on the bus line, otherwise it returns false  
 	bool check_last_trip (Bustrip* trip); // returns true if the trip is the last trip on the bus line, otherwise it returns false  
 //	double calc_next_scheduled_arrival_at_stop (Busstop* stop, double time); // returns the remaining time till the next trip on this line is scheduled to arrive at a stop (according to schedule only) 
-	Bustrip* find_next_scheduled_trip_at_stop (Busstop* stop, double time); // returns the trip which is scheduled to arrive next at stop
+	double find_time_till_next_scheduled_trip_at_stop (Busstop* stop, double time); // returns the time till the next trip which is scheduled to arrive next at stop
+	Bustrip* find_next_scheduled_trip_at_stop (Busstop* stop, double time); // returns the next trip which is scheduled to arrive next at stop
 	double time_till_next_arrival_at_stop (Busstop* stop, double time); // returns the time left till next trip is expected to arrive at the stop (real-time calculation)
 	Bustrip* get_next_trip (Bustrip* reference_trip); //!< returns the trip after the reference trip on the trips vector	
 	Bustrip* get_previous_trip (Bustrip* reference_trip); //!< returns the trip before the reference trip on the trips vector
