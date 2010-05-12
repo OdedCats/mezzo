@@ -1873,9 +1873,10 @@ ODRate Network::readrate(istream& in, double scale)
 #endif //_DEBUG_NETWORK	
 	ODRate odrate;
 	odrate.odid=odval(0,0);
-	odrate.rate=-1;
+	odrate.rate=-1.0;
 	char bracket;
-	int oid, did, rate;
+	int oid, did;
+	double rate;
 	in >> bracket;
 
 	if (bracket != '{')
@@ -1886,7 +1887,7 @@ ODRate Network::readrate(istream& in, double scale)
 	in  >> oid >> did >> rate;
 	// check oid, did, rate;
 	// scale up/down the rate
-	rate=static_cast<int> (rate*scale);
+	rate= (rate*scale);
 	//   assert (rate > 0);
 	in >> bracket;
 	if (bracket != '}')

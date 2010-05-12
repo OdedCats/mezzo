@@ -19,7 +19,6 @@
 #ifndef NETWORK_HH
 #define NETWORK_HH
 
-//#undef _NO_GUI
 //#define _DEBUG_NETWORK
 //#define _DEBUG_SP // shortest path routines
 #define _USE_VAR_TIMES   //!< variable link travel times
@@ -66,7 +65,7 @@
 //thread support
 #include <QThread.h>
 
-//include the PVM communicator
+//include the PVM communicator (for hybrid with MITSIMLAB)
 #ifdef _PVM
 #include "pvm.h"
 #endif // _PVM
@@ -84,7 +83,7 @@ class ODRate
 {
 public:
 	odval odid;
-	int rate;
+	double rate;
 };
 
 

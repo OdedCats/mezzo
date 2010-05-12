@@ -93,8 +93,8 @@ class Signature
 		int destination;
 		int type;
 		double length;
-		int path; // virtual link id
-    int tmppath;
+		int path; // Path id in Mezzo
+    int tmppath; // Virtual LInk ID
 		int tmporigin;
 		int tmpdestination;
 };
