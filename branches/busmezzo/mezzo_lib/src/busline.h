@@ -70,7 +70,7 @@ class Busline: public Action
 {
 public:
 	Busline (); //!< simple constructor
-	Busline (int id_, string name_, Busroute* busroute_, vector <Busstop*> stops_, Vtype* vtype_, ODpair* odpair_, int holding_strategy_, float ratio_headway_holding_); //!< Initialising constructor
+	Busline (int id_, int opposite_id_, string name_, Busroute* busroute_, vector <Busstop*> stops_, Vtype* vtype_, ODpair* odpair_, int holding_strategy_, float ratio_headway_holding_); //!< Initialising constructor
 	virtual ~Busline(); //!< destructor
 	void reset ();
 	void reset_curr_trip (); // initialize after reading bustrips
@@ -84,6 +84,9 @@ public:
 	float get_ratio_headway_holding() {return ratio_headway_holding;} //!< returns ratio_headway_holding
 	int get_holding_strategy() {return holding_strategy;} //!< returns the holding strategy
 	void set_curr_trip(vector <Start_trip>::iterator curr_trip_) {curr_trip = curr_trip_;}
+	int get_opposite_id () {return opposite_id;}
+	//void set_opposite_line (Busline* line) {opposite_line = line;}
+	//Busline* get_opposite_line () {return opposite_line;}
 	Output_Summary_Line get_output_summary () {return output_summary;}
 	vector <Start_trip> get_trips () {return trips;}
 
@@ -122,6 +125,8 @@ public:
 
 protected:
 	int id; //!< line ID
+	int opposite_id; // !< the line ID of the opposite direction
+	//Busline* opposite_line;
 	string name; //!< name of the busline "46 Sofia"
 //	int vtype; //!< vehicle type. There are usually multiple types of Busses
 
@@ -302,8 +307,8 @@ public:
 	int get_nr_waiting (Bustrip* trip) {return nr_waiting[trip->get_line()];}
 	const double get_position () { return position;}
 	double get_exit_time() { return exit_time;}
+	vector<Busline*> get_lines () {return lines;}
 	void set_position (double position_ ) {position = position_;}
-	vector <Busline*> get_lines () {return lines;}
 	double get_last_departure (Busline* line) {return last_departures[line].second;}
 	Bustrip* get_last_trip_departure (Busline* line) {return last_departures[line].first;}
 	map<Busstop*,double> & get_walking_distances () {return distances;}
@@ -311,6 +316,7 @@ public:
 	void save_previous_arrival_rates () {previous_arrival_rates.swap(arrival_rates);}
 	void save_previous_alighting_fractions () {previous_alighting_fractions.swap(alighting_fractions);}
 	bool check_walkable_stop (Busstop* stop);
+	bool check_destination_stop (Busstop* stop); 
 
 	Output_Summary_Stop_Line get_output_summary (int line_id) {return output_summary[line_id];}
 

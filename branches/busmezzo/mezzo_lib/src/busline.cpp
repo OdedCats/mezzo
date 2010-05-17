@@ -41,8 +41,8 @@ Busline::Busline ()
 	active = false;
 }
 
-Busline::Busline (int id_, string name_, Busroute* busroute_, vector<Busstop*> stops_, Vtype* vtype_, ODpair* odpair_, int holding_strategy_, float ratio_headway_holding_):
-	id(id_), name(name_), busroute(busroute_), stops(stops_), vtype(vtype_), odpair(odpair_), holding_strategy(holding_strategy_), ratio_headway_holding(ratio_headway_holding_)
+Busline::Busline (int id_, int opposite_id_, string name_, Busroute* busroute_, vector<Busstop*> stops_, Vtype* vtype_, ODpair* odpair_, int holding_strategy_, float ratio_headway_holding_):
+	id(id_), opposite_id(opposite_id_), name(name_), busroute(busroute_), stops(stops_), vtype(vtype_), odpair(odpair_), holding_strategy(holding_strategy_), ratio_headway_holding(ratio_headway_holding_)
 {
 	active=false;
 }
@@ -1553,6 +1553,15 @@ void Busstop::calculate_sum_output_stop_per_line(int line_id)
 bool Busstop::check_walkable_stop (Busstop* stop)
 {
 	if (distances.count(stop) > 0)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool Busstop::check_destination_stop (Busstop* stop)
+{
+	if (stop_as_origin.count(stop) > 0)
 	{
 		return true;
 	}

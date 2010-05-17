@@ -279,10 +279,12 @@ public:
   bool check_sequence_no_repeating_stops (vector<Busstop*> stops); // chceks if the sequence does not include going through the same stop more than once
   void static_filtering_rules (Busstop* stop); // delete paths which do not fulfill the global filtering rules
   void dominancy_rules (Busstop* stop); // delete paths which are dominated by other alterantive paths
-  bool IVT_dominancy_rule (ODstops* odstops, vector<vector<Busline*>> lines, vector<vector<Busstop*>> stops); // check if there is already a path with shorter IVT than the potential one
+  bool totaly_dominancy_rule (ODstops* odstops, vector<vector<Busline*>> lines, vector<vector<Busstop*>> stops); // check if there is already a path with shorter IVT than the potential one
 //  bool downstream_dominancy_rule (Pass_path* check_path); // check whether there is already a path with a transfer stop closer to the destination (to avoid further downstream transfers on the same line)
   bool check_consecutive (Busstop* first, Busstop* second); // checks whether second is consecutive of first 
   bool check_path_constraints(Busstop* destination); // check constraints during search process, return true if constraints are fulfilled
+  bool check_stops_opposing_directions (Busstop* origin, Busstop* destination); // checks whether the
+  bool check_path_no_opposing_lines (vector<vector<Busline*>> lines);
   const vector<Busstop*> & get_cons_stops (Busstop* stop) {return consecutive_stops[stop];}
   const vector<Busline*> & get_direct_lines (ODstops* odstops) {return od_direct_lines[odstops];}
   double calc_total_in_vechile_time (vector<vector<Busline*>> lines, vector<vector<Busstop*>> stops); // according to scheduled time

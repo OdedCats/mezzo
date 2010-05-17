@@ -1329,6 +1329,12 @@ bool Network::readbuslines(string name) // reads the busstops, buslines, trips, 
 			return false;
 		} 
 	}
+	/*
+	for (vector<Busline*>::iterator line_iter = buslines.begin(); line_iter < buslines.end(); line_iter++)
+	{
+		(*line_iter)->set_opposite_line(*(find_if(buslines.begin(), buslines.end(), compare <Busline> ((*line_iter)->get_opposite_id()) )));
+	}
+	*/
 	// Third read the trips
 in >> keyword;
 #ifdef _DEBUG_NETWORK
@@ -1557,7 +1563,7 @@ bool Network::readbusline(istream& in) // reads a busline
 	//	nr_stops	{	stop_id1  stop_id2  stop_id3  ...	stop_idn	} nr_time_points { stop_id1 ... stop_idn }
 	//}
   char bracket;
-  int busline_id, ori_id, dest_id, route_id, vehtype, holding_strategy, nr_stops, stop_id, nr_tp, tp_id;
+  int busline_id, opposite_busline_id, ori_id, dest_id, route_id, vehtype, holding_strategy, nr_stops, stop_id, nr_tp, tp_id;
   float ratio_headway_holding;
 	string name;
   vector <Busstop*> stops, line_timepoint;
@@ -1570,7 +1576,7 @@ bool Network::readbusline(istream& in) // reads a busline
 		cout << "readfile::readsbusline scanner jammed at " << bracket;
 		return false;
 	}
-	in >> busline_id >> name >> ori_id >> dest_id >> route_id >> vehtype >> holding_strategy >> ratio_headway_holding >> nr_stops;
+	in >> busline_id >> opposite_busline_id >> name >> ori_id >> dest_id >> route_id >> vehtype >> holding_strategy >> ratio_headway_holding >> nr_stops;
 	in >> bracket;
 	if (bracket != '{')
 	{
@@ -1596,7 +1602,7 @@ bool Network::readbusline(istream& in) // reads a busline
 	ODpair* odptr=(*(find_if (odpairs.begin(),odpairs.end(), compareod (odid) )));
 	Busroute* br=(*(find_if(busroutes.begin(), busroutes.end(), compare <Route> (route_id) )));
 	Vtype* vt= (*(find_if(vehtypes.vtypes.begin(), vehtypes.vtypes.end(), compare <Vtype> (vehtype) )));
-	Busline* bl= new Busline (busline_id,name,br,stops,vt,odptr,holding_strategy,ratio_headway_holding);
+	Busline* bl= new Busline (busline_id,opposite_busline_id,name,br,stops,vt,odptr,holding_strategy,ratio_headway_holding);
 	
 	for (vector<Busstop*>::iterator stop_iter = bl->stops.begin(); stop_iter < bl->stops.end(); stop_iter++)
 	{
@@ -2290,7 +2296,7 @@ void Network::generate_indirect_paths()
 	*/
 	vector<vector<Busline*>> lines_sequence = compose_line_sequence();
 	ODstops* od = collect_im_stops.front()->get_stop_od_as_origin_per_stop(collect_im_stops.back());
-	if (IVT_dominancy_rule(od,lines_sequence, stops_sequence) == true)
+	if (totaly_dominancy_rule(od,lines_sequence, stops_sequence) == true)
 	// in case it is dominated in terms of IVT - don't generate the path
 	{
 		return;
@@ -2396,18 +2402,52 @@ void Network::generate_stop_ods()
 	{
 		for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
 		{
-			//if ((*basic_origin)->get_id() != (*basic_destination)->get_id())
-			//{	
-				if ((*basic_origin)->get_stop_od_as_origin_per_stop(*basic_destination) == NULL)
+			bool od_with_demand = false;
+			ODstops* od_stop = new ODstops ((*basic_origin),(*basic_destination),0.0);
+			for (vector <ODstops*>::iterator od = odstops_demand.begin(); od< odstops_demand.end(); od++)
+			{
+				if ((*od)->get_origin()->get_id() == (*basic_origin)->get_id() && (*od)->get_destination()->get_id() == (*basic_destination)->get_id())
+				{
+					od_with_demand = true;
+				}
+			}
+			if (od_with_demand == false) // if it is not an od with a non-zero demand
+			{
+				if (check_stops_opposing_directions((*basic_origin),(*basic_destination)) == false)
 				{
 					ODstops* od_stop = new ODstops ((*basic_origin),(*basic_destination),0.0);
 					odstops.push_back(od_stop);
 					(*basic_origin)->add_odstops_as_origin((*basic_destination), od_stop);
 					(*basic_destination)->add_odstops_as_destination((*basic_origin), od_stop);
 				}
-			//}
+			}
 		}
 	}
+}
+
+bool Network::check_stops_opposing_directions (Busstop* origin, Busstop* destination)
+{
+	vector<Busline*> lines_at_origin = origin->get_lines();
+	vector<Busline*> lines_at_destination = destination->get_lines();
+	if (lines_at_origin.size() == lines_at_destination.size()) // if there is a diff. in number of passing lines then there are some non-opposing lines
+	{
+		vector<bool> opposite;
+		for (vector<Busline*>::iterator line_iter_o = lines_at_origin.begin(); line_iter_o < lines_at_origin.end(); line_iter_o++)
+		{
+			for (vector<Busline*>::iterator line_iter_d = lines_at_destination.begin(); line_iter_d < lines_at_destination.end(); line_iter_d++)
+			{
+				if((*line_iter_o)->get_opposite_id() == (*line_iter_d)->get_id())
+				{
+					opposite.push_back(true);
+				}
+			}
+		}
+		if (opposite.size() == lines_at_origin.size()) // if all the lines are opposing directions
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void Network::find_all_paths () 
@@ -2428,7 +2468,7 @@ void Network::find_all_paths ()
 		*/
 		for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
 		{
-			if ((*basic_origin)->get_id() != (*basic_destination)->get_id())
+			if ((*basic_origin)->get_id() != (*basic_destination)->get_id() && (*basic_origin)->check_destination_stop(*basic_destination) == true)
 			{
 				find_direct_paths ((*basic_origin), (*basic_destination));
 			}
@@ -2450,7 +2490,7 @@ void Network::find_all_paths ()
 		*/
 		for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
 		{
-			if ((*basic_origin)->get_id() != (*basic_destination)->get_id())
+			if ((*basic_origin)->get_id() != (*basic_destination)->get_id() && (*basic_origin)->check_destination_stop(*basic_destination) == true)
 			{
 				collect_im_stops.push_back(*basic_origin);
 				find_recursive_connection_with_walking ((*basic_origin), (*basic_destination));
@@ -2614,7 +2654,10 @@ bool Network::check_path_constraints(Busstop* destination)
 	{
 		if (check_path_no_repeating_lines(lines,stops) == true)
 		{
-			return true;
+			if (check_path_no_opposing_lines(lines) == true)
+			{
+				return true;
+			}
 		}
 	}
 	return false;
@@ -2626,7 +2669,7 @@ void Network::merge_paths_by_stops (Busstop* stop) // merge paths with same line
 	//for (map <Busstop*, ODstops*>::iterator odpairs = od_as_origin.begin(); odpairs != od_as_origin.end(); odpairs++)
 	for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
 	{
-		if (stop->get_id() != (*basic_destination)->get_id())
+		if (stop->get_id() != (*basic_destination)->get_id() && stop->check_destination_stop(*basic_destination) == true)
 		{
 		ODstops* odpairs = stop->get_stop_od_as_origin_per_stop(*basic_destination);
 		vector <Pass_path*> path_set = odpairs->get_path_set();
@@ -2724,7 +2767,7 @@ void Network::merge_paths_by_common_lines (Busstop* stop)  // merge paths with l
 {
 	for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
 	{
-		if (stop->get_id() != (*basic_destination)->get_id())
+		if (stop->get_id() != (*basic_destination)->get_id() && stop->check_destination_stop(*basic_destination) == true)
 		{
 		ODstops* odpairs = stop->get_stop_od_as_origin_per_stop(*basic_destination);
 		vector <Pass_path*> path_set = odpairs->get_path_set();
@@ -2887,7 +2930,7 @@ void Network::static_filtering_rules (Busstop* stop)
 	// includes the following filtering rules: (1) max walking distance; (2) max IVT ratio; (3) maybe worthwhile to way.
 	for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
 	{
-		if (stop->get_id() != (*basic_destination)->get_id())
+		if (stop->get_id() != (*basic_destination)->get_id() && stop->check_destination_stop(*basic_destination) == true)
 		{	
 		ODstops* odpairs = stop->get_stop_od_as_origin_per_stop(*basic_destination);
 		vector <Pass_path*> path_set = odpairs->get_path_set();
@@ -3028,7 +3071,7 @@ void Network::dominancy_rules (Busstop* stop)
 	// relevant aspects: number of transfers, total IVT, total walking distance and further downstream transfer stop
 	for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
 	{
-		if (stop->get_id() != (*basic_destination)->get_id())
+		if (stop->get_id() != (*basic_destination)->get_id() && stop->check_destination_stop(*basic_destination) == true)
 		{	
 		ODstops* odpairs = stop->get_stop_od_as_origin_per_stop(*basic_destination);
 		vector <Pass_path*> path_set = odpairs->get_path_set();
@@ -3045,7 +3088,7 @@ void Network::dominancy_rules (Busstop* stop)
 				for (vector <Pass_path*>::iterator path2 = path1 + 1; path2 < path_set.end(); path2++)
 				{
 					// check if path1 dominates path2
-					if ((*path1)->find_number_of_transfers() < (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time() * (1 + theParameters->dominancy_perception_threshold) <= (*path2)->calc_total_scheduled_in_vehicle_time() && (*path1)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold) <= (*path2)->calc_total_walking_distance())
+					if ((*path1)->find_number_of_transfers() < (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time() <= (*path2)->calc_total_scheduled_in_vehicle_time() && (*path1)->calc_total_walking_distance() <= (*path2)->calc_total_walking_distance())
 					{
 						paths_to_be_deleted[(*path2)] = true;
 						break;
@@ -3061,7 +3104,7 @@ void Network::dominancy_rules (Busstop* stop)
 						break;
 					}
 					// check if path2 dominates path1
-					if ((*path1)->find_number_of_transfers() > (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time() >= (*path2)->calc_total_scheduled_in_vehicle_time() * (1+ theParameters->dominancy_perception_threshold)&& (*path1)->calc_total_walking_distance() >= (*path2)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold)) 
+					if ((*path1)->find_number_of_transfers() > (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time() >= (*path2)->calc_total_scheduled_in_vehicle_time() && (*path1)->calc_total_walking_distance() >= (*path2)->calc_total_walking_distance()) 
 					{
 						paths_to_be_deleted[(*path1)] = true;
 						break;
@@ -3101,7 +3144,7 @@ void Network::dominancy_rules (Busstop* stop)
 	}
 }
 
-bool Network::IVT_dominancy_rule (ODstops* odstops, vector<vector<Busline*>> lines, vector<vector<Busstop*>> stops) // check if there is already a path with shorter IVT than the potential one
+bool Network::totaly_dominancy_rule (ODstops* odstops, vector<vector<Busline*>> lines, vector<vector<Busstop*>> stops) // check if there is already a path with shorter IVT than the potential one
 {
 	vector <Pass_path*> path_set = odstops->get_path_set();
 	if (path_set.size() < 1) // if it has no othe paths yet - then there is nothing to compare
@@ -3117,15 +3160,52 @@ bool Network::IVT_dominancy_rule (ODstops* odstops, vector<vector<Busline*>> lin
 	{
 		vector<vector<Busline*>> lines1 = (*path_iter)->get_alt_lines();
 		vector<vector<Busstop*>> stops1 = (*path_iter)->get_alt_transfer__stops();
-		if (calc_total_in_vechile_time(lines1, stops1) * (1 + theParameters->dominancy_perception_threshold) <= calc_total_in_vechile_time(lines,stops))
-		// the proposed path is dominated in terms of IVT - does not fulfill constraints
+		double total_walk = 0.0;
+		for (vector<double>::iterator walk_iter = collect_walking_distances.begin(); walk_iter < collect_walking_distances.end(); walk_iter++)
 		{
-			return true;
+			total_walk += (*walk_iter);
 		}
-		if (calc_total_in_vechile_time(lines, stops) * (1 + theParameters->dominancy_perception_threshold) <= calc_total_in_vechile_time(lines1,stops1))
+		if (calc_total_in_vechile_time(lines1, stops1) * (1 + theParameters->dominancy_perception_threshold) < calc_total_in_vechile_time(lines,stops))
+		{
+			if (total_walk * (1 + theParameters->dominancy_perception_threshold) <= (*path_iter)->calc_total_walking_distance())
+			{
+				if (lines.size() >= lines1.size())
+				{
+				// the proposed path is dominated - does not fulfill constraints
+					return true;
+				}
+			}
+		}
+		if (lines.size() > lines1.size())
+		{
+			if (calc_total_in_vechile_time(lines1, stops1)  <= calc_total_in_vechile_time(lines,stops))
+			{
+				if (total_walk  <= (*path_iter)->calc_total_walking_distance())
+				{
+					return true;
+				}
+			}
+		}
+		if (calc_total_in_vechile_time(lines, stops) * (1 + theParameters->dominancy_perception_threshold) < calc_total_in_vechile_time(lines1,stops1))
 		// the proposed path dominates previous paths - delete the dominated path
 		{
-			paths_to_be_deleted[(*path_iter)] = true;
+			if (total_walk * (1 + theParameters->dominancy_perception_threshold) >= (*path_iter)->calc_total_walking_distance())
+			{
+				if (lines.size() <= lines1.size())
+				{
+					paths_to_be_deleted[(*path_iter)] = true;
+				}
+			}
+		}
+		if (lines.size() < lines1.size())
+		{
+			if (calc_total_in_vechile_time(lines, stops) <= calc_total_in_vechile_time(lines1,stops1))
+			{
+				if (total_walk >= (*path_iter)->calc_total_walking_distance())
+				{
+					paths_to_be_deleted[(*path_iter)] = true;
+				}
+			}
 		}
 	}
 	for (map <Pass_path*,bool>::iterator delete_iter = paths_to_be_deleted.begin(); delete_iter != paths_to_be_deleted.end(); delete_iter++)	
@@ -3380,6 +3460,10 @@ bool Network::check_constraints_paths (Pass_path* path) // checks if the path me
 	{
 		return false;
 	}
+	if (check_path_no_opposing_lines(path->get_alt_lines()) == false)
+	{
+		return false;
+	}
 return true;
 }
 
@@ -3498,6 +3582,27 @@ bool Network::check_sequence_no_repeating_stops (vector<Busstop*> stops) // chce
 return true;
 }
 
+bool Network::check_path_no_opposing_lines (vector<vector<Busline*>> lines)
+{
+	for (vector<vector<Busline*>>::iterator lines_leg = lines.begin(); lines_leg < lines.end()-1; lines_leg++)
+	{
+		for (vector<vector<Busline*>>::iterator lines_leg1 = lines_leg + 1; lines_leg1 < lines.end(); lines_leg1++)
+		{
+			for (vector<Busline*>::iterator line_iter = (*lines_leg).begin(); line_iter < (*lines_leg).end(); line_iter++)
+			{
+				for (vector<Busline*>::iterator line_iter1 = (*lines_leg1).begin(); line_iter1 < (*lines_leg1).end(); line_iter1++)
+				{
+					if ((*line_iter)->get_opposite_id() == (*line_iter1)->get_id() || (*line_iter)->get_id() == (*line_iter1)->get_opposite_id())
+					{	
+						return false;
+					}
+				}
+			}
+		}
+	}
+	return true;
+}
+
 bool Network::write_path_set (string name1)
 {
 	ofstream out1(name1.c_str(),ios_base::app);
@@ -3508,7 +3613,7 @@ bool Network::write_path_set (string name1)
 	{
 			for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
 			{
-			if ((*stop_iter)->get_id() != (*basic_destination)->get_id())
+			if ((*stop_iter)->get_id() != (*basic_destination)->get_id() && (*stop_iter)->check_destination_stop(*basic_destination) == true)
 			{	
 			ODstops* odpairs = (*stop_iter)->get_stop_od_as_origin_per_stop(*basic_destination);
 			vector <Pass_path*> path_set = odpairs->get_path_set();

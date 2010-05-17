@@ -245,18 +245,18 @@ map<Busline*, bool> Pass_path::check_maybe_worthwhile_to_wait (vector<Busline*> 
 	if (leg_lines.size() > 1)
 		// only if there is what to compare
 	{
+		if (dynamic_indicator == 0) // in case it is a static filtering rule
+		{
+			stop_iter++; // the second stops set on the path	
+		}
 		for (vector<Busline*>::iterator iter_leg_lines = leg_lines.begin(); iter_leg_lines < leg_lines.end()-1; iter_leg_lines++)
 		{
 			for (vector<Busline*>::iterator iter1_leg_lines = iter_leg_lines+1; iter1_leg_lines < leg_lines.end(); iter1_leg_lines++)
 			{
-				if (dynamic_indicator == 0) // in case it is a static filtering rule
+				if ((*iter_leg_lines)->calc_curr_line_ivt((*stop_iter).front(),(*(stop_iter+1)).front()) + (*iter_leg_lines)->calc_max_headway() < (*iter1_leg_lines)->calc_curr_line_ivt((*stop_iter).front(),(*(stop_iter+1)).front()))		
 				{
-					stop_iter++; // the second stops set on the path	
-					if ((*iter_leg_lines)->calc_curr_line_ivt((*stop_iter).front(),(*(stop_iter+1)).front()) + (*iter_leg_lines)->calc_max_headway() < (*iter1_leg_lines)->calc_curr_line_ivt((*stop_iter).front(),(*(stop_iter+1)).front()))		
-					{
-						// if IVT(1) + Max H (1) < IVT (2) then line 2 is not worthwhile to wait for
-						worth_to_wait[(*iter1_leg_lines)] = false;
-					}
+					// if IVT(1) + Max H (1) < IVT (2) then line 2 is not worthwhile to wait for
+					worth_to_wait[(*iter1_leg_lines)] = false;
 				}
 				// in case it is a dynamic filtering rule
 				else 
