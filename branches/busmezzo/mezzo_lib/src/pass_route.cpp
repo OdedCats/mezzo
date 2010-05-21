@@ -63,7 +63,7 @@ int Pass_path::find_number_of_transfers ()
 	int nr_trans = 0; 
 	if (alt_lines.empty() == true)
 	{
-		return nr_trans;
+		return -1;
 	}
 	for (vector<vector<Busline*>>::iterator iter_count = alt_lines.begin(); iter_count < alt_lines.end(); iter_count++)
 	{

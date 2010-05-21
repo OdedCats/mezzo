@@ -262,7 +262,7 @@ public:
   void generate_consecutive_stops (); // stores for each stop all the stops that can be reached within a direct trip
   bool find_direct_paths (Busstop* bs_origin, Busstop* bs_destination); // finds direct paths and generate new direct paths
   void generate_indirect_paths (); // generates new indirect paths
-  vector<vector<Busline*>> compose_line_sequence ();  // compose the list of direct lines between each pair of intermediate stops
+  vector<vector<Busline*>> compose_line_sequence (Busstop* destination);  // compose the list of direct lines between each pair of intermediate stops
   vector<vector<Busstop*>> compose_stop_sequence ();  // compose the list of stops in path definiton structure
   void find_all_paths (); // goes over all OD stop pairs to generate their path choice set
 //  void find_recursive_connection (Busstop* origin, Busstop* destination); // search recursively for a path (forward - from origin to destination) WITHOUT walking links
