@@ -33,7 +33,7 @@
    <enum>Qt::StrongFocus</enum>
   </property>
   <property name="windowTitle" >
-   <string comment="Prototype Mesomodel" >Mezzo version 0.53</string>
+   <string comment="Prototype Mesomodel" >Mezzo version 0.55</string>
   </property>
   <property name="windowIcon" >
    <iconset resource="canvas_qt4.qrc" >
@@ -1012,7 +1012,7 @@
   <action name="batch_run" >
    <property name="icon" >
     <iconset resource="canvas_qt4.qrc" >
-     <normaloff>:/images/batchrun.gif</normaloff>:/images/batchrun.gif</iconset>
+     <normaloff>:/images/batchrun.png</normaloff>:/images/batchrun.png</iconset>
    </property>
    <property name="text" >
     <string>Batch Run</string>

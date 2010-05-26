@@ -40,7 +40,7 @@ class Eventlist;
 class Action
 {	
 	public:
-		virtual bool execute(Eventlist* eventlist, double time);
+		virtual const bool execute(Eventlist* eventlist, const double time);
 	private:
 };
 

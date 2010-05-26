@@ -42,7 +42,7 @@ class TurnAction : public Action
 {
  	public:
  		TurnAction(Turning* turning_);
- 		virtual bool execute(Eventlist* eventlist, double time);
+ 		virtual const bool execute(Eventlist* eventlist, const double time);
  	private:
  		Turning* turning;
 		double new_time;

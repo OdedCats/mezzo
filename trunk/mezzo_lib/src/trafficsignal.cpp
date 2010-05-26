@@ -1,6 +1,6 @@
 #include "trafficsignal.h"
 
-bool SignalControl::execute(Eventlist* eventlist, double time)
+const bool SignalControl::execute(Eventlist* eventlist, const double time)
 {
 	if (!active)
 	{
@@ -33,7 +33,7 @@ void  SignalControl::reset()
 }
 
 //Signalplan functions
-bool SignalPlan::execute(Eventlist* eventlist, double time)
+const bool SignalPlan::execute(Eventlist* eventlist, const double time)
 {
 	if (!active)
 	{
@@ -87,7 +87,7 @@ void SignalPlan::reset()
 }
 
 
-bool Stage::execute(Eventlist* eventlist, double time)
+const bool Stage::execute(Eventlist* eventlist, const double time)
 {
 	if (!active) // activate all turnings and rebook for stop time
 	{

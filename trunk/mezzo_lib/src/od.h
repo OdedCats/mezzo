@@ -54,7 +54,7 @@ public:
 	ODaction(ODpair* odpair_);
 	virtual ~ODaction();
 	void reset (double rate_);
-	bool execute(Eventlist* eventlist, double time);
+	const bool execute(Eventlist* eventlist, const double time);
 	void set_rate(double rate){server->set_rate((3600/rate),theParameters->odserver_sigma);active=true;}
 	void book_later(Eventlist* eventlist, double time);
 private:

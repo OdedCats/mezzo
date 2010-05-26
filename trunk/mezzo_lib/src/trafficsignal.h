@@ -34,7 +34,7 @@ public:
 	SignalControl (int id_):id(id_) {active = false;}
 	void reset() ;
 	void add_signal_plan (SignalPlan* signalplan_) { signalplans.push_back(signalplan_);}
-	virtual bool execute(Eventlist* eventlist, double time);
+	virtual const bool execute(Eventlist* eventlist, const double time);
 protected:
 	vector<SignalPlan*> signalplans;
 	vector<SignalPlan*>::iterator current_signal_plan;
@@ -49,7 +49,7 @@ public:
 	  id(id_), cycletime(cycletime_), offset(offset_), start(start_), stop(stop_)
 			{active=false;}
 	void reset() ;
-	virtual bool execute(Eventlist* eventlist, double time);
+	virtual const bool execute(Eventlist* eventlist, const double time);
 	double get_start() {return start;}
 	void add_stage(Stage* stage_) {stages.push_back(stage_);}
 protected:
@@ -74,7 +74,7 @@ public:
 	void stop (); // stops the stage (turns it to red).
 	void add_turning (Turning* turning) // add turning and stop it, since it is now regulated by the signal
 		{turnings.push_back(turning); turning->stop();} 
-	virtual bool execute(Eventlist* eventlist, double time); // starts and stops the turnings
+	virtual const bool execute(Eventlist* eventlist, const double time); // starts and stops the turnings
 protected:
 	int id;
 	double start,duration;

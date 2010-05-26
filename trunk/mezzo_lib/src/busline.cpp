@@ -22,7 +22,7 @@ Busline::Busline (int id_, string name_, Busroute* busroute_, Vtype* vtype_, ODp
 Busline::~Busline()
 {}
 
-bool Busline::execute(Eventlist* eventlist, double time)
+const bool Busline::execute(Eventlist* eventlist, const double time)
 {
 	if (!active) // first time this function is called. no active trips yet
 	{

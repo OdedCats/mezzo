@@ -249,7 +249,7 @@ class Daction : public Action
  public:
  	Daction(Link* link_, Destination* destination_, Server* server_);
  	virtual ~Daction();
- 	virtual bool execute(Eventlist* eventlist, double time);
+ 	virtual const bool execute(Eventlist* eventlist, const double time);
  	virtual bool process_veh(double time);	
  protected:
   Link* link;

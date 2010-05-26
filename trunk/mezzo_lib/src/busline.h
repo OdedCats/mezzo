@@ -39,7 +39,7 @@ public:
 	Busline ();  //!< simple constructor
 	Busline (int id_, string name_, Busroute* busroute_, Vtype* vtype_, ODpair* odpair_);  //!< constructor
 	virtual ~Busline(); // destructor
-	bool execute(Eventlist* eventlist, double time);  //!< re-implemented from virtual function in Action
+	const bool execute(Eventlist* eventlist, const double time);  //!< re-implemented from virtual function in Action
 													  //!< this function does the real work. It initiates 
 													  //!< the current Bustrip and books the next one
 

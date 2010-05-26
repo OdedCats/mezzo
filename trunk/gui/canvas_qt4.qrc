@@ -1,9 +1,9 @@
 <RCC>
   <qresource prefix="/" >
+    <file>images/batchrun.png</file>
     <file>images/background_map.jpg</file>
     <file>images/move.png</file>
     <file>images/background.png</file>
-    <file>images/batchrun.gif</file>
     <file>images/bt_pause.png</file>
     <file>images/bt_play.png</file>
     <file>images/bt_stop.png</file>

@@ -39,15 +39,15 @@ class Grid
 {
     public:
 		Grid() {}
-      Grid(int nr_fields_, vector<string> names_);
+      Grid(const int nr_fields_, const vector<string> names_);
 	  Grid (const Grid & grid_): nr_fields(grid_.nr_fields), fnames(grid_.fnames), grid (grid_.grid) {}
 	  void reset(); // resets the values NOT the fieldnames!
-      bool insert_row(list <double> & values); // reference to a list of values so theres no needless copying
-      bool write_empty(ostream& out);
-      double sum (int column);
-      double average (int column);
-      int size() {return grid.size();}
-	  vector <string> get_fieldnames () {return fnames;}
+      const bool insert_row(const list <double> & values); // reference to a list of values so theres no needless copying
+      const bool write_empty(ostream& out);
+      const double sum (const int column);
+      const double average (const int column);
+      const int size() {return grid.size();}
+	  const vector<string> & get_fieldnames () {return fnames;}
      private:
       int nr_fields;
       vector<string> fnames;
@@ -55,28 +55,32 @@ class Grid
 };
 
 class MOE
+	/* MOE class is used to collect output data (Measures Of Effectiveness), usually from Links
+		
+
+	*/
 {
  public:
- 	MOE (double val_update);
- 	MOE (double val_update, double scale_);
+ 	MOE (const double val_update);
+ 	MOE (const double val_update, const double scale_);
 	void reset(); // resets the value list, NOT the scale_ or value_update
-	void fill_missing (const int nr_periods,const double default_value);
- 	void report_value(double value, double time); // used to report values that are averaged
- 	void report_value(double time); // used to report counts such as flows
-  double get_value(int index);
-  double get_last_value();
-  double get_min();
-  double get_max();
- 	void write_values(ostream & out, int nrperiods);
- 	void write_value(ostream& out, int index);
- 	int get_size() {return values.size();}
+	void fill_missing (const int nr_periods,const double default_value); // fills out missing values for time periods without data
+ 	void report_value(const double value, const double time); // used to report values that are averaged
+ 	void report_value(const double time); // used to report counts such as flows
+	const double get_value(int index);
+	const double get_last_value();
+	const double get_min();
+	const double get_max();
+ 	void write_values(ostream & out, const int nrperiods);
+ 	void write_value(ostream& out, const int index);
+ 	const int get_size() {return values.size();}
  private:
    double value_update;
    double scale;
    int value_obs;
    int value_period;
- 	list <double>::iterator value_iter;
- 	list <double> values;
+   list <double>::iterator value_iter;
+   list <double> values;
 };
 
 #endif

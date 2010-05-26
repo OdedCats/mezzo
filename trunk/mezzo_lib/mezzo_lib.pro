@@ -1,6 +1,7 @@
 
 TEMPLATE = lib
-CONFIG += staticlib debug
+CONFIG += staticlib 
+#debug
 TARGET = mezzo_lib
 DEPENDPATH += . src
 INCLUDEPATH += $(QTDIR)/include 

@@ -66,7 +66,7 @@ void ODaction::reset(double rate_)
 	}
 }
 
-bool ODaction::execute(Eventlist* eventlist, double time)
+const bool ODaction::execute(Eventlist* eventlist, const double time)
 {
   if (active)
   {

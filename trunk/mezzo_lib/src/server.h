@@ -39,15 +39,15 @@ program.
 //
 // The random number generator is initialised and randomised at the creation of the object
 
-class Server  // standard n(mu,sd2) server  type: 1
+class Server  // standard n(mu,sd) server  type: 1
 {
   public:
-  Server(const int id_, const int type_, const double mu_, const double sd_, const double delay_);
-  void reset();
-  virtual ~Server();
-  const int get_id() const;
-  virtual  double next(const double time);
-  const double get_mu() const;
+	Server(const int id_, const int type_, const double mu_, const double sd_, const double delay_);
+	void reset();
+	virtual ~Server();
+	const int get_id() const;
+	virtual  const double next(const double time);
+	const double get_mu() const;
 	void set_mu(const double mu_);
 	const double get_sd() const;
 	void set_sd(const double sd_);
@@ -56,13 +56,13 @@ class Server  // standard n(mu,sd2) server  type: 1
   Random* random;
   
   int id;
-  int type; // dummy, later more subclasses of server
+  int type; 
   double mu;
   double sd;
   double delay;
 };
 
-class ConstServer : public Server // constant server that copies input to output  type: 0
+class DummyServer : public Server // Dummy server that represents unlimited capacity.  type: 0
 /*
    after every successfull action directly a new action at the same time is performed with
 	0 delay, untill all vehicles in the incoming link that have arrived at the end are processed and
@@ -70,8 +70,8 @@ class ConstServer : public Server // constant server that copies input to output
 */
 {
 	public:
-		ConstServer(const int id_, const int type_, const double mu_, const double sd_, const double delay_):Server(id_,type_,mu_,sd_,delay_) {}		
-		double next(const double time) {return time;}
+		DummyServer(const int id_, const int type_, const double mu_, const double sd_, const double delay_):Server(id_,type_,mu_,sd_,delay_) {}		
+		const double next(const double time) {return time;}
 } ;
 
 class ODServer : public Server
@@ -81,25 +81,26 @@ class ODServer : public Server
 {
 	public:
 		ODServer(const int id_, const int type_, const double mu_, const double sd_);
-		double next(const double time);
-		void set_rate(double mu_, double sd_) {mu=mu_; sd=sd_;}
+		const double next(const double time);
+		void set_rate(const double mu_, const double sd_) {mu=mu_; sd=sd_;}
 	private:
 		
 };
 
 
 class DetServer : public Server
-/* Delivers deterministic service time
+/* Delivers deterministic service time, type 2
   */
 {
 public:
 	DetServer (const int id_, const int type_, const double mu_, const double sd_, const double delay_) :
 		Server (id_,type_,mu_,sd_,delay_) {}
-	double next (const double time) {return time+mu+delay;}
+	const double next (const double time) {return time+mu+delay;}
 };
 
 class OServer : public Server
 /*   NOTE not in use anymore, traffic is generated directly onto inputqueue by OD pairs.
+	It is kept here in case we want to start using it again to beter generate headway distributions at the Origins.
 
    Especially designed for input flows. Designed to be a combination of a N(mu,sd) and EXP(beta) server,
 	: output=alpha(N(mu_bound,sd_bound)) + (1-alpha)Exp(mu_unbound)
@@ -112,9 +113,9 @@ class OServer : public Server
 {
 	public:
 		OServer(const int id_, const int type_, const double mu_, const double sd_);
-		double next(const double time);
-		void set_lanes(double l) {lanes=l;}
-		double get_lanes() {return lanes;}
+		const double next(const double time);
+		void set_lanes(const double l) {lanes=l;}
+		const double get_lanes() {return lanes;} 
 	protected:
 		double alpha;  // proportion of cars in carfollowing
 		double mu_unbound; // mu for the unbound traffic, calculated from (mu-alpha*cf_hdway)/(1-alpha)
@@ -127,9 +128,9 @@ class ChangeRateAction: public Action
 
 {
 	public:
-		ChangeRateAction (Eventlist* eventlist_, double time_, Server* server_, double mu_, double sd_);
+		ChangeRateAction (Eventlist* eventlist_, const double time_, Server* server_, const double mu_, const double sd_);
 		void reset();
-		bool execute(Eventlist* eventlist, double time);
+		const bool execute(Eventlist* eventlist, const double time);
 	private:
 		Server* server;
 		double mu, sd;

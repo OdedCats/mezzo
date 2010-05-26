@@ -199,7 +199,7 @@ double Turning::link_next_time(double time)
 
 TurnAction::TurnAction(Turning* turning_):Action(), turning(turning_) {}
 
-bool TurnAction::execute (Eventlist* eventlist, double time)
+const bool TurnAction::execute (Eventlist* eventlist, const double time)
 {
 	
 	// process vehicle if any  FOR THIS DIRECTION

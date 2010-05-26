@@ -247,7 +247,7 @@ void ODCheckerDlg::loadDestCombwithO(const QString& curtext)
 			
 			//add dest ID items with the given origin ID 
 			orgId_=(origcomb->currentText()).toInt();
-			vector <ODpair*>& odpairs=mezzonet_->get_odpairs();
+			const vector <ODpair*>& odpairs=mezzonet_->get_odpairs();
 			for(unsigned i=0;i<odpairs.size();i++){
 				if(odpairs[i]->get_origin()->get_id()==this->orgId_){
 					destcomb->addItem(QString::number(
@@ -281,7 +281,7 @@ void ODCheckerDlg::loadOrigCombwithD(const QString& curtext)
 			
 			//add origin ID items with the given dest ID 
 			destId_=(destcomb->currentText()).toInt();
-			vector <ODpair*>& odpairs=mezzonet_->get_odpairs();
+			const vector <ODpair*>& odpairs=mezzonet_->get_odpairs();
 			for(unsigned i=0;i<odpairs.size();i++){
 				if(odpairs[i]->get_destination()->get_id()==this->destId_){
 					origcomb->addItem(QString::number(
@@ -315,7 +315,7 @@ void ODCheckerDlg::checkOD(bool check_)
 		orgId_=(origcomb->currentText()).toInt();	
 		destId_=(destcomb->currentText()).toInt();
 
-		vector <ODpair*>& odpairs=mezzonet_->get_odpairs();
+		const vector <ODpair*>& odpairs=mezzonet_->get_odpairs();
 		vector<ODpair*>::const_iterator odlocation;
 		odlocation=find_if(odpairs.begin(), odpairs.end(), 
 							assist::compareod(odval(orgId_,destId_)));

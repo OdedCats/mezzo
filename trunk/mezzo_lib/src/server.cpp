@@ -28,7 +28,7 @@ void Server::reset()
 	else
 		random->randomize();
 }
-double Server::next(const double time)
+const double Server::next(const double time)
 {
  	double temp= _MAX(min_hdway,random->nrandom(mu,sd));
  	return time+temp;
@@ -65,19 +65,13 @@ ODServer::ODServer(const int id_, const int type_, const double mu_, const doubl
 {}
 
 
-double ODServer::next(const double time)
+const double ODServer::next(const double time)
 {
 	if (theParameters->od_servers_deterministic)
 		return (time+mu);
 	else
 		return time+(random->rrandom(mu));
-	/****
-#ifndef _DETERMINISTIC_OD_SERVERS
- return time+(random->rrandom(mu));
-#else
- return time+mu;
-#endif
- ***/
+
 }
 
 OServer::OServer(const int id_, const int type_, const double mu_, const double sd_):Server(id_,type_,mu_,sd_,0.0)
@@ -92,7 +86,7 @@ OServer::OServer(const int id_, const int type_, const double mu_, const double 
 	lanes=1.0;
 }
 
-double OServer::next(const double time)
+const double OServer::next(const double time)
 {
 	double bound=random->urandom();
 	double temp;
@@ -111,7 +105,7 @@ double OServer::next(const double time)
 }
 
 
-ChangeRateAction::ChangeRateAction (Eventlist* eventlist_, double time_, Server* server_, double mu_, double sd_)
+ChangeRateAction::ChangeRateAction (Eventlist* eventlist_, const double time_, Server* server_, const double mu_, const double sd_)
 {
    mu=mu_;
    sd=sd_;
@@ -126,7 +120,7 @@ void ChangeRateAction::reset()
 	eventlist->add_event(time, this);
 }
 		
-bool ChangeRateAction::execute(Eventlist* , double)     //unused  Eventlist* eventlist, double time
+const bool ChangeRateAction::execute(Eventlist* , const double)     //unused  Eventlist* eventlist, double time
 {
    if (mu > 0.0)
    		server->set_mu(mu);

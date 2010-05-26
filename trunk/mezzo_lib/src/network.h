@@ -98,7 +98,7 @@ class  ODMatrix
 {
 public:
 	ODMatrix ();
-	void add_slice(double time, ODSlice* slice);
+	void add_slice(const double time, ODSlice* slice);
 	void reset(Eventlist* eventlist,vector <ODpair*> * odpairs); // rebooks all the MatrixActions
 private:
 	vector < pair <double,ODSlice*> > slices;	
@@ -109,7 +109,7 @@ class MatrixAction: public Action
 {
 public:
 	MatrixAction(Eventlist* eventlist, double time, ODSlice* slice_, vector<ODpair*> *ods_);
-	bool execute(Eventlist* eventlist, double time);
+	const bool execute(Eventlist* eventlist, const double time);
 private:
 	ODSlice* slice;
 	vector <ODpair*> * ods;
@@ -137,7 +137,7 @@ public:
 	bool readmaster(string name); //!< reads the master file.
 #ifndef _NO_GUI
 	double executemaster(QPixmap * pm_, QMatrix * wm_); //!< starts the scenario, returns total running time
-	double get_scale() {return scale;} //!< returns the scale of the drawing
+	const double get_scale() {return scale;} //!< returns the scale of the drawing
 #endif //_NO_GUI
 	double executemaster(); //!< without GUI
 	int reset(); //!< resets the simulation to 0, clears all the state variables. returns runtime
@@ -202,11 +202,11 @@ public:
 #endif //_NO_GUI
 
 	// GET's
-	double get_currenttime(){return time;}
-	double get_runtime(){return runtime;}
-	double get_time_alpha(){return time_alpha;}
+	const double get_currenttime(){return time;}
+	const double get_runtime(){return runtime;}
+	const double get_time_alpha(){return time_alpha;}
 	Parameters* get_parameters () {return theParameters;} 
-	vector <ODpair*>& get_odpairs () {return odpairs;} // keep as vector
+	const vector <ODpair*>& get_odpairs () {return odpairs;} // keep as vector
 
 	map <int, Origin*>& get_origins() {return originmap;}
 	map <int, Destination*>& get_destinations() {return destinationmap;}
@@ -379,7 +379,7 @@ class Incident: public Action
 {
 public:
 	Incident (int lid_, int sid_, double start_, double stop_,double info_start_,double info_stop_, Eventlist* eventlist, Network* network_, bool blocked_);
-	bool execute(Eventlist* eventlist, double time); //!< Creates the events needed for setting and ending the incident and information broadcast
+	const bool execute(Eventlist* eventlist, const double time); //!< Creates the events needed for setting and ending the incident and information broadcast
 	void broadcast_incident_start(int lid); //!< Broadcasts the incident to all the affected links and origins. At origins a flag will be set so all created vehicles will automatically switch, until notification that incident is over
 	void broadcast_incident_stop(int lid); //!< Broadcasts the end of an incident to all Origins (Not needed for Links? Check...)
 

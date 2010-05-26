@@ -652,7 +652,7 @@ Daction::Daction(Link* link_, Destination* destination_, Server* server_):link(l
 Daction::~Daction()
 {}
 
-bool Daction::execute(Eventlist* eventlist, double time)
+const bool Daction::execute(Eventlist* eventlist, const double time)
 {
 	// process vehicles if any
 	double new_time=0.0;

@@ -278,7 +278,7 @@ int Network::reset()
 	return runtime;
 }
 
-void Network::end_of_simulation(double time)
+void Network::end_of_simulation(double time) // why is time passed here but not used??
 {
 	for (map<int,Link*>::iterator iter=linkmap.begin();iter != linkmap.end();iter++)
 	{
@@ -514,6 +514,12 @@ bool Network::readsdfuncs(istream& in)
 }
 
 bool Network::readsdfunc(istream& in)
+/*Reads SD servers. Available types:
+0.	Dummy Server, returns VMax for any density
+1.	Piece-wise linear (same as 2. with Alpha = Beta = 1)
+2.	Generalised according to (Burghout 2004) 
+
+*/
 
 {
 	char bracket;
@@ -526,8 +532,10 @@ bool Network::readsdfunc(istream& in)
 		eout << "readfile::readsdfuncs scanner jammed at " << bracket;
 		return false;
 	}
-	in  >> sdid >> type >> vmax >> vmin >> romax >> romin;
+	in  >> sdid >> type >> vmax ;
 	if ((type==1) ||(type ==2))
+		in >> vmin >> romax >> romin;
+	if (type==2)
 		in >> alpha >> beta;
 	assert (!sdfuncmap.count(sdid));
 	assert ( (vmin>0) && (vmax>=vmin) && (romin >= 0) && (romax>=romin) );
@@ -539,12 +547,17 @@ bool Network::readsdfunc(istream& in)
 		return false;
 	}
 	Sdfunc* sdptr;
-	if (type==0)
+	if (type==0) // DUMMY SD function
+	{
+		sdptr = new DummySdfunc(sdid,vmax);
+	}	
+	else if (type == 1) // Piece-wise linear SD function
 	{
 		sdptr = new Sdfunc(sdid,vmax,vmin,romax, romin);
-	}	else if ((type==1)	|| (type == 2))
+	}
+	else if (type == 2) // Non-Linear SD function
 	{
-		sdptr = new DynamitSdfunc(sdid,vmax,vmin,romax,romin,alpha,beta);
+		sdptr = new GenericSdfunc(sdid,vmax,vmin,romax,romin,alpha,beta);
 	}
 	assert (sdptr);
 	sdfuncmap [sdid] = sdptr;
@@ -827,14 +840,14 @@ bool Network::readserver(istream& in)
 		eout << "readfile::readservers scanner jammed at " << bracket;
 		return false;
 	}
-	// type 0= dummy server: Const server
+	// type 0= dummy server: 
 	// type 1=standard N(mu,sd) sever
 	// type 2=deterministic (mu) server
 	// type -1 (internal) = OD server
 	// type -2 (internal)= Destination server
 	Server* sptr;
 	if (stype==0)
-		sptr = new ConstServer(sid,stype,mu,sd,delay);
+		sptr = new DummyServer(sid,stype,mu,sd,delay);
 	if (stype==1)
 		sptr = new Server(sid,stype,mu,sd,delay);
 	if (stype==2)
@@ -3912,7 +3925,7 @@ info_start(info_start_), info_stop(info_stop_), lid(lid_), sid(sid_),network(net
 	eventlist->add_event(start,this);
 }
 
-bool Incident::execute(Eventlist* eventlist, double time)
+const bool Incident::execute(Eventlist* eventlist, const double time)
 {
 	//eout << "incident_execute time: " << time << endl;
 
@@ -4021,7 +4034,7 @@ void ODMatrix::reset(Eventlist* eventlist, vector <ODpair*> * odpairs)
 }
 
 
-void ODMatrix::add_slice(double time, ODSlice* slice)
+void ODMatrix::add_slice(const double time, ODSlice* slice)
 {
 	slices.insert(slices.end(), (pair <double,ODSlice*> (time,slice)) );
 }
@@ -4035,7 +4048,7 @@ MatrixAction::MatrixAction(Eventlist* eventlist, double time, ODSlice* slice_, v
 	eventlist->add_event(time, this);
 }
 
-bool MatrixAction::execute(Eventlist* eventlist, double time)
+const bool MatrixAction::execute(Eventlist* eventlist, const double time)
 {
 	assert (eventlist != NULL);
 	//eout << time << " : MATRIXACTION:: set new rates "<< endl;

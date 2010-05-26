@@ -1,20 +1,20 @@
 #include "grid.h"
 
 
-Grid::Grid(int nr_fields_,vector<string> names_):nr_fields(nr_fields_),fnames(names_)
+Grid::Grid(const int nr_fields_,const vector<string> names_):nr_fields(nr_fields_),fnames(names_)
 {}
 
 void Grid::reset()
 {
 	grid.clear();
 }
-bool Grid::insert_row(list <double> & values)
+const bool Grid::insert_row(const list <double> & values)
 {
     grid.insert(grid.end(), values);
     return true;
 }
 
-bool Grid::write_empty(ostream& out)
+const bool Grid::write_empty(ostream& out)
 {
 #ifdef INCLUDE_FIELD_NAMES
 	for (vector<string>::iterator iter0=fnames.begin();iter0<fnames.end();iter0++)
@@ -36,7 +36,7 @@ bool Grid::write_empty(ostream& out)
 	return true;
 }
 
-double Grid::sum (int column)
+const double Grid::sum (const int column)
 {
 	list<list <double> >::iterator iter0;
 	list <double>::iterator iter1;
@@ -55,14 +55,14 @@ double Grid::sum (int column)
 	return total;
 }
 
-double Grid::average (int column)
+const double Grid::average (const int column)
 {
 	return (sum(column)/grid.size());
 }
 
 
 // MOE functions
-MOE::MOE (double val_update)
+MOE::MOE (const double val_update)
 
 {
 	values.push_back(0.0);
@@ -73,7 +73,7 @@ MOE::MOE (double val_update)
 	scale=1.0;
 }
 
-MOE::MOE (double val_update, double scale_)
+MOE::MOE (const double val_update, const double scale_)
 {
   	values.push_back(0.0);
 	value_iter=values.begin();
@@ -91,7 +91,7 @@ void MOE::reset()
 	value_period=1;
 	value_obs=0;
 }
-void MOE::report_value(double value, double time)
+void MOE::report_value(const double value, const double time)
 {
 	 	if (time > (value_period*value_update))
  		 	{
@@ -111,7 +111,7 @@ void MOE::report_value(double value, double time)
 }
 
 
-void MOE::report_value(double time) // for flows
+void MOE::report_value(const double time) // for flows
 {
 	 	if (time > (value_period*value_update))
  		 	{
@@ -127,7 +127,7 @@ void MOE::report_value(double time) // for flows
  		    *value_iter=static_cast <double> (value_obs); 		 	
 }
 
-double MOE::get_value(int index)
+const double MOE::get_value(const int index)
 {
   if (values.empty())
     return -1.0;
@@ -148,7 +148,7 @@ double MOE::get_value(int index)
   }
 }
 
-double MOE::get_last_value()
+const double MOE::get_last_value()
 {
  if (!(values.empty()))
    return values.back();
@@ -156,7 +156,7 @@ double MOE::get_last_value()
    return -1.0;
 }
 
-double MOE::get_min()
+const double MOE::get_min()
 {
 	if (values.empty())
 		return -1.0;
@@ -173,7 +173,7 @@ double MOE::get_min()
 		return temp;
 	}
 }
-double MOE::get_max()
+const double MOE::get_max()
 {
 	if (values.empty())
 		return -1.0;
@@ -211,7 +211,7 @@ void MOE::fill_missing (const int nr_periods, const double default_value)
 
 }
 
-void MOE::write_values(ostream & out, int nrperiods)
+void MOE::write_values(ostream & out, const int nrperiods)
 {
   #ifdef _DEBUG_MOE
   eout << "values write size: " << values.size() << endl;
@@ -225,7 +225,7 @@ void MOE::write_values(ostream & out, int nrperiods)
   out << endl;
 }
 
-void MOE::write_value(ostream& out, int index)
+void MOE::write_value(ostream& out, const int index)
 {
   list <double>::iterator iter=values.begin();
   for (int i=0;i<index;i++)
