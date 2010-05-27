@@ -92,6 +92,7 @@ Parameters::Parameters ()
    max_walking_distance = 2500;
    max_waiting_time = 1800.0;
    dominancy_perception_threshold = 0;
+   real_time_info = 0;
 }
 
 bool Parameters::read_parameters (istream & in )
@@ -589,6 +590,20 @@ bool Parameters::read_parameters (istream & in )
 			return false;
 		}
 		in >> dominancy_perception_threshold;
+		in >> keyword;
+		if (keyword!= "real_time_info=")
+		{
+			cout << "ERROR reading Parameters file, expecting: real_time_info=, read: " << keyword << endl;
+			return false;
+		}
+		in >> real_time_info;
+		in >> keyword;
+		if (keyword!= "stop_pass_generation=")
+		{
+			cout << "ERROR reading Parameters file, expecting: stop_pass_generation=, read: " << keyword << endl;
+			return false;
+		}
+		in >> stop_pass_generation;
 	}
 	return true;
 }

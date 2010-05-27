@@ -181,7 +181,8 @@ Busstop* Passenger::make_connection_decision (double time)
 		for (vector<Busstop*>::iterator connected_stop = (*stops_iter).begin(); connected_stop < (*stops_iter).end(); connected_stop++)
 		// going over all the stops at the second (connected) set
 		{
-			if (candidate_connection_stops_u[(*connected_stop)] == NULL)
+			if (candidate_connection_stops_u[(*connected_stop)] == NULL && (*connected_stop)->check_destination_stop(this->get_OD_stop()->get_destination()) == true)
+				// only if it wasn't done already and there exists an OD for the remaining part
 			{
 				ODstops* left_od_stop = (*connected_stop)->get_stop_od_as_origin_per_stop(this->get_OD_stop()->get_destination());
 				if ((*connected_stop)->get_id() == OD_stop->get_destination()->get_id())

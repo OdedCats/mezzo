@@ -1539,7 +1539,7 @@ bool Network::readbusstop (istream& in) // reads a busstop
 		return false;
 	}
   in >> stop_id >> name >> link_id >> position >> length >> has_bay >> dwelltime;
-  Busstop* st= new Busstop (stop_id, name, link_id, position, length, has_bay, dwelltime);
+  Busstop* st= new Busstop (stop_id, name, link_id, position, length, has_bay, dwelltime, theParameters->real_time_info);
   st->add_distance_between_stops(st,0.0);
 	in >> bracket;
 	if (bracket != '}')
@@ -1610,6 +1610,14 @@ bool Network::readbusline(istream& in) // reads a busline
 		(*stop_iter)->add_line_nr_waiting(bl, 0);
 		(*stop_iter)->add_line_nr_boarding(bl, 0);
 		(*stop_iter)->add_line_nr_alighting(bl, 0);
+		if (theParameters->real_time_info == 0)
+		{
+			(*stop_iter)->add_real_time_info(bl,0);
+		}
+		else
+		{
+			(*stop_iter)->add_real_time_info(bl,1);
+		}
 	}
 
 // reading time point stops
@@ -2246,10 +2254,10 @@ bool Network::find_direct_paths (Busstop* bs_origin, Busstop* bs_destination)
 								original_path = false;
 							}
 						}
-					// add the direct path if it is an original one and it fulfills the constraints
+						// add the direct path if it is an original one and it fulfills the constraints
 						if (original_path == true && check_constraints_paths(direct_path) == true)
 						{
-							bs_origin->get_stop_od_as_origin_per_stop(bs_destination)->add_paths(direct_path);
+							//bs_origin->get_stop_od_as_origin_per_stop(bs_destination)->add_paths(direct_path);
 							od_direct_lines[bs_origin->get_stop_od_as_origin_per_stop(bs_destination)].push_back(*bl_o);
 							if (direct_path->get_number_of_transfers() < bs_origin->get_stop_od_as_origin_per_stop(bs_destination)->get_min_transfers())
 							// update the no. of min transfers required if decreased
@@ -2297,13 +2305,14 @@ void Network::generate_indirect_paths()
 	vector<vector<Busline*>> lines_sequence = compose_line_sequence(collect_im_stops.back());
 	ODstops* od = collect_im_stops.front()->get_stop_od_as_origin_per_stop(collect_im_stops.back());
 	if (totaly_dominancy_rule(od,lines_sequence, stops_sequence) == true)
-	// in case it is dominated in terms of IVT - don't generate the path
+	// in case it is dominated by an existing path - don't generate the path
 	{
 		return;
 	}
 	Pass_path* indirect_path = new Pass_path(pathid, lines_sequence, stops_sequence, collect_walking_distances);
 	pathid++;
 	paths.push_back(indirect_path);
+	/*
 	int stop_leg = 0;
 	vector<vector<Busline*>>::iterator lines_sequence_iter = lines_sequence.begin();
 	for (vector<Busstop*>::iterator im_iter = collect_im_stops.begin()+1; im_iter < collect_im_stops.end()-1; im_iter = im_iter+2)
@@ -2343,6 +2352,7 @@ void Network::generate_indirect_paths()
 			updated_paths.clear();
 		}
 	}
+	*/
 	for (vector<Pass_path*>::iterator paths_iter = paths.begin(); paths_iter < paths.end(); paths_iter++)
 	{
 		// check if this path was already generated		
@@ -2383,36 +2393,39 @@ vector<vector<Busline*>> Network::compose_line_sequence (Busstop* destination)
 			{
 				delete_lines[(*line_iter)] = false;
 			}
-			vector<Busline*> des_lines = get_direct_lines ((*im_iter)->get_stop_od_as_origin_per_stop(destination));
-			for (vector<Busline*>::iterator line_iter = d_lines.begin(); line_iter < d_lines.end(); line_iter++)
+			if ((*im_iter)->check_destination_stop(destination) == true)
 			{
-				for (vector<Busline*>::iterator line_iter1 = des_lines.begin(); line_iter1 < des_lines.end(); line_iter1++)
+				vector<Busline*> des_lines = get_direct_lines ((*im_iter)->get_stop_od_as_origin_per_stop(destination));
+				for (vector<Busline*>::iterator line_iter = d_lines.begin(); line_iter < d_lines.end(); line_iter++)
 				{
-					if ((*line_iter)->get_id() == (*line_iter1)->get_id()) // if there is a direct line to the destination in the set
+					for (vector<Busline*>::iterator line_iter1 = des_lines.begin(); line_iter1 < des_lines.end(); line_iter1++)
 					{
-						delete_lines[(*line_iter)] = true;
+						if ((*line_iter)->get_id() == (*line_iter1)->get_id()) // if there is a direct line to the destination in the set
+						{
+							delete_lines[(*line_iter)] = true;
+						}
 					}
 				}
-			}
-			for (map<Busline*,bool>::iterator iter = delete_lines.begin(); iter != delete_lines.end(); iter++)
-			// delete those lines that reach directly the destination and therefore should not be included in the transfer alternative
-			{
-				vector <Busline*>::iterator line_to_delete;
-				for (vector<Busline*>::iterator iter1 = d_lines.begin(); iter1 < d_lines.end(); iter1++)
+				for (map<Busline*,bool>::iterator iter = delete_lines.begin(); iter != delete_lines.end(); iter++)
+				// delete those lines that reach directly the destination and therefore should not be included in the transfer alternative
 				{
-					if ((*iter).first->get_id() == (*iter1)->get_id())
+					vector <Busline*>::iterator line_to_delete;
+					for (vector<Busline*>::iterator iter1 = d_lines.begin(); iter1 < d_lines.end(); iter1++)
 					{
-						line_to_delete = iter1;
-						break;
+						if ((*iter).first->get_id() == (*iter1)->get_id())
+						{
+							line_to_delete = iter1;
+							break;
+						}
 					}
+					if ((*iter).second == true)
+					{
+						d_lines.erase(line_to_delete);
+					}	
 				}
-				if ((*iter).second == true)
-				{
-					d_lines.erase(line_to_delete);
-				}	
 			}
 		}
-		lines_sequence.push_back(d_lines);
+		lines_sequence.push_back(d_lines);	
 	}
 	return lines_sequence;
 }
@@ -2492,36 +2505,18 @@ void Network::find_all_paths ()
 	// first - generate all direct paths
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{
-		/*
+		
 		map <Busstop*, ODstops*> od_as_origin = (*basic_origin)->get_stop_as_origin();
 		for (map<Busstop*, ODstops*>::iterator iter = od_as_origin.begin(); iter != od_as_origin.end(); iter++)
 		{
 			Busstop* basic_destination = (*iter).first;
 			find_direct_paths ((*basic_origin), basic_destination);
 		}
-		*/
-		for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
-		{
-			if ((*basic_origin)->get_id() != (*basic_destination)->get_id() && (*basic_origin)->check_destination_stop(*basic_destination) == true)
-			{
-				find_direct_paths ((*basic_origin), (*basic_destination));
-			}
-		}
 	}
 	// second - generate indirect paths with walking distances
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{
-		/*
-		map <Busstop*, ODstops*> od_as_origin = (*basic_origin)->get_stop_as_origin();
-		for (map<Busstop*, ODstops*>::iterator iter = od_as_origin.begin(); iter != od_as_origin.end(); iter++)
-		{
-			collect_im_stops.push_back(*basic_origin);
-			Busstop* basic_destination = (*iter).first;
-			find_recursive_connection_with_walking ((*basic_origin), basic_destination);
-			collect_im_stops.clear();
-			collect_walking_distances.clear();
-		}
-		*/
+		int origin_id = (*basic_origin)->get_id();
 		for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
 		{
 			if ((*basic_origin)->get_id() != (*basic_destination)->get_id() && (*basic_origin)->check_destination_stop(*basic_destination) == true)
@@ -2538,19 +2533,23 @@ void Network::find_all_paths ()
 	{
 		merge_paths_by_stops(*basic_origin);
 	}
+	/*
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{
 		merge_paths_by_common_lines(*basic_origin);
 	}
-	// apply static dominancy rules
+	*/
+	// apply static filtering rules
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{
 		static_filtering_rules(*basic_origin);
 	}
+	// apply dominancy rules
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{	
 		dominancy_rules(*basic_origin);
 	}
+	// report generated choice-sets 
 	write_path_set (workingdir + "path_set_generation.dat");
 }
 
@@ -2611,6 +2610,8 @@ void Network:: find_recursive_connection_with_walking (Busstop* origin, Busstop*
 		{
 			nr_im_stop_elements++;
 		}	
+		if (collect_im_stops.front()->check_destination_stop(destination) == true)
+		{
 		if (((nr_im_stop_elements-1)/2) <= collect_im_stops.front()->get_stop_od_as_origin_per_stop(destination)->get_min_transfers() + theParameters->max_nr_extra_transfers || collect_im_stops.back()->check_walkable_stop(destination) == true)
 		{
 			for (map <Busstop*, double>::iterator poss_origin = possible_origins.begin(); poss_origin != possible_origins.end(); poss_origin++)
@@ -2677,6 +2678,7 @@ void Network:: find_recursive_connection_with_walking (Busstop* origin, Busstop*
 				collect_walking_distances.pop_back();
 			}
 		}
+		}
 	}
 }
 
@@ -2712,94 +2714,93 @@ void Network::merge_paths_by_stops (Busstop* stop) // merge paths with same line
 	{
 		if (stop->get_id() != (*basic_destination)->get_id() && stop->check_destination_stop(*basic_destination) == true)
 		{
-		ODstops* odpairs = stop->get_stop_od_as_origin_per_stop(*basic_destination);
-		vector <Pass_path*> path_set = odpairs->get_path_set();
-		// go over all the OD pairs of stops that have more than a single alternative
-		if (path_set.size() > 1)
-		{
-			map <Pass_path*,bool> paths_to_be_deleted;
-			vector <Pass_path*> merged_paths_to_be_added;
-			map <Pass_path*,bool> flagged_paths;
-			for (vector <Pass_path*>::iterator path_iter = path_set.begin(); path_iter < path_set.end(); path_iter++)
+			ODstops* odpairs = stop->get_stop_od_as_origin_per_stop(*basic_destination);
+			vector <Pass_path*> path_set = odpairs->get_path_set();
+			// go over all the OD pairs of stops that have more than a single alternative
+			if (path_set.size() > 1)
 			{
-				flagged_paths[(*path_iter)] = false;
-				paths_to_be_deleted[(*path_iter)] = false;
-			}
-			for (vector <Pass_path*>::iterator path1 = path_set.begin(); path1 < path_set.end()-1; path1++)
-			{
-				bool perform_merge = false;
-				vector <vector <Busstop*>> stops1 = (*path1)->get_alt_transfer__stops();	
-				if (flagged_paths[(*path1)] == false)
+				map <Pass_path*,bool> paths_to_be_deleted;
+				vector <Pass_path*> merged_paths_to_be_added;
+				map <Pass_path*,bool> flagged_paths;
+				for (vector <Pass_path*>::iterator path_iter = path_set.begin(); path_iter < path_set.end(); path_iter++)
 				{
-					for (vector <Pass_path*>::iterator path2 = path1 + 1; path2 < path_set.end(); path2++)
+					flagged_paths[(*path_iter)] = false;
+					paths_to_be_deleted[(*path_iter)] = false;
+				}
+				for (vector <Pass_path*>::iterator path1 = path_set.begin(); path1 < path_set.end()-1; path1++)
+				{
+					bool perform_merge = false;
+					vector <vector <Busstop*>> stops1 = (*path1)->get_alt_transfer__stops();	
+					if (flagged_paths[(*path1)] == false)
 					{
-						if (compare_same_lines_paths ((*path1), (*path2)) == true) 
-						// both have exactly the same lines for all legs 
+						for (vector <Pass_path*>::iterator path2 = path1 + 1; path2 < path_set.end(); path2++)
 						{
-							vector <vector <Busstop*>> stops2 = (*path2)->get_alt_transfer__stops();
-							vector <vector <Busstop*>>::iterator stops2_iter = stops2.begin();
-							for (vector <vector <Busstop*>>::iterator stops1_iter = stops1.begin(); stops1_iter < stops1.end(); stops1_iter++)
+							if (compare_same_lines_paths ((*path1), (*path2)) == true) 
+							// both have exactly the same lines for all legs 
 							{
-								for (vector<Busstop*>::iterator stops2_leg = (*stops2_iter).begin(); stops2_leg < (*stops2_iter).end(); stops2_leg++)
+								vector <vector <Busstop*>> stops2 = (*path2)->get_alt_transfer__stops();
+								vector <vector <Busstop*>>::iterator stops2_iter = stops2.begin();
+								for (vector <vector <Busstop*>>::iterator stops1_iter = stops1.begin(); stops1_iter < stops1.end(); stops1_iter++)
 								{
-									// search for the stops that you want to copy (union of two sets)
-									bool no_identical = true;
-									for (vector<Busstop*>::iterator stops1_leg = (*stops1_iter).begin(); stops1_leg < (*stops1_iter).end(); stops1_leg++)
+									for (vector<Busstop*>::iterator stops2_leg = (*stops2_iter).begin(); stops2_leg < (*stops2_iter).end(); stops2_leg++)
 									{
-										if ((*stops1_leg)->get_id() == (*stops2_leg)->get_id())
+										// search for the stops that you want to copy (union of two sets)
+										bool no_identical = true;
+										for (vector<Busstop*>::iterator stops1_leg = (*stops1_iter).begin(); stops1_leg < (*stops1_iter).end(); stops1_leg++)
 										{
-											no_identical = false;
-											break;
+											if ((*stops1_leg)->get_id() == (*stops2_leg)->get_id())
+											{
+												no_identical = false;
+												break;
+											}
+										}
+										if (no_identical == true)
+										// add those non-shared stops to the stops set
+										{
+											(*stops1_iter).push_back((*stops2_leg));
+											flagged_paths[(*path2)] = true;
+											perform_merge = true;
 										}
 									}
-									if (no_identical == true)
-									// add those non-shared stops to the stops set
-									{
-										(*stops1_iter).push_back((*stops2_leg));
-										flagged_paths[(*path2)] = true;
-										perform_merge = true;
-									}
+									stops2_iter++;
 								}
-								stops2_iter++;
+								paths_to_be_deleted[*path1] = true;
+								paths_to_be_deleted[*path2] = true;
 							}
-							paths_to_be_deleted[*path1] = true;
-							paths_to_be_deleted[*path2] = true;
 						}
 					}
-				}
-				if (perform_merge == true)
-				// generate a new path with the joined stops set
-				{
-					Pass_path* merged_path = new Pass_path(pathid, (*path1)->get_alt_lines(), stops1, (*path1)->get_walking_distances());
-					pathid++;
-					merged_paths_to_be_added.push_back(merged_path);
-				}
-			}
-			for (map <Pass_path*,bool>::iterator delete_iter = paths_to_be_deleted.begin(); delete_iter != paths_to_be_deleted.end(); delete_iter++)
-			// delete all the paths that were used as source for the merged paths
-			{
-				vector<Pass_path*>::iterator path_to_delete;
-				for (vector<Pass_path*>::iterator paths_iter = path_set.begin(); paths_iter < path_set.end(); paths_iter++)
-				{
-					if ((*delete_iter).first->get_id() == (*paths_iter)->get_id() && (*delete_iter).second == true)
+					if (perform_merge == true)
+					// generate a new path with the joined stops set
 					{
-						path_to_delete = paths_iter;
-						break;
+						Pass_path* merged_path = new Pass_path(pathid, (*path1)->get_alt_lines(), stops1, (*path1)->get_walking_distances());
+						pathid++;
+						merged_paths_to_be_added.push_back(merged_path);
 					}
 				}
-				if ((*delete_iter).second == true)
+				for (map <Pass_path*,bool>::iterator delete_iter = paths_to_be_deleted.begin(); delete_iter != paths_to_be_deleted.end(); delete_iter++)
+				// delete all the paths that were used as source for the merged paths
 				{
-					path_set.erase(path_to_delete);
+					vector<Pass_path*>::iterator path_to_delete;
+					for (vector<Pass_path*>::iterator paths_iter = path_set.begin(); paths_iter < path_set.end(); paths_iter++)
+					{
+						if ((*delete_iter).first->get_id() == (*paths_iter)->get_id() && (*delete_iter).second == true)
+						{
+							path_to_delete = paths_iter;
+							break;
+						}
+					}
+					if ((*delete_iter).second == true)
+					{
+						path_set.erase(path_to_delete);
+					}
+				}
+				for (vector<Pass_path*>::iterator adding_iter = merged_paths_to_be_added.begin(); adding_iter < merged_paths_to_be_added.end(); adding_iter++)
+				// add the new merged paths to the path set
+				{
+					path_set.push_back((*adding_iter));
 				}
 			}
-			for (vector<Pass_path*>::iterator adding_iter = merged_paths_to_be_added.begin(); adding_iter < merged_paths_to_be_added.end(); adding_iter++)
-			// add the new merged paths to the path set
-			{
-				path_set.push_back((*adding_iter));
-			}
-
-		}
-		odpairs->set_path_set(path_set);
+			odpairs->set_path_set(path_set);
 		}
 	}
 }
@@ -2991,19 +2992,16 @@ void Network::static_filtering_rules (Busstop* stop)
 				if ((*path)->get_number_of_transfers() > odpairs->get_min_transfers() + theParameters->max_nr_extra_transfers)
 				{
 					paths_to_be_deleted[(*path)] = true;
-					break;
 				}
 				// max walking distance
-				if ((*path)->calc_total_walking_distance() > theParameters->max_walking_distance)
+				else if ((*path)->calc_total_walking_distance() > theParameters->max_walking_distance)
 				{
 					paths_to_be_deleted[(*path)] = true;
-					break;
 				}
 				// max IVT ratio
-				if ((*path)->calc_total_scheduled_in_vehicle_time() > min_total_scheduled_in_vehicle_time * theParameters->max_in_vehicle_time_ratio)
+				else if ((*path)->calc_total_scheduled_in_vehicle_time() > min_total_scheduled_in_vehicle_time * theParameters->max_in_vehicle_time_ratio)
 				{
 					paths_to_be_deleted[(*path)] = true;
-					break;
 				}
 				// eliminating dominated stops by upstream transfer stops (avoiding further downstream transfer stops
 				// downstream_dominancy_rule(*path);
@@ -3108,6 +3106,7 @@ void Network::static_filtering_rules (Busstop* stop)
 				}
 			}
 		}
+		odpairs->set_path_set(path_set);
 		}
 	}
 }
@@ -3187,6 +3186,7 @@ void Network::dominancy_rules (Busstop* stop)
 				}
 			}
 		}
+		odpairs->set_path_set(path_set);
 		}
 	}
 }
@@ -3214,20 +3214,20 @@ bool Network::totaly_dominancy_rule (ODstops* odstops, vector<vector<Busline*>> 
 		}
 		if (calc_total_in_vechile_time(lines1, stops1) * (1 + theParameters->dominancy_perception_threshold) < calc_total_in_vechile_time(lines,stops))
 		{
-			if (total_walk * (1 + theParameters->dominancy_perception_threshold) <= (*path_iter)->calc_total_walking_distance())
+			if ((*path_iter)->calc_total_walking_distance() <= total_walk)
 			{
-				if (lines.size() >= lines1.size())
+				if (lines1.size() <= lines.size())
 				{
 				// the proposed path is dominated - does not fulfill constraints
 					return true;
 				}
 			}
 		}
-		if (lines.size() > lines1.size())
+		if (lines1.size() < lines.size())
 		{
-			if (calc_total_in_vechile_time(lines1, stops1) * (1 + theParameters->dominancy_perception_threshold) <= calc_total_in_vechile_time(lines,stops))
+			if (calc_total_in_vechile_time(lines1, stops1) <= calc_total_in_vechile_time(lines,stops))
 			{
-				if (total_walk  * (1 + theParameters->dominancy_perception_threshold) <= (*path_iter)->calc_total_walking_distance())
+				if ((*path_iter)->calc_total_walking_distance() <= total_walk )
 				{
 					return true;
 				}
@@ -3236,7 +3236,7 @@ bool Network::totaly_dominancy_rule (ODstops* odstops, vector<vector<Busline*>> 
 		if (calc_total_in_vechile_time(lines, stops) * (1 + theParameters->dominancy_perception_threshold) < calc_total_in_vechile_time(lines1,stops1))
 		// the proposed path dominates previous paths - delete the dominated path
 		{
-			if (total_walk * (1 + theParameters->dominancy_perception_threshold) >= (*path_iter)->calc_total_walking_distance())
+			if (total_walk <= (*path_iter)->calc_total_walking_distance())
 			{
 				if (lines.size() <= lines1.size())
 				{
@@ -3246,9 +3246,9 @@ bool Network::totaly_dominancy_rule (ODstops* odstops, vector<vector<Busline*>> 
 		}
 		if (lines.size() < lines1.size())
 		{
-			if (calc_total_in_vechile_time(lines, stops) * (1 + theParameters->dominancy_perception_threshold)<= calc_total_in_vechile_time(lines1,stops1))
+			if (calc_total_in_vechile_time(lines, stops) <= calc_total_in_vechile_time(lines1,stops1))
 			{
-				if (total_walk >= (*path_iter)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold))
+				if (total_walk  <= (*path_iter)->calc_total_walking_distance())
 				{
 					paths_to_be_deleted[(*path_iter)] = true;
 				}
@@ -3272,6 +3272,7 @@ bool Network::totaly_dominancy_rule (ODstops* odstops, vector<vector<Busline*>> 
 			path_set.erase(path_to_delete);
 		}
 	}
+	odstops->set_path_set(path_set);
 	return false;
 }
 

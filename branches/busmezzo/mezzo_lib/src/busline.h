@@ -285,13 +285,14 @@ class Busstop : public Action
 public:
 	Busstop ();
 	~Busstop ();
-	Busstop (int id_, string name_, int link_id_, double position_, double length_, bool has_bay_, double dwelltime_);
+	Busstop (int id_, string name_, int link_id_, double position_, double length_, bool has_bay_, double dwelltime_, int rti_);
 	void reset (); 
 
 // GETS & SETS:
 	int get_id () {return id;} //!< returns id, used in the compare <..> functions for find and find_if algorithms
 	int get_link_id() {return link_id;}
 	string get_name() {return name;}
+	int get_rti () {return rti;}
 	double get_arrival_rates (Bustrip* trip) {return arrival_rates[trip->get_line()];}
 	double get_alighting_fractions (Bustrip* trip) {return alighting_fractions[trip->get_line()];}
 	const ODs_for_stop & get_stop_as_origin () {return stop_as_origin;}
@@ -326,7 +327,8 @@ public:
 	void add_line_nr_boarding(Busline* line, double value){arrival_rates[line] = value;}
 	void add_line_nr_alighting(Busline* line, double value){alighting_fractions[line]= value;}
 	void add_line_update_rate_time(Busline* line, double time){update_rates_times[line].push_back(time);}
-	
+	void add_real_time_info (Busline* line, bool info) {real_time_info[line] = info;}
+
 // functions for initializing stop-specific input (relevant for demand format 3 only)	
 	void add_odstops_as_origin(Busstop* destination_stop, ODstops* od_stop){stop_as_origin[destination_stop]= od_stop; is_origin = true;}
 	void add_odstops_as_destination(Busstop* origin_stop, ODstops* od_stop){stop_as_destination[origin_stop]= od_stop; is_destination = true;}
@@ -370,6 +372,7 @@ protected:
 	int nr_boarding;//!< pass. boarding
 	int nr_alighting; //!< pass alighting 
 	Random* random;
+	int rti; // !< indicates the level of real-time information at this stop: 0 - none; 1 - for all lines stoping at each stop; 2 - for all lines stoping at all connected stop; 3 - for the entire network.
 	
 	vector <Busline*> lines;
 	map <double,Bus*> expected_arrivals; //!< booked arrivals of buses on the link on their way to the stop
@@ -397,6 +400,7 @@ protected:
 	ODs_for_stop stop_as_destination; // a map of all the OD's that this busstop is their destination
 	bool is_origin; // indicates if this busstop serves as an origin for some passenger demand
 	bool is_destination; // indicates if this busstop serves as an destination for some passenger demand
+	map <Busline*, bool> real_time_info; // indicates for each line if it has real-time info. at this stop
 
 	// walking distances between stops (relevant only for demand format 3)
 	map<Busstop*,double> distances; // contains the distances [meters] from other bus stops

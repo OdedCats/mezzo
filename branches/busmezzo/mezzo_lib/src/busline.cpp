@@ -647,10 +647,11 @@ Busstop::Busstop()
 	position = 0;
 	has_bay = false;
 	dwelltime = 12.5;
+	rti = 0;
 }
 
-Busstop::Busstop (int id_, string name_, int link_id_, double position_, double length_, bool has_bay_, double dwelltime_):
-	id(id_), name(name_), link_id(link_id_), position (position_), length(length_), has_bay(has_bay_), dwelltime(dwelltime_)
+Busstop::Busstop (int id_, string name_, int link_id_, double position_, double length_, bool has_bay_, double dwelltime_, int rti_):
+	id(id_), name(name_), link_id(link_id_), position (position_), length(length_), has_bay(has_bay_), dwelltime(dwelltime_), rti (rti_)
 {
 	avaliable_length = length;
 	nr_boarding = 0;
@@ -669,8 +670,6 @@ Busstop::Busstop (int id_, string name_, int link_id_, double position_, double 
 		random->randomize();
 	}
 }
-
-
 
 Busstop::~Busstop ()
 {
