@@ -26,6 +26,7 @@ public:
 	double get_end_time () {return end_time;}
 	ODstops* get_OD_stop () {return OD_stop;}
 	Busstop* get_original_origin () {return original_origin;}
+	int get_nr_boardings () {return nr_boardings;}
 	void set_ODstop (ODstops* ODstop_) {OD_stop = ODstop_;}
 	void add_to_selected_path_stop (Busstop* stop) {selected_path_stops.push_back(stop);}
 	// bool get_already_walked () {return already_walked;}
@@ -50,6 +51,7 @@ protected:
 	bool boarding_decision;
 	Random* random;
 	bool already_walked;
+	int nr_boardings; // counts the number of times pass boarded a vehicle
 	vector <Busstop*> selected_path_stops;
 };
 

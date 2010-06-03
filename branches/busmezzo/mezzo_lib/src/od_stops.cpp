@@ -44,6 +44,8 @@ void ODstops::reset()
 	staying_utility = 0;
 	waiting_passengers.clear();
 	output_pass_boarding_decision.clear();
+	output_pass_alighting_decision.clear();
+	passengers_during_simulation.clear();
 }
 
 bool ODstops::execute (Eventlist* eventlist, double curr_time) // generate passengers with this OD and books an event for next passenger generation
@@ -180,7 +182,7 @@ double ODstops::calc_combined_set_utility_for_alighting (Passenger* pass, Bustri
 	return log(staying_utility);
 }
 
-double ODstops::calc_combined_set_utility_for_connection (Passenger* pass, double walking_distance, double time)
+double ODstops::calc_combined_set_utility_for_connection (double walking_distance, double time)
 {
 	// calc logsum over all the paths from this origin stop
 	double connection_utility = 0.0;
@@ -208,9 +210,9 @@ double ODstops::calc_combined_set_utility_for_connection (Passenger* pass, doubl
 	return log(connection_utility);
 }
 
-void ODstops::record_passenger_boarding_decision (Passenger* pass, Bustrip* trip, double time, bool boarding_decision)  // add to output structure boarding decision info
+void ODstops::record_passenger_boarding_decision (Passenger* pass, Bustrip* trip, double time, double boarding_probability, bool boarding_decision)  // add to output structure boarding decision info
 {
-	output_pass_boarding_decision[pass].push_back(Pass_boarding_decision(pass->get_id(), pass->get_original_origin()->get_id(), pass->get_OD_stop()->get_destination()->get_id(), trip->get_line()->get_id(), trip->get_id() , pass->get_OD_stop()->get_origin()->get_id() , time, pass->get_start_time(), boarding_decision, boarding_utility, staying_utility)); 
+	output_pass_boarding_decision[pass].push_back(Pass_boarding_decision(pass->get_id(), pass->get_original_origin()->get_id(), pass->get_OD_stop()->get_destination()->get_id(), trip->get_line()->get_id(), trip->get_id() , pass->get_OD_stop()->get_origin()->get_id() , time, pass->get_start_time(), boarding_probability , boarding_decision, boarding_utility, staying_utility)); 
 }
 
 void ODstops::record_passenger_alighting_decision (Passenger* pass, Bustrip* trip, double time, Busstop* chosen_alighting_stop, map<Busstop*,pair<double,double>> alighting_MNL)  //  add to output structure alighting decision info
@@ -234,7 +236,29 @@ void ODstops::write_alighting_output(ostream & out, Passenger* pass)
 	}
 }
 
-//**************
+void ODstops::write_od_summary(ostream & out)
+{
+	calc_pass_measures();
+	out << origin_stop->get_id() << '\t' << destination_stop->get_id() << '\t' << nr_pass_completed << '\t' << avg_tt << '\t' << avg_nr_boardings << '\t' << endl; 
+}
+
+void ODstops::calc_pass_measures ()
+{
+	nr_pass_completed = 0;
+	avg_tt = 0.0;
+	avg_nr_boardings = 0.0;
+	for (vector <Passenger*>::iterator pass_iter = passengers_during_simulation.begin(); pass_iter < passengers_during_simulation.end(); pass_iter++)
+	{
+		if ((*pass_iter)->get_end_time() > 0)
+		{
+			nr_pass_completed++;
+			avg_tt += (*pass_iter)->get_end_time() - (*pass_iter)->get_start_time();
+			avg_nr_boardings += (*pass_iter)->get_nr_boardings();
+		}
+	}
+	avg_tt = avg_tt / nr_pass_completed;
+	avg_nr_boardings = avg_nr_boardings / nr_pass_completed;
+}
 
 void Pass_alighting_decision::write (ostream& out) 
 { 

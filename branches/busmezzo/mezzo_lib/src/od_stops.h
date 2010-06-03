@@ -21,10 +21,10 @@ class Pass_boarding_decision // container object holding output data for passeng
 {
 public:
 	Pass_boarding_decision (int pass_id_, int original_origin_, int destination_stop_, int line_id_, int trip_id_, int stop_id_, double time_,	double generation_time_,
-							bool boarding_,double u_boarding_, double u_staying_):
-							pass_id(pass_id_),original_origin(original_origin_),destination_stop(destination_stop_),line_id(line_id_),trip_id(trip_id_), stop_id(stop_id_),time(time_),generation_time(generation_time_),boarding(boarding_),
+							double boarding_probability_, bool boarding_,double u_boarding_, double u_staying_):
+							pass_id(pass_id_),original_origin(original_origin_),destination_stop(destination_stop_),line_id(line_id_),trip_id(trip_id_), stop_id(stop_id_),time(time_),generation_time(generation_time_),boarding_probability(boarding_probability_),boarding(boarding_),
 							u_boarding(u_boarding_),u_staying(u_staying_) {}
-	void write (ostream& out) { out << pass_id << '\t' << original_origin << '\t' << destination_stop << '\t' << line_id << '\t'<< trip_id << '\t'<< stop_id<< '\t'<< time << '\t'<< generation_time << '\t'
+	void write (ostream& out) { out << pass_id << '\t' << original_origin << '\t' << destination_stop << '\t' << line_id << '\t'<< trip_id << '\t'<< stop_id<< '\t'<< time << '\t'<< generation_time << '\t' << boarding_probability << '\t'
 		<< boarding << '\t'<< u_boarding << '\t'<< u_staying <<'\t'<< endl; }
 	void reset () { pass_id = 0; original_origin = 0; destination_stop = 0; line_id = 0; trip_id = 0; stop_id = 0; time = 0;
 	generation_time = 0; boarding = 0; u_boarding = 0; u_staying = 0; }
@@ -36,6 +36,7 @@ public:
 	int stop_id;
 	double time;
 	double generation_time;
+	double boarding_probability;
 	bool boarding;
 	double u_boarding;
 	double u_staying;
@@ -96,13 +97,15 @@ public:
 	double calc_boarding_probability (Busline* arriving_bus, double time);
 	double calc_binary_logit (double utility_i, double utility_j);
 	double calc_combined_set_utility_for_alighting (Passenger* pass, Bustrip* bus_on_board, double time); // the trip that the pass. is currently on-board when calc. utility from downstream stop
-	double calc_combined_set_utility_for_connection (Passenger* pass, double walking_distance, double time);
+	double calc_combined_set_utility_for_connection (double walking_distance, double time);
 
 	// output-related functions
-	void record_passenger_boarding_decision (Passenger* pass, Bustrip* trip, double time, bool boarding_decision); //!< creates a log-file for boarding decision related info
+	void record_passenger_boarding_decision (Passenger* pass, Bustrip* trip, double time, double boarding_probability, bool boarding_decision); //!< creates a log-file for boarding decision related info
 	void record_passenger_alighting_decision (Passenger* pass, Bustrip* trip, double time, Busstop* chosen_alighting_stop, map<Busstop*,pair<double,double>> alighting_MNL); // !< creates a log-file for alighting decision related info
 	void write_boarding_output(ostream & out, Passenger* pass);
 	void write_alighting_output(ostream & out, Passenger* pass);
+	void write_od_summary(ostream & out);
+	void calc_pass_measures ();
 
 protected:
 	Busstop* origin_stop;
@@ -115,10 +118,13 @@ protected:
 	double boarding_utility;
 	double staying_utility;
 
-	// output structures
+	// output structures and measures
 	map <Passenger*,list<Pass_boarding_decision>> output_pass_boarding_decision;
 	map <Passenger*,list<Pass_alighting_decision>> output_pass_alighting_decision;
 	vector <Passenger*> passengers_during_simulation;
+	int nr_pass_completed;
+	double avg_tt;
+	double avg_nr_boardings;
 
 	Random* random;
 	Eventlist* eventlist; //!< to book passenger generation events

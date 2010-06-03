@@ -174,7 +174,7 @@ Random::urandom(int n)
 
 // Returns 1 with probability p and 0 with probability 1-p.
 
-int
+bool
 Random::brandom(double prob)
 {
    if (urandom() < prob) return (1);

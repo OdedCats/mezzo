@@ -74,12 +74,14 @@ int Pass_path::find_number_of_transfers ()
 
 double Pass_path::calc_total_scheduled_in_vehicle_time ()
 {
+	IVT.clear();
 	double sum_in_vehicle_time = 0.0;
 	vector<vector <Busstop*>>::iterator iter_alt_transfer_stops = alt_transfer_stops.begin();
 	iter_alt_transfer_stops++; // starting from the second stop
 	for (vector<vector <Busline*>>::iterator iter_alt_lines = alt_lines.begin(); iter_alt_lines < alt_lines.end(); iter_alt_lines++)
 	{
-		sum_in_vehicle_time += (*iter_alt_lines).front()->calc_curr_line_ivt((*iter_alt_transfer_stops).front(),(*(iter_alt_transfer_stops+1)).front());
+		IVT.push_back((*iter_alt_lines).front()->calc_curr_line_ivt((*iter_alt_transfer_stops).front(),(*(iter_alt_transfer_stops+1)).front()));
+		sum_in_vehicle_time += IVT.back();
 		iter_alt_transfer_stops++;
 		iter_alt_transfer_stops++; 
 	}
@@ -96,7 +98,7 @@ double Pass_path::calc_total_walking_distance()
 	return (sum_walking_distance); // meters
 }
 
-double Pass_path::calc_total_waiting_time (double time, bool without_first_waiting)
+double Pass_path::calc_total_waiting_time (double time, bool without_first_waiting, double avg_walking_speed)
 {
 	double sum_waiting_time = 0.0;
 	bool first_line = true;
@@ -112,6 +114,11 @@ double Pass_path::calc_total_waiting_time (double time, bool without_first_waiti
 		first_line = false;
 	}
 	bool first_entrance = true;
+	vector<double>::iterator iter_IVT = IVT.begin();
+	vector<double>::iterator iter_walk = walking_distances.begin();
+	double pass_arrival_time_at_next_stop;
+	double sum_IVT = 0.0;
+	double sum_walking_times = 0.0;
 	for (; iter_alt_lines < alt_lines.end(); iter_alt_lines++)
 	{	
 		if (first_entrance == false) // in all cases beside the first entrance
@@ -119,7 +126,12 @@ double Pass_path::calc_total_waiting_time (double time, bool without_first_waiti
 			first_line = false;
 			alt_transfer_stops_iter++;
 			alt_transfer_stops_iter++;
+			iter_IVT++;
+			iter_walk++;
 		}
+		sum_IVT += (*iter_IVT);
+		sum_walking_times += (*iter_walk) / avg_walking_speed;
+		pass_arrival_time_at_next_stop = time + sum_waiting_time + sum_walking_times + sum_IVT;
 		first_entrance = false;
 		switch (first_stops.front()->get_rti()) 
 		{
@@ -134,7 +146,7 @@ double Pass_path::calc_total_waiting_time (double time, bool without_first_waiti
 				{
 					if (second_stops.size() == 1 && first_stops.front() == second_stops.front()) // staying at the same stop
 					{
-						sum_waiting_time += calc_curr_leg_waiting_RTI((*iter_alt_lines), alt_transfer_stops_iter, time);
+						sum_waiting_time += calc_curr_leg_waiting_RTI((*iter_alt_lines), alt_transfer_stops_iter, pass_arrival_time_at_next_stop);
 					}
 					else // using a connected stop
 					{
@@ -150,7 +162,7 @@ double Pass_path::calc_total_waiting_time (double time, bool without_first_waiti
 				// first leg is calculated based on real-time, while downstream legs are estimated based on headway or time-table
 				if (first_line == true)
 				{
-					sum_waiting_time += calc_curr_leg_waiting_RTI((*iter_alt_lines), alt_transfer_stops_iter, time);
+					sum_waiting_time += calc_curr_leg_waiting_RTI((*iter_alt_lines), alt_transfer_stops_iter, pass_arrival_time_at_next_stop);
 					break;
 				}
 				else
@@ -159,8 +171,8 @@ double Pass_path::calc_total_waiting_time (double time, bool without_first_waiti
 					break;
 				}
 			case 3:
-				// all legs are estimated based on real-time info.
-				sum_waiting_time += calc_curr_leg_waiting_RTI((*iter_alt_lines), alt_transfer_stops_iter, time);
+				// all legs are estimated based on real-time info
+				sum_waiting_time += calc_curr_leg_waiting_RTI((*iter_alt_lines), alt_transfer_stops_iter, pass_arrival_time_at_next_stop);
 				break;
 		}
 	}
@@ -233,16 +245,24 @@ double Pass_path::calc_curr_leg_waiting_schedule (vector<Busline*> leg_lines, ve
 */
 
 double Pass_path::calc_curr_leg_waiting_RTI (vector<Busline*> leg_lines, vector <vector <Busstop*>>::iterator stop_iter, double arriving_time)
-{
-	Bustrip* next_trip = leg_lines.front()->find_next_scheduled_trip_at_stop((*stop_iter).front(), arriving_time);
-	double min_waiting_time = next_trip->stops_map[(*stop_iter).front()];
+{ 
+	double min_waiting_time;
+	bool first_time = true;
 	map<Busline*, bool> worth_to_wait = check_maybe_worthwhile_to_wait(leg_lines, stop_iter, 1);
 	for (vector<Busline*>::iterator iter_leg_lines = leg_lines.begin()+1; iter_leg_lines < leg_lines.end(); iter_leg_lines++)
 	{
 		if (worth_to_wait[(*iter_leg_lines)] == true) 
 		// dynamic filtering rules - consider only if it is maybe worthwhile to wait for it
 		{
-			min_waiting_time = min(min_waiting_time, (*iter_leg_lines)->time_till_next_arrival_at_stop((*stop_iter).front(),arriving_time));
+			if (first_time == true)
+			{
+				first_time =false;
+				min_waiting_time = (*iter_leg_lines)->time_till_next_arrival_at_stop_after_time((*stop_iter).front(),arriving_time);
+			}
+			else
+			{
+				min_waiting_time = min(min_waiting_time, (*iter_leg_lines)->time_till_next_arrival_at_stop_after_time((*stop_iter).front(),arriving_time));
+			}
 		}
 	}
 	return (min_waiting_time/60); // minutes
@@ -250,8 +270,9 @@ double Pass_path::calc_curr_leg_waiting_RTI (vector<Busline*> leg_lines, vector 
 
 double Pass_path::calc_arriving_utility (double time)
 // taking into account: transfer penalty + future waiting times + in-vehicle time + walking times
-{
-	return (random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4) * number_of_transfers + random->nrandom(theParameters->in_vehicle_time_coefficient, theParameters->in_vehicle_time_coefficient / 4 ) * calc_total_scheduled_in_vehicle_time() + random->nrandom(theParameters->waiting_time_coefficient, theParameters->waiting_time_coefficient / 4) * calc_total_waiting_time (time, true) + random->nrandom(theParameters->walking_time_coefficient, theParameters->walking_time_coefficient/4) * (calc_total_walking_distance() / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4)));
+{ 
+	double avg_walking_speed = random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4);
+	return (random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4) * number_of_transfers + random->nrandom(theParameters->in_vehicle_time_coefficient, theParameters->in_vehicle_time_coefficient / 4 ) * calc_total_scheduled_in_vehicle_time() + random->nrandom(theParameters->waiting_time_coefficient, theParameters->waiting_time_coefficient / 4) * calc_total_waiting_time (time, true, avg_walking_speed) + random->nrandom(theParameters->walking_time_coefficient, theParameters->walking_time_coefficient/4) * (calc_total_walking_distance() / avg_walking_speed));
 }
 
 double Pass_path::calc_waiting_utility (vector <vector <Busstop*>>::iterator stop_iter, double time)
@@ -264,15 +285,16 @@ double Pass_path::calc_waiting_utility (vector <vector <Busstop*>>::iterator sto
 	vector<vector <Busline*>>::iterator iter_alt_lines = alt_lines.begin();
 	for (vector <Busline*>::iterator iter_lines = (*iter_alt_lines).begin(); iter_lines < (*iter_alt_lines).end(); iter_lines++)
 	{
-		Bustrip* next_trip = (*iter_lines)->find_next_scheduled_trip_at_stop((*stop_iter).front(), time);
-		if (next_trip == NULL) // in case there is no next trip planned
+		vector<Start_trip>::iterator next_trip_iter = (*iter_lines)->find_next_expected_trip_at_stop((*stop_iter).front());
+		if ((*next_trip_iter).first == NULL) // in case there is no next trip planned
 		{
 			return -10.0;
 		}
-		if (next_trip->stops_map[(*stop_iter).front()] - time < theParameters->max_waiting_time)
+		if ((*next_trip_iter).first->stops_map[(*stop_iter).front()] - time < theParameters->max_waiting_time)
 		{
 		// a dynamic filtering rule - if there is at least one line in the first leg which is available - then this waiting alternative is relevant
-			return (random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4) * number_of_transfers + random->nrandom(theParameters->in_vehicle_time_coefficient, theParameters->in_vehicle_time_coefficient / 4 ) * calc_total_scheduled_in_vehicle_time() + random->nrandom(theParameters->waiting_time_coefficient, theParameters->waiting_time_coefficient / 4) * calc_total_waiting_time(time, false) + random->nrandom(theParameters->walking_time_coefficient, theParameters->walking_time_coefficient/4) * calc_total_walking_distance()/ random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4));
+			double avg_walking_speed = random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4);
+			return (random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4) * number_of_transfers + random->nrandom(theParameters->in_vehicle_time_coefficient, theParameters->in_vehicle_time_coefficient / 4 ) * calc_total_scheduled_in_vehicle_time() + random->nrandom(theParameters->waiting_time_coefficient, theParameters->waiting_time_coefficient / 4) * calc_total_waiting_time(time, false, avg_walking_speed) + random->nrandom(theParameters->walking_time_coefficient, theParameters->walking_time_coefficient/4) * calc_total_walking_distance()/ avg_walking_speed);
 		}
 	} 
 	// if none of the lines in the first leg is available - then the waiting alternative is irrelevant

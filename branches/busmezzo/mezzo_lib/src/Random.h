@@ -70,7 +70,7 @@ public:
 
   // returns 1 with probability p (Bernoulli generator)
 
-  int brandom(double p);
+  bool brandom(double p);
 
   // binomial generator - n trials with probability p 
 

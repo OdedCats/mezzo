@@ -184,42 +184,66 @@ double Busline::find_time_till_next_scheduled_trip_at_stop (Busstop* stop, doubl
 	return theParameters->running_time - time;
 }
 
-Bustrip* Busline::find_next_scheduled_trip_at_stop (Busstop* stop, double time)
+vector<Start_trip>::iterator Busline::find_next_expected_trip_at_stop (Busstop* stop)
 {
+	if (stop->get_had_been_visited(this) == false)
+	{
+		return trips.begin(); // if no trip had visited the stop yet then the first trip is the expected next arrival
+	}
+	Bustrip* next_trip = stop->get_last_trip_departure(this);
+	if (next_trip->get_id() == trips.back().first->get_id())
+	{
+		return trips.end()-1;
+	}
 	for (vector <Start_trip>::iterator trip_iter = trips.begin(); trip_iter < trips.end(); trip_iter++)
 	{
-		map <Busstop*, double> stop_time = (*trip_iter).first->stops_map;
-		if (stop_time[stop] > time)
-			// assuming that trips are stored according to their chronological order
+		if ((*trip_iter).first->get_id() == next_trip->get_id())
 		{
-			return (*trip_iter).first;
+			return (trip_iter+1); // the trip following the most recent arrival is expected to arrive next
 		}
 	}
+	return trips.end()-1;
 }
 
-double Busline::time_till_next_arrival_at_stop (Busstop* stop, double time)
+double Busline::time_till_next_arrival_at_stop_after_time (Busstop* stop, double time)
 {
-	Bustrip* last_trip = find_next_scheduled_trip_at_stop(stop, time);
+	vector <Start_trip>::iterator trip_iter = find_next_expected_trip_at_stop(stop);
+	if (trip_iter != trips.begin())
+	{
+		if (stop->get_last_trip_departure(this)->get_id() == trips.back().first->get_id())
+		// if the last trip for this line had already visited this stop
+		{
+			return theParameters->stop_pass_generation;
+		}
+	}
+	// find the iterator for this stop
 	vector<Busstop*>::iterator this_stop;
 	for (vector <Busstop*>::iterator stop_iter = stops.begin(); stop_iter < stops.end(); stop_iter++)
 	{
 		if ((*stop_iter)->get_id() == stop->get_id())
 		{
 			this_stop = stop_iter;
+			break;
 		}
 	}
-	for (vector <Busstop*>::iterator stop_iter = this_stop; stop_iter < stops.begin(); stop_iter--)
+	for (vector <Busstop*>::iterator stop_iter = this_stop-1; stop_iter < stops.begin(); stop_iter--)
 	{
-		if ((*stop_iter)->get_last_trip_departure(this)->get_id() != last_trip->get_id())
+		if ((*stop_iter)->get_last_trip_departure(this)->get_id() == (*trip_iter).first->get_id())
 		{
-			last_trip = (*stop_iter)->get_last_trip_departure(this);
 			// find the most downstream stop where the next trip had already arrived
-			return 	time - (*this_stop)->get_last_departure(this) + last_trip->stops_map[(*stop_iter)] - last_trip->stops_map[(*this_stop)]; 
+			double expected_arrival_time = (*this_stop)->get_last_departure(this) + (*trip_iter).first->stops_map[(*stop_iter)] - (*trip_iter).first->stops_map[(*this_stop)]; 
 			// calc the expected arrival time at stop according to arrival time at last stop plus shceduled travel time to this stop
+			while (expected_arrival_time < time) // in case this trip is expected to pass the stop before the relevant time
+			{
+				trip_iter++;
+				expected_arrival_time = (*this_stop)->get_last_departure(this) + (*trip_iter).first->stops_map[(*stop_iter)] - (*trip_iter).first->stops_map[(*this_stop)]; 
+				// find the earliest trip that satisfies the condition of arriving before the given time
+			}
+			return expected_arrival_time - time;
 		}
 	}
 	// in case that the next trip have not started yet - calculating according to the schedule
-	return time - (*curr_trip).second + (*curr_trip).first->stops_map[stop] - (*curr_trip).first->stops_map[stops.front()];
+	return time - (*trip_iter).first->get_starttime() + (*trip_iter).first->stops_map[stop] - (*trip_iter).first->stops_map[stops.front()];
 }
 
 double Busline::calc_curr_line_headway ()
@@ -277,6 +301,7 @@ Bustrip* Busline::get_next_trip (Bustrip* reference_trip) //!< returns the trip 
 			return ((*(trips_iter+1)).first);
 		}
 	}
+	return trips.back().first;
 }
 
 Bustrip* Busline::get_previous_trip (Bustrip* reference_trip) //!< returns the trip before the reference trip on the trips vector
@@ -288,6 +313,7 @@ Bustrip* Busline::get_previous_trip (Bustrip* reference_trip) //!< returns the t
 			return ((*(trips_iter-1)).first);
 		}
 	}
+	return trips.front().first;
 }
 
 double Busline::calc_curr_line_ivt (Busstop* start_stop, Busstop* end_stop)
@@ -809,6 +835,7 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 		bus->get_curr_trip()->advance_next_stop(exit_time, eventlist); 
 		update_last_arrivals (bus->get_curr_trip(), bus->get_curr_trip()->get_enter_time()); // in order to follow the arrival times (AFTER dwell time is calculated)
 		update_last_departures (bus->get_curr_trip(), exit_time); // in order to follow the departure times (AFTER the dwell time and time point stuff)
+		set_had_been_visited (bus->get_curr_trip()->get_line(), true);
 		expected_arrivals.erase(time);
 	}
 	return true;
@@ -1079,8 +1106,8 @@ double Busstop::passenger_activity_at_stop (Eventlist* eventlist, Bustrip* trip,
 
 double Busstop::calc_dwelltime (Bustrip* trip)  //!< calculates the dwelltime of each bus serving this stop. currently includes: passenger service times ,out of stop, bay/lane		
 {
-	// Dwell time parameters according to TCQSM
-	double dwell_constant = 2.0; 
+	// Dwell time parameters according to SL
+	double dwell_constant = 0.0; 
 	double out_of_stop_coefficient = 2.0;
 	double bay_coefficient = 2.0;
 	double boarding_coefficient = 2.0;	
@@ -1549,7 +1576,7 @@ void Busstop::calculate_sum_output_stop_per_line(int line_id)
 	output_summary[line_id].stop_sd_DT = sqrt(output_summary[line_id].stop_sd_DT/(counter-1));
 }
 
-bool Busstop::check_walkable_stop (Busstop* stop)
+const bool Busstop::check_walkable_stop ( Busstop* const & stop)
 {
 	if (distances.count(stop) > 0)
 	{
@@ -1577,7 +1604,7 @@ void Change_arrival_rate::book_update_arrival_rates (Eventlist* eventlist, doubl
 	eventlist->add_event(time,this);
 }
 
-bool Change_arrival_rate::execute(Eventlist* eventlist, double time)
+bool Change_arrival_rate::execute()
 {		
 	for (TD_demand::iterator stop_iter = arrival_rates_TD.begin(); stop_iter != arrival_rates_TD.end(); stop_iter++)
 	{

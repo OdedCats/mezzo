@@ -5,6 +5,7 @@ Passenger::Passenger ()
 	boarding_decision = false;
 	already_walked = false;
 	end_time = 0;
+	nr_boardings = 0;
 	random = new (Random);
 	if (randseed != 0)
 	{
@@ -27,6 +28,7 @@ void Passenger::reset()
 	already_walked = false;
 	start_time = 0; 
 	end_time = 0;
+	nr_boardings = 0;
 
 }
 void Passenger::init (int pass_id, double start_time_, ODstops* OD_stop_)
@@ -34,6 +36,7 @@ void Passenger::init (int pass_id, double start_time_, ODstops* OD_stop_)
 	passenger_id = pass_id;
 	start_time = start_time_;
 	end_time = 0;
+	nr_boardings = 0;
 	original_origin = OD_stop_->get_origin();
 	OD_stop = OD_stop_;
 	boarding_decision = false;
@@ -70,8 +73,13 @@ bool Passenger:: make_boarding_decision (Bustrip* arriving_bus, double time)
 	Busstop* curr_stop = selected_path_stops.back();
 	ODstops* od = curr_stop->get_stop_od_as_origin_per_stop(OD_stop->get_destination());
 	// use the od based on last stop on record (in case of connections)
-	boarding_decision = random ->brandom(od->calc_boarding_probability(arriving_bus->get_line(), time));
-	OD_stop->record_passenger_boarding_decision (this, arriving_bus, time, boarding_decision);
+	double boarding_prob = od->calc_boarding_probability(arriving_bus->get_line(), time);
+	boarding_decision = random ->brandom(boarding_prob);
+	if (boarding_decision == true)
+	{
+		nr_boardings++;
+	}
+	OD_stop->record_passenger_boarding_decision (this, arriving_bus, time, boarding_prob, boarding_decision);
 	return boarding_decision;
 }
 
@@ -105,7 +113,7 @@ Busstop* Passenger::make_alighting_decision (Bustrip* boarding_bus, double time)
 					vector<vector<Busstop*>>::iterator stops_iter = alt_stops.begin() + 2; // pointing to the third place - the first transfer stop
 					if (path_set.size() == 1 && (*stops_iter).size() == 1)
 					{
-						candidate_transfer_stops_u[(*stops_iter).front()] == 10; // in case it is the only option
+						candidate_transfer_stops_u[(*stops_iter).front()] = 10; // in case it is the only option
 					}
 					for (vector<Busstop*>::iterator first_transfer_stops = (*stops_iter).begin(); first_transfer_stops < (*stops_iter).end(); first_transfer_stops++)
 					{
@@ -194,7 +202,7 @@ Busstop* Passenger::make_connection_decision (double time)
 				else
 				// in case it is an intermediate transfer stop
 				{
-					candidate_connection_stops_u[(*connected_stop)] = left_od_stop->calc_combined_set_utility_for_connection (this, (*path_iter)->get_walking_distances().front(), time);
+					candidate_connection_stops_u[(*connected_stop)] = left_od_stop->calc_combined_set_utility_for_connection ((*path_iter)->get_walking_distances().front(), time);
 					// the utility is combined for all paths from this transfer stop (incl. walking time to the connected stop)
 				}
 			}

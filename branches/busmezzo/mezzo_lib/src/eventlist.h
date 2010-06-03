@@ -56,7 +56,9 @@ class Eventlist
 	 void reset (); // resets the eventlist, throws out all the Actions
   	 inline const bool add_event(const double time_, Action* action)
 				{ 
-						lastupdate = thelist.insert (lastupdate, Valtype (time_,action));
+						//lastupdate =
+						thelist.insert (lastupdate, Valtype (time_,action));
+						//assert(lastupdate->first >0);
   						return true;
 				}
   	inline const double next ()

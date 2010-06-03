@@ -34,7 +34,7 @@ class Pass_path
 	int find_number_of_transfers ();
 	double calc_total_scheduled_in_vehicle_time ();
 	double calc_total_walking_distance ();
-	double calc_total_waiting_time (double time, bool without_first_waiting);
+	double calc_total_waiting_time (double time, bool without_first_waiting, double avg_walking_speed);
 //	double calc_total_scheduled_waiting_time (double time, bool without_first_waiting);
 	double calc_curr_leg_headway (vector<Busline*> leg_lines, vector <vector <Busstop*>>::iterator stop_iter, double time);
 //	double calc_curr_leg_waiting_schedule (vector<Busline*> leg_lines, vector <vector <Busstop*>>::iterator stop_iter, double arriving_time);
@@ -48,6 +48,7 @@ protected:
 	int p_id;
 	Random* random;
 	vector <vector <Busline*>> alt_lines;
+	vector <double> IVT;
 	vector <vector <Busstop*>> alt_transfer_stops;
 	vector <double> walking_distances;
 	int number_of_transfers;

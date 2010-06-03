@@ -1610,6 +1610,7 @@ bool Network::readbusline(istream& in) // reads a busline
 		(*stop_iter)->add_line_nr_waiting(bl, 0);
 		(*stop_iter)->add_line_nr_boarding(bl, 0);
 		(*stop_iter)->add_line_nr_alighting(bl, 0);
+		(*stop_iter)->set_had_been_visited(bl, false);
 		if (theParameters->real_time_info == 0)
 		{
 			(*stop_iter)->add_real_time_info(bl,0);
@@ -2304,11 +2305,13 @@ void Network::generate_indirect_paths()
 	*/
 	vector<vector<Busline*>> lines_sequence = compose_line_sequence(collect_im_stops.back());
 	ODstops* od = collect_im_stops.front()->get_stop_od_as_origin_per_stop(collect_im_stops.back());
+	/*
 	if (totaly_dominancy_rule(od,lines_sequence, stops_sequence) == true)
 	// in case it is dominated by an existing path - don't generate the path
 	{
 		return;
 	}
+	*/
 	Pass_path* indirect_path = new Pass_path(pathid, lines_sequence, stops_sequence, collect_walking_distances);
 	pathid++;
 	paths.push_back(indirect_path);
@@ -2450,7 +2453,7 @@ void Network::generate_stop_ods()
 		for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
 		{
 			bool od_with_demand = false;
-			ODstops* od_stop = new ODstops ((*basic_origin),(*basic_destination),0.0);
+			new ODstops ((*basic_origin),(*basic_destination),0.0);
 			for (vector <ODstops*>::iterator od = odstops_demand.begin(); od< odstops_demand.end(); od++)
 			{
 				if ((*od)->get_origin()->get_id() == (*basic_origin)->get_id() && (*od)->get_destination()->get_id() == (*basic_destination)->get_id())
@@ -2516,7 +2519,6 @@ void Network::find_all_paths ()
 	// second - generate indirect paths with walking distances
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{
-		int origin_id = (*basic_origin)->get_id();
 		for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
 		{
 			if ((*basic_origin)->get_id() != (*basic_destination)->get_id() && (*basic_origin)->check_destination_stop(*basic_destination) == true)
@@ -2545,10 +2547,12 @@ void Network::find_all_paths ()
 		static_filtering_rules(*basic_origin);
 	}
 	// apply dominancy rules
+	/*
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{	
 		dominancy_rules(*basic_origin);
 	}
+	*/
 	// report generated choice-sets 
 	write_path_set (workingdir + "path_set_generation.dat");
 }
@@ -4616,7 +4620,7 @@ bool Network::writeheadways(string name)
 
 }
 
-bool Network::write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9)
+bool Network::write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10)
 {
 	ofstream out1(name1.c_str(),ios_base::app);
 	ofstream out2(name2.c_str(),ios_base::app);
@@ -4627,6 +4631,7 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 	ofstream out7(name7.c_str(),ios_base::app);
 	ofstream out8(name8.c_str(),ios_base::app);
 	ofstream out9(name9.c_str(),ios_base::app);
+	ofstream out10(name10.c_str(),ios_base::app);
 	assert(out1);
 	assert(out2);
 	assert(out3);
@@ -4636,6 +4641,7 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 	assert(out7);
 	assert(out8);
 	assert(out9);
+	assert(out10);
 	// writing the crude data and summary outputs for each bus stop
 	for (vector<Busstop*>::iterator iter = busstops.begin();iter != busstops.end();iter++)
 	{	
@@ -4666,32 +4672,35 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 		(*iter)->write_output(out4);
 	}
 	out4.close();
-	// writing the boarding decisions of passenger
+	// writing the decisions of passenger and summary per OD pair
 	for (vector<ODstops*>::iterator od_iter = odstops.begin(); od_iter < odstops.end(); od_iter++)
 	{
+		if ((*od_iter)->get_passengers_during_simulation().size() > 0)
+		{
+			(*od_iter)->write_od_summary(out10);
+		}
 		map <Passenger*,list<Pass_boarding_decision>> boarding_decisions = (*od_iter)->get_boarding_output();
 		for (map<Passenger*,list<Pass_boarding_decision>>::iterator pass_iter1 = boarding_decisions.begin(); pass_iter1 != boarding_decisions.end(); pass_iter1++)
 		{
 			(*od_iter)->write_boarding_output(out5, (*pass_iter1).first);
 		}
+		
 		vector<Passenger*> pass_vec = (*od_iter)->get_passengers_during_simulation();
 		for (vector<Passenger*>::iterator pass_iter = pass_vec.begin(); pass_iter < pass_vec.end(); pass_iter++) 
 		{
 			(*pass_iter)->write_selected_path(out8);
 		}
-	}
-	out5.close();
-	out8.close();
-	// writing the alighting decisions of passenger
-	for (vector<ODstops*>::iterator od_iter = odstops.begin(); od_iter < odstops.end(); od_iter++)
-	{
+		
 		map <Passenger*,list<Pass_alighting_decision>> alighting_decisions = (*od_iter)->get_alighting_output();
 		for (map<Passenger*,list<Pass_alighting_decision>>::iterator pass_iter2 = alighting_decisions.begin(); pass_iter2 != alighting_decisions.end(); pass_iter2++)
 		{
 			(*od_iter)->write_alighting_output(out6, (*pass_iter2).first);
 		}
 	}
+	out5.close();
 	out6.close();
+	out8.close();
+	out10.close();
 	// writing the assignment results in terms of each segment on individual trips
 	for (vector<Bustrip*>::iterator iter = bustrips.begin(); iter!= bustrips.end(); iter++)
 	{
@@ -5900,7 +5909,7 @@ bool Network::writeall(unsigned int repl)
 	//writeheadways("timestamps.dat"); // commented out, since no-one uses them 
 	writeassmatrices(assignmentmatfile);
 	write_v_queues(vqueuesfile);
-	this->write_busstop_output(workingdir + "buslog_out.dat", workingdir + "busstop_sum.dat", workingdir + "busline_sum.dat", workingdir + "bus_trajectory.dat", workingdir + "passenger_boarding.dat", workingdir + "passenger_alighting.dat", workingdir + "segments_trip_loads.dat", workingdir + "selected_paths.dat", workingdir + "segments_line_loads.dat");
+	this->write_busstop_output(workingdir + "buslog_out.dat", workingdir + "busstop_sum.dat", workingdir + "busline_sum.dat", workingdir + "bus_trajectory.dat", workingdir + "passenger_boarding.dat", workingdir + "passenger_alighting.dat", workingdir + "segments_trip_loads.dat", workingdir + "selected_paths.dat", workingdir + "segments_line_loads.dat", workingdir + "od_stops_summary.dat");
 	return true;
 }
 

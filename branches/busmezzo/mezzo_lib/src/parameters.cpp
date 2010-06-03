@@ -86,8 +86,8 @@ Parameters::Parameters ()
    waiting_time_coefficient = 0.0;
    walking_time_coefficient= 0.0;
    average_walking_speed = 4000.0;
-   max_nr_extra_transfers = 1.0;
-   absolute_max_transfers = 3.0;
+   max_nr_extra_transfers = 1;
+   absolute_max_transfers = 3;
    max_in_vehicle_time_ratio = 2.0;
    max_walking_distance = 2500;
    max_waiting_time = 1800.0;

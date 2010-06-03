@@ -101,10 +101,11 @@ public:
 	bool check_last_trip (Bustrip* trip); // returns true if the trip is the last trip on the bus line, otherwise it returns false  
 //	double calc_next_scheduled_arrival_at_stop (Busstop* stop, double time); // returns the remaining time till the next trip on this line is scheduled to arrive at a stop (according to schedule only) 
 	double find_time_till_next_scheduled_trip_at_stop (Busstop* stop, double time); // returns the time till the next trip which is scheduled to arrive next at stop
-	Bustrip* find_next_scheduled_trip_at_stop (Busstop* stop, double time); // returns the next trip which is scheduled to arrive next at stop
-	double time_till_next_arrival_at_stop (Busstop* stop, double time); // returns the time left till next trip is expected to arrive at the stop (real-time calculation)
+	vector<Start_trip>::iterator find_next_expected_trip_at_stop (Busstop* stop); // returns the next trip which is scheduled to arrive next at stop
+	double time_till_next_arrival_at_stop_after_time (Busstop* stop, double time); // returns the time left till next trip is expected to arrive at the stop (real-time calculation)
 	Bustrip* get_next_trip (Bustrip* reference_trip); //!< returns the trip after the reference trip on the trips vector	
 	Bustrip* get_previous_trip (Bustrip* reference_trip); //!< returns the trip before the reference trip on the trips vector
+	Bustrip* get_last_trip () {return trips.back().first;}
 	vector<Busstop*>::iterator get_stop_iter (Busstop* stop); // returns the location of stop on the stops sequence for this line
 
 	bool execute(Eventlist* eventlist, double time); //!< re-implemented from virtual function in Action this function does the real work. It initiates the current Bustrip and books the next one
@@ -313,10 +314,11 @@ public:
 	double get_last_departure (Busline* line) {return last_departures[line].second;}
 	Bustrip* get_last_trip_departure (Busline* line) {return last_departures[line].first;}
 	map<Busstop*,double> & get_walking_distances () {return distances;}
+	const bool get_had_been_visited ( Busline * line) {return had_been_visited[line];} 
 	double get_walking_distance_stop (Busstop* stop) {return distances[stop];}
 	void save_previous_arrival_rates () {previous_arrival_rates.swap(arrival_rates);}
 	void save_previous_alighting_fractions () {previous_alighting_fractions.swap(alighting_fractions);}
-	bool check_walkable_stop (Busstop* stop);
+	const bool check_walkable_stop ( Busstop* const & stop);
 	bool check_destination_stop (Busstop* stop); 
 
 	Output_Summary_Stop_Line get_output_summary (int line_id) {return output_summary[line_id];}
@@ -328,6 +330,7 @@ public:
 	void add_line_nr_alighting(Busline* line, double value){alighting_fractions[line]= value;}
 	void add_line_update_rate_time(Busline* line, double time){update_rates_times[line].push_back(time);}
 	void add_real_time_info (Busline* line, bool info) {real_time_info[line] = info;}
+	void set_had_been_visited (Busline* line, bool visited) {had_been_visited[line] = visited;}
 
 // functions for initializing stop-specific input (relevant for demand format 3 only)	
 	void add_odstops_as_origin(Busstop* destination_stop, ODstops* od_stop){stop_as_origin[destination_stop]= od_stop; is_origin = true;}
@@ -379,6 +382,7 @@ protected:
 	map <double,Bus*> buses_at_stop; //!< buses currently visiting stop
 	map <Busline*, pair<Bustrip*, double>> last_arrivals; //!< contains the arrival time of the last bus from each line that stops at the stop (can result headways)
 	map <Busline*, pair<Bustrip*, double>> last_departures; //!< contains the departure time of the last bus from each line that stops at the stop (can result headways)
+	map <Busline*,bool> had_been_visited; // !< indicates if this stop had been visited by a given line till now
 
 	// relevant only for demand format 1
 	map <Busline*, double> arrival_rates; //!< parameter lambda that defines the poission proccess of passengers arriving at the stop
@@ -418,7 +422,7 @@ class Change_arrival_rate : public Action
 public:
 	Change_arrival_rate(double time); 
 	void book_update_arrival_rates (Eventlist* eventlist, double time);
-	bool execute(Eventlist* eventlist, double time); 
+	bool execute(); 
 	void add_line_nr_boarding_TD(Busstop* stop, Busline* line, double value){TD_single_pair TD; TD.first = line; TD.second = value; arrival_rates_TD[stop].insert(TD);}
 	void add_line_nr_alighting_TD(Busstop* stop, Busline* line, double value){TD_single_pair TD; TD.first = line; TD.second = value; alighting_fractions_TD[stop].insert(TD);}
 	
