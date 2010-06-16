@@ -1473,6 +1473,25 @@ in >> keyword;
 		{
 			find_all_paths ();
 		}
+		// read travel time disruptions input (only for case of pass. route choice)
+		in >> keyword;
+		if (keyword!="travel_time_disruptions:")
+		{
+			cout << " readbuslines: no << travel_time_disruptions: >> keyword " << endl;
+			in.close();
+			return false;
+		}
+		in >> nr;
+		limit = i + nr;
+		for (i; i<limit;i++)
+		{
+			if (!read_travel_time_disruptions(in))
+			{
+				cout << " readbuslines: read_travel_time_disruptions returned false for line nr " << (i+1) << endl;
+				in.close();
+				return false;
+			}	
+		}
 	}
 
 	// Fifth read bus types
@@ -1563,11 +1582,11 @@ bool Network::readbusline(istream& in) // reads a busline
 	//	nr_stops	{	stop_id1  stop_id2  stop_id3  ...	stop_idn	} nr_time_points { stop_id1 ... stop_idn }
 	//}
   char bracket;
-  int busline_id, opposite_busline_id, ori_id, dest_id, route_id, vehtype, holding_strategy, nr_stops, stop_id, nr_tp, tp_id;
+  int busline_id, opposite_busline_id, ori_id, dest_id, route_id, vehtype, holding_strategy, init_occup, nr_stops, stop_id, nr_tp, tp_id;
   float ratio_headway_holding;
-	string name;
+  string name;
   vector <Busstop*> stops, line_timepoint;
-	Busstop* stop;
+  Busstop* stop;
   Busstop* tp;
 	bool ok= true;
 	in >> bracket;
@@ -1576,7 +1595,7 @@ bool Network::readbusline(istream& in) // reads a busline
 		cout << "readfile::readsbusline scanner jammed at " << bracket;
 		return false;
 	}
-	in >> busline_id >> opposite_busline_id >> name >> ori_id >> dest_id >> route_id >> vehtype >> holding_strategy >> ratio_headway_holding >> nr_stops;
+	in >> busline_id >> opposite_busline_id >> name >> ori_id >> dest_id >> route_id >> vehtype >> holding_strategy >> ratio_headway_holding >> init_occup >> nr_stops;
 	in >> bracket;
 	if (bracket != '{')
 	{
@@ -1602,7 +1621,7 @@ bool Network::readbusline(istream& in) // reads a busline
 	ODpair* odptr=(*(find_if (odpairs.begin(),odpairs.end(), compareod (odid) )));
 	Busroute* br=(*(find_if(busroutes.begin(), busroutes.end(), compare <Route> (route_id) )));
 	Vtype* vt= (*(find_if(vehtypes.vtypes.begin(), vehtypes.vtypes.end(), compare <Vtype> (vehtype) )));
-	Busline* bl= new Busline (busline_id,opposite_busline_id,name,br,stops,vt,odptr,holding_strategy,ratio_headway_holding);
+	Busline* bl= new Busline (busline_id,opposite_busline_id,name,br,stops,vt,odptr,holding_strategy,ratio_headway_holding,init_occup);
 	
 	for (vector<Busstop*>::iterator stop_iter = bl->stops.begin(); stop_iter < bl->stops.end(); stop_iter++)
 	{
@@ -1698,12 +1717,11 @@ bool Network::readbustrip_format1(istream& in) // reads a trip
 
 	// find busline
 	Busline* bl=(*(find_if(buslines.begin(), buslines.end(), compare <Busline> (busline_id) )));
-	Bustrip* trip= new Bustrip (trip_id, start_time );
+	Bustrip* trip= new Bustrip (trip_id, start_time,bl);
 	trip->add_stops(stops);
 	bl->add_trip(trip,start_time);
 	bl->reset_curr_trip();
-    trip->set_line(bl);
-	
+
   	trip->convert_stops_vector_to_map();
 	// add to bustrips vector
 	bustrips.push_back (trip);
@@ -1769,11 +1787,10 @@ bool Network::readbustrip_format2(istream& in) // reads a trip
 			Visit_stop* vs_ct = new Visit_stop ((*iter)->first, dispatching_time + (*iter)->second);
 			curr_trip.push_back(vs_ct);
 		}
-		Bustrip* trip= new Bustrip (busline_id*100 + i, dispatching_time); // e.g. line 2, 3rd trip: trip_id = 23
+		Bustrip* trip= new Bustrip (busline_id*100 + i, dispatching_time, bl); // e.g. line 2, 3rd trip: trip_id = 23
 		trip->add_stops(curr_trip);
 		bl->add_trip(trip,dispatching_time);
 		bl->reset_curr_trip();
-		trip->set_line(bl);
 		trip->convert_stops_vector_to_map();
 		bustrips.push_back (trip); // add to bustrips vector
 	}
@@ -1839,11 +1856,10 @@ bool Network::readbustrip_format3(istream& in) // reads a trip
 			Visit_stop* vs_ct = new Visit_stop ((*iter)->first, trip_acc_time);
 			curr_trip.push_back(vs_ct);
 		}
-		Bustrip* trip= new Bustrip (busline_id*100 + i, initial_dispatching_time); // e.g. line 2, 3rd trip: trip_id = 23
+		Bustrip* trip= new Bustrip (busline_id*100 + i, initial_dispatching_time,bl); // e.g. line 2, 3rd trip: trip_id = 23
 		trip->add_stops(curr_trip);
 		bl->add_trip(trip,curr_trip.front()->second);
 		bl->reset_curr_trip();
-		trip->set_line(bl);
 		trip->convert_stops_vector_to_map();
 		bustrips.push_back (trip); // add to bustrips vector
 		initial_dispatching_time = initial_dispatching_time + headway;
@@ -2133,6 +2149,31 @@ bool Network::readbusstops_distances (istream& in)
 			return false;
 		}
 	}
+	in >> bracket;
+	if (bracket != '}')
+	{
+		cout << "readfile::readsbusstop_distances scanner jammed at " << bracket;
+		return false;
+	}
+	return true;
+}
+
+bool Network::read_travel_time_disruptions (istream& in)
+{
+	char bracket;
+	int line, from_stop, to_stop;
+	double travel_time;
+	in >> bracket;
+	if (bracket != '{')
+	{
+		cout << "readfile::readsbusstop_distances scanner jammed at " << bracket;
+		return false;
+	}
+	in >> line >> from_stop >> to_stop >> travel_time;
+	Busline* d_line = (*(find_if(buslines.begin(), buslines.end(), compare <Busline> (line) )));
+	Busstop* from_bs = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (from_stop) )));
+	Busstop* to_bs = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (to_stop) )));
+	d_line->add_disruptions(from_bs, to_bs, travel_time);
 	in >> bracket;
 	if (bracket != '}')
 	{
@@ -3287,7 +3328,7 @@ double Network::calc_total_in_vechile_time (vector<vector<Busline*>> lines, vect
 	iter_stops++; // starting from the second stop
 	for (vector<vector <Busline*>>::iterator iter_lines = lines.begin(); iter_lines < lines.end(); iter_lines++)
 	{
-		sum_in_vehicle_time += (*iter_lines).front()->calc_curr_line_ivt((*iter_stops).front(),(*(iter_stops+1)).front());
+	sum_in_vehicle_time += (*iter_lines).front()->calc_curr_line_ivt((*iter_stops).front(),(*(iter_stops+1)).front(), stops.front().front()->get_rti());
 		iter_stops++;
 		iter_stops++; 
 	}

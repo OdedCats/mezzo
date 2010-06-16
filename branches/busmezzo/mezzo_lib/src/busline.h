@@ -70,7 +70,7 @@ class Busline: public Action
 {
 public:
 	Busline (); //!< simple constructor
-	Busline (int id_, int opposite_id_, string name_, Busroute* busroute_, vector <Busstop*> stops_, Vtype* vtype_, ODpair* odpair_, int holding_strategy_, float ratio_headway_holding_); //!< Initialising constructor
+	Busline (int id_, int opposite_id_, string name_, Busroute* busroute_, vector <Busstop*> stops_, Vtype* vtype_, ODpair* odpair_, int holding_strategy_, float ratio_headway_holding_, int init_occupancy_); //!< Initialising constructor
 	virtual ~Busline(); //!< destructor
 	void reset ();
 	void reset_curr_trip (); // initialize after reading bustrips
@@ -83,6 +83,7 @@ public:
 	vector <Start_trip>::iterator get_curr_trip() {return curr_trip;} 
 	float get_ratio_headway_holding() {return ratio_headway_holding;} //!< returns ratio_headway_holding
 	int get_holding_strategy() {return holding_strategy;} //!< returns the holding strategy
+	int get_initial_occupancy() {return init_occupancy;}
 	void set_curr_trip(vector <Start_trip>::iterator curr_trip_) {curr_trip = curr_trip_;}
 	int get_opposite_id () {return opposite_id;}
 	//void set_opposite_line (Busline* line) {opposite_line = line;}
@@ -93,6 +94,7 @@ public:
 	// initialization
 	void add_timepoints (vector <Busstop*> tp) {line_timepoint = tp;}
 	void add_trip(Bustrip* trip, double starttime){trips.push_back(Start_trip(trip,starttime));}
+	void add_disruptions (Busstop* from_stop, Busstop* to_stop, double disruption_travel_time);
 	
 	// checks
 	bool is_line_timepoint (Busstop* stop); //!< returns true if stops is a time point for this busline, otherwise it returns false
@@ -114,7 +116,7 @@ public:
 	double calc_curr_line_headway ();
 	double calc_curr_line_headway_forward ();
 	double calc_max_headway ();
-	double calc_curr_line_ivt (Busstop* start_stop, Busstop* end_stop);
+	double calc_curr_line_ivt (Busstop* start_stop, Busstop* end_stop, int rti);
 	
 	// output-related functions
 	void calculate_sum_output_line(); 
@@ -138,6 +140,8 @@ protected:
 	ODpair* odpair; 
 	float ratio_headway_holding;
 	int holding_strategy; 
+	int init_occupancy;
+	map <pair<Busstop*,Busstop*>,double> disruption_times; // contains the expected travel times between a pair of stops in case of disruption (does not affect actual travel time, only passenger information provision)
 	bool active; //!< is true when the busline has started generating trips
 	vector <Start_trip>::iterator curr_trip; //!< indicates the next trip
 	Output_Summary_Line output_summary;
@@ -167,7 +171,7 @@ class Bustrip
 public:
 	Bustrip ();
 	~Bustrip ();
-	Bustrip (int id_, double start_time_);
+	Bustrip (int id_, double start_time_, Busline* line_);
 	void reset ();
 
 // GETS & SETS

@@ -80,7 +80,7 @@ double Pass_path::calc_total_scheduled_in_vehicle_time ()
 	iter_alt_transfer_stops++; // starting from the second stop
 	for (vector<vector <Busline*>>::iterator iter_alt_lines = alt_lines.begin(); iter_alt_lines < alt_lines.end(); iter_alt_lines++)
 	{
-		IVT.push_back((*iter_alt_lines).front()->calc_curr_line_ivt((*iter_alt_transfer_stops).front(),(*(iter_alt_transfer_stops+1)).front()));
+		IVT.push_back((*iter_alt_lines).front()->calc_curr_line_ivt((*iter_alt_transfer_stops).front(),(*(iter_alt_transfer_stops+1)).front(),alt_transfer_stops.front().front()->get_rti()));
 		sum_in_vehicle_time += IVT.back();
 		iter_alt_transfer_stops++;
 		iter_alt_transfer_stops++; 
@@ -305,6 +305,7 @@ map<Busline*, bool> Pass_path::check_maybe_worthwhile_to_wait (vector<Busline*> 
 {
 	// based on the complete headway
 	map <Busline*,bool> worth_to_wait;
+	int rti = (*stop_iter).front()->get_rti();
 	for (vector<Busline*>::iterator iter_leg_lines = leg_lines.begin(); iter_leg_lines < leg_lines.end(); iter_leg_lines++)
 	{
 		worth_to_wait[(*iter_leg_lines)] = true;
@@ -320,7 +321,7 @@ map<Busline*, bool> Pass_path::check_maybe_worthwhile_to_wait (vector<Busline*> 
 		{
 			for (vector<Busline*>::iterator iter1_leg_lines = iter_leg_lines+1; iter1_leg_lines < leg_lines.end(); iter1_leg_lines++)
 			{
-				if ((*iter_leg_lines)->calc_curr_line_ivt((*stop_iter).front(),(*(stop_iter+1)).front()) + (*iter_leg_lines)->calc_max_headway() < (*iter1_leg_lines)->calc_curr_line_ivt((*stop_iter).front(),(*(stop_iter+1)).front()))		
+				if ((*iter_leg_lines)->calc_curr_line_ivt((*stop_iter).front(),(*(stop_iter+1)).front(), rti) + (*iter_leg_lines)->calc_max_headway() < (*iter1_leg_lines)->calc_curr_line_ivt((*stop_iter).front(),(*(stop_iter+1)).front(), rti))		
 				{
 					// if IVT(1) + Max H (1) < IVT (2) then line 2 is not worthwhile to wait for
 					worth_to_wait[(*iter1_leg_lines)] = false;
@@ -328,7 +329,7 @@ map<Busline*, bool> Pass_path::check_maybe_worthwhile_to_wait (vector<Busline*> 
 				// in case it is a dynamic filtering rule
 				else 
 				{
-					if ((*iter_leg_lines)->calc_curr_line_ivt((*stop_iter).front(),(*(stop_iter+1)).front()) + (*iter_leg_lines)->calc_curr_line_headway() < (*iter1_leg_lines)->calc_curr_line_ivt((*stop_iter).front(),(*(stop_iter+1)).front()))
+					if ((*iter_leg_lines)->calc_curr_line_ivt((*stop_iter).front(),(*(stop_iter+1)).front(), rti) + (*iter_leg_lines)->calc_curr_line_headway() < (*iter1_leg_lines)->calc_curr_line_ivt((*stop_iter).front(),(*(stop_iter+1)).front(),rti))
 					{
 						// if IVT(1) + H (1) < IVT (2) then line 2 is not worthwhile to wait for
 						worth_to_wait[(*iter1_leg_lines)] = false;

@@ -41,8 +41,8 @@ Busline::Busline ()
 	active = false;
 }
 
-Busline::Busline (int id_, int opposite_id_, string name_, Busroute* busroute_, vector<Busstop*> stops_, Vtype* vtype_, ODpair* odpair_, int holding_strategy_, float ratio_headway_holding_):
-	id(id_), opposite_id(opposite_id_), name(name_), busroute(busroute_), stops(stops_), vtype(vtype_), odpair(odpair_), holding_strategy(holding_strategy_), ratio_headway_holding(ratio_headway_holding_)
+Busline::Busline (int id_, int opposite_id_, string name_, Busroute* busroute_, vector<Busstop*> stops_, Vtype* vtype_, ODpair* odpair_, int holding_strategy_, float ratio_headway_holding_, int init_occupancy_):
+	id(id_), opposite_id(opposite_id_), name(name_), busroute(busroute_), stops(stops_), vtype(vtype_), odpair(odpair_), holding_strategy(holding_strategy_), ratio_headway_holding(ratio_headway_holding_), init_occupancy(init_occupancy_)
 {
 	active=false;
 }
@@ -102,6 +102,14 @@ vector<Busstop*>::iterator Busline::get_stop_iter (Busstop* stop)
 		}
 	}
 	return stops.end();
+}
+
+void Busline::add_disruptions (Busstop* from_stop, Busstop* to_stop, double disruption_travel_time)
+{
+	pair<Busstop*,Busstop*> pair_stops;
+	pair_stops.first = from_stop;
+	pair_stops.second = to_stop;
+	disruption_times[pair_stops] = disruption_travel_time;
 }
 
 bool Busline::is_line_timepoint (Busstop* stop)
@@ -316,8 +324,18 @@ Bustrip* Busline::get_previous_trip (Bustrip* reference_trip) //!< returns the t
 	return trips.front().first;
 }
 
-double Busline::calc_curr_line_ivt (Busstop* start_stop, Busstop* end_stop)
+double Busline::calc_curr_line_ivt (Busstop* start_stop, Busstop* end_stop, int rti)
 {
+	if (rti == 3)
+	{
+		pair <Busstop*, Busstop*> pair_stops;
+		pair_stops.first = start_stop;
+		pair_stops.second = end_stop;
+		if (disruption_times.count(pair_stops) > 0)
+		{
+			return disruption_times[pair_stops];
+		}
+	}
 	vector<Visit_stop*>::iterator board_stop;
 	vector<Visit_stop*>::iterator alight_stop;
 	vector <Start_trip>::iterator check_trip;
@@ -423,7 +441,7 @@ void Busline::write_assign_output(ostream & out)
 
 Bustrip::Bustrip ()
 {
-	init_occupancy = 0;
+	init_occupancy = line->get_initial_occupancy();
 	random = new (Random);
 	next_stop = stops.begin();
 	for (vector <Visit_stop*>::iterator visit_stop_iter = stops.begin(); visit_stop_iter < stops.end(); visit_stop_iter++)
@@ -440,9 +458,9 @@ Bustrip::Bustrip ()
 	}
 }
 
-Bustrip::Bustrip (int id_, double start_time_): id(id_), starttime(start_time_)
+Bustrip::Bustrip (int id_, double start_time_, Busline* line_): id(id_), starttime(start_time_), line(line_)
 {
-	init_occupancy=0;
+	init_occupancy = line->get_initial_occupancy();
 	random = new (Random);
 	next_stop = stops.begin();
 	for (vector<Visit_stop*>::iterator visit_stop_iter = stops.begin(); visit_stop_iter < stops.end(); visit_stop_iter++)
@@ -470,7 +488,7 @@ Bustrip::~Bustrip ()
 
 void Bustrip::reset ()
 {
-	init_occupancy=0;
+	init_occupancy = line->get_initial_occupancy();
 	passengers_on_board.clear();
 	enter_time = 0;
 	next_stop = stops.begin();
@@ -596,6 +614,7 @@ bool Bustrip::activate (double time, Route* route, ODpair* odpair, Eventlist* ev
 		}
 	}	
 	busv->init(busv->get_id(),4,busv->get_length(),route,odpair,time); // initialize with the trip specific details
+	busv->set_occupancy(init_occupancy);
 	if ( (odpair->get_origin())->insert_veh(busv, calc_departure_time(time))) // insert the bus at the origin at the possible departure time
 	{
   		busv->set_on_trip(true); // turn on indicator for bus on a trip
