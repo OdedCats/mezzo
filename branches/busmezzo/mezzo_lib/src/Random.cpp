@@ -162,6 +162,15 @@ double Random::lnrandom1 (double m, double sd)
 	return exp(y);
 }
 
+double Random::loglogisticrandom(double alpha, double beta)
+{
+	double alpha_logistic = log(alpha);
+	double beta_logistic = 1/beta;
+	double logistic = alpha_logistic + beta_logistic * log(urandom()/(1-urandom()));
+	double loglogistic = exp(logistic);
+	return loglogistic;
+}
+
 // Generates an integer random number that is uniformly distributed
 // between [0, n).
 

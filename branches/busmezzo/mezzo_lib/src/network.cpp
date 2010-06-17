@@ -838,12 +838,13 @@ bool Network::readserver(istream& in)
 	}
 	in  >> sid >> stype >> mu >> sd >> delay;
 	assert (!servermap.count(sid));
-	assert ( (stype > -1) && (stype<4) && (mu>=0.0) && (sd>=0.0) && (delay>=0.0)); // to be updated when more server types are added
+	assert ( (stype > -1) && (stype<5) && (mu>=0.0) && (sd>=0.0) && (delay>=0.0)); // to be updated when more server types are added
 	// check id, vmax, vmin, romax;
 	// type 0= dummy server: Const server
 	// type 1=standard N(mu,sd) sever
 	// type 2=deterministic (mu) server
-    	// type 3=stochastic delay server LN(delay, std_delay)
+    // type 3=stochastic delay server: min_time(mu) + LN(delay, std_delay)
+	// type 4=stochastic delay server: LogLogistic(alpha/scale=mu, beta/shape=sd)
 	// type -1 (internal) = OD server
 	// type -2 (internal)= Destination server
 	Server* sptr;
@@ -857,8 +858,11 @@ bool Network::readserver(istream& in)
 	{
 		in >> delay_std;
 		assert (delay_std >=0.0);
-		sptr = new StochasticDelayServer (sid,stype,mu,sd,delay,delay_std * theParameters->sd_server_scale);
-		//sptr->set_delay_std (delay_std);
+		sptr = new LogNormalDelayServer (sid,stype,mu,sd,delay,delay_std * theParameters->sd_server_scale);
+	}
+	if (stype==4)
+	{
+		sptr = new LogLogisticDelayServer (sid,stype,mu,sd,delay);
 	}
 	assert (sptr);
 	servermap [sid] = sptr;

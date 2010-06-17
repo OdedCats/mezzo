@@ -97,6 +97,9 @@ public:
   double lnrandom(double m, double v);
   double lnrandom1(double m, double v);
 
+  // loglogistic with scale parameter alpha and shape parameter beta
+  double loglogisticrandom(double alpha, double beta);
+
   // discrete random number in [0, n) with given CDF
 
   int drandom(int n, double cdf[]);
