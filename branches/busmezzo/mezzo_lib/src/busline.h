@@ -315,6 +315,7 @@ public:
 	double get_exit_time() { return exit_time;}
 	vector<Busline*> get_lines () {return lines;}
 	void set_position (double position_ ) {position = position_;}
+	map <Busline*, pair<Bustrip*, double>> get_last_departures () {return last_departures;}
 	double get_last_departure (Busline* line) {return last_departures[line].second;}
 	Bustrip* get_last_trip_departure (Busline* line) {return last_departures[line].first;}
 	map<Busstop*,double> & get_walking_distances () {return distances;}

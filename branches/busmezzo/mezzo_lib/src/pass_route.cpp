@@ -126,18 +126,18 @@ double Pass_path::calc_total_waiting_time (double time, bool without_first_waiti
 			first_line = false;
 			alt_transfer_stops_iter++;
 			alt_transfer_stops_iter++;
+			sum_IVT += (*iter_IVT);
 			iter_IVT++;
 			iter_walk++;
 		}
-		sum_IVT += (*iter_IVT);
-		sum_walking_times += (*iter_walk) / avg_walking_speed;
+		sum_walking_times += (((*iter_walk) / avg_walking_speed) * 60); // in seconds
 		pass_arrival_time_at_next_stop = time + sum_waiting_time + sum_walking_times + sum_IVT;
 		first_entrance = false;
 		switch (first_stops.front()->get_rti()) 
 		{
 			case 0:
 				// all legs are calculated based on headway or time-table
-				sum_waiting_time += calc_curr_leg_headway((*iter_alt_lines), alt_transfer_stops_iter, time) / 2;
+				sum_waiting_time += (calc_curr_leg_headway((*iter_alt_lines), alt_transfer_stops_iter, pass_arrival_time_at_next_stop) / 2);
 				break;
 			case 1:
 				// first leg is calculated based on real-time if it is an alternative of staying at the same stop (stop1==stop2),
@@ -150,12 +150,12 @@ double Pass_path::calc_total_waiting_time (double time, bool without_first_waiti
 					}
 					else // using a connected stop
 					{
-						sum_waiting_time += calc_curr_leg_headway((*iter_alt_lines), alt_transfer_stops_iter, time) / 2;
+						sum_waiting_time += (calc_curr_leg_headway((*iter_alt_lines), alt_transfer_stops_iter, pass_arrival_time_at_next_stop) / 2);
 					}
 				}
 				else
 				{
-					sum_waiting_time += calc_curr_leg_headway((*iter_alt_lines), alt_transfer_stops_iter, time) / 2;
+					sum_waiting_time += (calc_curr_leg_headway((*iter_alt_lines), alt_transfer_stops_iter, pass_arrival_time_at_next_stop) / 2);
 					break;
 				}
 			case 2:
@@ -167,7 +167,7 @@ double Pass_path::calc_total_waiting_time (double time, bool without_first_waiti
 				}
 				else
 				{
-					sum_waiting_time += calc_curr_leg_headway((*iter_alt_lines), alt_transfer_stops_iter, time) / 2;
+					sum_waiting_time += (calc_curr_leg_headway((*iter_alt_lines), alt_transfer_stops_iter, pass_arrival_time_at_next_stop) / 2);
 					break;
 				}
 			case 3:
@@ -249,14 +249,14 @@ double Pass_path::calc_curr_leg_waiting_RTI (vector<Busline*> leg_lines, vector 
 	double min_waiting_time;
 	bool first_time = true;
 	map<Busline*, bool> worth_to_wait = check_maybe_worthwhile_to_wait(leg_lines, stop_iter, 1);
-	for (vector<Busline*>::iterator iter_leg_lines = leg_lines.begin()+1; iter_leg_lines < leg_lines.end(); iter_leg_lines++)
+	for (vector<Busline*>::iterator iter_leg_lines = leg_lines.begin(); iter_leg_lines < leg_lines.end(); iter_leg_lines++)
 	{
 		if (worth_to_wait[(*iter_leg_lines)] == true) 
 		// dynamic filtering rules - consider only if it is maybe worthwhile to wait for it
 		{
 			if (first_time == true)
 			{
-				first_time =false;
+				first_time = false;
 				min_waiting_time = (*iter_leg_lines)->time_till_next_arrival_at_stop_after_time((*stop_iter).front(),arriving_time);
 			}
 			else

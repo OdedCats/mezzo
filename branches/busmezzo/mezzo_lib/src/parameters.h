@@ -179,6 +179,7 @@ public:
    double max_waiting_time;
    double dominancy_perception_threshold;
    int real_time_info; //!< real-time information at the network: 0 - none; 1 - for all lines stoping at each stop; 2 - for all lines stoping at all connected stop; 3 - for the entire network.
+   double start_pass_generation; 
    double stop_pass_generation;
 
 // TODO: Implement the use of the following paramaters

@@ -93,6 +93,7 @@ Parameters::Parameters ()
    max_waiting_time = 1800.0;
    dominancy_perception_threshold = 0;
    real_time_info = 0;
+   start_pass_generation = 0;
 }
 
 bool Parameters::read_parameters (istream & in )
@@ -597,6 +598,13 @@ bool Parameters::read_parameters (istream & in )
 			return false;
 		}
 		in >> real_time_info;
+		in >> keyword;
+		if (keyword!= "start_pass_generation=")
+		{
+			cout << "ERROR reading Parameters file, expecting: start_pass_generation=, read: " << keyword << endl;
+			return false;
+		}
+		in >> start_pass_generation;
 		in >> keyword;
 		if (keyword!= "stop_pass_generation=")
 		{

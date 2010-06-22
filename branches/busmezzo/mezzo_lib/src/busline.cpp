@@ -215,14 +215,10 @@ vector<Start_trip>::iterator Busline::find_next_expected_trip_at_stop (Busstop* 
 
 double Busline::time_till_next_arrival_at_stop_after_time (Busstop* stop, double time)
 {
-	vector <Start_trip>::iterator trip_iter = find_next_expected_trip_at_stop(stop);
-	if (trip_iter != trips.begin())
+	if (stops.front()->get_had_been_visited(this) == false) 
+	// in case no trip started yet - according to time table of the first trip
 	{
-		if (stop->get_last_trip_departure(this)->get_id() == trips.back().first->get_id())
-		// if the last trip for this line had already visited this stop
-		{
-			return theParameters->stop_pass_generation;
-		}
+		return (trips.front().first->stops_map[stop] - time);
 	}
 	// find the iterator for this stop
 	vector<Busstop*>::iterator this_stop;
@@ -234,24 +230,102 @@ double Busline::time_till_next_arrival_at_stop_after_time (Busstop* stop, double
 			break;
 		}
 	}
-	for (vector <Busstop*>::iterator stop_iter = this_stop-1; stop_iter < stops.begin(); stop_iter--)
+	bool another_trip = false;
+	Busstop* last_visited_stop;
+	Bustrip* last_dispatched_trip;
+	// find the last trip that had visited a downstream stop
+	for (vector<Busstop*>::iterator stop_iter = this_stop; stop_iter > stops.begin(); stop_iter--)
 	{
-		if ((*stop_iter)->get_last_trip_departure(this)->get_id() == (*trip_iter).first->get_id())
+		if ((*stop_iter)->get_had_been_visited(this) == true)
 		{
-			// find the most downstream stop where the next trip had already arrived
-			double expected_arrival_time = (*this_stop)->get_last_departure(this) + (*trip_iter).first->stops_map[(*stop_iter)] - (*trip_iter).first->stops_map[(*this_stop)]; 
-			// calc the expected arrival time at stop according to arrival time at last stop plus shceduled travel time to this stop
-			while (expected_arrival_time < time) // in case this trip is expected to pass the stop before the relevant time
+			if ((*this_stop)->get_had_been_visited(this) == true)
 			{
-				trip_iter++;
-				expected_arrival_time = (*this_stop)->get_last_departure(this) + (*trip_iter).first->stops_map[(*stop_iter)] - (*trip_iter).first->stops_map[(*this_stop)]; 
-				// find the earliest trip that satisfies the condition of arriving before the given time
+				if ((*this_stop)->get_last_trip_departure(this)->get_id() == stops.front()->get_last_trip_departure(this)->get_id())
+				// a shortcut in case that no later trip had started yet
+				{
+					last_dispatched_trip = (*this_stop)->get_last_trip_departure(this);
+					break;
+				}
+				if ((*stop_iter)->get_last_trip_departure(this)->get_id() != (*this_stop)->get_last_trip_departure(this)->get_id())
+				{
+					last_visited_stop = (*stop_iter);
+					last_dispatched_trip = last_visited_stop->get_last_trip_departure(this);
+					another_trip = true;
+					break;
+				}
 			}
-			return expected_arrival_time - time;
+			else // the most recent stop to be first visited
+			{
+				last_visited_stop = (*stop_iter);
+				last_dispatched_trip = last_visited_stop->get_last_trip_departure(this);
+				another_trip = true;
+				break;
+			}	
+		}
+	} 
+	double time_till_next_visit;
+	if (another_trip == false)// find the next trip and calc. according to schedule
+	{
+		vector<Start_trip>::iterator next_trip_to_start = trips.end();	
+		for (vector<Start_trip>::iterator trip_iter = trips.begin(); trip_iter < trips.end(); trip_iter++)
+		{
+			if ((*trip_iter).first->get_id() == stop->get_last_trip_departure(this)->get_id())
+			{
+				next_trip_to_start = trip_iter+1;
+				break;
+			}
+		}
+		if (next_trip_to_start == trips.end()) // no more scheduled trips
+		{
+			return 100000;
+		}
+		time_till_next_visit = (*next_trip_to_start).first->stops_map[(*this_stop)] - time; // acoording to the schedule
+		while (time_till_next_visit < 0) // if the next trip is planned to visit the stop before the relevant time, then look for the next trip
+		{
+			next_trip_to_start++;
+			if (next_trip_to_start == trips.end()) // no more scheduled trips
+			{
+				return 100000;
+			}
+			time_till_next_visit = (*next_trip_to_start).first->stops_map[(*this_stop)] - time; // acoording to the schedule
 		}
 	}
-	// in case that the next trip have not started yet - calculating according to the schedule
-	return time - (*trip_iter).first->get_starttime() + (*trip_iter).first->stops_map[stop] - (*trip_iter).first->stops_map[stops.front()];
+	else  // in case the next trip have started already
+	{
+		// find the iterator for last_dispatched_trip
+		vector<Start_trip>::iterator last_dispatched_trip_iter;	
+		for (vector<Start_trip>::iterator trip_iter = trips.begin(); trip_iter < trips.end(); trip_iter++)
+		{
+			if ((*trip_iter).first->get_id() == last_dispatched_trip->get_id())
+			{
+				last_dispatched_trip_iter = trip_iter;
+				break;
+			}
+		}		
+		time_till_next_visit = last_visited_stop->get_last_departure(this) + last_dispatched_trip->stops_map[(*this_stop)] - last_dispatched_trip->stops_map[last_visited_stop] - time;
+		// calc the expected arrival time at stop according to arrival time at last stop plus shceduled travel time to this stop	
+		while (time_till_next_visit < 0)
+		{
+			last_dispatched_trip_iter++; 
+			if (last_dispatched_trip_iter == trips.end()) // no more scheduled trips
+			{
+				return 100000;
+			}
+			Visit_stop* last_stop_visit =  *((*last_dispatched_trip_iter).first->get_next_stop());
+			if (last_stop_visit->first->get_id() == stops.front()->get_id())
+			// if the next trip have not started yet
+			{
+				time_till_next_visit = (*last_dispatched_trip_iter).first->stops_map[(*this_stop)] - time; // acoording to the schedule
+			}
+			else
+			{
+				last_stop_visit =  *((*last_dispatched_trip_iter).first->get_next_stop()-1);
+				last_visited_stop = last_stop_visit->first;
+				time_till_next_visit = last_visited_stop->get_last_departure(this) + last_dispatched_trip->stops_map[(*this_stop)] - last_dispatched_trip->stops_map[last_visited_stop] - time;
+			}
+		}
+	}
+	return time_till_next_visit;
 }
 
 double Busline::calc_curr_line_headway ()
