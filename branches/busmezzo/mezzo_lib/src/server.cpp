@@ -119,7 +119,7 @@ double LogNormalDelayServer::next (const double time)
 
 double LogLogisticDelayServer::next (const double time)
 {
-	return time + delay + random->loglogisticrandom(mu,sd);
+	return time + random->loglogisticrandom(mu,sd);
 }
 
 ChangeRateAction::ChangeRateAction (Eventlist* eventlist_, double time_, Server* server_, double mu_, double sd_)

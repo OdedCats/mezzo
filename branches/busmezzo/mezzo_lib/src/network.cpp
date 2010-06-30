@@ -1777,6 +1777,7 @@ bool Network::readbustrip_format2(istream& in) // reads a trip
 	}
 	
 	in >> nr_trips;
+	in >> bracket;
 	if (bracket != '{')
 	{
 		cout << "readfile::readsbustrip scanner jammed at " << bracket;
