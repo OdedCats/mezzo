@@ -125,6 +125,7 @@ protected:
 	int nr_pass_completed;
 	double avg_tt;
 	double avg_nr_boardings;
+	vector <pair<vector<Busstop*>, pair <int,double>>> paths_tt;
 
 	Random* random;
 	Eventlist* eventlist; //!< to book passenger generation events

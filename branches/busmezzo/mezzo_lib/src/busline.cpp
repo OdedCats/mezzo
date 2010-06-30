@@ -183,7 +183,7 @@ double Busline::find_time_till_next_scheduled_trip_at_stop (Busstop* stop, doubl
 	{
 		map <Busstop*, double> stop_time = (*trip_iter).first->stops_map;
 		if (stop_time[stop] > time)
-			// assuming that trips are stored according to their chronological order
+		// assuming that trips are stored according to their chronological order
 		{
 			return ((*trip_iter).second - time);
 		}
@@ -229,6 +229,10 @@ double Busline::time_till_next_arrival_at_stop_after_time (Busstop* stop, double
 			this_stop = stop_iter;
 			break;
 		}
+	}
+	if (stop->get_last_departure(this) > time)
+	{
+		return stop->get_last_departure(this) - time;
 	}
 	bool another_trip = false;
 	Busstop* last_visited_stop;

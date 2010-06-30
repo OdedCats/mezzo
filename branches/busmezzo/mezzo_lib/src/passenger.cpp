@@ -121,7 +121,7 @@ Busstop* Passenger::make_alighting_decision (Bustrip* boarding_bus, double time)
 						if ((*first_transfer_stops)->get_id() == OD_stop->get_destination()->get_id())
 						// in case it is the final destination for this passeneger
 						{
-						candidate_transfer_stops_u[(*first_transfer_stops)] = theParameters->in_vehicle_time_coefficient * (boarding_bus->get_line()->calc_curr_line_ivt(OD_stop->get_origin(),OD_stop->get_destination(),OD_stop->get_origin()->get_rti()))/60;
+						candidate_transfer_stops_u[(*first_transfer_stops)] = theParameters->in_vehicle_time_coefficient * ((boarding_bus->get_line()->calc_curr_line_ivt(OD_stop->get_origin(),OD_stop->get_destination(),OD_stop->get_origin()->get_rti()))/60);
 							// the only utility component is the IVT till the destination
 						} 
 						else

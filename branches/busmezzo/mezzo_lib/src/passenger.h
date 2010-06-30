@@ -27,6 +27,7 @@ public:
 	ODstops* get_OD_stop () {return OD_stop;}
 	Busstop* get_original_origin () {return original_origin;}
 	int get_nr_boardings () {return nr_boardings;}
+	vector <Busstop*> get_chosen_path_stops () {return selected_path_stops;}
 	void set_ODstop (ODstops* ODstop_) {OD_stop = ODstop_;}
 	void add_to_selected_path_stop (Busstop* stop) {selected_path_stops.push_back(stop);}
 	// bool get_already_walked () {return already_walked;}
