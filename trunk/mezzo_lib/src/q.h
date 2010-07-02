@@ -54,32 +54,32 @@ class Q
 {
   public:
 
-  Q(double maxcap_, double freeflowtime_);
+  Q(const double maxcap_, const double freeflowtime_);
   ~Q();
   void reset(); // resets the queue for re-start of simulation
  // Accessors -> made inline so they are faster....
-//  inline const bool full() {return (calc_total_space() >= maxcap);}           // for some reason this doesnt work. check later...
-  inline const bool full() {return (vehicles.size() >= maxcap);}
-  inline const bool empty(){return vehicles.empty();}
-  inline const bool exit_ok() {return ok;}
-  inline const int size() {return vehicles.size();}
-  inline const int queue(double time) {return (size()-nr_running(time));}
-  inline const int nr_running(double time) 	{list <Veh_in_Q> :: iterator iter=(find_if (vehicles.begin(),vehicles.end(), compare_time (time) ) ); 	
+  inline const bool full() const {return (vehicles.size() >= maxcap);}
+  inline const bool empty() const {return vehicles.empty();}
+  inline const bool exit_ok() const {return ok;}
+  inline const int size() const {return vehicles.size();}
+  inline const int queue(const double time) const {return (size()-nr_running(time));}
+  inline const int nr_running(const double time) 	const {list <Veh_in_Q> ::const_iterator iter=(find_if (vehicles.begin(),vehicles.end(), compare_time (time) ) ); 	
   																	return distance(iter,vehicles.end());}
-  inline const double next () {return next_action;}
-  inline void add_alternative(int dest, vector<Link*> route) {alternatives.insert(alternatives.begin(),alternativetype(dest,route));}
-  inline void add_alternative_route (Route* route_) {routes.insert(routes.begin(),route_);}
+  inline const double next () const {return next_action;}
+  inline void add_alternative(const int dest, const vector<Link*> & route) {alternatives.insert(alternatives.begin(),alternativetype(dest,route));}
+  inline void add_alternative_route ( Route* const route_) {routes.insert(routes.begin(),route_);}
   // entering and exiting vehicles, maybe they should be inline as well...
-  bool enter_veh(Vehicle* veh);
-  Vehicle* exit_veh(double time, Link* nextlink, int lookback);
-  Vehicle* exit_veh(double time);
-  bool veh_exiting (double time, Link* nextlink, int lookback);
-  void update_exit_times(double t0, Link* nextlink, int lookback, double v_exit, double v_shockwave);
-  void broadcast_incident_start(int lid, vector <double> parameters);
-  void receive_broadcast(Vehicle* veh, int lid, vector <double> parameters);
-  void switchroute(Vehicle* veh, Route* curr_route, Route* alt_route, vector <double> parameters);
-  double calc_space(double time);
-  double calc_total_space();
+  const bool enter_veh(Vehicle* const veh);
+  Vehicle* const exit_veh(const double time, const Link* const nextlink, const int lookback);
+  Vehicle* const exit_veh(const double time);
+  const bool veh_exiting (const double time, const Link* const nextlink, const int lookback);
+  void update_exit_times(const double t0, const Link* const nextlink, const int lookback, const double v_exit, const double v_shockwave);
+  void broadcast_incident_start(const int lid, const vector <double> & parameters);
+  void receive_broadcast(Vehicle*const  veh, const int lid, const vector <double> & parameters);
+  void switchroute(Vehicle* const veh, Route* const curr_route, Route* const alt_route, const vector <double> & parameters);
+  const double calc_space(const double time) const;
+  const double calc_total_space() const;
+
 private:
   double maxcap;
   double freeflowtime;

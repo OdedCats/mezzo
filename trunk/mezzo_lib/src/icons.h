@@ -48,10 +48,10 @@ class Drawing
   public:
   	Drawing();
   	virtual ~Drawing();
-  	void set_background (const char* name) {if (bpm) delete bpm; bpm=new QPixmap(name);bg_set=true;basematrix_set=false;}
-  	void add_icon (Icon* icon);
-  	virtual void draw(QPixmap * pm,QMatrix * wm);
-	vector <int> get_boundaries();        // returns [min_x,min_y, max_x, max_y]
+  	void set_background (const char* const name) {if (bpm) delete bpm; bpm=new QPixmap(name);bg_set=true;basematrix_set=false;}
+  	void add_icon (Icon* const icon); // adds icon to drawing.
+  	void draw(QPixmap * const pm,QMatrix * const wm); // no const as 
+	const vector <int>  get_boundaries();        // returns [min_x,min_y, max_x, max_y]
   private:
   	list <Icon*> icons;
     bool bg_set;
@@ -65,18 +65,18 @@ class Icon
 {
   public:
 	  Icon() {selected = false;}
-	  Icon( int startx_, int starty_) : startx(startx_), starty(starty_) 
+	  Icon( const int startx_, const int starty_) : startx(startx_), starty(starty_) 
 			{selected = false; selected_color = theParameters->selectedcolor;}
 	  virtual ~Icon(){};
-	  virtual void draw(QPixmap * ,QMatrix * ){};
+	  virtual void draw(QPixmap * const ,QMatrix *const ){};
 	  virtual const bool within_boundary(const double x, const double y, const int rad);
 	  void settext(const string st) {text=QString(st.c_str());}
-	  const int get_x()  { return startx;}
-	  const int get_y()  { return starty;}
+	  const int get_x()  const { return startx;}
+	  const int get_y()  const { return starty;}
 	  void set_selected (const bool sel) {selected = sel;} // sets if object is selected or not
-	  const bool get_selected () {return selected;} // gets the selected status of object
+	  const bool get_selected () const {return selected;} // gets the selected status of object
 	  void set_selected_color (const QColor selcolor) {selected_color = selcolor;}
-	  const QColor get_selected_color () {return selected_color;}
+	  const QColor get_selected_color () const  {return selected_color;}
   protected:
       QString text;
       int startx, starty; // the icon's position
@@ -87,21 +87,21 @@ class Icon
 class LinkIcon : public Icon
 {
   public:
-  	LinkIcon(int x, int y, int tox, int toy);
+  	LinkIcon(const int x, const int y, const int tox, const int toy);
 	virtual ~LinkIcon(){};
 	void set_pointers(double * q, double * r);
-	void set_link(Link* link_) {link=link_;}
+	void set_link(const Link* const   link_) {link=link_;}
 	void calc_shift(double q=0.0); //!< calculate the relative shift from the center line between nodes, q is radius. 
 	void sethandle(bool handle){handle_on_=handle;}
 	bool gethandle(){return handle_on_;}
 	int getLinkicon_leng(){return linkicon_leng_;}
 	virtual const bool within_boundary(const double x, const double y, const int rad);
-  	virtual void draw(QPixmap * pm,QMatrix * wm);
+  	virtual void draw(QPixmap * const pm,QMatrix *const  wm);
 
 	void setMOE_thickness (MOE* moe_) {moe_thickness=moe_;} // sets the output MOE (such as flows, links etc.)	
 	void setMOE_colour (MOE* moe_) {moe_colour=moe_;} // sets the output MOE (such as flows, links etc.)
   protected:
-   Link* link;
+   const Link* link;
   	int stopx, stopy;
 	int shiftx, shifty;
 	int handlex, handley;
@@ -117,18 +117,18 @@ class LinkIcon : public Icon
 class VirtualLinkIcon: public LinkIcon
 {
  public:
-	VirtualLinkIcon(int x, int y, int tox, int toy) : LinkIcon(x,y,tox,toy) {}
+	VirtualLinkIcon(const int x, const int y, const int tox, const int toy) : LinkIcon(x,y,tox,toy) {}
 	virtual ~VirtualLinkIcon(){};
-	virtual void draw(QPixmap * pm,QMatrix * wm);
+	virtual void draw(QPixmap *const  pm,QMatrix * const wm);
  private:
 };
 
 class NodeIcon : public Icon
 {
  public:
-  	NodeIcon(int x, int y, Node *node);
+  	NodeIcon(const int x, const int y, Node *const node);
 	virtual ~NodeIcon(){}
-    virtual void draw(QPixmap * pm,QMatrix * wm);
+    virtual void draw(QPixmap * const pm,QMatrix *const  wm);
  private:
   	int width, height;
 	Node* thenode_;
@@ -138,9 +138,9 @@ class NodeIcon : public Icon
 class IncidentIcon : public Icon
 {
 public:
-	IncidentIcon (int x, int y);
+	IncidentIcon (const int x,const  int y);
 	virtual ~IncidentIcon () {}
-	virtual void draw(QPixmap * pm,QMatrix * wm);
+	virtual void draw(QPixmap *const  pm,QMatrix *const  wm);
 	void set_visible( bool val) {visible = val;}
 	bool is_visible () {return visible;}
 private:

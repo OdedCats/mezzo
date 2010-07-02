@@ -35,30 +35,31 @@ class Vehicle
 {
   public:
    Vehicle();
-   Vehicle(int id_, int type_, double length_,Route* route_, ODpair* odpair_, double time_);
-   void init (int id_, int type_, double length_, Route* route_, ODpair* odpair_, double time_);
-   const double get_length(){return length;}
-   const double get_exit_time(){return exit_time;}
-   const double get_start_time(){return start_time;}
-   const odval get_odids () ;
-   void set_exit_time(double time){exit_time=time;}
-   void set_entry_time(double time){entry_time=time;}
-   void set_route (Route* route_) {route=route_; switched=1;}
-   void set_switched(int i) {switched=i;}
-   const double get_entry_time() {return entry_time;}
-   void set_curr_link(Link* curr_link_);
-   Link* get_curr_link();
-   Route* get_route() {return route;}
-   Link* nextlink();
-   const int get_id() {return id;}
-   const int get_type() {return type;}
-   int get_oid();
-   int get_did();
+   Vehicle(const int id_, const int type_, const double length_,Route*const  route_, ODpair* const odpair_, const double time_);
+   void init (const int id_, const int type_, const double length_, Route* const route_, ODpair*const  odpair_, const double time_);
+   const double get_length() const {return length;}
+   const double get_exit_time() const {return exit_time;}
+   const double get_start_time() const {return start_time;}
+   const ODVal get_odids () const  ;
+   void set_exit_time(const double time){exit_time=time;}
+   void set_entry_time(const double time){entry_time=time;}
+   void set_route (Route* const  route_) {route=route_; switched=1;}
+   void set_switched(const int i) {switched=i;}
+   const double get_entry_time() const  {return entry_time;}
+   void set_curr_link(Link* const curr_link_);
+   Link* const  get_curr_link() const ;
+   Route* const get_route() const {return route;}
+   Link* const nextlink() const ;
+   const int get_id() const {return id;}
+   const int get_type() const {return type;}
+   const  int get_oid() const ;
+   const int get_did() const ;
 	void set_entered() {entered=true;theParameters->veh_in_network++;}
-	void add_meters(int meters_) {meters+=meters_;}
-	void set_meters(int meters_) {meters=meters_;}
-	int get_meters () {return meters;}
-	void report(double time);
+	void add_meters(const int meters_) {meters+=meters_;}
+	void set_meters(const int meters_) {meters=meters_;}
+	const int get_meters () const {return meters;}
+	void report(const double time);
+
   protected:
 	int id;
 	Route* route;
@@ -79,10 +80,9 @@ class Bus : public Vehicle
 {
 public:
 	Bus():Vehicle() {occupancy=0;}
-	Bus(int id_, int type_, double length_,Route* route_, ODpair* odpair_, double time_) :
-	Vehicle(id_, type_,length_,route_,odpair_,time_) {}
-
-	const int get_occupancy() {return occupancy;}
+	Bus(const int id_, const int type_, const double length_,Route* const route_, ODpair* const odpair_, const double time_) :
+		Vehicle(id_, type_,length_,route_,odpair_,time_) {}
+	const int get_occupancy() const {return occupancy;}
 	void set_occupancy (const int occup) {occupancy=occup;}
 	
 protected:
@@ -95,7 +95,7 @@ class VehicleRecycler
 {
  public:
  	~VehicleRecycler();
-	Vehicle* newVehicle() {	 	if (recycled.empty())
+	Vehicle* const  newVehicle() {	 	if (recycled.empty())
      								return new Vehicle();
      							else
      							{
@@ -105,8 +105,8 @@ class VehicleRecycler
      							}	
      						}
 							
-     void addVehicle(Vehicle* veh){recycled.push_back( veh);}
-	 Bus* newBus() {	 	if (recycled_busses.empty())
+     void addVehicle(Vehicle*const  veh){recycled.push_back( veh);}
+	 Bus* const newBus() {	 	if (recycled_busses.empty())
      								return new Bus();
      							else
      							{
@@ -116,7 +116,7 @@ class VehicleRecycler
      							}	
      						}
 							
-     void addBus(Bus* bus){recycled_busses.push_back( bus);}
+     void addBus(Bus*const  bus){recycled_busses.push_back( bus);}
 
  private:
 	list <Vehicle*> recycled;

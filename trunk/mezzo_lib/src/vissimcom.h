@@ -66,7 +66,7 @@ class VISSIMCOM : public Action
 		VISSIMCOM(const string & configfile) ;
 		~VISSIMCOM() ;
 		bool init (const string & configfile, const int runtime);
-		bool execute(Eventlist* eventlist, double time);   // to do what has to be done and book itself regularly in the eventlist
+		const bool execute(Eventlist* eventlist, const double time);   // to do what has to be done and book itself regularly in the eventlist
 		void register_boundaryouts( vector <BoundaryOut*> * boundaryouts_) {boundaryouts=boundaryouts_;}
 		void register_boundaryins( vector <BoundaryIn*> * boundaryins_) {boundaryins=boundaryins_;}
 		void register_virtuallinks( vector <VirtualLink*> * virtuallinks_) {virtuallinks=virtuallinks_;}

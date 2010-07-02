@@ -102,7 +102,7 @@ const bool Stage::execute(Eventlist* eventlist, const double time)
 
 	    eventlist->add_event(time+duration,this); // add the event to stop this stage
 	}
-	else // disactivate all turnings
+	else // disactivate turnings
 	{
 		stop();
 #ifdef _DEBUG_SIGNALS

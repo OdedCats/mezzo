@@ -1,14 +1,14 @@
 #include "eventlist.h"
 
 
-
+/*
 // dummy implementation of  virtual execute (...,...) otherwise the linking gives
 // problems: no virtual table generated
 const bool Action::execute(Eventlist*, const double)        // unused Eventlist* eventlist, double time
 {
 	return true;
 }
-
+*/
 // Eventlist implementation
 Eventlist::~Eventlist()
 

@@ -20,12 +20,12 @@ Drawing::~Drawing()
   icons.empty();
 }
 
-void Drawing::add_icon(Icon* icon)
+void Drawing::add_icon(Icon* const icon)
 {
  	icons.push_back(icon);
 }
 
-void Drawing::draw(QPixmap* pm,QMatrix * wm)
+void Drawing::draw(QPixmap* const  pm,QMatrix * const  wm)
 {
 	if (!basematrix_set)
 	{
@@ -54,7 +54,7 @@ void Drawing::draw(QPixmap* pm,QMatrix * wm)
 }
 
 
- vector <int> Drawing::get_boundaries()
+ const vector <int>  Drawing::get_boundaries()
 
  {
     int min_x=0, min_y=0, max_x=0, max_y=0;
@@ -97,7 +97,7 @@ const bool Icon::within_boundary(const double x, const double y, const int rad)
 // LinkIcon functions
 ////////////////////////////////////////
 
-LinkIcon::LinkIcon(int x, int y, int tox, int toy): Icon (x, y), stopx(tox), stopy(toy)
+LinkIcon::LinkIcon(const int x, const int y, const int tox, const int toy): Icon (x, y), stopx(tox), stopy(toy)
 {
 	moe_thickness = NULL;
 	moe_colour = NULL;
@@ -161,13 +161,13 @@ void LinkIcon::calc_shift(double q)
 
 }
 
-void LinkIcon::set_pointers(double * q, double * r)
+void LinkIcon::set_pointers(double *  q, double * r)
 {
 	 queuepercentage=q;
 	 runningpercentage=r;
 }
 
-void LinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
+void LinkIcon::draw(QPixmap *const  pm,QMatrix * const wm)   // draw the stuff on pixmap
 {
 	
 	if (theParameters->viewmode==0)
@@ -366,7 +366,7 @@ const bool LinkIcon::within_boundary(const double x, const double y, const int r
 // VirtualLinkIcon functions
 //////////////////////////////////////////////
 
-void VirtualLinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pixmap
+void VirtualLinkIcon::draw(QPixmap * const pm,QMatrix * const wm)   // draw the stuff on pixmap
 {
 
    QPainter paint(pm); // automatic paint.begin()
@@ -387,7 +387,7 @@ void VirtualLinkIcon::draw(QPixmap * pm,QMatrix * wm)   // draw the stuff on pix
 // NodeIcon functions
 ///////////////////////////////////////////////
 
-NodeIcon::NodeIcon( int x, int y, Node* node):Icon(x,y)
+NodeIcon::NodeIcon( const int x, const int y, Node* const node):Icon(x,y)
 {
  	width=2*theParameters->node_radius;
  	height=2*theParameters->node_radius;
@@ -395,7 +395,7 @@ NodeIcon::NodeIcon( int x, int y, Node* node):Icon(x,y)
 	thenode_=node;
 }
 
-void NodeIcon::draw(QPixmap *pm,QMatrix *wm)
+void NodeIcon::draw(QPixmap *const pm,QMatrix *const wm)
 {
 	width=2*theParameters->node_radius;
 	height=2*theParameters->node_radius;
@@ -440,7 +440,7 @@ void NodeIcon::draw(QPixmap *pm,QMatrix *wm)
 
 
 // IncidentIcon
-IncidentIcon::IncidentIcon(int x, int y):Icon(x,y)
+IncidentIcon::IncidentIcon(const int x, const int y):Icon(x,y)
 {
 	width=12*theParameters->node_radius;
  	height=12*theParameters->node_radius;

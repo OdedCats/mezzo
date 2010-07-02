@@ -201,7 +201,7 @@ class BoundaryOut : public Junction
 	bool blocked_;
 } ;
 
-typedef pair <int,int> odval;
+typedef pair <int,int> ODVal;
 
 class BoundaryIn : public Origin
 /* BoundaryIn is a special Origin, in the sense that vehicles that are generated here are generated from a stream (PVM or other)
@@ -213,11 +213,11 @@ class BoundaryIn : public Origin
 	~BoundaryIn ();
 	void register_virtual(VirtualLink* vl) ;
 	//void register_routes(vector<Route*> * routes_){routes=routes_;}
-	void register_routes (multimap<odval,Route*> * routemap_) {routemap=routemap_;}
+	void register_routes (multimap<ODVal,Route*> * routemap_) {routemap=routemap_;}
 	void register_busroutes (vector<Busroute*> * busroutes_) {busroutes=busroutes_;}
 	void register_ods(vector<ODpair*> *ods_){ods=ods_;}
     vector <VirtualLink*> & get_virtual_links() {return vlinks;}
-	Route* find_route(odval val, int id);
+	Route* find_route(ODVal val, int id);
 #ifdef _PVM	 // PVM specific functions
 	bool receive_message(PVM* com);
 	int send_message (PVM* com, double time);   // sends messages. returns nr of sigs that are sent 
@@ -236,7 +236,7 @@ class BoundaryIn : public Origin
 private:
 	vector <VirtualLink*> vlinks;
 	//vector <Route*> * routes;
-	multimap <odval,Route*> * routemap;
+	multimap <ODVal,Route*> * routemap;
 	vector <Busroute*> * busroutes; 
 	vector <ODpair*> * ods;
 	Vehicle* lastveh;

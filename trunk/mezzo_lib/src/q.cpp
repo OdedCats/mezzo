@@ -3,7 +3,7 @@
 
 
 
-Q::Q(double maxcap_, double freeflowtime_):maxcap(maxcap_), freeflowtime(freeflowtime_), ok(false), next_action(0.0)
+Q::Q(const double maxcap_, const double freeflowtime_):maxcap(maxcap_), freeflowtime(freeflowtime_), ok(false), next_action(0.0)
 {
 	random=new Random();
 	if (randseed != 0)
@@ -46,7 +46,7 @@ void Q::reset()
 }
 
 
-bool Q::enter_veh(Vehicle* veh)
+const bool Q::enter_veh(Vehicle*const veh)
 {
 	if (!full())
 	{
@@ -68,7 +68,7 @@ bool Q::enter_veh(Vehicle* veh)
     	 return false;	
 }
 
-void Q::update_exit_times(double time, Link* nextlink, int lookback, double v_exit, double v_shockwave)
+void Q::update_exit_times(const double time, const Link* const nextlink, const int lookback, const double v_exit, const double v_shockwave)
 /* Calculates the shockwave that propagates upstream when a queue dissipates and re-calculates the exit times for the vehicles
  *       NOTE: if we return last t0 value in case the shockwave reaches the last veh, it can be used together with the
  *                    distance the veh has travelled, to calculate the time the shockwave reaches the upstream node (given the inflow rate)
@@ -125,7 +125,7 @@ void Q::update_exit_times(double time, Link* nextlink, int lookback, double v_ex
    }
 }
 
-bool Q::veh_exiting (double time, Link* nextlink, int lookback)
+const bool Q::veh_exiting (const double time, const Link* const nextlink, const int lookback)
 {
 	int next = 0;
 	if (empty())
@@ -150,7 +150,7 @@ bool Q::veh_exiting (double time, Link* nextlink, int lookback)
 	}
 }
 
-Vehicle* Q::exit_veh(double time, Link* nextlink, int lookback)
+Vehicle* const Q::exit_veh(const double time, const Link* const nextlink, const int lookback)
 
 {
 	ok=false;
@@ -214,7 +214,7 @@ Vehicle* Q::exit_veh(double time, Link* nextlink, int lookback)
   
 
 
-Vehicle* Q::exit_veh(double time)
+Vehicle* const Q::exit_veh(const double time)
 {
 	ok=false;
 	next_action=0.0;
@@ -238,7 +238,7 @@ Vehicle* Q::exit_veh(double time)
   return NULL;
 }
 
-void Q::broadcast_incident_start(int lid, vector <double> parameters)
+void Q::broadcast_incident_start(const int lid, const vector <double> & parameters)
 {
  // for all vehicles
  	for (list <Veh_in_Q>::iterator iter1=vehicles.begin();iter1!=vehicles.end();iter1++)
@@ -251,7 +251,7 @@ void Q::broadcast_incident_start(int lid, vector <double> parameters)
  	}	
 } 		
 
-void Q::receive_broadcast(Vehicle* veh, int lid, vector <double> parameters) 		
+void Q::receive_broadcast(Vehicle* const veh, const int lid, const vector <double> & parameters) 		
 {
  			int curr_lid=(veh->get_curr_link())->get_id();
  			Route* curr_route=veh->get_route();
@@ -260,10 +260,10 @@ void Q::receive_broadcast(Vehicle* veh, int lid, vector <double> parameters)
  			// check if link is on route AFTER currlink
  			if (curr_route->has_link_after(lid, curr_lid))
  			{
- 				odval odvalue=curr_route->get_oid_did();
+ 				ODVal ODValue=curr_route->get_oid_did();
  				// find an alternative route with the same o and d; 
 				// TODO change to a map <> structure instead
- 		   		vector <Route*>::iterator iter2=(find_if (routes.begin(),routes.end(), compare_route (odvalue))) ;
+ 		   		vector <Route*>::iterator iter2=(find_if (routes.begin(),routes.end(), compare_route (ODValue))) ;
 	 		    if (iter2<routes.end())
  			    {
  			    	  	alt_route=(*iter2);
@@ -277,7 +277,7 @@ void Q::receive_broadcast(Vehicle* veh, int lid, vector <double> parameters)
  			     	for ( iter3=alternatives.begin();iter3<alternatives.end(); iter3++)
  			     	{
  			     		// if destination of alternative == destination 0f Vehicle
- 			     	 	if   ((*iter3).first == odvalue.second)
+ 			     	 	if   ((*iter3).first == ODValue.second)
  			     	 	{ 	
  			     	 	 	alt=iter3;
  			     	 	} 	
@@ -302,7 +302,7 @@ void Q::receive_broadcast(Vehicle* veh, int lid, vector <double> parameters)
 }
 
 
-void Q::switchroute(Vehicle* veh, Route* curr_route, Route* alt_route, vector <double> parameters)
+void Q::switchroute(Vehicle* const veh, Route* const curr_route, Route* const alt_route, const vector <double> & parameters)
 // parameters contain the mu and sd's of all  beta's and X1
 {
  	veh->set_switched(-1); // sets the default of a negative switching decision (staying on habitual road)
@@ -333,12 +333,12 @@ void Q::switchroute(Vehicle* veh, Route* curr_route, Route* alt_route, vector <d
 }
 
 //calculates the space occupied by the queueing part of the vehicles, taking the individual vehicle lengths
- double Q::calc_space(double time)
+ const double Q::calc_space(const double time) const
  {
 	if (empty())
 		return 0.0;
 	double space=0.0;
-	list <Veh_in_Q>::iterator iter1=vehicles.end();
+	list <Veh_in_Q>::const_iterator iter1=vehicles.end();
    	while (iter1!=vehicles.begin())
    	{
    		iter1--;
@@ -350,12 +350,12 @@ void Q::switchroute(Vehicle* veh, Route* curr_route, Route* alt_route, vector <d
 	return space;
  }
 
- double Q::calc_total_space()  // returns the total space occupied by queue;
+ const double Q::calc_total_space() const  // returns the total space occupied by queue;
  {
    if (empty())
 		return 0.0;
 	double space=0.0;
-	list <Veh_in_Q>::iterator iter1=vehicles.end();
+	list <Veh_in_Q>::const_iterator iter1=vehicles.end();
    	while (iter1!=vehicles.begin())
    	{
    		iter1--;

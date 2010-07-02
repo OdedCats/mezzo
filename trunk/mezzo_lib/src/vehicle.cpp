@@ -15,14 +15,14 @@ Vehicle::Vehicle()
 }
 
 
-Vehicle::Vehicle(int id_, int type_, double length_, Route* route_, ODpair* odpair_, double time_): id(id_), route(route_), odpair(odpair_), start_time(time_) , type(type_), length(length_), exit_time(0.0)
+Vehicle::Vehicle(const int id_, const int type_, const double length_, Route*const  route_, ODpair* const odpair_, const double time_): id(id_), route(route_), odpair(odpair_), start_time(time_) , type(type_), length(length_), exit_time(0.0)
 {
 	entered=false;	
 	switched=0;
 	meters=0;
 }
 
-void Vehicle::init (int id_, int type_, double length_, Route* route_, ODpair* odpair_, double time_)
+void Vehicle::init (const int id_, const int type_, const double length_, Route* const route_, ODpair* const odpair_, const double time_)
 {
  id=id_;
  type=type_;
@@ -36,17 +36,17 @@ void Vehicle::init (int id_, int type_, double length_, Route* route_, ODpair* o
  meters=0;
 }
 
-void Vehicle::set_curr_link(Link* curr_link_)
+void Vehicle::set_curr_link(Link* const  curr_link_)
 {
 	curr_link=curr_link_;
 }
 
-Link* Vehicle::get_curr_link()
+Link* const  Vehicle::get_curr_link() const 
 {
 	return curr_link;
 }
 
-Link* Vehicle::nextlink()
+Link* const  Vehicle::nextlink() const 
 {
 	if (entered)
 		return route->nextlink(curr_link);
@@ -54,26 +54,23 @@ Link* Vehicle::nextlink()
 		return route->firstlink();
 }
 
-const odval Vehicle::get_odids ()
+const ODVal Vehicle::get_odids () const 
 {return odpair->odids();}
 
-int Vehicle::get_oid()
+const int Vehicle::get_oid() const 
 {
-
-
-
-	odval oid=odpair->odids() ;
+	ODVal oid=odpair->odids() ;
 	return oid.first;	
 }
 
-int Vehicle::get_did()
+const int Vehicle::get_did() const 
 {
-	odval did=odpair->odids() ;
+	ODVal did=odpair->odids() ;
 	return did.second;	
 }
  	
 
-void Vehicle::report(double time)
+void Vehicle::report(const double time)
 {
   arrival_time=time;
   list <double> collector;

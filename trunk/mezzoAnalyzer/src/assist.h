@@ -25,9 +25,9 @@ namespace assist{
 	
 	struct compareod
 	{
-		compareod(odval val_):val(val_) {}
+		compareod(ODVal val_):val(val_) {}
 		bool operator () (ODpair* odpair){return (odpair->odids()==val);}
-	    odval val;
+	    ODVal val;
 	};
 };
 

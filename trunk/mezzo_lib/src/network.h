@@ -79,17 +79,18 @@ using namespace std;
 class TurnPenalty;
 class Incident;
 
-class ODRate
+struct ODRate
 {
 public:
-	odval odid;
+	ODVal odid;
 	double rate;
 };
 
 
-class ODSlice
+struct ODSlice
 {
 public:
+	const bool remove_rate(const ODVal& odid); // removes od_rate for given od_id.
 	vector <ODRate> rates;	
 };
 
@@ -100,6 +101,8 @@ public:
 	ODMatrix ();
 	void add_slice(const double time, ODSlice* slice);
 	void reset(Eventlist* eventlist,vector <ODpair*> * odpairs); // rebooks all the MatrixActions
+
+	const bool remove_rate(const ODVal& odid); // removes od_rates for given od_id for all slices
 private:
 	vector < pair <double,ODSlice*> > slices;	
 
@@ -152,7 +155,7 @@ public:
 	bool find_alternatives_all (int lid, double penalty, Incident* incident); //!< finds the alternative paths 'without' link lid.
 	//void delete_spurious_routes(); //!< deletes all routes that have no OD pair.
 	void renum_routes (); //!< renumerates the routes, to keep a consecutive series after deletions & additions
-	bool run(int period); //!< RUNS the network for 'period' seconds
+	// bool run(int period); //!< RUNS the network for 'period' seconds OBSOLETE
 	bool addroutes (int oid, int did, ODpair* odpair); //!< adds routes to an ODpair
 	bool add_od_routes()	; //!< adds routes to all ODpairs
 	bool readdemandfile(string name);  //!< reads the OD matrix and creates the ODpairs
@@ -176,7 +179,7 @@ public:
 	void create_turnings();          //!< creates the turning movements
 	bool writeturnings(string name);  //!< writes the turing movements
 	bool writemoes(string ending=""); //!< writes all the moes: speeds, inflows, outflows, queuelengths and densities per link
-	bool writeallmoes(string name); //!< writes all the moes in one file.
+	bool writeconvergence(string name); //!< writes the convergence moes in one file.
 	bool writeassmatrices(string name); //!< writes the assignment matrices
 	bool write_v_queues(string name); //!< writes the virtual queue lengths
 
@@ -213,8 +216,8 @@ public:
 	map <int, Node*>& get_nodes() {return nodemap;}
 	map <int,Link*>& get_links() {return linkmap;}
 	
-	multimap<odval, Route*>::iterator find_route (int id, odval val);
-	bool exists_route (int id, odval val); // checks if route with this ID exists for OD pair val
+	multimap<ODVal, Route*>::iterator find_route (int id, ODVal val);
+	bool exists_route (int id, ODVal val); // checks if route with this ID exists for OD pair val
 	bool exists_same_route (Route* route); // checks if a similar route with the same links already exists
 // STATISTICS
 	//Linktimes
@@ -267,7 +270,7 @@ protected:
 	map <int, Server*> servermap; //!< 
 	vector <ChangeRateAction*> changerateactions; //!<
 //	vector <Route*> routes;	
-	multimap <odval, Route*> routemap; //!< 
+	multimap <ODVal, Route*> routemap; //!< 
 	vector <ODpair*> odpairs; //!< keep using OD pair vector for now, as map is too much of a hassle with two indices.
 	// map <int, ODpair*> odpairmap; 
 	vector <Incident*> incidents;

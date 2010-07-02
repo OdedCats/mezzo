@@ -37,6 +37,7 @@ ODaction::ODaction(ODpair* odpair_):odpair(odpair_)
 #endif //_DEBUG_OD
 	double rate = odpair->get_rate();
 	double mu = 0.0;
+	total_nr_veh=0;
 	active = false;
 	if (rate >= 1)
 	{
@@ -54,6 +55,7 @@ ODaction::~ODaction()
 
 void ODaction::reset(double rate_)
 {
+	total_nr_veh=0;
 	server->reset();
 	if (rate_ < 1)
 	{
@@ -82,7 +84,10 @@ const bool ODaction::execute(Eventlist* eventlist, const double time)
 	  Vehicle* veh=recycler.newVehicle(); // get a _normal_ vehicle
 	  veh->init(vid,vehtype->id, vehtype->length,route,odpair,time);  
 	  if ( (odpair->get_origin())->insert_veh(veh,time)) // insert vehicle in the input queue
+	  {
   		ok=true;
+		total_nr_veh ++;
+	  }
 	  else
   		{
   			ok=false; // if there's no room on the inputqueue (should never happen) we just drop the vehicle.
@@ -296,9 +301,9 @@ Route* ODpair::select_route(double time)          // to be changed
 	return routes.front(); // to be sure that in any case a route is returned
 }
  	
-odval ODpair::odids ()
+ODVal ODpair::odids ()
 {
-	return odval(origin->get_id(), destination->get_id());
+	return ODVal(origin->get_id(), destination->get_id());
 }
 
 ODpair::ODpair(Origin* origin_, Destination* destination_, double rate_, Vtypes* vtypes_)
@@ -383,7 +388,7 @@ void ODpair::report (list <double>   collector)
 bool ODpair::writesummary(ostream& out)
 {
 	out << origin->get_id() << "\t" << destination->get_id() << "\t" << routes.size() << "\t";
-	out << grid->size() << "\t" << grid->sum(6) << "\t" << grid->sum(7) << endl;
+	out << odaction->get_total_nr_veh() << '\t'  << grid->size() << "\t" << grid->sum(6) << "\t" << grid->sum(7) << endl;
   return true;
 }
 
@@ -394,6 +399,7 @@ bool  ODpair::writefieldnames(ostream& out)
 	{
 		out << (*iter) << '\t';
 	}
+	
 	out << endl;
 	return true;
 }

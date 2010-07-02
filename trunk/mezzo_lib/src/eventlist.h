@@ -37,10 +37,10 @@ using namespace std;
 class Eventlist;
 
 
-class Action
+class Action // Abstract class that is inherited by all Action types to perform actions at the appropriate time, when called by the eventlist.
 {	
 	public:
-		virtual const bool execute(Eventlist* eventlist, const double time);
+		virtual const bool execute(Eventlist* eventlist, const double time) = 0; // pure virtual, force inherited classes to defy proper behaviour.
 	private:
 };
 
@@ -56,7 +56,8 @@ class Eventlist
 	 void reset (); // resets the eventlist, throws out all the Actions
   	 inline const bool add_event(const double time_, Action* action)
 				{ 
-						lastupdate = thelist.insert (lastupdate, Valtype (time_,action));
+						//lastupdate = 
+						thelist.insert (lastupdate, Valtype (time_,action));
   						return true;
 				}
   	inline const double next ()

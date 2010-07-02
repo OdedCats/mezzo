@@ -67,7 +67,7 @@ class Stage : public Action
 {
 public:
 	Stage (int id_, double start_, double duration_): id(id_), start(start_), duration(duration_) { active = false;}
-	int get_id() {return id;}
+	const int get_id() {return id;}
 	void reset() {stop();} //already implemented in void stop(), but reset is universal
 	double get_start() {return start;}
 	double get_duration() {return duration;}

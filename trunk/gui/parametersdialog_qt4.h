@@ -29,7 +29,7 @@ class ParametersDialog : public QDialog, public Ui::ParametersDialog
 
 public:
 	ParametersDialog(QWidget *parent = 0); // inits the dialog
-	void set_parameters (Parameters* params) {theParameters = params; }
+	void set_parameters (Parameters* params);
 
 private slots: 
 	// Using the Auto-Connect feature with the on_<signal>_<event>() syntax

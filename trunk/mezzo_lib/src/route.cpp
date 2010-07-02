@@ -16,7 +16,7 @@ struct compare
  int id;
 };
 
-Route::Route(int id_, Origin* origin_, Destination* destination_, vector <Link*> links_):	id(id_), origin(origin_), destination(destination_),sumcost(0.0)
+Route::Route(const int id_, Origin* const origin_, Destination* const destination_, const vector <Link*> & links_):	id(id_), origin(origin_), destination(destination_),sumcost(0.0)
 {
  	last_calc_time=0.0;
 	links=links_;
@@ -40,7 +40,7 @@ Route::Route(int id_, Origin* origin_, Destination* destination_, vector <Link*>
 
 
 
-Route::Route(int id_, Route* route, vector<Link*> links_): id(id_)
+Route::Route(const int id_, Route* const route, const vector<Link*> & links_): id(id_)
 {
 	sumcost=0.0;
 	last_calc_time=0.0;
@@ -67,13 +67,13 @@ void Route::reset()
 
 }
 
-odval Route::get_oid_did()
-  {return odval(origin->get_id(), destination->get_id());}		
+const ODVal Route::get_oid_did() const
+  {return  ODVal(origin->get_id(), destination->get_id());}		
 
- bool Route::check (int oid, int did)
+ const bool Route::check (const int oid, const int did) const 
 	{ return ( (origin->get_id()==oid) && (destination->get_id()==did) );}
 
- bool Route::less_than (Route* route) 
+ const bool Route::less_than (const Route*const  route) const
 	 // returns true if origin_id of this route is less than origin_id of the "route" parameter, or
 	 // if the origins are equal, if the destination_id is less than that of the "route" parameter provided
  {
@@ -95,18 +95,18 @@ odval Route::get_oid_did()
 	 }
  }
 
- vector<Link*> Route::get_upstream_links(int link_id)
+ const vector<Link*>  Route::get_upstream_links(const int link_id)const 
  {
 		return (vector <Link*> (links.begin(), find_if (links.begin(),links.end(), compare <Link> (link_id))));
  }
 
- vector<Link*> Route::get_downstream_links(int link_id)
+ const vector<Link*> Route::get_downstream_links(const int link_id) const 
  {
 	    return (vector <Link*> (find_if (links.begin(),links.end(), compare <Link> (link_id)),links.end()  ));
  }
 
 
- void Route::set_selected(bool selected) // sets the links' selected attribute
+ void Route::set_selected(const bool selected) // sets the links' selected attribute
  {
 	 vector <Link*>::iterator iter = links.begin();
 	 for (iter;iter < links.end(); iter++)
@@ -116,7 +116,7 @@ odval Route::get_oid_did()
  }
 
 #ifndef _NO_GUI
- void Route::set_selected_color(QColor selcolor)
+ void Route::set_selected_color(const QColor & selcolor)
  {
 	vector <Link*>::iterator iter = links.begin();
 	 for (iter;iter < links.end(); iter++)
@@ -126,9 +126,9 @@ odval Route::get_oid_did()
  }
 #endif
 
- bool Route::equals (Route& route) // returns true if same route 
+ const  bool Route::equals (const  Route& route) const  // returns true if same route 
  {
-	 odval val=route.get_oid_did();
+	 ODVal val=route.get_oid_did();
 	 if ((val.first != origin->get_id()) || (val.second != destination->get_id()))
 		 return false;
 	 else
@@ -136,9 +136,9 @@ odval Route::get_oid_did()
  }
  
   		
-Link* Route::nextlink(Link* currentlink)
+Link* const Route::nextlink(Link* const currentlink) const
 {
- vector<Link*>::iterator iter=find(links.begin(), links.end(), currentlink);
+ vector<Link*>::const_iterator iter=find(links.begin(), links.end(), currentlink);
  iter++;
   if (iter<links.end())
  {
@@ -151,7 +151,7 @@ Link* Route::nextlink(Link* currentlink)
 
 
 
-bool Route::has_link(int lid)
+const bool Route::has_link(const int lid) const 
 {
   //return ( (find_if (links.begin(),links.end(), compare <Link> (lid))) < links.end() ); // the link exists
 	if (linkmap.count(lid))
@@ -161,16 +161,16 @@ bool Route::has_link(int lid)
 }
 
 
-bool Route::has_link_after(int lid, int curr_lid)
+const bool Route::has_link_after(const int lid, const int curr_lid) const 
 {
-  vector <Link*>:: iterator iter =(find_if (links.begin(),links.end(), compare <Link> (curr_lid))) ; // find curr_lid
+  vector <Link*>:: const_iterator iter =(find_if (links.begin(),links.end(), compare <Link> (curr_lid))) ; // find curr_lid
   iter++;
    if (iter < links.end())
 	   return ((find_if (iter,links.end(), compare <Link> (lid))) < links.end() ); // the link lid exists after curr_lid
    return false;
 }
 
-double Route::cost(double time)
+const double Route::cost(const double time) 
 {
 	if ((sumcost>0.0) & (last_calc_time+theParameters->update_interval_routes < time))
 		return sumcost;// this means the cost has already been calculated once this update interval
@@ -197,7 +197,7 @@ double Route::cost(double time)
 	}
 }
 
-double Route::utility (double time)
+const double Route::utility (const double time) 
 {
 #ifdef _MULTINOMIAL_LOGIT
 	return exp(theParameters->mnl_theta*(cost(time)) );
@@ -209,7 +209,7 @@ double Route::utility (double time)
 /**
 * compute the length of the route
 **/
-int Route::computeRouteLength()
+const int Route::computeRouteLength() const 
 {	
 	int routelength=0;
 	for(unsigned i=0; i<links.size();i++)
@@ -217,10 +217,10 @@ int Route::computeRouteLength()
 	return routelength;
 }
 
-void Route::write(ostream& out)
+void Route::write(ostream& out) const
 {
 	out << "{ " << id << " " << origin->get_id() << " " << destination->get_id() << " " << links.size() << "{";
-	for (vector <Link*>::iterator iter=links.begin(); iter<links.end();iter++)
+	for (vector <Link*>::const_iterator iter=links.begin(); iter<links.end();iter++)
 	{
 	 	out <<" " <<(*iter)->get_id();
 	}

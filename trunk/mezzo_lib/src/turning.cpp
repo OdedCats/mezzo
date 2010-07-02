@@ -22,11 +22,12 @@ Turning::Turning(int id_, Node* node_, Server* server_, Link* inlink_, Link* out
 		blocked=false;
 		active = true; // turning is active by default
 		out_full = false;
+		hold_green=false;
 	}
 
 Turning::~Turning()
 {
- // !!! SHOULD WE DO THIS HERE? IS ALSO DELETED IN ~Eventlist ?!
+
  for (vector <TurnAction*>::iterator iter=turnactions.begin();iter<turnactions.end();)
 	{
 		delete (*iter); // calls automatically destructor

@@ -11,6 +11,12 @@ ParametersDialog::ParametersDialog(QWidget *parent): QDialog(parent)
 					     this, SIGNAL(activateSimSpeed(int)));
 }
 
+void ParametersDialog::set_parameters (Parameters* params) 
+{
+	theParameters=params;
+	refreshrate->setValue(theParameters->gui_update_step);
+}
+
 // Auto connect slots
 
 void ParametersDialog::on_LinkIds_toggled(bool value)

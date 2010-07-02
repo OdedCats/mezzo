@@ -142,19 +142,19 @@ void Link::end_of_simulation()
 
 }
 
-const int Link::get_out_node_id ()
+const int Link::get_out_node_id () const 
 	{return out_node->get_id();}
 	
-const int Link::get_in_node_id()
+const int Link::get_in_node_id() const
 	{return in_node->get_id();}
 
-const bool Link::full()
+const bool Link::full() const
 	{
     return queue->full();
   }
 
   
-const bool Link::full(double time)
+const bool Link::full(const double time)
 
 {
   moe_density->report_value(density(),time); // to make sure even values are reported when queue is full
@@ -184,10 +184,10 @@ const bool Link::full(double time)
    }   
 }
      
-const bool Link::empty()
+const bool Link::empty() const
 	{return queue->empty();}		
 
-const double Link::next_action (double time)
+const double Link::next_action (const double time) const
 	{ double newtime;
       if (queue->empty() )
 			newtime= (time+freeflowtime);
@@ -198,13 +198,14 @@ const double Link::next_action (double time)
       return newtime;
 	}	 // optimisation: return freeflow time if queue is empty
 
-const int Link::size()
+const int Link::size() const
 	{return queue->size();}	
 	
 	
-void Link::add_alternative(int dest, vector<Link*> route)
+void Link::add_alternative(const int dest, const vector<Link*> & route)
 	{queue->add_alternative(dest, route);}	
-void Link::add_alternative_route(Route* route) 
+
+void Link::add_alternative_route(Route* const route) 
 {
 	queue->add_alternative_route(route);
 	vector<Link*> route_v = route->get_downstream_links (id);
@@ -212,7 +213,7 @@ void Link::add_alternative_route(Route* route)
 	queue->add_alternative (dest, route_v);
 }
 
-void Link::register_route (Route* route) 
+void Link::register_route (Route* const route) 
 {
 	int dest_id = route->get_destination()->get_id();
 	routemap.insert(pair<int,Route*>(dest_id,route));
@@ -227,7 +228,7 @@ void Link::set_selected (const bool sel)
 #endif // _NO_GUI	
 }
 
-pair<double,double> Link::set_output_moe_thickness(unsigned int val)// sets the output MOE for the link icon
+const pair<double,double> Link::set_output_moe_thickness(const unsigned int val)// sets the output MOE for the link icon
 {
 #ifndef _NO_GUI	
 	int nr_periods;
@@ -271,7 +272,7 @@ pair<double,double> Link::set_output_moe_thickness(unsigned int val)// sets the 
 	#endif // _NO_GUI	
 	return pair <double, double> (0,0);
 }
-pair <double,double> Link::set_output_moe_colour(unsigned int val)// sets the output MOE for the link icon
+const pair <double,double> Link::set_output_moe_colour(const unsigned int val)// sets the output MOE for the link icon
 {
 #ifndef _NO_GUI	
 	int nr_periods;
@@ -316,7 +317,7 @@ pair <double,double> Link::set_output_moe_colour(unsigned int val)// sets the ou
 	return pair <double, double> (0,0);
 }
 
-void Link::update_exit_times(double time,Link* nextlink, int lookback)
+void Link::update_exit_times(const double time,Link*const  nextlink,const  int lookback)
 {
    // Not good enough (2004-01-26) need to use the upstream density to calc exit speed & shockwave speeds
    double kjam=142.0;
@@ -389,7 +390,7 @@ void Link::update_exit_times(double time,Link* nextlink, int lookback)
 }   // exit speed is based on downstream density
                                     
   
-double Link::speed(double time)
+const double Link::speed(const double time) const 
 {	
 	double ro=0.0;
 #ifdef _RUNNING     // if running segment is seperate density is calculated on that part only
@@ -409,11 +410,11 @@ double Link::speed(double time)
 }
 
 
-double Link::speed_density(double density_)
+const double Link::speed_density(const double density_) const 
 {
     return sdfunc->speed(density_);
 }
-bool Link::enter_veh(Vehicle* veh, double time)
+const bool Link::enter_veh(Vehicle* const veh, const double time)
 {
    double ro=0.0;
 #ifdef _RUNNING     // if running segment is seperate density is calculated on that part only
@@ -470,7 +471,7 @@ bool Link::enter_veh(Vehicle* veh, double time)
 	{
 		int cur_l_period = static_cast <int> (time / theParameters->ass_link_period);
 		int od_period = static_cast <int> (veh->get_start_time() / theParameters->ass_od_period);
-		const odval& od_pair = veh->get_odids();
+		const ODVal& od_pair = veh->get_odids();
 		// Test first if the location has been used yet, since we only allocate used places in memory
 		if ( (ass_matrix[cur_l_period].empty()) || (ass_matrix[cur_l_period] [od_pair].empty()) ||
 			 (ass_matrix[cur_l_period] [od_pair].find(od_period) == ass_matrix[cur_l_period] [od_pair].end()))
@@ -485,10 +486,10 @@ bool Link::enter_veh(Vehicle* veh, double time)
 	return queue->enter_veh(veh);
 }
 
-bool Link::veh_exiting(double time, Link* nextlink, int lookback)
+const bool Link::veh_exiting(const double time, const Link* const nextlink, const int lookback) const
 	{return queue->veh_exiting(time,nextlink,lookback);}
 
-Vehicle* Link::exit_veh(double time, Link* nextlink, int lookback)
+Vehicle* const  Link::exit_veh(const double time, Link* const nextlink, const int lookback)
 {
 	ok=false;
 	if (!empty())
@@ -553,7 +554,7 @@ Vehicle* Link::exit_veh(double time, Link* nextlink, int lookback)
 
 
 
-Vehicle* Link::exit_veh(double time)
+Vehicle*const  Link::exit_veh(const double time)
 {
 	ok=false;
 	if (!empty())
@@ -617,20 +618,20 @@ Vehicle* Link::exit_veh(double time)
 	return NULL;
 }
 
-const double Link::density()
+const double Link::density() const 
 {
    int qsize=queue->size() ;
    	return (qsize/(nr_lanes*(length/1000.0))); // veh/km/lane and length is in meters	
 }
 
-const double Link::density_running(double time)
+const double Link::density_running(const double time) const 
 {
  	int nr_running=queue->nr_running(time);
    return (nr_running/(nr_lanes*(length/1000.0))); // veh/km and length is in meters
 }
 
 // 2002-07-25: new: queue space calculated using individual vehicles lengths
-const double Link::density_running_only(double time)
+const double Link::density_running_only(const double time) const 
 {
   int nr_running=queue->nr_running(time);// nr cars in running segment
  // double queue_space=(queue->size()-nr_running)*theParameters->standard_veh_length; // length of queue
@@ -650,7 +651,7 @@ const double Link::density_running_only(double time)
 }
 
 
-bool Link::write(ostream&)      // unused ostream& out
+const bool Link::write(ostream&)      // unused ostream& out
 {
 #ifndef _COLLECT_ALL
 #ifndef _COLLECT_TRAVELTIMES
@@ -663,7 +664,7 @@ bool Link::write(ostream&)      // unused ostream& out
 }	
 
 
-void Link::write_ass_matrix (ostream & out, int linkflowperiod)
+void Link::write_ass_matrix (ostream & out, const int linkflowperiod)
 {
 	if (use_ass_matrix)
 	{
@@ -768,7 +769,7 @@ void Link::write_time(ostream& out)
 //#endif _COLLECT_TRAVELTIMES	
 }
 
-void Link::update_icon(double time)
+void Link::update_icon(const double time)
 {
 	double cap;
 	cap=maxcap;
@@ -786,9 +787,9 @@ void Link::update_icon(double time)
 }
 // INCIDENT FUNCTIONS
 
-vector <Route*> Link::get_routes_to_dest(int dest) 
+const vector <Route*> Link::get_routes_to_dest(const int dest) const
 {
-	multimap <int, Route*>::iterator start,stop; // CHECK OUT if we can simply pass the iterators...
+	multimap <int, Route*>::const_iterator start,stop; // CHECK OUT if we can simply pass the iterators...
 	start = routemap.lower_bound(dest);
 	stop = routemap.upper_bound(dest);
 	vector <Route*> return_routes;
@@ -799,11 +800,11 @@ vector <Route*> Link::get_routes_to_dest(int dest)
  return return_routes;
 
 }
-unsigned int Link::nr_alternative_routes(int dest, int incidentlink_id)
+const unsigned int Link::nr_alternative_routes(const int dest, const int incidentlink_id) 
 {
 	unsigned int count = 0;
 	vector <Route*> routes_to_dest=get_routes_to_dest(dest);
-	vector <Route*>::iterator route_iter= routes_to_dest.begin();
+	vector <Route*>::const_iterator route_iter= routes_to_dest.begin();
 	for (route_iter; route_iter!=routes_to_dest.end();route_iter++)
 	{	
 		if ( ! ((*route_iter)->has_link(incidentlink_id)) )
@@ -814,7 +815,7 @@ unsigned int Link::nr_alternative_routes(int dest, int incidentlink_id)
 	}
   return count;
 }
-void Link::set_incident(Sdfunc* sdptr, bool blocked_, double blocked_until_)
+void Link::set_incident(Sdfunc* const sdptr, const bool blocked_, const double blocked_until_)
 {
 	temp_sdfunc=sdfunc;
 	sdfunc=sdptr;
@@ -832,35 +833,25 @@ void Link::unset_incident()
 }
 
 
-void Link::broadcast_incident_start(int lid, vector <double> parameters)
+void Link::broadcast_incident_start(const int lid, const vector <double> & parameters) const
 {
 	queue->broadcast_incident_start(lid, parameters);
 }
 
 
 
-void Link::receive_broadcast(Vehicle* veh, int lid, vector <double> parameters)
+void Link::receive_broadcast(Vehicle* const  veh, const int lid, const vector <double> & parameters) const 
 
 {queue->receive_broadcast(veh,lid,parameters);}
 
 
 
-double Link::calc_diff_input_output_linktimes ()
+const double Link::calc_diff_input_output_linktimes () const 
  {
 	if (avgtimes->times.size() > 0)
 		{
 		double total = 0.0;
-//		map <int,double>::iterator newtime=avgtimes->times.begin();
-//		map <int,double>::iterator oldtime=histtimes->times.begin();
-		/*
-		for (newtime, oldtime; (newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()); newtime++, oldtime++)
-		{
-			if ((newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()) &&((*newtime) > 0))
-			{
-				total+= (*newtime) - (*oldtime);
-			}
-		}
-		*/
+
 		for (int i=0; i<avgtimes->nrperiods; i++)
 			total += avgtimes->times [i] - histtimes->times [i];
 		return total;
@@ -869,31 +860,24 @@ double Link::calc_diff_input_output_linktimes ()
 		return 0.0;
  }
 
-double Link::calc_sumsq_input_output_linktimes ()
+const double Link::calc_sumsq_input_output_linktimes () const
  {
 	if (avgtimes->times.size() > 0)
 	{
 		double total = 0.0;
-		/*
-		vector <double>::iterator newtime=avgtimes->times.begin();
-		vector <double>::iterator oldtime=histtimes->times.begin();
-		for (newtime, oldtime; (newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()); newtime++, oldtime++)
-		{
-			if ((newtime < avgtimes->times.end()) && (oldtime < histtimes->times.end()) && ((*newtime) > 0))
-			{
-				total+= ((*newtime) - (*oldtime)) * ((*newtime) - (*oldtime)) ;
+		double diff = 0.0;
 		
-			}
-		}
-		*/
 		for (int i=0; i<avgtimes->nrperiods; i++)
-			total += (avgtimes->times [i] - histtimes->times [i])*(avgtimes->times [i] - histtimes->times [i]);
+		{
+			diff = avgtimes->times [i] - histtimes->times [i];
+			total += diff*diff;
+		}
 		return total;
 	}
 	else return 0.0;
 }
 
-bool Link::copy_linktimes_out_in()
+const bool Link::copy_linktimes_out_in()
 {
 	// 'safe' way of copying the output to input travel times. 
 	// If no value in output (for certain time period), input value is kept. 
@@ -910,7 +894,7 @@ bool Link::copy_linktimes_out_in()
 
 
 // InputLink functions
-InputLink::InputLink(int id_, Origin* out_)
+InputLink::InputLink(const int id_, Origin* const  out_)
 {
     id=id_;
 	out_node=out_;
@@ -935,7 +919,7 @@ InputLink::~InputLink()
 	//delete queue;
 }
 
-bool InputLink::enter_veh(Vehicle* veh, double time)
+const bool InputLink::enter_veh(Vehicle* const  veh, const double time)
 {
   veh->set_exit_time(time);
   veh->set_curr_link(this);
@@ -943,7 +927,7 @@ bool InputLink::enter_veh(Vehicle* veh, double time)
   return queue->enter_veh(veh);
 }
 
-Vehicle* InputLink::exit_veh(double time, Link* link, int lookback)
+Vehicle* const InputLink::exit_veh(const double time, Link* const link, const int lookback)
 {
 	ok=false;
 	if (!empty())
@@ -979,7 +963,7 @@ VirtualLink::~VirtualLink()
 		delete (histtimes);*/
 }
 
-VirtualLink::VirtualLink(int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* sdfunc_) : Link(id_,in_,out_,length_,nr_lanes_,sdfunc_) 
+VirtualLink::VirtualLink(const int id_, Node* const in_, Node* const out_, const int length_, const int nr_lanes_, Sdfunc*const  sdfunc_) : Link(id_,in_,out_,length_,nr_lanes_,sdfunc_) 
  {
 	blocked=false;
    linkdensity=0.0;
@@ -992,29 +976,29 @@ VirtualLink::VirtualLink(int id_, Node* in_, Node* out_, int length_, int nr_lan
 #endif //_VISSIMCOM
  }
 
-const  bool VirtualLink::full()
+const  bool VirtualLink::full() const
  {
   	return blocked;
  }
 
- const bool VirtualLink::full(double ) // double time unused
+ const bool VirtualLink::full(const double )  // double time unused
  {
    return blocked;
  }
 
- double VirtualLink::speed_density(double)    //unused double density
+ const double VirtualLink::speed_density(const double)  const   //unused double density
 {
     return linkspeed;
 }
  
- bool VirtualLink::enter_veh(Vehicle* veh, double time)
+ const bool VirtualLink::enter_veh(Vehicle* const veh, const double time)
  {
   in_headways.push_back(time);
   return in_node->process_veh(veh,time);
   
  }
 
- bool VirtualLink::exit_veh(Vehicle* veh, double time)
+ const bool VirtualLink::exit_veh(Vehicle* const veh, const double time)
  {
 			double entrytime=veh->get_entry_time();
 			double traveltime=(time-entrytime);

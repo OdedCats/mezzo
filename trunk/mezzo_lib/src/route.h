@@ -33,37 +33,39 @@
 class Link;
 class Origin;
 class Destination;
-typedef pair <int,int> odval;
+typedef pair <int,int> ODVal;
 
 class Route
 {
   public:
-	Route(int id_, Origin* origin_, Destination* destination_, vector <Link*> links_);
-	Route(int id, Route* route, vector<Link*> links_); // copy constructor that copies route and overwrites remaining part starting from links_.front()
-	void reset();
-	Link* nextlink(Link* currentlink);
-	Link* firstlink() {	return (links.front());}
-	const int get_id () {return id;}
-	void set_id(int id_) {id=id_;}
-	Origin* get_origin() {return origin;}
-	Destination* get_destination() {return destination;}
-	odval get_oid_did();
-	void set_selected(bool selected); // sets the links' selected attribute
+	Route(const int id_, Origin* const origin_, Destination* const destination_,  const vector <Link*> & links_ );
+	Route(const int id, Route* const route, const vector<Link*> & links_); // copy constructor that copies route and overwrites remaining part starting from links_.front()
+	void reset(); // resets all variables to initial state
+	Link* const nextlink(Link* const currentlink) const;
+	Link* const firstlink() const {	return (links.front());}
+	const int get_id () const {return id;}
+	void set_id(const int id_) {id=id_;}
+	Origin* const get_origin() const {return origin;}
+	Destination* const get_destination() const {return destination;}
+	const ODVal get_oid_did() const;
+	void set_selected(const bool selected); // sets the links' selected attribute
 #ifndef _NO_GUI
-	void set_selected_color(QColor selcolor);
+	void set_selected_color(const QColor & selcolor);
 #endif
-	bool check (int oid, int did);
-	bool less_than(Route* route);
-	double cost(double time=0.0);
-	bool equals (Route& route); // returns true if same route {return ( (route.get_links())==(get_links()) );}
-	vector<Link*> get_links() {return links;}	
-	vector<Link*> get_upstream_links(int link_id) ;// returns all links upstream of link_id
-	vector<Link*> get_downstream_links(int link_id);  // returns all links downstream of link_id, including Link(link_id)
-	bool has_link(int lid);
-	bool has_link_after(int lid, int curr_lid);
-	void write(ostream& out);
-	double utility (double time);
-	int computeRouteLength();
+	const bool check (const int oid, const int did) const ;
+	const bool less_than(const Route* const  route) const ;
+	const double cost(const double time=0.0) ;
+	const bool equals (const Route& route) const ; // returns true if same route 
+	
+	const vector<Link*> & get_links() const {return links;}	
+	const vector<Link*> get_upstream_links(const int link_id) const ;// returns all links upstream of link_id NOTE: no reference (&) as the vector needs to be copied unfortunately.
+	const vector<Link*> get_downstream_links(const  int link_id) const ;  // returns all links downstream of link_id, including Link(link_id)
+	const bool has_link(const int lid) const ;
+	const bool has_link_after(const int lid, const int curr_lid) const ;
+	void write(ostream& out) const;
+	const double utility (const double time)  ;
+	const int computeRouteLength() const ;
+
   protected:
 	int id;
 	Origin* origin;
@@ -77,18 +79,19 @@ class Route
 
 struct compare_route
 {
- compare_route(odval odvalue_):odvalue(odvalue_) {}
- bool operator () (Route* route)
+ compare_route(const ODVal & ODValue_):ODValue(ODValue_) {}
+ const bool operator () (const Route* const route)
  	{
- 	 return (route->check(odvalue.first, odvalue.second)==true);
+ 	 return (route->check(ODValue.first, ODValue.second)==true);
  	}
- odval odvalue;
+private:
+ ODVal ODValue;
 };
 
 class Busroute: public Route
 {
 public:
-	Busroute(int id_, Origin* origin_, Destination* destination_, vector <Link*> links_) :
+	Busroute(const int id_, Origin*const  origin_, Destination* const destination_, const vector <Link*> & links_) :
 		Route (id_, origin_, destination_, links_) {}
 
 

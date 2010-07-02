@@ -151,10 +151,10 @@ bool VISSIMCOM::init(const string& configfile, const int runtime)
 	{
 		if (error.ErrorInfo())
 		{
-			eout << "VISSIMCOM Error: " << (char*)(error.Description()) << endl;
+			eout << "VissimCom::init - VISSIMCOM Error: " << (char*)(error.Description()) << endl;
 		}
 		else
-			eout << "VISSIMCOM Error, No Description available" << endl;
+			eout << "VissimCom::init  -  VISSIMCOM Error, No Description available" << endl;
 		return false;
 	}
 	return true;
@@ -423,6 +423,7 @@ int VISSIMCOM::receive (double time)
 	//	eout << "VISSIMCOM Error: " << (char*)(error.Description()) << endl;
 		if (error.ErrorInfo())
 		{
+			eout << "VISSIMCOM Error in Receive, description follows:" << endl;
 			eout << "VISSIMCOM Error: " << (char*)(error.Description()) << endl;
 		}
 		else
@@ -438,7 +439,7 @@ int VISSIMCOM::receive (double time)
 	
 }
 
-bool VISSIMCOM::execute(Eventlist* eventlist, double time)
+const bool VISSIMCOM::execute(Eventlist* eventlist, const double time)
 {
  	if (booked)
 	{
@@ -459,17 +460,19 @@ bool VISSIMCOM::execute(Eventlist* eventlist, double time)
 		
 		}
 		try
-		{
+		{	
+			eout << time << ": run single vissim step " << endl;
 			spSim->RunSingleStep(); // advance the VISSIM simulation one step
 		}
 		catch (_com_error &error) 
 		{
 			if (error.ErrorInfo())
 			{
-				eout << "VISSIMCOM Error: " << (char*)(error.Description()) << endl;
+				eout << time << " : VISSIMCOM Error doing RunSingleStep in Vissimcom::execute. description follows: "  ;
+				eout << (char*)(error.Description()) << endl;
 			}
 			else
-				eout << "VISSIMCOM Error, No Description available" << endl;
+				eout << time <<  " : VISSIMCOM Error doing RunSingleStep in Vissimcom::execute No Description available" << endl;
 		}
 		
 		// do this always!
@@ -483,6 +486,7 @@ bool VISSIMCOM::execute(Eventlist* eventlist, double time)
 	}
 	else 
 	{
+		eout << "VISSIMCOM execute: first booking in eventlist " << endl;
 		booked=true;
 		last_timestamp = timest(); // start the timestamp series.
 		next_mime_comm_step = 0.0;

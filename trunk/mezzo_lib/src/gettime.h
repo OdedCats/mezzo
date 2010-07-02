@@ -21,7 +21,7 @@
 #include <sys/timeb.h>
 #include <time.h>
 
-double timestamp ()
+const double timestamp ()
 /*
 	After some hours of digging through the UNIX and LINUX legacy of time
 	standards and functions, i used the simplest in sys/timeb.h and converted it
@@ -37,7 +37,7 @@ double timestamp ()
 	return (seconds*1000 + ms)/1000;
 }
 
-double msecs()
+const double msecs()
 {
 	timeb* tb=new timeb;
 	ftime(tb);
@@ -46,14 +46,11 @@ double msecs()
 	return ms;
 }
 
-char* timestring()
+const char* const timestring()
 {
  time_t* tt=new time_t;
  time(tt);
  char* stri=new char [30];
-
-// ctime_r(tt,stri);
-
  strftime (stri,30,"%Y-%m-%d\t%T",gmtime(tt));
  return stri;
 

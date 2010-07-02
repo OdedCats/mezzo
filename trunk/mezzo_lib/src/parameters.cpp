@@ -45,8 +45,7 @@ Parameters::Parameters ()
    moe_outflow_update= 300.0;
    moe_queue_update= 300.0;
    moe_density_update= 300.0;
-   // FOR USE LATER
-   linktime_alpha= 0.2;
+   linktime_alpha= 0.2;    // FOR USE LATER
 // #assignment_matrix_parameters
    use_ass_matrix= 1;
    ass_link_period= 1200.0;
@@ -493,7 +492,7 @@ void Parameters::write_parameters(ostream & out)
    out << "  moe_outflow_update= " << moe_outflow_update << endl;
    out << "  moe_queue_update= " << moe_queue_update << endl;
    out << "  moe_density_update= " << moe_density_update << endl;
-   out << "  linktime_alpha= " << linktime_alpha << endl;
+   out << "  linktime_alpha= " << linktime_alpha << endl; // for future use, for now the one in the scenario file is used
    out << "#assignment_matrix_parameters" << endl;
    out << "  use_ass_matrix= " << use_ass_matrix << endl;
    out << "  ass_link_period= " << ass_link_period << endl;

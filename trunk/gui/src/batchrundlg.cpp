@@ -15,13 +15,13 @@ BatchrunDlg::BatchrunDlg( QWidget* )
 	max_iter = 1000; // default value
 	max_rmsn=1.0;
 	
-//TODO: there is a linktime_alpha in the parameters file and a time_alpha in the Master file! where should it be?
+//TODO: there is a linktime_alpha in the parameters file and a time_alpha in the Master file! 
 }
 
 void BatchrunDlg::setNetwork(Network* net)
 {
 	theNetwork=net;
-	alpha->setText( QString::number(theNetwork->get_parameters()->linktime_alpha,'f',3));
+	alpha->setText( QString::number(theNetwork->get_time_alpha(),'f',3));
 }
 
 void BatchrunDlg::on_max_iterations_val_valueChanged(int i)
@@ -113,7 +113,7 @@ const bool BatchrunDlg::checkConvergence(const int i, const double rmsn_ltt_, co
 }
 void BatchrunDlg::run_iterations()
 {
-	//theNetwork->get_parameters()->linktime_alpha = alpha->text().toDouble();
+	
 	theNetwork->set_time_alpha(alpha->text().toDouble());
 	int i=1;
 	total_iter->setNum(max_iter);
@@ -156,8 +156,7 @@ void BatchrunDlg::run_iterations()
 			rmsn_odtt_=theNetwork->calc_rmsn_input_output_odtimes();
 		// calculate the OD travel times rmsn as well
 	}	
-//	rmsn_ltt_= theNetwork->calc_rmsn_input_output_linktimes();
-//	rmsn_odtt_=theNetwork->calc_rmsn_input_output_odtimes();
+;
 	rmsn_ltt->setText (QString::number(rmsn_ltt_,'f',5));
 	rmsn_odtt->setText(QString::number(rmsn_odtt_,'f',5));
 	currIterPb->setValue(100);

@@ -419,7 +419,7 @@ void BoundaryOut::block(int code,double speed) // spread the news to the virtual
          blocked_=false;
          (*iter)->set_density(code);
          (*iter)->set_speed(speed);
-         eout << " set the density " << code << " for virtual link " << (*iter)->get_id() << endl; 
+		 eout << "BoundaryOut::unblock - set the density " << code << " for virtual link " << (*iter)->get_id() << endl; 
        }
     }
 }
@@ -563,9 +563,9 @@ bool BoundaryIn::receive_message(PVM* com)
 }
 #endif //_PVM
 
-Route* BoundaryIn::find_route(odval val, int id)
+Route* BoundaryIn::find_route(ODVal val, int id)
 {
-	multimap<odval,Route*>::iterator r_upper, r_lower, r_iter;
+	multimap<ODVal,Route*>::iterator r_upper, r_lower, r_iter;
 	r_lower=routemap->lower_bound(val);
 	r_upper=routemap->upper_bound(val);
 	for (r_iter=r_lower; r_iter != r_upper; r_iter++)
@@ -584,8 +584,8 @@ bool BoundaryIn::newvehicle(Signature* sig)
 			  //find the odpair
 			 for (vector <ODpair*>::iterator iter=ods->begin();iter < ods->end(); iter++)
 			  {
-			  		odval odvalue=(*iter)->odids();
-			   		if ((odvalue.first==sig->origin) && (odvalue.second==sig->destination))
+			  		ODVal ODValue=(*iter)->odids();
+			   		if ((ODValue.first==sig->origin) && (ODValue.second==sig->destination))
 			   		{
 			    		odptr=(*iter);
 			    		break;
@@ -597,7 +597,7 @@ bool BoundaryIn::newvehicle(Signature* sig)
 			  		
 					//eout << "BoundaryIn:: found od" << endl;
 			  		//Route* rptr=*(find_if(routes->begin(), routes->end(), compare <Route> (sig->path)));
-					odval val = odptr->odids();
+					ODVal val = odptr->odids();
 					Route* rptr= find_route(val, sig->path);
 			  		if (rptr)
 			  		{

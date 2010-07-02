@@ -39,7 +39,7 @@ class Origin;
 class Destination;
 
 
-typedef pair <int,int> odval;
+typedef pair <int,int> ODVal;
 typedef pair <Route*,double> rateval; // pair of linkid and rate
 
 class ODpair;
@@ -54,6 +54,7 @@ public:
 	ODaction(ODpair* odpair_);
 	virtual ~ODaction();
 	void reset (double rate_);
+	const unsigned int get_total_nr_veh() const {return total_nr_veh;}  
 	const bool execute(Eventlist* eventlist, const double time);
 	void set_rate(double rate){server->set_rate((3600/rate),theParameters->odserver_sigma);active=true;}
 	void book_later(Eventlist* eventlist, double time);
@@ -61,6 +62,7 @@ private:
 	ODpair* odpair;
 	ODServer* server;
 	bool active; // indicates if an odpair is active
+	unsigned int total_nr_veh;
 };
 
 class ODpair
@@ -72,7 +74,7 @@ public:
 	~ODpair();
 	void reset();
 // GETS
-	odval  odids();
+	ODVal  odids();
 	const long get_nr_routes() {return routes.size();}
 	Route* get_route(int id);
 	Origin* get_origin();

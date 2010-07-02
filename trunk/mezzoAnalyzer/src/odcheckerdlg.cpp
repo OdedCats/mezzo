@@ -318,7 +318,7 @@ void ODCheckerDlg::checkOD(bool check_)
 		const vector <ODpair*>& odpairs=mezzonet_->get_odpairs();
 		vector<ODpair*>::const_iterator odlocation;
 		odlocation=find_if(odpairs.begin(), odpairs.end(), 
-							assist::compareod(odval(orgId_,destId_)));
+							assist::compareod(ODVal(orgId_,destId_)));
 		if(odlocation==odpairs.end()) 
 		{
 			QMessageBox::warning(this, "Errors", "no route is found!", 
