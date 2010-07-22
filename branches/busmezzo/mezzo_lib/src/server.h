@@ -144,7 +144,7 @@ class LogLogisticDelayServer : public Server
 public:	
 	LogLogisticDelayServer (const int id_, const int type_, const double mu_, const double sd_, const double delay_) :
 		Server (id_,type_,mu_,sd_,delay_) {}
-		// mu = alpha (scale); sd = beta (shape);
+		// mu = shape ; sd = scale;
 	double next (const double time);
 };
 

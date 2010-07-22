@@ -427,7 +427,7 @@ class Change_arrival_rate : public Action
 public:
 	Change_arrival_rate(double time); 
 	void book_update_arrival_rates (Eventlist* eventlist, double time);
-	bool execute(); 
+	bool execute(Eventlist* eventlist, double time);
 	void add_line_nr_boarding_TD(Busstop* stop, Busline* line, double value){TD_single_pair TD; TD.first = line; TD.second = value; arrival_rates_TD[stop].insert(TD);}
 	void add_line_nr_alighting_TD(Busstop* stop, Busline* line, double value){TD_single_pair TD; TD.first = line; TD.second = value; alighting_fractions_TD[stop].insert(TD);}
 	

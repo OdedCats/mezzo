@@ -1116,7 +1116,7 @@ double Busstop::passenger_activity_at_stop (Eventlist* eventlist, Bustrip* trip,
 					else  // pass walks to another stop
 					{
 						// booking an event to the arrival time at the new stop
-						(*alighting_passenger)->execute(eventlist, time + distances[next_stop] / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4));
+						(*alighting_passenger)->execute(eventlist, time + distances[next_stop] * 60 / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4));
 					}
 				}
 				else
@@ -1552,8 +1552,8 @@ return total_nr_waiting;
 void Busstop::record_busstop_visit (Bustrip* trip, double enter_time)  // creates a log-file for stop-related info
 {
 	output_stop_visits.push_back(Busstop_Visit(trip->get_line()->get_id(), trip->get_id() , trip->get_busv()->get_bus_id() , get_id() , enter_time,
-			trip->scheduled_arrival_time (this),dwelltime,(enter_time - trip->scheduled_arrival_time (this)), exit_time, get_time_since_arrival (trip , enter_time),
-			get_time_since_departure (trip , exit_time),get_nr_alighting() , get_nr_boarding() , trip->get_busv()->get_occupancy(), calc_total_nr_waiting() ,exit_time-enter_time-dwelltime)); 
+		trip->scheduled_arrival_time (this),dwelltime,(enter_time - trip->scheduled_arrival_time (this)), exit_time, get_time_since_arrival (trip , enter_time),
+		get_time_since_departure (trip , exit_time),get_nr_alighting() , get_nr_boarding() , trip->get_busv()->get_occupancy(), calc_total_nr_waiting() ,exit_time-enter_time-dwelltime)); 
 }
 
 void Busstop::write_output(ostream & out)
@@ -1701,7 +1701,7 @@ void Change_arrival_rate::book_update_arrival_rates (Eventlist* eventlist, doubl
 	eventlist->add_event(time,this);
 }
 
-bool Change_arrival_rate::execute()
+bool Change_arrival_rate::execute(Eventlist* eventlist, double time)
 {		
 	for (TD_demand::iterator stop_iter = arrival_rates_TD.begin(); stop_iter != arrival_rates_TD.end(); stop_iter++)
 	{

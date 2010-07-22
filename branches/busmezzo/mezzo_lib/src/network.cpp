@@ -1787,9 +1787,11 @@ bool Network::readbustrip_format2(istream& in) // reads a trip
 	{
 		in >> dispatching_time;
 		vector <Visit_stop*> curr_trip;
+		double acc_time_table = dispatching_time;
 		for (vector <Visit_stop*>::iterator iter = delta_at_stops.begin(); iter < delta_at_stops.end(); iter++)
 		{
-			Visit_stop* vs_ct = new Visit_stop ((*iter)->first, dispatching_time + (*iter)->second);
+			acc_time_table += (*iter)->second;
+			Visit_stop* vs_ct = new Visit_stop ((*iter)->first, acc_time_table);
 			curr_trip.push_back(vs_ct);
 		}
 		Bustrip* trip= new Bustrip (busline_id*100 + i, dispatching_time, bl); // e.g. line 2, 3rd trip: trip_id = 23
