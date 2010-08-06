@@ -98,6 +98,7 @@ public:
 	double calc_binary_logit (double utility_i, double utility_j);
 	double calc_combined_set_utility_for_alighting (Passenger* pass, Bustrip* bus_on_board, double time); // the trip that the pass. is currently on-board when calc. utility from downstream stop
 	double calc_combined_set_utility_for_connection (double walking_distance, double time);
+	bool check_if_path_is_dominated (Pass_path* considered_path, vector<Pass_path*> arriving_paths);
 
 	// output-related functions
 	void record_passenger_boarding_decision (Passenger* pass, Bustrip* trip, double time, double boarding_probability, bool boarding_decision); //!< creates a log-file for boarding decision related info

@@ -101,7 +101,6 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus, double time)
 	staying_utility = 0.0;
 	vector<Busline*> first_leg_lines;
 	bool in_alt = false; // indicates if the current arriving bus is included 
-	
 	// checks if the arriving bus is included as an option in the path set of this OD pair 
 	for (vector <Pass_path*>::iterator path = path_set.begin(); path < path_set.end(); path ++)
 	{
@@ -127,10 +126,11 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus, double time)
 	{
 		if (path_set.size() == 1) // if the choice-set includes only a single alternative of the arriving bus - then there is no choice left
 		{
-			boarding_utility = 10.0;
-			staying_utility = -10.0;
+			boarding_utility = 2.0;
+			staying_utility = -2.0;
 			return 1;
 		}
+		vector<Pass_path*> arriving_paths;
 		for (vector<Pass_path*>::iterator iter_paths = path_set.begin(); iter_paths < path_set.end(); iter_paths++)
 		{
 			(*iter_paths)->set_arriving_bus_rellevant(false);
@@ -142,6 +142,7 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus, double time)
 					if ((*iter_first_leg_lines)->get_id() == arriving_bus->get_id()) // if the arriving bus is a possible first leg for this path alternative
 					{
 						boarding_utility += exp((*iter_paths)->calc_arriving_utility(time)); 
+						arriving_paths.push_back((*iter_paths));
 						(*iter_paths)->set_arriving_bus_rellevant(true);
 						break;
 					}
@@ -154,20 +155,56 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus, double time)
 			if ((*iter_paths)->get_arriving_bus_rellevant() == false)
 			{
 				// logsum calculation
-				staying_utility += exp((*iter_paths)->calc_waiting_utility((*iter_paths)->get_alt_transfer__stops().begin(), time, false));
+				if (check_if_path_is_dominated((*iter_paths), arriving_paths) == false)
+				{
+					staying_utility += exp((*iter_paths)->calc_waiting_utility((*iter_paths)->get_alt_transfer__stops().begin(), time, false));
+				}
 			}
 		}
-		staying_utility = log (staying_utility);
+		if (staying_utility == 0.0) // in case all the staying alternatives are dominated by arriving alternatives
+		{
+			boarding_utility = 2.0;
+			staying_utility = -2.0;
+		}
+		else
+		{
+			staying_utility = log (staying_utility);
+		}
 		return calc_binary_logit(boarding_utility, staying_utility); // calculate the probability to board
 	}
 	// what to do if the arriving bus is not included in any of the alternatives?
 	// currently - will not board it
 	else 
 	{	
-		boarding_utility = -10.0;
-		staying_utility = 10.0;
+		boarding_utility = -2.0;
+		staying_utility = 2.0;
 		return 0;
 	}
+}
+
+bool ODstops::check_if_path_is_dominated (Pass_path* considered_path, vector<Pass_path*> arriving_paths)
+{
+	if (path_set.size() < 2)
+	{	
+		return false;
+	}
+	for (vector <Pass_path*>::iterator path2 = arriving_paths.begin(); path2 < arriving_paths.end(); path2++)
+	{
+		// check if one of the arriving paths dominates the considered path
+		if (considered_path->find_number_of_transfers() > (*path2)->find_number_of_transfers() && considered_path->calc_total_scheduled_in_vehicle_time() >= (*path2)->calc_total_scheduled_in_vehicle_time() && considered_path->calc_total_walking_distance() >= (*path2)->calc_total_walking_distance()) 
+		{
+			return true;
+		}
+		if (considered_path->find_number_of_transfers() >= (*path2)->find_number_of_transfers() && considered_path->calc_total_scheduled_in_vehicle_time() > (*path2)->calc_total_scheduled_in_vehicle_time() * (1+ theParameters->dominancy_perception_threshold)&& considered_path->calc_total_walking_distance() >= (*path2)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold)) 
+		{ 		
+			return true;
+		}
+		if (considered_path->find_number_of_transfers() >= (*path2)->find_number_of_transfers() && considered_path->calc_total_scheduled_in_vehicle_time() >= (*path2)->calc_total_scheduled_in_vehicle_time() * (1+ theParameters->dominancy_perception_threshold)&& considered_path->calc_total_walking_distance() > (*path2)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold)) 
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 double ODstops::calc_binary_logit (double utility_i, double utility_j)
