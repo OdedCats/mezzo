@@ -60,6 +60,7 @@ protected:
 	bool active; // true if current Signalplan is active
 	vector <Stage*> stages;
 	vector <Stage*> :: iterator current_stage; // keeps track of current stage
+	vector <Stage*> :: iterator next_stage; // keeps track of current stage
 
 };
 
@@ -69,11 +70,13 @@ public:
 	Stage (int id_, double start_, double duration_): id(id_), start(start_), duration(duration_) { active = false;}
 	const int get_id() {return id;}
 	void reset() {stop();} //already implemented in void stop(), but reset is universal
-	double get_start() {return start;}
-	double get_duration() {return duration;}
+	const double get_start() const {return start;}
+	const double get_duration() const {return duration;}
+	const vector <Turning*> & get_turnings () {return turnings;}
 	void stop (); // stops the stage (turns it to red).
 	void add_turning (Turning* turning) // add turning and stop it, since it is now regulated by the signal
 		{turnings.push_back(turning); turning->stop();} 
+	void hold_turnings( const vector<Turning*> & nextturnings);
 	virtual const bool execute(Eventlist* eventlist, const double time); // starts and stops the turnings
 protected:
 	int id;

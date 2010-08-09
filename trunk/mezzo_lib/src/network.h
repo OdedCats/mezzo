@@ -207,7 +207,7 @@ public:
 	// GET's
 	const double get_currenttime(){return time;}
 	const double get_runtime(){return runtime;}
-	const double get_time_alpha(){return time_alpha;}
+	//const double get_time_alpha(){return time_alpha;}
 	Parameters* get_parameters () {return theParameters;} 
 	const vector <ODpair*>& get_odpairs () {return odpairs;} // keep as vector
 
@@ -232,7 +232,7 @@ public:
 	double calc_rmsn_input_output_odtimes();
 	// SET's
 	void set_workingdir (const string dir) {workingdir = dir;}
-	void set_time_alpha(double val) {time_alpha=val;}
+	//void set_time_alpha(double val) {time_alpha=val;}
 
 	// Public transport
 	bool readbusroutes(string name); //!< reads the busroutes, similar to readroutes

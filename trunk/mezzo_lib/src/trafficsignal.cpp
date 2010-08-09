@@ -33,11 +33,18 @@ void  SignalControl::reset()
 }
 
 //Signalplan functions
+
 const bool SignalPlan::execute(Eventlist* eventlist, const double time)
 {
 	if (!active)
 	{
 		current_stage = stages.begin(); // start at the first stage when this plan becomes active
+		next_stage = current_stage;
+		next_stage++;
+		if (next_stage == stages.end())
+		{
+			next_stage=stages.begin(); // cycle round
+		}
 		active = true;
 #ifdef _DEBUG_SIGNALS
 		eout << "Signal plan " << id << " activated. Nr of stages " << stages.size() << endl;
@@ -51,10 +58,15 @@ const bool SignalPlan::execute(Eventlist* eventlist, const double time)
 #endif // _DEBUG_SIGNALS
 		(*current_stage)->execute(eventlist,time); // activate stage. It will book an event for itself to determine when to stop.
 		double next_stage_time= time + ((*current_stage)->get_duration());
-		current_stage++; // next stage
-		if (current_stage == stages.end())
+		// set the 'hold_green' attributes where appropriate.
+		(*current_stage)->hold_turnings((*next_stage)->get_turnings());
+
+		//advance to next stage
+		current_stage=next_stage;
+		next_stage++;
+		if (next_stage == stages.end())
 		{
-			current_stage=stages.begin(); // cycle round
+			next_stage=stages.begin(); // cycle round
 		}
 		// book the activation of the next stage
 #ifdef _DEBUG_SIGNALS
@@ -121,4 +133,23 @@ void Stage::stop()
 	  {	
 			(*iter)->stop();
 	  }
+}
+
+void Stage::hold_turnings( const vector<Turning*> & nextturnings)
+{
+	for (vector<Turning*>::iterator curr_stage_turn=turnings.begin(); curr_stage_turn != turnings.end(); curr_stage_turn++)
+	{
+		bool found = false;
+		for (vector<Turning*>::const_iterator next_stage_turn=nextturnings.begin(); next_stage_turn!=nextturnings.end(); next_stage_turn++)
+		{
+			// if the same set hold to true otherwise 
+			if ((*curr_stage_turn)->get_id() == (*next_stage_turn)->get_id())
+			{
+				found = true;
+			}
+		}
+		(*curr_stage_turn)->set_hold_green(found); // if found
+			
+	}
+	
 }

@@ -710,7 +710,7 @@ void Link::write_time(ostream& out)
 	out << "{\t" << id ;
 	for (i; i<histtimes->nrperiods;i++)
 	{
-		newtime=time_alpha * (avgtimes->times[i]) + (1-time_alpha) * (histtimes->times[i]);
+		newtime=(theParameters->linktime_alpha)* (avgtimes->times[i]) + (1-(theParameters->linktime_alpha)) * (histtimes->times[i]);
 		out << "\t"<< newtime;
 	}
 	out << "\t}" << endl;
@@ -885,7 +885,7 @@ const bool Link::copy_linktimes_out_in()
 	if (avgtimes->times.size() > 0)
 	{
 		for (int i=0; i<avgtimes->nrperiods; i++)
-			histtimes->times [i] =time_alpha*avgtimes->times [i] + (1-time_alpha)* histtimes->times [i];
+			histtimes->times [i] =(theParameters->linktime_alpha)*avgtimes->times [i] + (1-(theParameters->linktime_alpha))* histtimes->times [i];
 		return true;
 	}
 	else 

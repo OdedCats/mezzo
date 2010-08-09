@@ -19,9 +19,10 @@ VehicleRecycler recycler;    // Global vehicle recycler
 
 long int randseed=0;
 int vid=0;
+//!!!!!!!!! parameters->linktime_alpha replaces this:
+//double time_alpha=0.2; // smoothing factor for the output link times (uses hist_time & avg_time),
+										// 1 = only new times, 0= only old times. 
 
-double time_alpha=0.2; // smoothing factor for the output link times (uses hist_time & avg_time),
-										// 1 = only new times, 0= only old times.
 
 Parameters* theParameters = new Parameters();
 std::ofstream eout("debug_log.txt"); // for all debugging output
@@ -2532,6 +2533,8 @@ bool Network::readassignmentlinksfile(string name)
 	int nr,lid;
 	in >> nr;
 	in >> temp;
+	if (temp != "{")
+		eout << "Network::readassignmentlinksfile:expected {, read: " << temp << endl;
 	assert (temp=="{");
 	map <int, Link*>::iterator iter;
 	for (int i=0; i<nr;i++)
@@ -2924,7 +2927,7 @@ void Network::reset_link_icons() // reset the links to normal color and hide the
 #endif
 }
 
-
+/*
 bool Network::readmaster(string name)
 {
 	string temp;
@@ -3173,6 +3176,476 @@ bool Network::readmaster(string name)
 	inputfile.close();
 	return true;
 }
+*/
+
+
+vector <string> parse_line (istream & in)
+{
+	//const unsigned int max_char= 1024;
+	//char t_str [max_char];
+	stringstream stream;
+	string temp, line;
+	vector <string> output;
+
+	//in.getline(t_str,1024);
+	//stream << t_str;
+	std::getline(in, line); // safer, string resizes dynamically
+	stream << line; // use stringstream to chop up in words
+	
+	while (!stream.eof())
+	{
+		stream >> temp;
+		output.push_back(temp);
+	}
+	return output;
+}
+
+bool Network::readmaster(string name) // new  version that skips empty entries for filenames.
+{
+	string temp;
+	ifstream inputfile;
+	
+	vector <string> stringlist;
+	unsigned int nr_elements;
+	
+	try
+	{
+		inputfile.open(name.c_str());
+		if (!inputfile) 
+			throw (string ("Could not open file " + name));
+		assert (inputfile); // to be sure
+	}
+	catch (string a)
+	{
+		eout << "Error: " << "Network::readmaster: " << a << endl;
+	}
+
+	try
+	{		
+		// now set workingdir if needed
+		if (workingdir=="")
+		{
+			size_t found = 0;
+			found = name.find_last_of("/\\");
+			if (found)
+			{
+				workingdir= name.substr(0,found+1);
+			}
+		}
+
+		stringlist=parse_line(inputfile);
+		nr_elements=stringlist.size();
+		temp =stringlist[0];		
+		if (temp!="#input_files")
+		{
+			throw (string ("expecting #input_files, read " + temp) );
+		}
+
+		//NETWORK
+		stringlist=parse_line(inputfile); // read line
+		nr_elements=stringlist.size();
+		temp =stringlist[0]; // first item on line
+		if (temp!="network=")
+			throw (string ("expecting network=, read " + temp) );
+		else
+		{
+			if (nr_elements > 1)
+			{
+				temp = stringlist[1];
+				filenames.push_back(workingdir+temp); // #0 Network file, obligatory
+			}
+			else
+				throw (string ("expecting network file (obligatory), following " + temp) );
+		}
+
+		// TURNINGS
+		stringlist=parse_line(inputfile); // read line
+		nr_elements=stringlist.size();
+		temp =stringlist[0]; // first item on line
+		if (temp!="turnings=")
+			throw (string ("expecting turnings=, read " + temp) );
+		else
+		{
+			if (nr_elements > 1)
+			{
+				temp = stringlist[1];
+				filenames.push_back(workingdir+temp); // #1 turnings file, not obligatory, can be created
+			}
+			else
+				filenames.push_back(""); // empty string, turnings will be generated.
+		}
+		
+		// SIGNALS
+		stringlist=parse_line(inputfile); // read line
+		nr_elements=stringlist.size();
+		temp =stringlist[0]; // first item on line
+		if (temp!="signals=")
+			throw (string ("expecting signals=, read " + temp) );
+		else
+		{
+			if (nr_elements > 1)
+			{
+				temp = stringlist[1];
+				filenames.push_back(workingdir+temp); // #2 signals file, not obligatory
+			}
+			else
+				filenames.push_back(""); // empty string.
+		}
+
+		//HISTTIMES
+		stringlist=parse_line(inputfile); // read line
+		nr_elements=stringlist.size();
+		temp =stringlist[0]; // first item on line
+		if (temp!="histtimes=")
+			throw (string ("expecting histtimes=, read " + temp) );
+		else
+		{
+			if (nr_elements > 1)
+			{
+				temp = stringlist[1];
+				filenames.push_back(workingdir+temp); // #3 histtimes file, not obligatory
+			}
+			else
+				filenames.push_back(""); // empty string
+		}
+
+		// ROUTES
+		stringlist=parse_line(inputfile); // read line
+		nr_elements=stringlist.size();
+		temp =stringlist[0]; // first item on line
+		if (temp!="routes=")
+			throw (string ("expecting routes=, read " + temp) );
+		else
+		{
+			if (nr_elements > 1)
+			{
+				temp = stringlist[1];
+				filenames.push_back(workingdir+temp); // #4 routes file, not obligatory
+			}
+			else
+				filenames.push_back(""); // empty string
+		}
+		//DEMAND
+		stringlist=parse_line(inputfile); // read line
+		nr_elements=stringlist.size();
+		temp =stringlist[0]; // first item on line
+		if (temp!="demand=")
+			throw (string ("expecting demand=, read " + temp) );
+		else
+		{
+			if (nr_elements > 1)
+			{
+				temp = stringlist[1];
+				filenames.push_back(workingdir+temp); // #5 demand file, obligatory
+			}
+			else
+				throw (string ("expecting demand file (obligatory), following " + temp) );
+		}
+
+		//INCIDENT
+		stringlist=parse_line(inputfile); // read line
+		nr_elements=stringlist.size();
+		temp =stringlist[0]; // first item on line
+		if (temp!="incident=")
+			throw (string ("expecting incident=, read " + temp) );
+		else
+		{
+			if (nr_elements > 1)
+			{
+				temp = stringlist[1];
+				filenames.push_back(workingdir+temp); // #6 incident file, not obligatory
+			}
+			else
+				filenames.push_back(""); // empty string
+		}
+		
+		//VEHICLETYPES
+		stringlist=parse_line(inputfile); // read line
+		nr_elements=stringlist.size();
+		temp =stringlist[0]; // first item on line
+		if (temp!="vehicletypes=")
+			throw (string ("expecting vehicletypes=, read " + temp) );
+		else
+		{
+			if (nr_elements > 1)
+			{
+				temp = stringlist[1];
+				filenames.push_back(workingdir+temp); // #7 vehicletypes file, obligatory
+			}
+			else
+				throw (string ("expecting vehicle type file (obligatory), following " + temp) );
+		}
+		
+		//VIRTUALLINKS
+		stringlist=parse_line(inputfile); // read line
+		nr_elements=stringlist.size();
+		temp =stringlist[0]; // first item on line
+		if (temp!="virtuallinks=")
+			throw (string ("expecting virtuallinks=, read " + temp) );
+		else
+		{
+			if (nr_elements > 1)
+			{
+				temp = stringlist[1];
+				filenames.push_back(workingdir+temp); // #8 virtuallinks file, not obligatory
+			}
+			else
+				filenames.push_back(""); // empty string
+		}
+	
+		//SERVERRATES
+		stringlist=parse_line(inputfile); // read line
+		nr_elements=stringlist.size();
+		temp =stringlist[0]; // first item on line
+		if (temp!="serverrates=")
+			throw (string ("expecting serverrates=, read " + temp) );
+		else
+		{
+			if (nr_elements > 1)
+			{
+				temp = stringlist[1];
+				filenames.push_back(workingdir+temp); // #9 serverrates file, not obligatory
+			}
+			else
+				filenames.push_back(""); // empty string
+		}
+		
+		//OUTPUT_FILES
+		stringlist=parse_line(inputfile); // read line
+		nr_elements=stringlist.size();
+		temp =stringlist[0]; // first item on line
+		if (temp!="#output_files")
+			throw (string ("expecting #output_files, read " + temp) );
+		
+		//LINKTIMES
+		stringlist=parse_line(inputfile); // read line
+		nr_elements=stringlist.size();
+		temp =stringlist[0]; // first item on line
+		if (temp!="linktimes=")
+			throw (string ("expecting linktimes=, read " + temp) );
+		else
+		{
+			if (nr_elements > 1)
+			{
+				temp = stringlist[1];
+				filenames.push_back(workingdir+temp); // #10 linktimes file, not obligatory
+			}
+			else
+				filenames.push_back(""); // empty string
+		}
+		
+		//OUTPUT
+		stringlist=parse_line(inputfile); // read line
+		nr_elements=stringlist.size();
+		temp =stringlist[0]; // first item on line
+		if (temp!="output=")
+			throw (string ("expecting output=, read " + temp) );
+		else
+		{
+			if (nr_elements > 1)
+			{
+				temp = stringlist[1];
+				filenames.push_back(workingdir+temp); // #11 output file, not obligatory
+			}
+			else
+				filenames.push_back(""); // empty string
+		}
+		
+		//SUMMARY
+		stringlist=parse_line(inputfile); // read line
+		nr_elements=stringlist.size();
+		temp =stringlist[0]; // first item on line
+		if (temp!="summary=")
+			throw (string ("expecting summary=, read " + temp) );
+		else
+		{
+			if (nr_elements > 1)
+			{
+				temp = stringlist[1];
+				filenames.push_back(workingdir+temp); // #12 summary file, not obligatory
+			}
+			else
+				filenames.push_back(""); // empty string
+		}
+		
+		//SPEEDS
+		stringlist=parse_line(inputfile); // read line
+		nr_elements=stringlist.size();
+		temp =stringlist[0]; // first item on line
+		if (temp!="speeds=")
+			throw (string ("expecting speeds=, read " + temp) );
+		else
+		{
+			if (nr_elements > 1)
+			{
+				temp = stringlist[1];
+				filenames.push_back(workingdir+temp); // #13 speeds file, not obligatory
+			}
+			else
+				filenames.push_back(""); // empty string
+		}
+	
+		//INFLOWS
+		stringlist=parse_line(inputfile); // read line
+		nr_elements=stringlist.size();
+		temp =stringlist[0]; // first item on line
+		if (temp!="inflows=")
+			throw (string ("expecting inflows=, read " + temp) );
+		else
+		{
+			if (nr_elements > 1)
+			{
+				temp = stringlist[1];
+				filenames.push_back(workingdir+temp); // #14 inflows file, not obligatory
+			}
+			else
+				filenames.push_back(""); // empty string
+		}
+		
+		//OUTFLOWS
+		stringlist=parse_line(inputfile); // read line
+		nr_elements=stringlist.size();
+		temp =stringlist[0]; // first item on line
+		if (temp!="outflows=")
+			throw (string ("expecting outflows=, read " + temp) );
+		else
+		{
+			if (nr_elements > 1)
+			{
+				temp = stringlist[1];
+				filenames.push_back(workingdir+temp); // #15 outflows file, not obligatory
+			}
+			else
+				filenames.push_back(""); // empty string
+		}
+
+		//QUEUELENGTHS
+		stringlist=parse_line(inputfile); // read line
+		nr_elements=stringlist.size();
+		temp =stringlist[0]; // first item on line
+		if (temp!="queuelengths=")
+			throw (string ("expecting queuelengths=, read " + temp) );
+		else
+		{
+			if (nr_elements > 1)
+			{
+				temp = stringlist[1];
+				filenames.push_back(workingdir+temp); // #16 queuelengths file, not obligatory
+			}
+			else
+				filenames.push_back(""); // empty string
+		}
+	
+		//DENSITIES
+		stringlist=parse_line(inputfile); // read line
+		nr_elements=stringlist.size();
+		temp =stringlist[0]; // first item on line
+		if (temp!="densities=")
+			throw (string ("expecting densities=, read " + temp) );
+		else
+		{
+			if (nr_elements > 1)
+			{
+				temp = stringlist[1];
+				filenames.push_back(workingdir+temp); // #17 densities file, not obligatory
+			}
+			else
+				filenames.push_back(""); // empty string
+		}
+
+		//SCENARIO
+		stringlist=parse_line(inputfile); // read line
+		nr_elements=stringlist.size();
+		temp =stringlist[0]; // first item on line
+		if (temp!="#scenario")
+			throw (string ("expecting #scenario, read " + temp) );
+
+		//STARTTIME (not used for the moment, not obligatory)
+		inputfile >> temp;
+		if (temp!="starttime=")
+			throw (string ("expecting starttime=, read " + temp) );
+		else
+			inputfile >> starttime;
+		
+		//STOPTIME obligatory (=runtime)
+		inputfile >> temp;
+		if (temp!="stoptime=")
+			throw (string ("expecting stoptime=, read " + temp) );
+		else
+		{
+			inputfile >> runtime;
+			theParameters->running_time = runtime;
+		}
+		
+		//CALC_ROUTES
+		inputfile >> temp;
+		if (temp!="calc_paths=")
+			throw (string ("expecting calc_paths=, read " + temp) );
+		else
+			inputfile >>calc_paths;
+		/*********** REMOVED TRAVEL TIME ALPHA FROM THE FILE FORMAT. PARAMETERS::LINKTIME_ALPHA IS NOW USED
+		// TRAVELTIME_ALPHA
+		inputfile >> temp;
+		if (temp!="traveltime_alpha=") // to be removed
+			throw (string ("expecting traveltime_alpha=, read " + temp) );
+		else
+			inputfile >>time_alpha;
+		*/
+		//PARAMETERS
+		inputfile >> temp;
+		if (temp!="parameters=")
+			throw (string ("expecting parameters=, read " + temp) );
+		else
+		{
+			inputfile >> temp;
+			filenames.push_back(workingdir+temp); // #18 parameters file, obligatory
+		}
+		
+		
+	#ifdef _VISSIMCOM	
+
+		//VISSIMFILE
+		stringlist=parse_line(inputfile); // read line
+		nr_elements=stringlist.size();
+		temp =stringlist[0]; // first item on line
+		if (temp!="vissimfile=")
+			throw (string ("expecting vissimfile=, read " + temp) );
+		else
+		{
+			if (nr_elements > 1)
+				vissimfile = stringlist[1];
+			else
+				throw (string ("expecting vissimfile file (obligatory), following " + temp) ); 			// NOTE: here the full path is specified! (since it may be somewhere else)
+		}
+		
+	#endif //_VISSIMCOM
+		inputfile >> temp ; // first item on line
+		if (temp!="background=")
+			throw (string ("expecting background=, read " + temp) );
+		else
+		{
+			inputfile >> temp;
+			if (!inputfile.eof())
+			{
+				filenames.push_back(workingdir+temp); // #19 background file, not obligatory
+			}
+			else
+				filenames.push_back(""); // empty string
+		}
+		
+
+		// close and return true
+		inputfile.close();
+		return true;
+	}
+	// Now catch any thrown errors
+	catch (string a)
+	{
+		eout << "Error: " << "Network::readmaster: " << a << endl;
+		inputfile.close();
+		return false;
+	}
+}
 
 #ifndef _NO_GUI
 double Network::executemaster(QPixmap * pm_,QMatrix * wm_)
@@ -3356,7 +3829,7 @@ bool Network::writeall(unsigned int repl)
 	if (theParameters->overwrite_histtimes) // Overwrite the input file if true
 		writelinktimes(histtimesfile);
 
-	time_alpha=1.0;
+	//time_alpha=1.0;  // replaced by Parameters->linktime_alpha
 	writelinktimes(cleantimes);
 	////////
 	writesummary(summaryfile); // write the summary first because	

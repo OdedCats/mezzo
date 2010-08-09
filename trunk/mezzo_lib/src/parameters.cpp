@@ -45,7 +45,7 @@ Parameters::Parameters ()
    moe_outflow_update= 300.0;
    moe_queue_update= 300.0;
    moe_density_update= 300.0;
-   linktime_alpha= 0.2;    // FOR USE LATER
+   linktime_alpha= 0.2;    // REPLACES the time_alpha
 // #assignment_matrix_parameters
    use_ass_matrix= 1;
    ass_link_period= 1200.0;

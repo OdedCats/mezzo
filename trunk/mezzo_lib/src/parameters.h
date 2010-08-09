@@ -46,7 +46,7 @@
 // GLOBAL VARIABLES
 extern long int randseed; // random seed
 extern int vid;     // global vehicle id nr.
-extern double time_alpha;
+//extern double time_alpha;
 extern std::ofstream eout; // for all debugging output
 
 // OLD Network.hh parameters

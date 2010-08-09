@@ -21,7 +21,7 @@ BatchrunDlg::BatchrunDlg( QWidget* )
 void BatchrunDlg::setNetwork(Network* net)
 {
 	theNetwork=net;
-	alpha->setText( QString::number(theNetwork->get_time_alpha(),'f',3));
+	alpha->setText( QString::number(theParameters->linktime_alpha,'f',3));
 }
 
 void BatchrunDlg::on_max_iterations_val_valueChanged(int i)
@@ -35,7 +35,7 @@ void BatchrunDlg::on_stopButton_clicked()
 
 void BatchrunDlg::show()
 {		
-	alpha->setText( QString::number(theNetwork->get_time_alpha(),'f',3));
+	alpha->setText( QString::number(theParameters->linktime_alpha,'f',3));
 	cur_iter->setNum(0);
 	rmsn_ltt->setNum(0);
 	totalPb->setValue(0);
@@ -114,7 +114,7 @@ const bool BatchrunDlg::checkConvergence(const int i, const double rmsn_ltt_, co
 void BatchrunDlg::run_iterations()
 {
 	
-	theNetwork->set_time_alpha(alpha->text().toDouble());
+	theParameters->linktime_alpha=(alpha->text().toDouble());
 	int i=1;
 	total_iter->setNum(max_iter);
 	double runtime=theNetwork->get_runtime();
