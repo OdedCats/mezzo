@@ -3270,9 +3270,13 @@ bool Network::readmaster(string name) // new  version that skips empty entries f
 			{
 				temp = stringlist[1];
 				filenames.push_back(workingdir+temp); // #1 turnings file, not obligatory, can be created
+				theParameters->read_turnings=true;
 			}
 			else
+			{
+				theParameters->read_turnings=false;
 				filenames.push_back(""); // empty string, turnings will be generated.
+			}
 		}
 		
 		// SIGNALS
@@ -3287,9 +3291,13 @@ bool Network::readmaster(string name) // new  version that skips empty entries f
 			{
 				temp = stringlist[1];
 				filenames.push_back(workingdir+temp); // #2 signals file, not obligatory
+				theParameters->read_signals=true;
 			}
 			else
+			{
+				theParameters->read_signals=false;
 				filenames.push_back(""); // empty string.
+			}
 		}
 
 		//HISTTIMES
@@ -3304,9 +3312,13 @@ bool Network::readmaster(string name) // new  version that skips empty entries f
 			{
 				temp = stringlist[1];
 				filenames.push_back(workingdir+temp); // #3 histtimes file, not obligatory
+				theParameters->read_histtimes=true;
 			}
 			else
+			{
 				filenames.push_back(""); // empty string
+				theParameters->read_histtimes=false;
+			}
 		}
 
 		// ROUTES
@@ -3321,9 +3333,13 @@ bool Network::readmaster(string name) // new  version that skips empty entries f
 			{
 				temp = stringlist[1];
 				filenames.push_back(workingdir+temp); // #4 routes file, not obligatory
+				theParameters->read_routes=true;
 			}
 			else
+			{
 				filenames.push_back(""); // empty string
+				theParameters->read_routes=false;
+			}
 		}
 		//DEMAND
 		stringlist=parse_line(inputfile); // read line
@@ -3354,9 +3370,13 @@ bool Network::readmaster(string name) // new  version that skips empty entries f
 			{
 				temp = stringlist[1];
 				filenames.push_back(workingdir+temp); // #6 incident file, not obligatory
+				theParameters->read_incidents=true;
 			}
 			else
+			{
+				theParameters->read_incidents=false;
 				filenames.push_back(""); // empty string
+			}
 		}
 		
 		//VEHICLETYPES
@@ -3388,9 +3408,13 @@ bool Network::readmaster(string name) // new  version that skips empty entries f
 			{
 				temp = stringlist[1];
 				filenames.push_back(workingdir+temp); // #8 virtuallinks file, not obligatory
+				theParameters->read_virtuallinks=true;
 			}
 			else
+			{
+				theParameters->read_virtuallinks=false;
 				filenames.push_back(""); // empty string
+			}
 		}
 	
 		//SERVERRATES
@@ -3405,9 +3429,13 @@ bool Network::readmaster(string name) // new  version that skips empty entries f
 			{
 				temp = stringlist[1];
 				filenames.push_back(workingdir+temp); // #9 serverrates file, not obligatory
+				theParameters->read_serverrates=true;
 			}
 			else
+			{
+				theParameters->read_serverrates=false;
 				filenames.push_back(""); // empty string
+			}
 		}
 		
 		//OUTPUT_FILES
@@ -3429,9 +3457,13 @@ bool Network::readmaster(string name) // new  version that skips empty entries f
 			{
 				temp = stringlist[1];
 				filenames.push_back(workingdir+temp); // #10 linktimes file, not obligatory
+				theParameters->write_linktimes=true;
 			}
 			else
+			{
 				filenames.push_back(""); // empty string
+				theParameters->write_linktimes=false;
+			}
 		}
 		
 		//OUTPUT
@@ -3446,9 +3478,13 @@ bool Network::readmaster(string name) // new  version that skips empty entries f
 			{
 				temp = stringlist[1];
 				filenames.push_back(workingdir+temp); // #11 output file, not obligatory
+				theParameters->write_output=true;
 			}
 			else
+			{
+				theParameters->write_output=false;
 				filenames.push_back(""); // empty string
+			}
 		}
 		
 		//SUMMARY
@@ -3463,9 +3499,13 @@ bool Network::readmaster(string name) // new  version that skips empty entries f
 			{
 				temp = stringlist[1];
 				filenames.push_back(workingdir+temp); // #12 summary file, not obligatory
+				theParameters->write_summary=true;
 			}
 			else
+			{
+				theParameters->write_summary=false;
 				filenames.push_back(""); // empty string
+			}
 		}
 		
 		//SPEEDS
@@ -3480,9 +3520,13 @@ bool Network::readmaster(string name) // new  version that skips empty entries f
 			{
 				temp = stringlist[1];
 				filenames.push_back(workingdir+temp); // #13 speeds file, not obligatory
+				theParameters->write_speeds=true;
 			}
 			else
+			{
+				theParameters->write_speeds=false;
 				filenames.push_back(""); // empty string
+			}
 		}
 	
 		//INFLOWS
@@ -3497,9 +3541,13 @@ bool Network::readmaster(string name) // new  version that skips empty entries f
 			{
 				temp = stringlist[1];
 				filenames.push_back(workingdir+temp); // #14 inflows file, not obligatory
+				theParameters->write_inflows=true;
 			}
 			else
+			{
+				theParameters->write_inflows=false;
 				filenames.push_back(""); // empty string
+			}
 		}
 		
 		//OUTFLOWS
@@ -3514,9 +3562,13 @@ bool Network::readmaster(string name) // new  version that skips empty entries f
 			{
 				temp = stringlist[1];
 				filenames.push_back(workingdir+temp); // #15 outflows file, not obligatory
+				theParameters->write_outflows=true;
 			}
 			else
+			{
+				theParameters->write_outflows=false;
 				filenames.push_back(""); // empty string
+			}
 		}
 
 		//QUEUELENGTHS
@@ -3531,9 +3583,13 @@ bool Network::readmaster(string name) // new  version that skips empty entries f
 			{
 				temp = stringlist[1];
 				filenames.push_back(workingdir+temp); // #16 queuelengths file, not obligatory
+				theParameters->write_queuelengths=true;
 			}
 			else
+			{
+				theParameters->write_queuelengths=false;
 				filenames.push_back(""); // empty string
+			}
 		}
 	
 		//DENSITIES
@@ -3548,9 +3604,13 @@ bool Network::readmaster(string name) // new  version that skips empty entries f
 			{
 				temp = stringlist[1];
 				filenames.push_back(workingdir+temp); // #17 densities file, not obligatory
+				theParameters->write_densities=true;
 			}
 			else
+			{
+				theParameters->write_densities=false;
 				filenames.push_back(""); // empty string
+			}
 		}
 
 		//SCENARIO
@@ -3583,16 +3643,20 @@ bool Network::readmaster(string name) // new  version that skips empty entries f
 			throw (string ("expecting calc_paths=, read " + temp) );
 		else
 			inputfile >>calc_paths;
-		/*********** REMOVED TRAVEL TIME ALPHA FROM THE FILE FORMAT. PARAMETERS::LINKTIME_ALPHA IS NOW USED
+		// ********** REMOVED TRAVEL TIME ALPHA FROM THE FILE FORMAT. PARAMETERS::LINKTIME_ALPHA IS NOW USED
 		// TRAVELTIME_ALPHA
 		inputfile >> temp;
 		if (temp!="traveltime_alpha=") // to be removed
-			throw (string ("expecting traveltime_alpha=, read " + temp) );
-		else
-			inputfile >>time_alpha;
-		*/
+		{
+			// do nothing
+		}
+		{
+			eout << "Warning: traveltime_alpha is no longer in the master file, instead linktime_alpha in the parameters file is used." << endl;
+			inputfile >> temp; // to read away the value.
+			inputfile >> temp; // read the  next item
+		}
+		
 		//PARAMETERS
-		inputfile >> temp;
 		if (temp!="parameters=")
 			throw (string ("expecting parameters=, read " + temp) );
 		else

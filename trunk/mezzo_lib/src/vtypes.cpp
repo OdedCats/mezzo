@@ -20,16 +20,7 @@
 Vtypes::Vtypes () 
 {
  	random= new Random();
-		/**
-#ifndef _DETERMINISTIC_VTYPES
-	if (randseed != 0)
-	   random->seed(randseed);
-	else
-		random->randomize();
-#else
-	random->seed(42);
-#endif
-	*/
+	
 }
 
 

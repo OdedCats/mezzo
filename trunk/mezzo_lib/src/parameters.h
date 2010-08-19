@@ -36,7 +36,7 @@
 
 // DEFINES
 
-#define _DETERMINISTIC_OD_SERVERS
+
 #define _DETERMINISTIC_ROUTE_CHOICE
 #define _DETERMINISTIC_VTYPES
 //#define _MULTINOMIAL_LOGIT
@@ -157,10 +157,7 @@ public:
    double max_rel_route_cost; //!< max relative cost of a route, compared to the minimum cost route, to be allowed in the choice set.
    double small_od_rate; //!< minimum od_rate for an od-pair to have more than 1 route
 
-   // statevar:
-   bool shortest_paths_initialised; //!< true if shortest paths have been initialised
-   int veh_in_network; // nr of vehicles in network at any moment
-   bool overwrite_histtimes; // if true the input (historical) link travel times are overwritten when output files are saved.
+
 // #mime_parameters: ONLY for use in HYBRID situations
    double mime_comm_step; //!< Communication step for MICRO-MESO information exchange
    int mime_min_queue_length; //!< min queue length for stopping / starting shockwaves
@@ -168,6 +165,36 @@ public:
 // TODO: Implement the use of the following paramaters
    double vissim_step; //!< time step for the VISSIM micro model
    double sim_speed_factor; //!< REALTIME factor to keep the hybrid model running at a fixed speed
+
+	
+   // statevars:
+   bool shortest_paths_initialised; //!< true if shortest paths have been initialised
+   int veh_in_network; // nr of vehicles in network at any moment
+   bool overwrite_histtimes; // if true the input (historical) link travel times are overwritten when output files are saved.
+		// Flags for input files. If true, these files should be read, otherwise they are created.
+		bool read_turnings; 
+		bool read_signals;
+		bool read_histtimes; 
+		bool read_routes;
+		bool read_incidents;
+		bool read_virtuallinks;
+		bool read_serverrates;
+		//Flags for output files
+		bool write_linktimes;
+		bool write_output;
+		bool write_summary;
+		bool write_speeds;
+		bool write_inflows;
+		bool write_outflows;
+		bool write_queuelengths;
+		bool write_densities;
+		
+
+
+
+
+
+
 };
 
 
