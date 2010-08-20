@@ -3646,10 +3646,11 @@ bool Network::readmaster(string name) // new  version that skips empty entries f
 		// ********** REMOVED TRAVEL TIME ALPHA FROM THE FILE FORMAT. PARAMETERS::LINKTIME_ALPHA IS NOW USED
 		// TRAVELTIME_ALPHA
 		inputfile >> temp;
-		if (temp!="traveltime_alpha=") // to be removed
+		if (temp!="traveltime_alpha=") // removed from format
 		{
 			// do nothing
 		}
+		else
 		{
 			eout << "Warning: traveltime_alpha is no longer in the master file, instead linktime_alpha in the parameters file is used." << endl;
 			inputfile >> temp; // to read away the value.
@@ -3692,12 +3693,15 @@ bool Network::readmaster(string name) // new  version that skips empty entries f
 			if (!inputfile.eof())
 			{
 				filenames.push_back(workingdir+temp); // #19 background file, not obligatory
+				theParameters->read_background=true;
 			}
 			else
+			{
+				theParameters->read_background=false;
 				filenames.push_back(""); // empty string
+			}
 		}
 		
-
 		// close and return true
 		inputfile.close();
 		return true;
@@ -3714,8 +3718,17 @@ bool Network::readmaster(string name) // new  version that skips empty entries f
 #ifndef _NO_GUI
 double Network::executemaster(QPixmap * pm_,QMatrix * wm_)
 {
+	// This version of execute master is the same as the one without parameters,
+	// except for reading the background (if necessary) and assigning the drawing Qpixmap + world matrix.
 	pm=pm_;
 	wm=wm_;
+	runtime=executemaster(); // reads all the usual files
+	if ((theParameters->read_background) &&  (filenames.size() >= 20))
+		drawing->set_background(filenames[19].c_str());	
+		
+	return runtime;
+
+	/**********'' OLD
 	time=0.0;
 	if (!readparameters(filenames [18]))
 		eout << "Problem reading parameters: " << filenames [18] << endl; // read parameters first
@@ -3784,8 +3797,8 @@ double Network::executemaster(QPixmap * pm_,QMatrix * wm_)
 	{
 		this->readassignmentlinksfile (workingdir + "assign_links.dat"); //FIX IN THE MAIN READ & WRITE
 	}
+*/
 
-	return runtime;
 }
 #endif // _NO_GUI	
 

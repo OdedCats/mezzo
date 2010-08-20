@@ -179,6 +179,7 @@ public:
 		bool read_incidents;
 		bool read_virtuallinks;
 		bool read_serverrates;
+		bool read_background;
 		//Flags for output files
 		bool write_linktimes;
 		bool write_output;
