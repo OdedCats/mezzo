@@ -3686,7 +3686,12 @@ bool Network::readmaster(string name) // new  version that skips empty entries f
 	#endif //_VISSIMCOM
 		inputfile >> temp ; // first item on line
 		if (temp!="background=")
-			throw (string ("expecting background=, read " + temp) );
+		{
+			eout << "Warning: expecting background=, read " << temp << ". When no backgorund specified, use background= followed by empty space." << endl;
+			theParameters->read_background=false;
+			filenames.push_back(""); // empty string
+			//throw (string ("expecting background=, read " + temp) ); taken out for compatibility
+		}
 		else
 		{
 			inputfile >> temp;
@@ -3812,17 +3817,28 @@ double Network::executemaster()
 		eout << "Problem reading vtypes: " << filenames [7] << endl; // read the vehicle types
 	if (!readnetwork(filenames[0]))
 		eout << "Problem reading network: " << filenames [0] << endl; // read the network configuration
-	if(!readvirtuallinks(filenames[8]))
-		eout << "Problem reading virtuallinks: " << filenames [8] << endl;	//read the virtual links
-	if(!readserverrates(filenames[9]))
-		eout << "Problem reading serverrates: " << filenames [9] << endl;	//read the virtual links
+	if (theParameters->read_virtuallinks)
+		if(!readvirtuallinks(filenames[8]))
+			eout << "Problem reading virtuallinks: " << filenames [8] << endl;	//read the virtual links
+	if (theParameters->read_serverrates)
+		if(!readserverrates(filenames[9]))
+			eout << "Problem reading serverrates: " << filenames [9] << endl;	//read the virtual links
 	if (!register_links())
 		eout << "Problem reading registering links at nodes "<< endl; // register the links at the destinations, junctions and origins
-	if (!(readturnings(filenames[1])))
+	if (!theParameters->read_turnings)
 	{
-		eout << "no turnings read, making new ones...." << endl;
+		filenames[1]="turnings.dat";
 		create_turnings(); // creates the turning movements for all junctions    if not read by file
-		writeturnings(filenames[1]); // writes the new turnings
+		writeturnings(filenames[1]); // writes the new turnings		
+	}
+	else
+	{
+		if (!(readturnings(filenames[1])))
+		{
+			eout << "Error reading turnings file " <<filenames[1] <<". Making new ones...." << endl;
+			create_turnings(); // creates the turning movements for all junctions    if not read by file
+			writeturnings(filenames[1]); // writes the new turnings
+		}
 	}
 	if (!(readlinktimes(filenames[3])))
 	{
@@ -3835,18 +3851,22 @@ double Network::executemaster()
 	//Sort the ODpairs
 	sort (odpairs.begin(), odpairs.end(), od_less_than);
 
-
-	if (!(readpathfile(filenames[4]))) // read the known paths
+	if (theParameters->read_routes)
 	{
-		eout << "no routes read from the pathfile" << endl;
-		calc_paths=true; // so that new ones are calculated.
-	}   
+		if (!(readpathfile(filenames[4]))) // read the known paths
+		{
+			eout << "ERROR: no routes read from the pathfile " << filenames[4]<< endl;
+			calc_paths=true; // so that new ones are calculated.
+		}   
+	}
+	else
+		calc_paths=true;
 	if (calc_paths)
 	{
 		if (!init_shortest_path())
-			eout << "Problem starting init shortest path " << endl; // init the shortest paths
+			eout << "ERROR: Problem starting init shortest path " << endl; // init the shortest paths
 		if (!shortest_paths_all())
-			eout << "Problem calculating shortest paths for all OD pairs " << endl; // see if there are new routes based on shortest path
+			eout << "ERROR: Problem calculating shortest paths for all OD pairs " << endl; // see if there are new routes based on shortest path
 	}
 	
 	// add the routes to the OD pairs & delete spurious routes
@@ -3854,9 +3874,11 @@ double Network::executemaster()
 	//renum_routes ();
 	
 	writepathfile(filenames[4]); // write back the routes.
-	readsignalcontrols(filenames[2]);
+	if (theParameters->read_signals)
+		if (!readsignalcontrols(filenames[2]))
+			eout << "ERROR reading the signal control file " << filenames [2]<< endl;;
 #ifdef _BUSES
-	// NEW 2007_03_08
+	// temporary, BusMezzo redefines the whole bus part. This bus section only covers the simple  bus modeling.
 	// read the busroutes & Lines
 	this->readbusroutes (workingdir +"busroutes.dat");//FIX IN THE MAIN READ & WRITE
 	this->readbuslines (workingdir +"buslines.dat");//FIX IN THE MAIN READ & WRITE
@@ -3868,7 +3890,8 @@ double Network::executemaster()
 		eout << "Problem reading incident file " << filenames [5] << endl; // reads the incident file   and makes all the alternative routes at all  links
 	if (theParameters->use_ass_matrix) 
 	{
-		this->readassignmentlinksfile (workingdir + "assign_links.dat"); // !!! WE NEED TO FIX THIS INTO THE MAIN READ& WRITE
+		if (!readassignmentlinksfile (workingdir + "assign_links.dat"))
+			eout << "ERROR reading the assignment matrix links: assign_links.dat " << endl; // !!! WE NEED TO FIX THIS INTO THE MAIN READ& WRITE
 	}
 
 	return runtime;
