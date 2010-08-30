@@ -14,6 +14,7 @@ class Busstop;
 class Bustrip;
 class Passenger;
 class Pass_path;
+class ODzone;
 
 typedef vector <Passenger*> passengers;
 
@@ -67,6 +68,7 @@ class ODstops : public Action
 {
 public:
 	ODstops ();
+	ODstops (Busstop* origin_stop_, Busstop* destination_stop_);
 	ODstops (Busstop* origin_stop_, Busstop* destination_stop_, double arrival_rate_);
 	~ODstops ();
 	void reset ();
@@ -96,6 +98,7 @@ public:
 	void add_paths (Pass_path* pass_path_) {path_set.push_back(pass_path_);}
 	double calc_boarding_probability (Busline* arriving_bus, double time);
 	double calc_binary_logit (double utility_i, double utility_j);
+	double calc_path_size_logit (double utility_i, double utility_j);
 	double calc_combined_set_utility_for_alighting (Passenger* pass, Bustrip* bus_on_board, double time); // the trip that the pass. is currently on-board when calc. utility from downstream stop
 	double calc_combined_set_utility_for_connection (double walking_distance, double time);
 	bool check_if_path_is_dominated (Pass_path* considered_path, vector<Pass_path*> arriving_paths);
@@ -132,4 +135,30 @@ protected:
 	Eventlist* eventlist; //!< to book passenger generation events
 	bool active; // indicator for non-initialization call
 };
-#endif //_OD_stops
+
+class ODzone : public Action
+{
+public:
+	ODzone (int zone_id);
+	~ODzone ();
+	int get_id () {return id;}
+	map <Busstop*,pair<double,double>> get_stop_distances() {return stops_distances;}
+	
+	// initialize
+	void add_stop_distance (Busstop* stop, double mean_distance, double sd_distance);
+	void add_arrival_rates (ODzone* d_zone, double arrival_rate); 
+
+	// demand generation
+	bool execute(Eventlist* eventlist, double curr_time);
+
+protected:
+	int id;
+	map <Busstop*,pair<double,double>> stops_distances; // the mean and SD of the distances to busstops included in the zone
+	map <ODzone*,double> arrival_rates; // hourly arrival rate from this origin zone to the specified destination zone
+	vector <Passenger*> passengers_during_simulation; 
+	Random* random;
+	Eventlist* eventlist; //!< to book passenger generation events
+	bool active; // indicator for non-initialization call
+};
+
+#endif // OD

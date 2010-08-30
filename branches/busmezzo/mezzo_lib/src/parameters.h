@@ -178,6 +178,7 @@ public:
    double max_walking_distance;
    double max_waiting_time;
    double dominancy_perception_threshold;
+   int choice_model; // !< RUM used at passengers' route choice decisions: 1 - MNL; 2 - PSL with legs defining overlapping.
    int real_time_info; //!< real-time information at the network: 0 - none; 1 - for all lines stoping at each stop; 2 - for all lines stoping at all connected stop; 3 - for the entire network.
    double start_pass_generation; 
    double stop_pass_generation;

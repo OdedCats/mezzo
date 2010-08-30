@@ -92,6 +92,7 @@ Parameters::Parameters ()
    max_walking_distance = 2500;
    max_waiting_time = 1800.0;
    dominancy_perception_threshold = 0;
+   choice_model = 0;
    real_time_info = 0;
    start_pass_generation = 0;
 }
@@ -591,6 +592,13 @@ bool Parameters::read_parameters (istream & in )
 			return false;
 		}
 		in >> dominancy_perception_threshold;
+		in >> keyword;
+		if (keyword!= "choice_model=")
+		{
+			cout << "ERROR reading Parameters file, expecting: choice_model=, read: " << keyword << endl;
+			return false;
+		}
+		in >> choice_model;
 		in >> keyword;
 		if (keyword!= "real_time_info=")
 		{

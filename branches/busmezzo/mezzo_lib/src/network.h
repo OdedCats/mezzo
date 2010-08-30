@@ -244,6 +244,7 @@ public:
 	bool readbusroute(istream& in); //!< reads a busroute
 	bool readbuslines(string name); //!< reads the busstops, buslines, and trips
 	bool readbusstop (istream& in); //!< reads a busstop
+	bool readtransitzones (istream& in); //!< reads a transit travel zone
 	bool readbusline(istream& in); //!< reads a busline
 	bool readbustrip_format1(istream& in); //!< reads trips based on detailed time-table
 	bool readbustrip_format2(istream& in); //!< reads trips based on dispatching time-table (time-independent intervals between stops)
@@ -253,6 +254,7 @@ public:
   bool read_passenger_rates_format1_TD_slices (istream& in);
   bool read_passenger_rates_format2 (istream& in); // reads the passenger rates in the format of arrival rate per line, origin stop and destination stop combination
   bool read_passenger_rates_format3 (istream& in); // reads the passenger rates in the format of arrival rate per OD in terms of stops (no path is pre-determined)
+  bool read_passenger_rates_format4 (istream& in); // reads the passenger rates in the format of arrival rate per OD in terms of travel zones (no path is pre-determined)
   bool readbusstops_distances (istream& in); // !< reads a busstop distance matrix (to other busstops) - relevant only for demand format 3
   bool read_travel_time_disruptions (istream& in); // reads the expected travel time between stops due to disruptions - does not affect the actual travel time, just passengers expectations in case of information provision
   bool read_bustype (istream& in); // reads a bus type
@@ -342,6 +344,7 @@ protected:
     vector <Bustype*> bustypes; // types of bus vehicles
     vector <Bus*> busvehicles; // a list of the bus vehicles
 	vector <ODstops*> odstops;
+	vector <ODzone*> odzones; 
 	vector <ODstops*> odstops_demand; // contains only ODs with a non-zero demand
 	vector<Busstop*> collect_im_stops; // compose the list of stops for a path
 	vector<double> collect_walking_distances; // compose the list of walking distances for a path
