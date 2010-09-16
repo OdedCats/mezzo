@@ -67,19 +67,22 @@ Parameters::Parameters ()
    delete_bad_routes= false;
    max_rel_route_cost = 2.0;
    small_od_rate = 3.0;
-   
-	//state vars
-   shortest_paths_initialised = false;
-   veh_in_network = 0;
-   overwrite_histtimes=false;
 
-// #mime_parameters
+ // #mime_parameters
    mime_comm_step= 0.1;
    mime_min_queue_length= 20;
    mime_queue_dis_speed= 6.0;
    vissim_step= 0.1;
    sim_speed_factor= 0.0;
-   
+
+ //#iteration_control
+   max_iter=10;
+   rel_gap_threshold=0.01;
+  
+   	//state vars
+   shortest_paths_initialised = false;
+   veh_in_network = 0;
+   overwrite_histtimes=false;
 }
 
 bool Parameters::read_parameters (istream & in )
@@ -464,6 +467,32 @@ bool Parameters::read_parameters (istream & in )
 	}
 	in >> sim_speed_factor;
 
+	in >> keyword;
+	if (keyword!= "#iteration_control")
+	{
+		eout << "WARNING reading Parameters file, expecting: #iteration_control, read: " << keyword << endl;
+		
+	}
+	else
+	{
+		in >> keyword;
+		if (keyword!= "max_iter=")
+		{
+			eout << "ERROR reading Parameters file, expecting: max_iter=, read: " << keyword << endl;
+			return false;
+		}
+		in >> max_iter;
+		
+		in >> keyword;
+		if (keyword!= "rel_gap_threshold=")
+		{
+			eout << "ERROR reading Parameters file, expecting: rel_gap_threshold=, read: " << keyword << endl;
+			return false;
+		}
+		in >> rel_gap_threshold;
+	
+	
+	}
 
 	return true;
 }
@@ -518,6 +547,10 @@ void Parameters::write_parameters(ostream & out)
    out << "  mime_queue_dis_speed= " << mime_queue_dis_speed << endl;
    out << "  vissim_step= " << vissim_step << endl;
    out << "  sim_speed_factor= " << sim_speed_factor << endl;
+   out << "#iteration_control" << endl;
+   out << "  max_iter= " << max_iter << endl;
+   out << "  rel_gap_threshold= " << rel_gap_threshold << endl;
+    
 
 #endif
 

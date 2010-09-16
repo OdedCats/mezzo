@@ -46,6 +46,11 @@ public:
 	~BatchrunDlg(){}
 	void setNetwork(Network* net);
 	void show();
+	void autorun()
+	{
+		on_runButton_clicked();
+		on_saveButton_clicked();
+	}
 	
 	
 	//SLOTS
@@ -56,15 +61,18 @@ public:
 	void on_max_iterations_val_valueChanged(int i);
 	
 
-
+ signals:
+    void paintRequest();
+	void activateAnalyzeOutput();
 	
 private:
-	
+//private methods
 	void run_iterations();
 	const bool checkConvergence(const int i, const double rmsn_ltt_, const double rmsn_odtt_);
-
+//VARS
+	QWidget* parent_;
 	int max_iter;
-	double max_rmsn;
+	double max_relgap;
 	Network* theNetwork;
 	LinkTimeInfo* linktimes;
 	bool stop_pressed;

@@ -84,25 +84,42 @@ const double LinkTime::cost(const double time)
 
 const double LinkTime::mean ()
 {
+
+	return (sum() / times.size());
+
+}
+
+const double LinkTime::sum()
+{
 	totaltime=0.0;
 	map<int,double>::iterator t_iter = times.begin();
 	for (t_iter;t_iter!=times.end();t_iter++)
 	{
 		totaltime+=(*t_iter).second;	
 	}
-	return (totaltime / times.size());
+	return totaltime;
 
 }
 
-const double LinkTimeInfo::mean()
-{	
+const double LinkTimeInfo::sum()
+{
 	double totaltime = 0.0;
 	map <int,LinkTime*>::iterator iter = times.begin();
 	for (iter;iter!=times.end();iter++)
 	{
 		totaltime+=(*iter).second->mean();
 	}
-	return (totaltime / times.size()); // we can do this since all linktimes have same nr of periods
+	return totaltime ; // we can do this since all linktimes have same nr of periods
+
+
+}
+
+
+
+const double LinkTimeInfo::mean()
+{	
+
+	return sum()/ times.size(); // we can do this since all linktimes have same nr of periods
 
 }
 

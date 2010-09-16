@@ -13,7 +13,7 @@
    <string>Batch Run</string>
   </property>
   <property name="windowIcon" >
-   <iconset resource="../canvas_qt4.qrc" >
+   <iconset>
     <normaloff>:/images/batchrun.gif</normaloff>:/images/batchrun.gif</iconset>
   </property>
   <widget class="QDialogButtonBox" name="buttonBox" >
@@ -117,7 +117,7 @@
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QCheckBox" name="max_rmsn_cb" >
+     <widget class="QCheckBox" name="max_relgap_cb" >
       <property name="geometry" >
        <rect>
         <x>20</x>
@@ -130,13 +130,13 @@
        <string>The maximum Root Mean Square Normalized error between Input-Output traveltimes. between 0.00 and 1.00</string>
       </property>
       <property name="text" >
-       <string>Max RMSN difference</string>
+       <string>Max Relative Gap</string>
       </property>
       <property name="checked" >
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QLineEdit" name="max_rmsn_val" >
+     <widget class="QLineEdit" name="max_relgap_val" >
       <property name="geometry" >
        <rect>
         <x>250</x>
@@ -146,16 +146,16 @@
        </rect>
       </property>
       <property name="inputMask" >
-       <string>0.00; </string>
+       <string>0.0000; </string>
       </property>
       <property name="text" >
-       <string>0.05</string>
+       <string>0.0100</string>
       </property>
       <property name="maxLength" >
-       <number>4</number>
+       <number>6</number>
       </property>
      </widget>
-     <widget class="QCheckBox" name="rmsn_link_tt" >
+     <widget class="QCheckBox" name="relgap_link_tt" >
       <property name="geometry" >
        <rect>
         <x>60</x>
@@ -174,7 +174,10 @@
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QCheckBox" name="rmsn_od_tt" >
+     <widget class="QCheckBox" name="relgap_route_flows" >
+      <property name="enabled" >
+       <bool>false</bool>
+      </property>
       <property name="geometry" >
        <rect>
         <x>60</x>
@@ -187,7 +190,7 @@
        <string>The maximum Root Mean Square Normalized error between Input-Output traveltimes. between 0.00 and 1.00</string>
       </property>
       <property name="text" >
-       <string>OD travel times</string>
+       <string>Route Flows</string>
       </property>
       <property name="checked" >
        <bool>false</bool>
@@ -203,10 +206,10 @@
        </rect>
       </property>
       <property name="text" >
-       <string>Current RMSN</string>
+       <string>Current RGAP</string>
       </property>
      </widget>
-     <widget class="QLabel" name="rmsn_ltt" >
+     <widget class="QLabel" name="relgap_ltt" >
       <property name="geometry" >
        <rect>
         <x>280</x>
@@ -222,7 +225,7 @@
        <enum>Qt::PlainText</enum>
       </property>
      </widget>
-     <widget class="QLabel" name="rmsn_odtt" >
+     <widget class="QLabel" name="relgap_rf" >
       <property name="geometry" >
        <rect>
         <x>280</x>

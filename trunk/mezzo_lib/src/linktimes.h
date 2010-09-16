@@ -45,7 +45,7 @@ LinkTimeInfo contains the LinkTime for all links in the network. It is used by t
   int id;   // link id
   const int get_id() {return id;}
   const double mean ();
-
+  const double sum ();
   int nrperiods;   // number of time periods
   double periodlength; //periodlength
   //vector <double> times;  // the vector of times
@@ -60,6 +60,7 @@ LinkTimeInfo contains the LinkTime for all links in the network. It is used by t
  	public:
  	const double cost (const int i, const double time=0.0);
 	const double mean ();
+	const double sum();
 
  	//vector <LinkTime*> times;
 	map <int, LinkTime*> times;

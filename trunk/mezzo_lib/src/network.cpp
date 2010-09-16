@@ -3935,31 +3935,44 @@ bool Network::writeall(unsigned int repl)
 	writesummary(summaryfile); // write the summary first because	
 	writeoutput(vehicleoutputfile);  // here the detailed output is written and then deleted from memory
 	writemoes(rep);
-	writeconvergence(convergencefile);
+//	open_convergence_file(convergencefile);
 	//writeheadways("timestamps.dat"); // commented out, since no-one uses them 
 	writeassmatrices(assignmentmatfile);
 	write_v_queues(vqueuesfile);
 	return true;
 }
 
-bool Network::writeconvergence(string name)
+bool Network::open_convergence_file(string name)
 {
 	
-	ofstream out(name.c_str());
-	assert(out);
+	convergence_out.open(name.c_str(),ios_base::out);
+	assert(convergence_out);
 
-	out << "CONVERGENCE" << endl;
+	//out << "CONVERGENCE" << endl;
+	convergence_out << "iteration	Relative Gap Link Times  " << endl;
+		//<< calc_rel_gap_linktimes() << endl;
 
-	out << "SumDiff_InputOutputLinkTimes : " << calc_diff_input_output_linktimes () << endl;
-	out << "SumSquare_InputOutputLinkTimes : " << calc_sumsq_input_output_linktimes () << endl;
-	out << "Root Mean Square Linktimes : " <<this->calc_rms_input_output_linktimes() << endl;
-	out << "Root Mean Square Normalized Linktimes : " <<this->calc_rmsn_input_output_linktimes() << endl;
+	//out << "SumDiff_InputOutputLinkTimes : " << calc_diff_input_output_linktimes () << endl;
+	//out << "SumSquare_InputOutputLinkTimes : " << calc_sumsq_input_output_linktimes () << endl;
+	//out << "Root Mean Square Linktimes : " <<this->calc_rms_input_output_linktimes() << endl;
+	//out << "Root Mean Square Normalized Linktimes : " <<this->calc_rmsn_input_output_linktimes() << endl;
+
 		
-	out.close();
+	//convergence_out.close();
 	return true;
 }
 
-double Network::calc_diff_input_output_linktimes ()
+void Network::close_convergence_file()
+{
+	convergence_out.close();
+}
+
+const double Network::calc_rel_gap_linktimes()
+{
+	return (calc_abs_diff_input_output_linktimes()/ linkinfo->sum());
+}
+
+const double Network::calc_diff_input_output_linktimes ()
 {
 	double total =0.0;
 	for (map <int, Link*>::iterator iter1=linkmap.begin();iter1!=linkmap.end();iter1++)
@@ -3970,7 +3983,20 @@ double Network::calc_diff_input_output_linktimes ()
 	return total;
 }
 
-double Network::calc_sumsq_input_output_linktimes ()
+const double Network::calc_abs_diff_input_output_linktimes()
+{
+	double total =0.0;
+	for (map <int, Link*>::iterator iter1=linkmap.begin();iter1!=linkmap.end();iter1++)
+	{	
+		if ((*iter1).second->get_nr_passed() > 0 )
+			total+=abs((*iter1).second->calc_diff_input_output_linktimes());
+	}
+	return total;
+
+}
+
+
+const double Network::calc_sumsq_input_output_linktimes ()
 {
 	double total =0.0;
 	for (map <int, Link*>::iterator iter1=linkmap.begin();iter1!=linkmap.end();iter1++)
@@ -3981,13 +4007,13 @@ double Network::calc_sumsq_input_output_linktimes ()
 	return total;
 }
 
-double Network::calc_mean_input_linktimes()
+const double Network::calc_mean_input_linktimes()
 {
-	return this->linkinfo->mean();
+	return linkinfo->mean();
 
 }
 
-double Network::calc_rms_input_output_linktimes()
+const double Network::calc_rms_input_output_linktimes()
 {
 	double n = linkmap.size() * nrperiods;
 	double ssq = calc_sumsq_input_output_linktimes();
@@ -3995,12 +4021,12 @@ double Network::calc_rms_input_output_linktimes()
 	return result;
 }
 
-double Network::calc_rmsn_input_output_linktimes()
+const double Network::calc_rmsn_input_output_linktimes()
 {
 	return (calc_rms_input_output_linktimes() / calc_mean_input_linktimes());
 }
 
-double Network::calc_mean_input_odtimes()
+const double Network::calc_mean_input_odtimes()
 {
 	double n= odpairs.size();
 	double sum = 0.0;
@@ -4011,7 +4037,7 @@ double Network::calc_mean_input_odtimes()
 	return sum / n;
 }
 
-double Network::calc_rms_input_output_odtimes()
+const double Network::calc_rms_input_output_odtimes()
 {
 	double n = odpairs.size();
 	double diff= 0.0;
@@ -4026,7 +4052,7 @@ double Network::calc_rms_input_output_odtimes()
 	return sqrt(ssq/n);
 }
 
-double Network::calc_rmsn_input_output_odtimes()
+const double Network::calc_rmsn_input_output_odtimes()
 {
 	return (calc_rms_input_output_odtimes() / calc_mean_input_odtimes());
 }
@@ -4243,7 +4269,46 @@ bool Network::run(int period)
 
 }
 */
+const double Network::run_iterations ()
+{
+	// do iterations
+	int i = 0;
+	double curtime= 0.0;
+	bool ok=false;
+	double relgap_ltt=0.0;
+	theParameters->overwrite_histtimes=true; // to ensure that the  histtimes are overwritten with the 'equilibrium times'.
+	open_convergence_file(workingdir+"convergence.dat");
 
+	for (i; i<theParameters->max_iter; i++)
+	{
+		curtime=step(runtime);
+		end_of_simulation(runtime);
+		relgap_ltt=calc_rel_gap_linktimes();
+		// write results in convergence file
+		convergence_out << i << '\t' << relgap_ltt << endl;
+		if (check_convergence(i, relgap_ltt))
+		{
+			close_convergence_file();
+			return relgap_ltt;
+		}
+		else if (i<(theParameters->max_iter -1))
+		{
+			ok=copy_linktimes_out_in();
+			reset();
+		}
+	}
+	//check convergence
+	convergence_out << "Not converged after " << i << " iterations. threshold = " << theParameters->rel_gap_threshold << endl;
+	close_convergence_file();
+	return -1.0;
+}
+const bool Network::check_convergence(const int iter_, const double rel_gap_)
+{
+	if (rel_gap_ <= theParameters->rel_gap_threshold)
+		return true;
+	else
+		return false;
+}
 double Network::step(double timestep)
 // same as run, but more stripped down. Called every timestep by the GUI
 {

@@ -1,19 +1,20 @@
 #include <QtGui>
 #include "batchrundlg.h"
 
-BatchrunDlg::BatchrunDlg( QWidget* )
+BatchrunDlg::BatchrunDlg( QWidget* parent )
 {
+	parent_=parent;
 	theNetwork=NULL;
 	setupUi(this);
 	//progress_gb->setEnabled(false);
 	cur_iter->setNum(0);
-	rmsn_ltt->setNum(0);
-	rmsn_odtt->setNum(0);
+	relgap_ltt->setNum(0);
+	relgap_rf->setNum(0);
 	totalPb->setValue(0);
 	currIterPb->setValue(0);
 
 	max_iter = 1000; // default value
-	max_rmsn=1.0;
+	max_relgap=1.0;
 	
 //TODO: there is a linktime_alpha in the parameters file and a time_alpha in the Master file! 
 }
@@ -37,12 +38,12 @@ void BatchrunDlg::show()
 {		
 	alpha->setText( QString::number(theParameters->linktime_alpha,'f',3));
 	cur_iter->setNum(0);
-	rmsn_ltt->setNum(0);
+	relgap_ltt->setNum(0);
 	totalPb->setValue(0);
 	currIterPb->setValue(0);
 	stop_pressed = false;
-	rmsn_ltt->setEnabled(false);
-	rmsn_odtt->setEnabled(false);
+	relgap_ltt->setEnabled(false);
+	relgap_rf->setEnabled(false);
 
 	QWidget::show();
 }
@@ -50,9 +51,9 @@ void BatchrunDlg::on_saveButton_clicked()
 {
 	if (overwriteHisttimes->isChecked())
 		theParameters->overwrite_histtimes=true;
-	if (theNetwork->writeall())
-		QMessageBox::information(this, "Saved", 
-					          "Results saved.");
+	if (!theNetwork->writeall())
+		QMessageBox::information(this, "Error Saving", "Error saving results. See debug_log.txt for information");;
+		// QMessageBox::information(this, "Saved", "Results saved.");
 }
 
 void BatchrunDlg::on_runButton_clicked()
@@ -67,16 +68,16 @@ void BatchrunDlg::on_runButton_clicked()
 			max_iter=max_iterations_val->value();
 		}
 
-		if (max_rmsn_cb->isChecked())
+		if (max_relgap_cb->isChecked())
 		{
-			max_rmsn = max_rmsn_val->text().toDouble();
-			if (rmsn_link_tt->isChecked())
+			max_relgap = max_relgap_val->text().toDouble();
+			if (relgap_link_tt->isChecked())
 			{
-				rmsn_ltt->setEnabled(true);
+				relgap_ltt->setEnabled(true);
 			}
-			if (rmsn_od_tt->isChecked())
+			if (relgap_route_flows->isChecked())
 			{
-				rmsn_odtt->setEnabled(true);
+				relgap_rf->setEnabled(true);
 			}
 		}
 		//progress_gb->setEnabled(true);
@@ -84,31 +85,44 @@ void BatchrunDlg::on_runButton_clicked()
 	}	
 }
 
-const bool BatchrunDlg::checkConvergence(const int i, const double rmsn_ltt_, const double rmsn_odtt_)
+const bool BatchrunDlg::checkConvergence(const int i, const double relgap_ltt_, const double rmsn_odtt_)
 {
 	// if more than max iterations, return true
 	if (i >= max_iter)
 		return true;
-	// if rmsn criterium is used
-	if (max_rmsn_cb->isChecked())
+	/*
+	// if relgap criterium is used
+	if (max_relgap_cb->isChecked())
 	{
-		// if both link traveltimes and od traveltimes used
-		if ( (rmsn_link_tt->isChecked()) && (rmsn_od_tt->isChecked()))
+		// if both link traveltimes and route flows used
+		if ( (relgap_link_tt->isChecked()) && (relgap_route_flows->isChecked()))
 		{
-			if ((rmsn_ltt_ <= max_rmsn) && (rmsn_odtt_ <= max_rmsn)) // they both have to be true
+			if ((rmsn_ltt_ <= max_relgap) && (rmsn_odtt_ <= max_relgap)) // they both have to be true
 				return true;
 			else 
 				return false;
 		}
 		else // otherwise the one checked has to give 'true'
 		{
-			if ( ((rmsn_od_tt->isChecked()) && (rmsn_odtt_ <= max_rmsn)) || ((rmsn_link_tt->isChecked()) && (rmsn_ltt_ <= max_rmsn)) )
+			if ( ((relgap_route_flows->isChecked()) && (rmsn_odtt_ <= max_relgap)) || ((relgap_link_tt->isChecked()) && (rmsn_ltt_ <= max_relgap)) )
 				return true;	
 			else
 				return false;
 		}
 	}
-	
+	*/
+	// temporary, for now only linktimes RGAP
+	if (max_relgap_cb->isChecked())
+	{
+		// RGAPlink traveltimes 
+		if ( (relgap_link_tt->isChecked()) )
+		{
+			if ((relgap_ltt_ <= max_relgap)) 
+				return true;
+			else 
+				return false;
+		}
+	}
 	return false;
 }
 void BatchrunDlg::run_iterations()
@@ -119,18 +133,18 @@ void BatchrunDlg::run_iterations()
 	total_iter->setNum(max_iter);
 	double runtime=theNetwork->get_runtime();
 	double curtime=0.0;
-	double rmsn_ltt_=1.0;
+	double relgap_ltt_=1.0;
 	double rmsn_odtt_=1.0;
 	cur_iter->setNum(i);
 	update();
-
+	theNetwork->open_convergence_file(theNetwork->get_workingdir() + "convergence.dat");
 // iterations
-	for (i; !checkConvergence(i,rmsn_ltt_,rmsn_odtt_) && !stop_pressed;i++)
+	for (i; !checkConvergence(i,relgap_ltt_,rmsn_odtt_) && !stop_pressed;i++)
 	{
 		// update display widgets with correct values
 		cur_iter->setNum(i);
-		rmsn_ltt->setText (QString::number(rmsn_ltt_,'f',5));
-		rmsn_odtt->setText(QString::number(rmsn_odtt_,'f',5));
+		relgap_ltt->setText (QString::number(relgap_ltt_,'f',5));
+		relgap_rf->setText(QString::number(rmsn_odtt_,'f',5));
 		int progress = static_cast<int>(100*(i-1)/max_iter);
 		totalPb->setValue(progress);
 		repaint();
@@ -149,19 +163,27 @@ void BatchrunDlg::run_iterations()
 			update();
 			qApp->processEvents();
 			repaint();
+			theNetwork->redraw();
+			emit paintRequest();
 		}
 		theNetwork->end_of_simulation(runtime);
-		rmsn_ltt_= theNetwork->calc_rmsn_input_output_linktimes();
-		if (i>1)
-			rmsn_odtt_=theNetwork->calc_rmsn_input_output_odtimes();
-		// calculate the OD travel times rmsn as well
+		//relgap_ltt_= theNetwork->calc_rmsn_input_output_linktimes();
+		relgap_ltt_= theNetwork->calc_rel_gap_linktimes();
+		// write to convergence file
+		theNetwork->write_line_convergence(i,relgap_ltt_);
+		//if (i>1)
+		//	rmsn_odtt_=theNetwork->calc_rmsn_input_output_odtimes();
+		
 	}	
-;
-	rmsn_ltt->setText (QString::number(rmsn_ltt_,'f',5));
-	rmsn_odtt->setText(QString::number(rmsn_odtt_,'f',5));
+
+	relgap_ltt->setText (QString::number(relgap_ltt_,'f',5));
+	//relgap_rf->setText(QString::number(rmsn_odtt_,'f',5));
 	currIterPb->setValue(100);
 	totalPb->setValue(100);
 	repaint();
+	theNetwork->close_convergence_file();
+	activateAnalyzeOutput();
+
 }
 
 	

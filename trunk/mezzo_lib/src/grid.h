@@ -61,8 +61,8 @@ class MOE
 	*/
 {
  public:
- 	MOE (const double val_update);
- 	MOE (const double val_update, const double scale_);
+ 	MOE (const double val_update, const double default_val_);
+ 	MOE (const double val_update, const double scale_, const double default_val_);
 	void reset(); // resets the value list, NOT the scale_ or value_update
 	void fill_missing (const int nr_periods,const double default_value); // fills out missing values for time periods without data
  	void report_value(const double value, const double time); // used to report values that are averaged
@@ -75,8 +75,10 @@ class MOE
  	void write_value(ostream& out, const int index);
  	const int get_size() {return values.size();}
  private:
+	
    double value_update;
    double scale;
+   double default_val;
    int value_obs;
    int value_period;
    list <double>::iterator value_iter;

@@ -25,7 +25,6 @@
 #ifndef MAINFORM
 #define MAINFORM
 
-//#include <Qt3Support>
 #include <Qfiledialog>
 #include <QMatrix>
 #include "ui_canvas_qt4.h"
@@ -47,9 +46,18 @@ public:
 	void set_filename(const QString fn_) {	
 			fn = QDir (fn_).path();
 			process_masterfile();}
+	void auto_run() // when run from commandline, autorun and save results, then closes the application.
+	{
+		on_batch_run_activated();
+		brdlg->autorun();
+		//brdlg->close();
+		on_quit_activated();
+	}
 	void process_masterfile();
 	// access ports
 	Network* getMezzoNet(){return (theNetwork);}
+	void set_started_from_commandline(const bool value) { started_from_commandline=value;}
+	const bool get_started_from_commandline() {return started_from_commandline;}
 
 private slots: 
 	// Using the Auto-Connect feature with the on_<signal>_<event>() syntax
@@ -87,6 +95,8 @@ private slots:
 	
 	void loop();  //!< main simulation - display loop in which the Network->step() is called repeatedly and the GUI is refreshed in between
 	void paintEvent(QPaintEvent *event );
+	void activate_AnalyzeOutput() ;
+
 	void copyPixmap();  //!< redraws the network on the GUI
 
 private:
@@ -111,6 +121,7 @@ private:
 	int panelx, panely;
     int dx,dy;
     bool exited;
+	bool started_from_commandline; // true if run from commandline
 
 	// xiaoliang work variables on zooming
 	QMatrix wm;			  //!< general world matrix from model to current view	

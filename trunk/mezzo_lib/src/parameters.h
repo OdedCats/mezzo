@@ -156,6 +156,9 @@ public:
    bool delete_bad_routes; //!< deletes bad (long) routes as well as cleans up nr of routes for small od pairs.
    double max_rel_route_cost; //!< max relative cost of a route, compared to the minimum cost route, to be allowed in the choice set.
    double small_od_rate; //!< minimum od_rate for an od-pair to have more than 1 route
+//#iteration_control
+   int max_iter; // max number of iterations
+   double rel_gap_threshold; // relative gap threshold. For the moment linktime rel_gap, will be route_flow_relgap
 
 
 // #mime_parameters: ONLY for use in HYBRID situations

@@ -146,6 +146,8 @@ public:
 	int reset(); //!< resets the simulation to 0, clears all the state variables. returns runtime
 	void end_of_simulation(double time); //!< finalise all the temp values into containers (linktimes)
 	double step(double timestep); //!< executes one step of simulation, called by the gui, returns current value of time
+	const double run_iterations (); // runs iterations until max_iter or until mal_rel_gap_threshold  is reached (see Parameters). Returns rel_gap
+	const bool check_convergence(const int iter_, const double rel_gap_); // returns true if convergence criterium is reached or if max_iter is reached.
 	bool writeall(unsigned int repl=0); //writes the output, appends replication number to output files
 	bool readnetwork(string name); //!< reads the network and creates the appropriate structures
 	bool init(); //!< creates eventlist and initializes first actions for all turnings at time 0 and starts the Communicator
@@ -179,7 +181,9 @@ public:
 	void create_turnings();          //!< creates the turning movements
 	bool writeturnings(string name);  //!< writes the turing movements
 	bool writemoes(string ending=""); //!< writes all the moes: speeds, inflows, outflows, queuelengths and densities per link
-	bool writeconvergence(string name); //!< writes the convergence moes in one file.
+	bool open_convergence_file(string name); //!< opents  the convergence  file.
+	void write_line_convergence(const int iteration, const double rgap) { convergence_out << iteration << '\t' << rgap << endl;}
+	void close_convergence_file(); //!< closes the convergence file
 	bool writeassmatrices(string name); //!< writes the assignment matrices
 	bool write_v_queues(string name); //!< writes the virtual queue lengths
 
@@ -221,17 +225,20 @@ public:
 	bool exists_same_route (Route* route); // checks if a similar route with the same links already exists
 // STATISTICS
 	//Linktimes
-	double calc_diff_input_output_linktimes (); //!< calculates the sum of the differences in output-input link travel times
-	double calc_sumsq_input_output_linktimes (); //!< calculates the sum square of the differences in output-input link travel times
-	double calc_rms_input_output_linktimes();//!< calculates the root mean square of the differences in output-input link travel times
-	double calc_rmsn_input_output_linktimes();//!< calculates the Normalized (by mean) root mean square differences in output-input link travel times
-	double calc_mean_input_linktimes(); //!< calculates the mean of the input link travel times;
+	const double calc_rel_gap_linktimes(); //!< calculates the relative gap for the output-input link travel times
+	const double calc_abs_diff_input_output_linktimes(); //!< calculates the sum of the absolute differences in output-input link travel times
+	const double calc_diff_input_output_linktimes (); //!< calculates the sum of the differences in output-input link travel times
+	const double calc_sumsq_input_output_linktimes (); //!< calculates the sum square of the differences in output-input link travel times
+	const double calc_rms_input_output_linktimes();//!< calculates the root mean square of the differences in output-input link travel times
+	const double calc_rmsn_input_output_linktimes();//!< calculates the Normalized (by mean) root mean square differences in output-input link travel times
+	const double calc_mean_input_linktimes(); //!< calculates the mean of the input link travel times;
 	// OD times
-	double calc_rms_input_output_odtimes();
-	double calc_mean_input_odtimes();
-	double calc_rmsn_input_output_odtimes();
+	const double calc_rms_input_output_odtimes();
+	const double calc_mean_input_odtimes();
+	const double calc_rmsn_input_output_odtimes();
 	// SET's
 	void set_workingdir (const string dir) {workingdir = dir;}
+	const string get_workingdir () {return workingdir;}
 	//void set_time_alpha(double val) {time_alpha=val;}
 
 	// Public transport
@@ -357,6 +364,7 @@ protected:
 	int nrperiods; //!< number of linktime periods
 	double periodlength; //!< length of each period in seconds.
 	LinkTimeInfo* linkinfo;
+	ofstream convergence_out;
 	// PVM communicator
 #ifdef _PVM   
 	PVM * communicator;
@@ -436,8 +444,17 @@ public:
 		}
 	void run ()
 	  {				
+		  if (theNetwork->get_parameters()->max_iter > 1)
+			  theNetwork->run_iterations();
+		  else
 				theNetwork->step(runtime_);
+				
 	  }
+	void iterate()
+	{
+		double result= theNetwork->run_iterations();
+	}
+
 	void saveresults (unsigned int replication = 0)
 	  {
 			theNetwork->writeall(replication);

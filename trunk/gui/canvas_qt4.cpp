@@ -26,7 +26,7 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 	// first create a Network object
 	theNetwork = new Network();
 	fn = "";
-
+	started_from_commandline=false;
 	panelx=Canvas->width();
 	panely=Canvas->height();
 	start_x=Canvas->x();
@@ -74,6 +74,10 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 	// dialogs
 	pmdlg = new ParametersDialog (this);
 	brdlg = new BatchrunDlg(this);
+	QObject::connect(brdlg, SIGNAL(paintRequest()), 
+					 this, SLOT(copyPixmap()));
+	QObject::connect(brdlg, SIGNAL(activateAnalyzeOutput()), 
+					 this, SLOT( activate_AnalyzeOutput()   ));
 	outputview = new OutputView(this);
 	posbackground = new PositionBackground(this);
 	
@@ -81,6 +85,7 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 	od_analyser_=new ODCheckerDlg();
 	QObject::connect(od_analyser_, SIGNAL(paintRequest()), 
 					 this, SLOT(copyPixmap()));
+
 
 	// zoom by window
 	zoomrect_=0;
@@ -483,6 +488,13 @@ void MainForm::on_actionAnalyzeOutput_toggled()
 	}
 	updateCanvas();
 
+}
+
+void MainForm::activate_AnalyzeOutput() 
+{	
+	actionAnalyzeOutput->setEnabled(true);
+	actionAnalyzeOutput->setChecked(true);
+	on_actionAnalyzeOutput_toggled();
 }
 
 void MainForm::on_horizontalSlider_valueChanged()

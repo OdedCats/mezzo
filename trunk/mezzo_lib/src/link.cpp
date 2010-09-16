@@ -32,11 +32,11 @@ Link::Link(int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* s
 	running_percentage=0.0;
 	queue_percentage=0.0;
 	blocked=false;
-	moe_speed=new MOE(theParameters->moe_speed_update, 3.6);
-	moe_inflow=new MOE(theParameters->moe_inflow_update, (3600.0/theParameters->moe_inflow_update));
-	moe_outflow=new MOE(theParameters->moe_outflow_update, (3600.0/theParameters->moe_outflow_update));
-	moe_queue=new MOE(theParameters->moe_queue_update);
-	moe_density=new MOE(theParameters->moe_density_update);
+	moe_speed=new MOE(theParameters->moe_speed_update, 3.6, this->speed_density(0.0));
+	moe_inflow=new MOE(theParameters->moe_inflow_update, (3600.0/theParameters->moe_inflow_update),0.0);
+	moe_outflow=new MOE(theParameters->moe_outflow_update, (3600.0/theParameters->moe_outflow_update),0.0);
+	moe_queue=new MOE(theParameters->moe_queue_update,0.0);
+	moe_density=new MOE(theParameters->moe_density_update, 0.0);
   blocked_until=-1.0; // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
   nr_exits_blocked=0; // set by the turning movements if they are blocked
   freeflowtime=(length/(sdfunc->speed(0.0)));
@@ -49,12 +49,20 @@ Link::Link(int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* s
 
 
 Link::Link()
+
 {
+	moe_speed=new MOE(theParameters->moe_speed_update, 3.6, 100.0);
+	moe_inflow=new MOE(theParameters->moe_inflow_update, (3600.0/theParameters->moe_inflow_update),0.0);
+	moe_outflow=new MOE(theParameters->moe_outflow_update, (3600.0/theParameters->moe_outflow_update),0.0);
+	moe_queue=new MOE(theParameters->moe_queue_update,0.0);
+	moe_density=new MOE(theParameters->moe_density_update, 0.0);
+	/*
 	moe_speed=new MOE(theParameters->moe_speed_update);
 	moe_inflow=new MOE(theParameters->moe_inflow_update);
 	moe_outflow=new MOE(theParameters->moe_outflow_update);
 	moe_queue=new MOE(theParameters->moe_queue_update);
 	moe_density=new MOE(theParameters->moe_density_update);
+	*/
 	blocked_until=-1.0; // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
 	nr_exits_blocked=0; // set by the turning movements if they are blocked
 	freeflowtime=1.0;	

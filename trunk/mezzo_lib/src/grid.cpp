@@ -62,49 +62,53 @@ const double Grid::average (const int column)
 
 
 // MOE functions
-MOE::MOE (const double val_update)
+MOE::MOE (const double val_update, const double default_val_)
 
 {
-	values.push_back(0.0);
+	values.push_back(default_val_);
 	value_iter=values.begin();
 	value_update=val_update;
 	value_period=1;
 	value_obs=0;
 	scale=1.0;
+	default_val=default_val_;
 }
 
-MOE::MOE (const double val_update, const double scale_)
+MOE::MOE (const double val_update, const double scale_, const double default_val_)
 {
-  	values.push_back(0.0);
+  	values.push_back(default_val_);
 	value_iter=values.begin();
 	value_update=val_update;
 	value_period=1;
 	value_obs=0;
 	scale=scale_;
+	default_val=default_val_;
+
 }
 
 void MOE::reset()
 {	
 	values.clear();
-	values.push_back(0.0);
+	values.push_back(default_val);
 	value_iter=values.begin();
 	value_period=1;
 	value_obs=0;
+
 }
 void MOE::report_value(const double value, const double time)
 {
 	 	if (time > (value_period*value_update))
  		 	{
- 		 		for (int i=0; i<(static_cast<int>(time/value_update)-value_period+1); i++)
+ 		 		for (int i=0; i<(static_cast<int>(time/value_update)-value_period+1); i++) // for all previous periods
  		 		{
  		 	 		value_period++;
- 		 	 		values.push_back(0.0); // add a new interval to the list
+ 		 	 		values.push_back(default_val); // add a new interval to the list, initialized with default value
  		 	 		value_iter++;
  		 	 		value_obs=0;
  		 	 	}
  		 	}
  		 	value_obs++;
- 		    if (value_obs== 1)
+ 		    if (value_obs== 1) // if this is the first value for this period
  		    	*value_iter=value;
  		    else
  		    	*value_iter=((*value_iter)*(value_obs-1)+value ) /value_obs; 		 	

@@ -33,6 +33,8 @@
 class Link;
 class Origin;
 class Destination;
+class Vehicle; 
+
 typedef pair <int,int> ODVal;
 
 class Route
@@ -66,12 +68,16 @@ class Route
 	const double utility (const double time)  ;
 	const int computeRouteLength() const ;
 
+	void register_veh_departure(const double time,  Vehicle * veh) {departures.insert(pair<double,Vehicle*>(time,veh));}
+//	const int get_nr_departures (const double starttime, const double endtime) const {return (departures.lower_bound(starttime) - departures.upper_bound(endtime));}
+
   protected:
 	int id;
 	Origin* origin;
 	Destination* destination;
 	vector <Link*> links; // ordered sequence of the links in the route
 	map <int, Link*> linkmap; // in addition to the 'links' vector, to enable fast lookup
+	map <double, Vehicle*> departures;
 	double sumcost; // the cached route cost.
 	double last_calc_time; // last time the route cost was updated
 };
