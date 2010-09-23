@@ -174,6 +174,9 @@ public:
    bool shortest_paths_initialised; //!< true if shortest paths have been initialised
    int veh_in_network; // nr of vehicles in network at any moment
    bool overwrite_histtimes; // if true the input (historical) link travel times are overwritten when output files are saved.
+   vector <double> od_loadtimes; // contains the load times for all slices in the OD matrix
+
+
 		// Flags for input files. If true, these files should be read, otherwise they are created.
 		bool read_turnings; 
 		bool read_signals;

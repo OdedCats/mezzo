@@ -176,7 +176,7 @@
      </widget>
      <widget class="QCheckBox" name="relgap_route_flows" >
       <property name="enabled" >
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="geometry" >
        <rect>

@@ -36,6 +36,7 @@ Route::Route(const int id_, Origin* const origin_, Destination* const destinatio
 	}
 	eout << endl;
 #endif // _DEBUG_ROUTE		
+	routeflows=vector <int> (theParameters->od_loadtimes.size(),0);
 }
 
 
@@ -58,17 +59,76 @@ Route::Route(const int id_, Route* const route, const vector<Link*> & links_): i
 //	int me=(links.front())->get_id();
 	if ( (links.front())->get_id() != (oldlinks.front())->get_id() )	
 		links.insert(links.begin(),  oldlinks.front() );
+	routeflows=vector <int> (theParameters->od_loadtimes.size(),0);
 }
 
 void Route::reset()
 {
 	sumcost=0.0;
 	last_calc_time=0.0;
+	prev_routeflows=routeflows;
+	routeflows=vector <int> (theParameters->od_loadtimes.size(),0);
 
 }
 
 const ODVal Route::get_oid_did() const
-  {return  ODVal(origin->get_id(), destination->get_id());}		
+  {return  ODVal(origin->get_id(), destination->get_id());}	
+
+const int Route::get_od_period(const double time) const
+{	
+	int i = 0;
+	int max_i=theParameters->od_loadtimes.size(); 
+	for (i; i < max_i ; i++)
+	{
+		if (theParameters->od_loadtimes[i] > time)
+			return (i-1); 
+	}
+	return max_i-1;
+}
+
+const int Route::get_abs_diff_routeflows() const
+{
+	int abs_diff=0;
+	int i = 0;
+	int max_i=min (routeflows.size(), prev_routeflows.size());
+	for (i ;i < max_i; i++)
+	{
+		abs_diff += abs(routeflows [i]-prev_routeflows [i]);
+	}
+	return abs_diff;
+}
+
+const int Route::get_sum_prev_routeflows() const
+{
+	int sum=0;
+	int i = 0;
+	int max_i= prev_routeflows.size();
+	for (i ;i < max_i; i++)
+	{
+		sum+= prev_routeflows [i];
+	}
+	return sum;
+
+}
+
+const int Route::get_sum_routeflows() const
+{
+	int sum=0;
+	int i = 0;
+	int max_i= routeflows.size();
+	for (i ;i < max_i; i++)
+	{
+		sum+= routeflows [i];
+	}
+	return sum;
+
+}
+
+void Route::register_veh_departure(const double time)
+{	
+	int period = get_od_period(time);
+	routeflows [period] = routeflows [period] +1;
+}
 
  const bool Route::check (const int oid, const int did) const 
 	{ return ( (origin->get_id()==oid) && (destination->get_id()==did) );}
@@ -227,3 +287,15 @@ void Route::write(ostream& out) const
 	out << "} }" << endl;
 }
 
+void Route::write_routeflows(ostream &out) const
+{
+	out << id << '\t' ;
+	vector <int>::const_iterator iter;
+	for ( iter = routeflows.begin(); iter != routeflows.end(); iter++)
+	{
+		out << (*iter) << '\t' ;
+	}
+	out << endl;
+
+
+}

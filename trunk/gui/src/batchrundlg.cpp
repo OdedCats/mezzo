@@ -85,43 +85,33 @@ void BatchrunDlg::on_runButton_clicked()
 	}	
 }
 
-const bool BatchrunDlg::checkConvergence(const int i, const double relgap_ltt_, const double rmsn_odtt_)
+const bool BatchrunDlg::checkConvergence(const int i, const double relgap_ltt_, const double relgap_rf_)
 {
 	// if more than max iterations, return true
 	if (i >= max_iter)
 		return true;
-	/*
-	// if relgap criterium is used
+	
+	bool rf=true;
+	bool ltt=true;
 	if (max_relgap_cb->isChecked())
 	{
-		// if both link traveltimes and route flows used
-		if ( (relgap_link_tt->isChecked()) && (relgap_route_flows->isChecked()))
-		{
-			if ((rmsn_ltt_ <= max_relgap) && (rmsn_odtt_ <= max_relgap)) // they both have to be true
-				return true;
-			else 
-				return false;
-		}
-		else // otherwise the one checked has to give 'true'
-		{
-			if ( ((relgap_route_flows->isChecked()) && (rmsn_odtt_ <= max_relgap)) || ((relgap_link_tt->isChecked()) && (rmsn_ltt_ <= max_relgap)) )
-				return true;	
-			else
-				return false;
-		}
-	}
-	*/
-	// temporary, for now only linktimes RGAP
-	if (max_relgap_cb->isChecked())
-	{
-		// RGAPlink traveltimes 
+		// RGAP link traveltimes 
 		if ( (relgap_link_tt->isChecked()) )
 		{
 			if ((relgap_ltt_ <= max_relgap)) 
-				return true;
+				ltt= true;
 			else 
-				return false;
+				ltt= false;
 		}
+		// RGAP route flows 
+		if ( (relgap_route_flows->isChecked()) )
+		{
+			if ((relgap_rf_ <= max_relgap)) 
+				rf= true;
+			else 
+				rf= false;
+		}
+		return (rf && ltt); // for now both checked critera need to be true.
 	}
 	return false;
 }
@@ -134,17 +124,17 @@ void BatchrunDlg::run_iterations()
 	double runtime=theNetwork->get_runtime();
 	double curtime=0.0;
 	double relgap_ltt_=1.0;
-	double rmsn_odtt_=1.0;
+	double relgap_rf_=1.0;
 	cur_iter->setNum(i);
 	update();
 	theNetwork->open_convergence_file(theNetwork->get_workingdir() + "convergence.dat");
 // iterations
-	for (i; !checkConvergence(i,relgap_ltt_,rmsn_odtt_) && !stop_pressed;i++)
+	for (i; !checkConvergence(i,relgap_ltt_,relgap_rf_) && !stop_pressed;i++)
 	{
 		// update display widgets with correct values
 		cur_iter->setNum(i);
 		relgap_ltt->setText (QString::number(relgap_ltt_,'f',5));
-		relgap_rf->setText(QString::number(rmsn_odtt_,'f',5));
+		relgap_rf->setText(QString::number(relgap_rf_,'f',5));
 		int progress = static_cast<int>(100*(i-1)/max_iter);
 		totalPb->setValue(progress);
 		repaint();
@@ -167,17 +157,15 @@ void BatchrunDlg::run_iterations()
 			emit paintRequest();
 		}
 		theNetwork->end_of_simulation(runtime);
-		//relgap_ltt_= theNetwork->calc_rmsn_input_output_linktimes();
 		relgap_ltt_= theNetwork->calc_rel_gap_linktimes();
+		if (i>1)
+			relgap_rf_= theNetwork->calc_rel_gap_routeflows();
 		// write to convergence file
-		theNetwork->write_line_convergence(i,relgap_ltt_);
-		//if (i>1)
-		//	rmsn_odtt_=theNetwork->calc_rmsn_input_output_odtimes();
-		
+		theNetwork->write_line_convergence(i,relgap_ltt_,relgap_rf_);	
 	}	
 
 	relgap_ltt->setText (QString::number(relgap_ltt_,'f',5));
-	//relgap_rf->setText(QString::number(rmsn_odtt_,'f',5));
+	relgap_rf->setText(QString::number(relgap_rf_,'f',5));
 	currIterPb->setValue(100);
 	totalPb->setValue(100);
 	repaint();

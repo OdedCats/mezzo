@@ -65,19 +65,25 @@ class Route
 	const bool has_link(const int lid) const ;
 	const bool has_link_after(const int lid, const int curr_lid) const ;
 	void write(ostream& out) const;
+	void write_routeflows (ostream& out) const;
 	const double utility (const double time)  ;
 	const int computeRouteLength() const ;
 
-	void register_veh_departure(const double time,  Vehicle * veh) {departures.insert(pair<double,Vehicle*>(time,veh));}
-//	const int get_nr_departures (const double starttime, const double endtime) const {return (departures.lower_bound(starttime) - departures.upper_bound(endtime));}
-
+	void register_veh_departure(const double time); 
+	const vector <int> get_routeflows() const { return routeflows;}
+	const int get_od_period(const double time) const;
+	const int get_abs_diff_routeflows() const;
+	const int get_sum_prev_routeflows() const;
+	const int get_sum_routeflows()const ;
   protected:
 	int id;
 	Origin* origin;
 	Destination* destination;
 	vector <Link*> links; // ordered sequence of the links in the route
 	map <int, Link*> linkmap; // in addition to the 'links' vector, to enable fast lookup
-	map <double, Vehicle*> departures;
+	//map <int, Vehicle*> departures;
+	vector <int> routeflows; //  for each OD time period the nr of departures.
+	vector <int> prev_routeflows; //  routeflows previous iteration.
 	double sumcost; // the cached route cost.
 	double last_calc_time; // last time the route cost was updated
 };

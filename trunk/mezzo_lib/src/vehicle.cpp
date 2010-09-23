@@ -34,7 +34,7 @@ void Vehicle::init (const int id_, const int type_, const double length_, Route*
  entered=false;
  switched=0;
  meters=0;
- route->register_veh_departure(start_time,this);
+ route->register_veh_departure(start_time);
 }
 
 void Vehicle::set_curr_link(Link* const  curr_link_)

@@ -2050,6 +2050,7 @@ bool Network::readdemandfile(string name)
 			}
 		}
 		inputfile.close();
+		theParameters->od_loadtimes = odmatrix.get_loadtimes();
 		return true;
 	}	
 	else
@@ -2164,6 +2165,20 @@ bool Network::writeheadways(string name)
 	return true;
 
 
+}
+
+bool Network::writerouteflows(string name)
+{
+	ofstream out(name.c_str());
+	assert(out);
+	multimap <ODVal, Route*>::iterator r_iter=routemap.begin();
+	for (r_iter; r_iter!=routemap.end(); r_iter++)
+	{
+		r_iter->second->write_routeflows(out);
+	}
+
+	out.close();
+	return true;
 }
 
 
@@ -3910,6 +3925,7 @@ bool Network::writeall(unsigned int repl)
 	string summaryfile=filenames[12];
 	string vehicleoutputfile=filenames[11];
 	string convergencefile=workingdir + "convergence.dat";
+	string routeflowsfile=workingdir+ "routeflows.dat";
 	string assignmentmatfile=workingdir + "assign.dat";
 	string vqueuesfile=workingdir + "v_queues.dat";
 	if (replication >0)
@@ -3935,7 +3951,7 @@ bool Network::writeall(unsigned int repl)
 	writesummary(summaryfile); // write the summary first because	
 	writeoutput(vehicleoutputfile);  // here the detailed output is written and then deleted from memory
 	writemoes(rep);
-//	open_convergence_file(convergencefile);
+	writerouteflows(routeflowsfile);
 	//writeheadways("timestamps.dat"); // commented out, since no-one uses them 
 	writeassmatrices(assignmentmatfile);
 	write_v_queues(vqueuesfile);
@@ -3949,16 +3965,8 @@ bool Network::open_convergence_file(string name)
 	assert(convergence_out);
 
 	//out << "CONVERGENCE" << endl;
-	convergence_out << "iteration	Relative Gap Link Times  " << endl;
-		//<< calc_rel_gap_linktimes() << endl;
+	convergence_out << "Iteration	RGAP_Linktimes	RGAP_Routeflows" << endl;
 
-	//out << "SumDiff_InputOutputLinkTimes : " << calc_diff_input_output_linktimes () << endl;
-	//out << "SumSquare_InputOutputLinkTimes : " << calc_sumsq_input_output_linktimes () << endl;
-	//out << "Root Mean Square Linktimes : " <<this->calc_rms_input_output_linktimes() << endl;
-	//out << "Root Mean Square Normalized Linktimes : " <<this->calc_rmsn_input_output_linktimes() << endl;
-
-		
-	//convergence_out.close();
 	return true;
 }
 
@@ -4025,6 +4033,52 @@ const double Network::calc_rmsn_input_output_linktimes()
 {
 	return (calc_rms_input_output_linktimes() / calc_mean_input_linktimes());
 }
+
+const double Network::calc_rel_gap_routeflows()
+//!< calculates the relative gap for the output-input route flows
+{
+	return (calc_abs_diff_input_output_routeflows() / calc_sum_prev_routeflows());
+	
+}
+	
+
+const double Network::calc_abs_diff_input_output_routeflows()
+//!< calculates the sum of the absolute differences in output-input routeflows
+{
+	double sum = 0.0;
+	multimap <ODVal,Route*>::iterator r=routemap.begin();
+	for (r; r!=routemap.end(); r++)
+	{
+		sum+=r->second->get_abs_diff_routeflows();
+	}
+	return sum;
+}
+
+const double Network::calc_sum_routeflows()
+//!< calculates the sum of the absolute differences in output-input routeflows
+{
+	double sum = 0.0;
+	multimap <ODVal,Route*>::iterator r=routemap.begin();
+	for (r; r!=routemap.end(); r++)
+	{
+		sum+=r->second->get_sum_routeflows();
+	}
+	return sum;
+}
+
+const double Network::calc_sum_prev_routeflows()
+//!< calculates the sum of the absolute differences in output-input routeflows
+{
+	double sum = 0.0;
+	multimap <ODVal,Route*>::iterator r=routemap.begin();
+	for (r; r!=routemap.end(); r++)
+	{
+		sum+=r->second->get_sum_prev_routeflows();
+	}
+	return sum;
+}
+
+
 
 const double Network::calc_mean_input_odtimes()
 {
@@ -4276,6 +4330,7 @@ const double Network::run_iterations ()
 	double curtime= 0.0;
 	bool ok=false;
 	double relgap_ltt=0.0;
+	double relgap_rf=0.0;
 	theParameters->overwrite_histtimes=true; // to ensure that the  histtimes are overwritten with the 'equilibrium times'.
 	open_convergence_file(workingdir+"convergence.dat");
 
@@ -4284,9 +4339,10 @@ const double Network::run_iterations ()
 		curtime=step(runtime);
 		end_of_simulation(runtime);
 		relgap_ltt=calc_rel_gap_linktimes();
+		relgap_rf=calc_rel_gap_routeflows();
 		// write results in convergence file
-		convergence_out << i << '\t' << relgap_ltt << endl;
-		if (check_convergence(i, relgap_ltt))
+		convergence_out << i << '\t' << relgap_ltt << '\t' << relgap_rf << endl;
+		if (check_convergence(i, relgap_ltt, relgap_rf))
 		{
 			close_convergence_file();
 			return relgap_ltt;
@@ -4302,9 +4358,9 @@ const double Network::run_iterations ()
 	close_convergence_file();
 	return -1.0;
 }
-const bool Network::check_convergence(const int iter_, const double rel_gap_)
+const bool Network::check_convergence(const int iter_, const double rel_gap_ltt_, const double rel_gap_rf_)
 {
-	if (rel_gap_ <= theParameters->rel_gap_threshold)
+	if ((rel_gap_ltt_ <= theParameters->rel_gap_threshold) && ( rel_gap_rf_ <= theParameters->rel_gap_threshold) )
 		return true;
 	else
 		return false;
@@ -4641,7 +4697,10 @@ const bool ODSlice::remove_rate( const ODVal &  odid)
 
 // ODMATRIX CLASS
 
-ODMatrix::ODMatrix (){}
+ODMatrix::ODMatrix ()
+{
+
+}
 
 void ODMatrix::reset(Eventlist* eventlist, vector <ODpair*> * odpairs)
 {
@@ -4667,6 +4726,16 @@ const bool ODMatrix::remove_rate(const ODVal& odid) // removes od_rates for give
 void ODMatrix::add_slice(const double time, ODSlice* slice)
 {
 	slices.insert(slices.end(), (pair <double,ODSlice*> (time,slice)) );
+}
+
+const vector <double> ODMatrix::get_loadtimes()
+{
+	vector <double> loadtimes;
+	loadtimes.push_back(0.0);
+	vector <pair <double, ODSlice*> >::iterator cur_slice=slices.begin();
+	for (cur_slice; cur_slice != slices.end(); cur_slice++)
+		loadtimes.push_back(cur_slice->first);
+	return loadtimes;
 }
 
 // MATRIXACTION CLASSES

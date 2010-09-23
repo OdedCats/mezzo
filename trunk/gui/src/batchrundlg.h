@@ -68,7 +68,7 @@ public:
 private:
 //private methods
 	void run_iterations();
-	const bool checkConvergence(const int i, const double rmsn_ltt_, const double rmsn_odtt_);
+	const bool checkConvergence(const int i, const double rmsn_ltt_, const double relgap_rf_);
 //VARS
 	QWidget* parent_;
 	int max_iter;
