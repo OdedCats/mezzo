@@ -33,7 +33,7 @@
    <enum>Qt::StrongFocus</enum>
   </property>
   <property name="windowTitle" >
-   <string comment="Prototype Mesomodel" >Mezzo version 0.56</string>
+   <string comment="Prototype Mesomodel" >Mezzo version 0.57</string>
   </property>
   <property name="windowIcon" >
    <iconset resource="canvas_qt4.qrc" >

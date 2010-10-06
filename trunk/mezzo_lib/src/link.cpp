@@ -120,7 +120,7 @@ void Link::reset()
 	if (freeflowtime < 1.0)
       freeflowtime=1.0;
 	queue->reset();    
-	use_ass_matrix = false;
+	//use_ass_matrix = false;
 	selected = false;
 	ass_matrix.clear();
 }
