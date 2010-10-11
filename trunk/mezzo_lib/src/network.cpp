@@ -3206,11 +3206,13 @@ vector <string> parse_line (istream & in)
 	//stream << t_str;
 	std::getline(in, line); // safer, string resizes dynamically
 	stream << line; // use stringstream to chop up in words
-	
+	temp="";
 	while (!stream.eof())
 	{
 		stream >> temp;
-		output.push_back(temp);
+		if (temp != "")
+			output.push_back(temp);
+		temp="";
 	}
 	return output;
 }
@@ -3901,8 +3903,9 @@ double Network::executemaster()
 
 	if (!init())
 		eout << "Problem initialising " << endl;
-	if (!readincidentfile(filenames[6]))
-		eout << "Problem reading incident file " << filenames [5] << endl; // reads the incident file   and makes all the alternative routes at all  links
+	if (theParameters->read_incidents)
+		if (!readincidentfile(filenames[6]))
+			eout << "Problem reading incident file " << filenames [5] << endl; // reads the incident file   and makes all the alternative routes at all  links
 	if (theParameters->use_ass_matrix) 
 	{
 		if (!readassignmentlinksfile (workingdir + "assign_links.dat"))

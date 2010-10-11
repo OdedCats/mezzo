@@ -45,11 +45,11 @@ Parameters::Parameters ()
    moe_outflow_update= 300.0;
    moe_queue_update= 300.0;
    moe_density_update= 300.0;
-   linktime_alpha= 0.2;    // REPLACES the time_alpha
+   linktime_alpha= 0.6;    // REPLACES the time_alpha
 // #assignment_matrix_parameters
-   use_ass_matrix= 1;
-   ass_link_period= 1200.0;
-   ass_od_period= 1200.0;
+   use_ass_matrix= 0;
+   ass_link_period= 900.0;
+   ass_od_period= 900.0;
 // #turning_parameters
    default_lookback_size= 20;
    turn_penalty_cost= 99999.0;
