@@ -86,7 +86,7 @@ void Graph<T, I>::penalty(int up, int dn, const T w)
    // Create the array at the first time a link calls this function
 
    if (!(l->penalties_)) {
-      short int i, num = n->nDnLinks();
+       int i, num = n->nDnLinks();
       l->penalties_ = new T[num];
       for (i = 0; i < num; i ++) {
 		 l->penalties_[i] = 0;
@@ -284,7 +284,7 @@ void Graph<T, I>::labelSetting(int s, const T scp)
 
 //--------------------------------------------------------------------
 // REQUIRES: Costs for every link during each time period are provided
-// by info->cost(i, t), where i the index to a link and t is the time
+// by info->graph_cost(i, t), where i the index to a link and t is the time
 // to enter the link.
 //
 // CAUTION: If info is not defined, default link cost specified in
@@ -355,7 +355,7 @@ void Graph<T, I>::labelCorrecting(int s, double entry, I *info)
 
    root->predecessor_ = SP_START;
    if (info) {			// cost may be time variant
-      label[s] = info->cost(s, entry);
+      label[s] = info->graph_cost(s, entry);
    } else {
       label[s] = root->cost_;
    }
@@ -396,7 +396,7 @@ void Graph<T, I>::labelCorrecting(int s, double entry, I *info)
 		 if (!s_link->dnLegal(k)) continue;
 
 		 if (info) {
-			newlabel = label[u] + info->cost(v, entry + label[u]);
+			newlabel = label[u] + info->graph_cost(v, entry + label[u]);
 		 } else {
 			newlabel = label[u] + link(v)->cost_;
 		 }
@@ -569,7 +569,7 @@ void Graph<T, I>::printLinkPathTree
 {
    if (root_ == SP_UNSET) return;
    int i, p;
-   os << "Shortest path tree rooted from ";
+   os << "shortest path tree rooted from ";
    printLinkCode(root_);
    if (scope_ < infinity_) {
       os << " in scope (" << scope_ << ")";
@@ -595,7 +595,7 @@ void Graph<T, I>::printNodePathTree
 {
    if (root_ == SP_UNSET) return;
    int i, p;
-   os << "Shortest path tree rooted from ";
+   os << "shortest path tree rooted from ";
    printLinkCode(root_);
    if (scope_ < infinity_) {
       os << " in scope (" << scope_ << ")";

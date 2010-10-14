@@ -263,6 +263,8 @@ public:
 protected:
 	//vector <Node*> nodes;
 	map <int, Node*> nodemap; //!< 
+	map <int,int> node_to_graphnode;
+	map <int,int> graphnode_to_node;
 	//vector <Origin*> origins;
 	map <int, Origin*> originmap; //!< 
 	//vector <Destination*> destinations;
@@ -275,6 +277,8 @@ protected:
 	map <int, BoundaryIn*> boundaryinmap; //!< 
 	//  vector <Link*> links;
 	map <int, Link*> linkmap; //!< 
+	map <int,int> link_to_graphlink;
+	map <int,int> graphlink_to_link;
 	// vector <Sdfunc*> sdfuncs;
 	map <int, Sdfunc*> sdfuncmap; //!< 
 	//  vector <Turning*> turnings;

@@ -127,13 +127,28 @@ const double LinkTimeInfo::cost (const int i, const double time)  // to be repai
 
 
 {
- 	//vector <LinkTime*>::iterator iter=find_if (times.begin(),times.end(), compare <LinkTime> (i) );
-	map <int,LinkTime*>::iterator iter = times.find (i);
+ 	map <int,LinkTime*>::iterator iter = times.find (i);
  	if (iter!=times.end())
  		return (*iter).second->cost(time);
  	else
  	{	
  		eout << "LinkTimeInfo:: cost  : Error, can't find the link i = " << i << endl;
+ 		return 0.1; // NEVER RETURN 0
+   }
+}
+
+
+const double LinkTimeInfo::graph_cost (const int i, const double time)  // to be repaired. It caused crashes in the Graph.cc routines (which contain some archaic C-style array magic)
+
+
+{
+	int graph_i = graphlink_to_link [i];
+ 	map <int,LinkTime*>::iterator iter = times.find (graph_i);
+ 	if (iter!=times.end())
+ 		return (*iter).second->cost(time);
+ 	else
+ 	{	
+ 		eout << "LinkTimeInfo:: graph_cost  : Error, can't find the link i = " << i << endl;
  		return 0.1; // NEVER RETURN 0
    }
 }

@@ -71,16 +71,16 @@ class GraphNode
 		 dnLinks_.push_back(dn);
       }
 
-      inline short int nUpLinks() { return upLinks_.size(); }
-      inline short int nDnLinks() { return dnLinks_.size(); }
+      inline  int nUpLinks() { return upLinks_.size(); }
+      inline  int nDnLinks() { return dnLinks_.size(); }
 
       inline int predecessor() { return predecessor_; }
       inline T& cost() { return cost_; }
 
       // The caller is responsible for index boundaries
 
-      inline int upLink(short int i) { return upLinks_[i]; }
-      inline int dnLink(short int i) { return dnLinks_[i]; }
+      inline int upLink( int i) { return upLinks_[i]; }
+      inline int dnLink( int i) { return dnLinks_[i]; }
 };
 
 
@@ -124,12 +124,12 @@ class GraphLink
 
       inline int predecessor() { return predecessor_; }
 
-      inline char dnLegal(short int i) {
+      inline char dnLegal( int i) {
 		 return (dnLegal_ & (1 << i)); // the ith bit
       }
       inline char dnIndex() { return dnIndex_; }
 
-      inline T& penalty(short int i) { return penalties_[i]; }
+      inline T& penalty( int i) { return penalties_[i]; }
       inline T& cost() { return cost_; }
 };
 
@@ -158,13 +158,13 @@ class Graph
 			const T p = 0);
       virtual ~Graph() {}
 
-      int nNodes() const { return nodes_.size(); }
-      int nLinks() const { return links_.size(); }
+     const int nNodes() const { return nodes_.size(); }
+     const int nLinks() const { return links_.size(); }
   
       // Pointer to the objects in array (in this class)
 
-      GraphNode<T, I> *node(int i) { return &nodes_[i]; }
-      GraphLink<T, I> *link(int i) { return &links_[i]; }
+      GraphNode<T, I> *node(const int i) { return &nodes_[i]; }
+      GraphLink<T, I> *link(const int i) { return &links_[i]; }
 
       // For ith node
 

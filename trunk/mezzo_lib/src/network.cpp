@@ -489,7 +489,10 @@ bool Network::readnode(istream& in)
 		eout << "readfile::readnodes scanner jammed at " << bracket;
 		return false;
 	}
-
+// Set up mapping for shortest path graph.
+	int new_id = graphnode_to_node.size(); // numbered from 0.
+	node_to_graphnode [nid] = new_id;
+	graphnode_to_node [new_id] = nid;
 #ifdef _DEBUG_NETWORK
 	eout << "read"<<endl;
 #endif //_DEBUG_NETWORK
@@ -662,7 +665,11 @@ bool Network::readlink(istream& in)
 	icon->set_link(link);
 #endif //_NO_GUI 
 	linkmap [lid] = link;
-	//links.insert(links.end(),link);
+	// Set up mapping for shortest path graph.
+	int new_id = graphlink_to_link.size(); // numbered from 0.
+	link_to_graphlink [lid] = new_id;
+	graphlink_to_link [new_id] = lid;
+
 #ifdef _DEBUG_NETWORK
 	eout << " read a link"<<endl;
 #endif //_DEBUG_NETWORK
@@ -2272,14 +2279,14 @@ bool Network::readtimes(istream& in)
 			ltime->nrperiods=nrperiods;
 			ltime->id=(*iter).second->get_id();
 			for (int i=0;i < nrperiods;i++)
-		//		(ltime->times).push_back(linktime);
-			(ltime->times) [i] = linktime;
+				(ltime->times) [i] = linktime;
 			(*iter).second->set_hist_time(linktime);
 			(*iter).second->set_histtimes(ltime);
 			linkinfo->times.insert(pair <int,LinkTime*> ((*iter).second->get_id(),ltime )); 
 		}
+		
 	} 
-
+	linkinfo->set_graphlink_to_link(graphlink_to_link);
 	return true;
 }
 
@@ -2589,8 +2596,7 @@ bool Network::init_shortest_path()
 */
 {
 	int lid,in,out;
-		// int routenr;
-	//routenr=routemap.size();
+
 	double cost, mu, sd;
 	random=new (Random);
 
@@ -2606,9 +2612,7 @@ bool Network::init_shortest_path()
 #ifndef _USE_VAR_TIMES
 	graph=new Graph<double, GraphNoInfo<double> > (nodemap.size() /* 50000*/, linkmap.size(), 9999999.0);
 #else
-	map <int,Node*> :: iterator lastnode = --nodemap.end();
-	long largest = lastnode->first;
-	graph=new Graph<double, LinkTimeInfo > (largest+1, linkmap.size()*10, 9999999.0);
+	graph=new Graph<double, LinkTimeInfo > (nodemap.size()+1, linkmap.size()+1, 9999999.0);
 #endif
 	// ADD THE LINKS AND NODES
 
@@ -2620,10 +2624,11 @@ bool Network::init_shortest_path()
 		mu=(*iter).second->get_hist_time();
 		sd=disturbance*mu;
 		cost=mu;
+
 #ifdef _DEBUG_SP
 		eout << " graph->addlink: link " << lid << ", innode " << in << ", outnode " << out << ", cost " << cost << endl;
 #endif //_DEBUG_SP
-		graph->addLink(lid,in,out,cost);
+		graph->addLink(link_to_graphlink[lid],node_to_graphnode[in],node_to_graphnode[out],cost);
 	}
 	// ADD THE TURNPENALTIES;
 
@@ -2634,7 +2639,9 @@ bool Network::init_shortest_path()
 	{
 
 		//graph->penalty((*iter1)->from_link, (*iter1)->to_link,(*iter1)->cost);
-		graph->set_turning_prohibitor((*iter1)->from_link, (*iter1)->to_link);
+		int from = link_to_graphlink[(*iter1)->from_link];
+		int to = link_to_graphlink[(*iter1)->to_link];
+		graph->set_turning_prohibitor(from, to);
 	}
 
 	theParameters->shortest_paths_initialised= true;
@@ -2643,13 +2650,13 @@ bool Network::init_shortest_path()
 }
 
 
-vector<Link*> Network::get_path(int destid)  // get the path from
+vector<Link*> Network::get_path(int destid)  // NOTE: destid in Original Node ID, not graphnode!
 {
 #ifdef _DEBUG_SP
 	eout << "shortest path to " << destid << endl << " with " ;
 #endif //_DEBUG_SP
-
-	vector <int> linkids=graph->shortest_path_vector(destid);  // get out the shortest path current root link to Destination (*iter3)
+	int graphdest = node_to_graphnode[destid];
+	vector <int> linkids=graph->shortest_path_vector(graphdest);  // get out the shortest path current root link to Destination (*iter3) in GraphLink ids!
 
 #ifdef _DEBUG_SP
 	eout << linkids.size() << " links " << endl << "  : " ;
@@ -2663,7 +2670,7 @@ vector<Link*> Network::get_path(int destid)  // get the path from
 	}	
 	for (vector<int>::iterator iter4=linkids.begin();iter4<linkids.end();iter4++) // find all the links
 	{
-		int lid=(*iter4);
+		int lid=graphlink_to_link[(*iter4)];
 #ifdef _DEBUG_SP					
 		eout << lid << " , ";
 #endif //_DEBUG_SP
@@ -2728,9 +2735,9 @@ bool Network::shortest_paths_all()
 				graph->labelCorrecting((*iter2)->get_id());  // find the shortest path from Link (*iter2) to ALL nodes
 #else
 				if (linkinfo) // if there are link info times
-					graph->labelCorrecting((*iter2)->get_id(),entrytime,linkinfo);  // find the shortest path from Link (*iter2) to ALL nodes
+					graph->labelCorrecting(link_to_graphlink[ (*iter2)->get_id() ],entrytime,linkinfo);  // find the shortest path from Link (*iter2) to ALL nodes
 				else
-					graph->labelCorrecting((*iter2)->get_id());  // find the shortest path from Link (*iter2) to ALL nodes NO LINKINFO
+					graph->labelCorrecting(link_to_graphlink[ (*iter2)->get_id() ]);  // find the shortest path from Link (*iter2) to ALL nodes NO LINKINFO
 #endif // _USE_VAR_TIMES
 #ifdef _DEBUG_SP
 				eout << "finished label correcting for root link "<<(*iter2)->get_id() << endl;
@@ -2740,7 +2747,7 @@ bool Network::shortest_paths_all()
 #ifdef _DEBUG_SP
 					eout << " see if we can reach destination " << (*iter3)->get_id()<< endl;
 #endif //_DEBUG_SP
-					if (graph->reachable((*iter3)->get_id())) // if the destination is reachable from this link...
+					if (graph->reachable(node_to_graphnode[ (*iter3)->get_id() ] )) // if the destination is reachable from this link...
 					{
 #ifdef _DEBUG_SP
 						eout << " it's reachable.." << endl;
@@ -2875,21 +2882,21 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 			for (mi; mi != links_without_alternative.end();mi++)
 		 {
 			 // get shortest path and add.
-			 double cost=(graph->linkCost (lid)) + penalty;
+			 double cost=(graph->linkCost (link_to_graphlink[lid])) + penalty;
 			 int root = mi->first;
 			 Link* rootlink=linkmap[root];
 			 set <int> dests = mi->second;
-			 graph->linkCost(lid, cost);
-			 graph->labelCorrecting(root);
+			 graph->linkCost(link_to_graphlink[lid], cost);
+			 graph->labelCorrecting(link_to_graphlink[root]);
 			 for (set<int>::iterator di = dests.begin(); di != dests.end(); di++)
 			 {	
-				 if (graph->reachable (*di))
+				 if (graph->reachable (node_to_graphnode[(*di)]))
 				 {
 
 					 vector<Link*> rlinks=get_path((*di));
 #ifdef _DEBUG_SP
 					 eout << " network::shortest_alternatives from link " << root << " to destination " << (*di) << endl;
-					 graph->printPathToNode((*di));
+					 graph->printPathToNode(node_to_graphnode[(*di)]);
 #endif //_DEBUG_SP
 					 //save the found remainder in the link table
 					 int frontid=(rlinks.front())->get_id();
