@@ -44,7 +44,8 @@ void BatchrunDlg::show()
 	stop_pressed = false;
 	relgap_ltt->setEnabled(false);
 	relgap_rf->setEnabled(false);
-
+	max_iterations_val->setValue(theParameters->max_iter);
+	max_relgap_val->setText(QString("%1").arg(theParameters->rel_gap_threshold));
 	QWidget::show();
 }
 void BatchrunDlg::on_saveButton_clicked()

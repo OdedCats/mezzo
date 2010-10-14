@@ -527,8 +527,8 @@ bool Network::readsdfunc(istream& in)
 {
 	char bracket;
 	int sdid=0, type=0; 
-	double vmax=0, vmin=0, romax=0, romin=0;
-	double alpha=0.0, beta=0.0;
+	double vmax=32, vmin=7, romax=145, romin=0;
+	double alpha=1.0, beta=1.0;
 	in >> bracket;
 	if (bracket != '{')
 	{
@@ -2606,7 +2606,9 @@ bool Network::init_shortest_path()
 #ifndef _USE_VAR_TIMES
 	graph=new Graph<double, GraphNoInfo<double> > (nodemap.size() /* 50000*/, linkmap.size(), 9999999.0);
 #else
-	graph=new Graph<double, LinkTimeInfo > (/*nodemap.size()*/ 50000, linkmap.size()*10, 9999999.0);
+	map <int,Node*> :: iterator lastnode = --nodemap.end();
+	long largest = lastnode->first;
+	graph=new Graph<double, LinkTimeInfo > (largest+1, linkmap.size()*10, 9999999.0);
 #endif
 	// ADD THE LINKS AND NODES
 
