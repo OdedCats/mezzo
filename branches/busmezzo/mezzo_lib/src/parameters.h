@@ -183,6 +183,12 @@ public:
    double start_pass_generation; 
    double stop_pass_generation;
 
+// transit control parameters
+   double riding_time_weight;
+   double dwell_time_weight;
+   double waiting_time_weight;
+   double holding_time_weight;
+
 // TODO: Implement the use of the following paramaters
    double vissim_step; //!< time step for the VISSIM micro model
    double sim_speed_factor; //!< REALTIME factor to keep the hybrid model running at a fixed speed

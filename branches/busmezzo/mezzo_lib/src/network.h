@@ -238,7 +238,7 @@ public:
 
 	// Public transport
 	
-	bool write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10); //<! writes all the bus-related output 
+	bool write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10, string name11, string name12); //<! writes all the bus-related output 
 	bool write_path_set (string name1); //!< writes the path-set generated at the initialization process (aimed to be used as an input file for other runs with the same network)
 	bool readbusroutes(string name); //!< reads the busroutes, similar to readroutes
 	bool readbusroute(istream& in); //!< reads a busroute

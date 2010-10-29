@@ -453,6 +453,11 @@ void Busline::calculate_sum_output_line()
 	output_summary.line_on_time = 0;
 	output_summary.line_early = 0;
 	output_summary.line_late = 0;
+	output_summary.total_pass_riding_time = 0;
+	output_summary.total_pass_dwell_time = 0;
+	output_summary.total_pass_waiting_time = 0;
+	output_summary.total_pass_holding_time = 0;
+	output_summary.control_objective_function = 0;
 	
 	// accumulating the measures over line's stops
 	for (vector<Busstop*>::iterator stop = stops.begin(); stop < stops.end(); stop++)
@@ -467,6 +472,11 @@ void Busline::calculate_sum_output_line()
 		output_summary.line_on_time += (*stop)->get_output_summary(id).stop_on_time;
 		output_summary.line_early += (*stop)->get_output_summary(id).stop_early;
 		output_summary.line_late += (*stop)->get_output_summary(id).stop_late;
+		
+		output_summary.total_pass_riding_time += (*stop)->get_output_summary(id).total_stop_pass_riding_time;
+		output_summary.total_pass_dwell_time += (*stop)->get_output_summary(id).total_stop_pass_dwell_time;
+		output_summary.total_pass_waiting_time += (*stop)->get_output_summary(id).total_stop_pass_waiting_time;
+		output_summary.total_pass_holding_time += (*stop)->get_output_summary(id).total_stop_pass_holding_time;		
 	}
 	// dividing by the number of stops for average measures
 	output_summary.line_avg_headway = output_summary.line_avg_headway / stops.size();
@@ -478,6 +488,9 @@ void Busline::calculate_sum_output_line()
 	output_summary.line_on_time = output_summary.line_on_time / stops.size();
 	output_summary.line_early = output_summary.line_early / stops.size();
 	output_summary.line_late = output_summary.line_late / stops.size();
+
+	// calculate weighted objective function
+	output_summary.control_objective_function += theParameters->riding_time_weight * output_summary.total_pass_riding_time + theParameters->dwell_time_weight * output_summary.total_pass_dwell_time + theParameters->waiting_time_weight * output_summary.total_pass_waiting_time + theParameters->holding_time_weight * output_summary.total_pass_holding_time;
 }
 
 void Busline::calc_line_assignment()
@@ -522,6 +535,7 @@ Bustrip::Bustrip ()
 	init_occupancy = line->get_initial_occupancy();
 	random = new (Random);
 	next_stop = stops.begin();
+	last_stop_exit_time = 0.0;
 	for (vector <Visit_stop*>::iterator visit_stop_iter = stops.begin(); visit_stop_iter < stops.end(); visit_stop_iter++)
 	{
 		assign_segements[(*visit_stop_iter)->first] = 0;
@@ -838,7 +852,7 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 {
   	// progress the vehicle when entering or exiting a stop
 	
-	if (theParameters->demand_format == 3)
+	if (theParameters->demand_format == 3 || theParameters->demand_format == 4)
 	{
 		for (map <Busstop*, ODstops*>::iterator destination_stop = stop_as_origin.begin(); destination_stop != stop_as_origin.end(); destination_stop++)
 		{
@@ -927,9 +941,10 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 		buses_at_stop [exit_time] = bus; 
 		eventlist->add_event (exit_time, this); // book an event for the time it exits the stop
 		record_busstop_visit ( bus->get_curr_trip(), bus->get_curr_trip()->get_enter_time()); // document stop-related info
-								// done BEFORE update_last_arrivals in order to calc the headway
+								// done BEFORE update_last_arrivals in order to calc the headway and BEFORE set_last_stop_exit_time
 		bus->record_busvehicle_location (bus->get_curr_trip(), this, bus->get_curr_trip()->get_enter_time());
 		bus->get_curr_trip()->advance_next_stop(exit_time, eventlist); 
+		bus->get_curr_trip()->set_last_stop_exit_time(exit_time);
 		update_last_arrivals (bus->get_curr_trip(), bus->get_curr_trip()->get_enter_time()); // in order to follow the arrival times (AFTER dwell time is calculated)
 		update_last_departures (bus->get_curr_trip(), exit_time); // in order to follow the departure times (AFTER the dwell time and time point stuff)
 		set_had_been_visited (bus->get_curr_trip()->get_line(), true);
@@ -1080,27 +1095,45 @@ double Busstop::passenger_activity_at_stop (Eventlist* eventlist, Bustrip* trip,
 			}
 		}
 	}
-	if (theParameters->demand_format == 3)   // demand is given in terms of arrival rate of individual passengers per OD of stops (future - route choice)
+	if (theParameters->demand_format == 3 || theParameters->demand_format == 4)   // demand is given in terms of arrival rate of individual passengers per OD of stops (future - route choice)
 	{	
 		// * Alighting passengers *
 		set_nr_alighting (trip->passengers_on_board[this].size()); 
-		for (vector <Passenger*> ::iterator alighting_passenger = trip->passengers_on_board[this].begin(); alighting_passenger < trip->passengers_on_board[this].end(); alighting_passenger++)
+		for (vector <Passenger*> ::iterator alighting_passenger = trip->passengers_on_board[this].begin(); alighting_passenger != trip->passengers_on_board[this].end(); alighting_passenger++)
 		{
 			(*alighting_passenger)->add_to_selected_path_stop(this);
 			Busstop* next_stop;	
-			if (id == (*alighting_passenger)->get_OD_stop()->get_destination()->get_id()) // if this stop is passenger's destination
+			bool final_stop = false;
+			// if this stop is not passenger's final destination then make a connection decision
+			(*alighting_passenger)->set_ODstop(stop_as_origin[(*alighting_passenger)->get_OD_stop()->get_destination()]); // set the connected stop as passenger's new origin (new OD)
+			switch (theParameters->demand_format)
 			{
-				// passenger has no further conection choice
-				next_stop = this;
-				(*alighting_passenger)->add_to_selected_path_stop(this);
-				(*alighting_passenger)->set_end_time(time);
-				pass_recycler.addPassenger(*alighting_passenger); // terminate passenger
-			}
-			else
+				case 3:
+					if (id == (*alighting_passenger)->get_OD_stop()->get_destination()->get_id()) // if this stop is passenger's destination
+					{
+						// passenger has no further conection choice
+						next_stop = this;
+						final_stop = true;
+						(*alighting_passenger)->add_to_selected_path_stop(this);
+						(*alighting_passenger)->set_end_time(time);
+						pass_recycler.addPassenger(*alighting_passenger); // terminate passenger
+					}
+					else
+					{
+						next_stop =(*alighting_passenger)->make_connection_decision(time);
+					}
+					break;
+				case 4:
+					next_stop =(*alighting_passenger)->make_connection_decision_zone(time);
+					if ((*alighting_passenger)->get_this_is_the_last_stop() == true)
+					{
+						// booking an event to the arrival time at the final destination
+						(*alighting_passenger)->execute(eventlist, time + (*alighting_passenger)->get_destination_walking_distance(this) * 60 / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4));
+						final_stop = true;
+					}
+			}	
+			if (final_stop == false)
 			{
-				// if this stop is not passenger's final destination then make a connection decision
-				(*alighting_passenger)->set_ODstop(stop_as_origin[(*alighting_passenger)->get_OD_stop()->get_destination()]); // set the connected stop as passenger's new origin (new OD)
-				next_stop =(*alighting_passenger)->make_connection_decision(time);
 				// set connected_stop as the new origin
 				ODstops* new_od = next_stop->get_stop_od_as_origin_per_stop((*alighting_passenger)->get_OD_stop()->get_destination());
 				(*alighting_passenger)->set_ODstop(new_od); // set the connected stop as passenger's new origin (new OD)
@@ -1152,8 +1185,15 @@ double Busstop::passenger_activity_at_stop (Eventlist* eventlist, Bustrip* trip,
 						if ((starting_occupancy + get_nr_boarding() - get_nr_alighting()) < trip->get_busv()->get_capacity()) 
 						{
 							// if the bus is not completly full - then the passenger boards
-							trip->passengers_on_board[(*check_pass)->make_alighting_decision(trip, time)].push_back((*check_pass)); 
 							// currently - alighting decision is made when boarding
+							switch (theParameters->demand_format)
+							{
+								case 3:
+									trip->passengers_on_board[(*check_pass)->make_alighting_decision(trip, time)].push_back((*check_pass)); 
+									break;
+								case 4:
+									trip->passengers_on_board[(*check_pass)->make_alighting_decision_zone(trip, time)].push_back((*check_pass)); 	
+							}
 							set_nr_boarding (get_nr_boarding()+1);
 							if (check_pass < pass_waiting_od.end()-1)
 							{
@@ -1538,7 +1578,7 @@ int Busstop::calc_total_nr_waiting ()
 		}
 	}
 	// format 3
-	else if (theParameters->demand_format ==3)
+	else if (theParameters->demand_format == 3 || theParameters->demand_format == 4)
 	{
 		for (map <Busstop*, ODstops*>::iterator destination_stop = stop_as_origin.begin(); destination_stop != stop_as_origin.end(); destination_stop++)
 				// going through all the stops that this stop is their origin on a given OD pair
@@ -1551,9 +1591,23 @@ return total_nr_waiting;
 
 void Busstop::record_busstop_visit (Bustrip* trip, double enter_time)  // creates a log-file for stop-related info
 {
+	double arrival_headway = get_time_since_arrival (trip , enter_time);
+	double riding_time, total_pass_waiting_time;
+	if (trip->get_line()->check_first_stop(this) == true)
+	{
+		riding_time = 0;
+	}
+	else
+	{
+		riding_time = enter_time - trip->get_last_stop_exit_time();
+	}
+	if (trip->get_line()->check_first_trip(trip) == true)
+	{
+		arrival_headway = 0;
+	}
 	output_stop_visits.push_back(Busstop_Visit(trip->get_line()->get_id(), trip->get_id() , trip->get_busv()->get_bus_id() , get_id() , enter_time,
-		trip->scheduled_arrival_time (this),dwelltime,(enter_time - trip->scheduled_arrival_time (this)), exit_time, get_time_since_arrival (trip , enter_time),
-		get_time_since_departure (trip , exit_time),get_nr_alighting() , get_nr_boarding() , trip->get_busv()->get_occupancy(), calc_total_nr_waiting() ,exit_time-enter_time-dwelltime)); 
+		trip->scheduled_arrival_time (this),dwelltime,(enter_time - trip->scheduled_arrival_time (this)), exit_time, riding_time, riding_time * (trip->get_busv()->get_occupancy() + nr_alighting - nr_boarding),
+		arrival_headway, get_time_since_departure (trip , exit_time), nr_alighting , nr_boarding , trip->get_busv()->get_occupancy(), calc_total_nr_waiting(), (arrival_headway * nr_boarding)/2, exit_time-enter_time-dwelltime)); 
 }
 
 void Busstop::write_output(ostream & out)
@@ -1580,6 +1634,11 @@ void Busstop::calculate_sum_output_stop_per_line(int line_id)
 	output_summary[line_id].stop_on_time = 0;
 	output_summary[line_id].stop_early = 0;
 	output_summary[line_id].stop_late = 0;
+	output_summary[line_id].total_stop_pass_riding_time = 0;
+	output_summary[line_id].total_stop_pass_dwell_time = 0;
+	output_summary[line_id].total_stop_pass_waiting_time = 0;
+	output_summary[line_id].total_stop_pass_holding_time = 0;
+
 	for (list <Busstop_Visit>::iterator iter1 = output_stop_visits.begin(); iter1!=output_stop_visits.end();iter1++)
 	{
 		if ((*iter1).line_id == line_id)
@@ -1606,6 +1665,10 @@ void Busstop::calculate_sum_output_stop_per_line(int line_id)
 				output_summary[line_id].stop_avg_abs_deviation += abs((*iter1).lateness);
 				output_summary[line_id].stop_total_boarding += (*iter1).nr_boarding;
 				output_summary[line_id].stop_avg_waiting_per_stop += (*iter1).nr_waiting;
+				output_summary[line_id].total_stop_pass_riding_time += (*iter1).riding_pass_time;
+				output_summary[line_id].total_stop_pass_dwell_time += (*iter1).dwell_time * (*iter1).occupancy;
+				output_summary[line_id].total_stop_pass_waiting_time += ((*iter1).time_since_arr * (*iter1).nr_boarding) / 2;
+				output_summary[line_id].total_stop_pass_holding_time += (*iter1).holding_time * (*iter1).occupancy;
 				if ((*iter1).lateness > 300)
 				{
 					output_summary[line_id].stop_late ++;

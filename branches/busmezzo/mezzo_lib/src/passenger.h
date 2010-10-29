@@ -40,6 +40,7 @@ public:
 	void add_to_selected_path_stop (Busstop* stop) {selected_path_stops.push_back(stop);}
 	// bool get_already_walked () {return already_walked;}
 	// void set_already_walked (bool already_walked_) {already_walked = already_walked_;}
+	bool get_this_is_the_last_stop () {return this_is_the_last_stop;}
 
 	bool execute(Eventlist* eventlist, double time); // called every time passengers choose to walk to another stop (origin/transfer), puts the passenger at the waiting list at the right timing
 
@@ -47,13 +48,15 @@ public:
 	bool make_boarding_decision (Bustrip* arriving_bus, double time); // boarding decision making 
 	Busstop* make_alighting_decision (Bustrip* boarding_bus, double time); // alighting decision making 
 	Busstop* make_connection_decision (double time); // connection link decision (walking between stops)
-	Busstop* make_first_stop_decision (double time); // deciding at which stop to initiate the trip
-	
 
 	// Demand in terms of zones
 	map<Busstop*,double> sample_walking_distances (ODzone* zone);
-	double calc_boarding_probability (Busline* arriving_bus, Busstop* o_stop, double time);
-
+	Busstop* make_first_stop_decision (double time); // deciding at which stop to initiate the trip
+	double calc_boarding_probability_zone (Busline* arriving_bus, Busstop* o_stop, double time);
+	Busstop* make_alighting_decision_zone (Bustrip* boarding_bus, double time); 
+	Busstop* make_connection_decision_zone (double time);
+	bool stop_is_in_d_zone (Busstop* stop);
+	
 	// output-related 
 	void write_selected_path(ostream& out);
 
@@ -74,6 +77,7 @@ protected:
 	ODzone* d_zone;
 	map<Busstop*,double> origin_walking_distances;
 	map<Busstop*,double> destination_walking_distances;
+	bool this_is_the_last_stop;
 };
 
 class PassengerRecycler

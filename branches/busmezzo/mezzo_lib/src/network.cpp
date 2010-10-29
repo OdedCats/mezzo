@@ -2614,12 +2614,12 @@ void Network::generate_stop_ods()
 		for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
 		{
 			bool od_with_demand = false;
-			new ODstops ((*basic_origin),(*basic_destination),0.0);
 			for (vector <ODstops*>::iterator od = odstops_demand.begin(); od< odstops_demand.end(); od++)
 			{
 				if ((*od)->get_origin()->get_id() == (*basic_origin)->get_id() && (*od)->get_destination()->get_id() == (*basic_destination)->get_id())
 				{
 					od_with_demand = true;
+					break;
 				}
 			}
 			if (od_with_demand == false) // if it is not an od with a non-zero demand
@@ -2669,7 +2669,6 @@ void Network::find_all_paths ()
 	// first - generate all direct paths
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{
-		
 		map <Busstop*, ODstops*> od_as_origin = (*basic_origin)->get_stop_as_origin();
 		for (map<Busstop*, ODstops*>::iterator iter = od_as_origin.begin(); iter != od_as_origin.end(); iter++)
 		{
@@ -2708,12 +2707,10 @@ void Network::find_all_paths ()
 		static_filtering_rules(*basic_origin);
 	}
 	// apply dominancy rules
-	/*
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{	
 		dominancy_rules(*basic_origin);
 	}
-	*/
 	// report generated choice-sets 
 	write_path_set (workingdir + "path_set_generation.dat");
 }
@@ -4811,7 +4808,7 @@ bool Network::writeheadways(string name)
 
 }
 
-bool Network::write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10)
+bool Network::write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10, string name11, string name12)
 {
 	ofstream out1(name1.c_str(),ios_base::app);
 	ofstream out2(name2.c_str(),ios_base::app);
@@ -4823,6 +4820,8 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 	ofstream out8(name8.c_str(),ios_base::app);
 	ofstream out9(name9.c_str(),ios_base::app);
 	ofstream out10(name10.c_str(),ios_base::app);
+	ofstream out11(name11.c_str(),ios_base::app);
+	ofstream out12(name12.c_str(),ios_base::app);
 	assert(out1);
 	assert(out2);
 	assert(out3);
@@ -4833,6 +4832,8 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 	assert(out8);
 	assert(out9);
 	assert(out10);
+	assert(out11);
+	assert(out12);
 	// writing the crude data and summary outputs for each bus stop
 	for (vector<Busstop*>::iterator iter = busstops.begin();iter != busstops.end();iter++)
 	{	
@@ -4875,7 +4876,6 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 		{
 			(*od_iter)->write_boarding_output(out5, (*pass_iter1).first);
 		}
-		
 		vector<Passenger*> pass_vec = (*od_iter)->get_passengers_during_simulation();
 		for (vector<Passenger*>::iterator pass_iter = pass_vec.begin(); pass_iter < pass_vec.end(); pass_iter++) 
 		{
@@ -4885,7 +4885,30 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 		map <Passenger*,list<Pass_alighting_decision>> alighting_decisions = (*od_iter)->get_alighting_output();
 		for (map<Passenger*,list<Pass_alighting_decision>>::iterator pass_iter2 = alighting_decisions.begin(); pass_iter2 != alighting_decisions.end(); pass_iter2++)
 		{
-			(*od_iter)->write_alighting_output(out6, (*pass_iter2).first);
+			switch (theParameters->demand_format)
+			{
+				case 3:
+					(*od_iter)->write_alighting_output(out6, (*pass_iter2).first);
+					break;
+				case 4:
+					break;
+			}
+		}
+	}
+	if (theParameters->demand_format == 4)
+	{
+		for (vector<ODzone*>::iterator od_iter = odzones.begin(); od_iter < odzones.end(); od_iter++)
+		{
+			map <Passenger*,list<Pass_boarding_decision_zone>> boarding_decisions = (*od_iter)->get_boarding_output_zone();
+			for (map<Passenger*,list<Pass_boarding_decision_zone>>::iterator pass_iter1 = boarding_decisions.begin(); pass_iter1 != boarding_decisions.end(); pass_iter1++)
+			{
+				(*od_iter)->write_boarding_output_zone(out11, (*pass_iter1).first);
+			}	
+			map <Passenger*,list<Pass_alighting_decision_zone>> alighting_decisions = (*od_iter)->get_alighting_output_zone();
+			for (map<Passenger*,list<Pass_alighting_decision_zone>>::iterator pass_iter1 = alighting_decisions.begin(); pass_iter1 != alighting_decisions.end(); pass_iter1++)
+			{
+				(*od_iter)->write_alighting_output_zone(out12, (*pass_iter1).first);
+			}
 		}
 	}
 	out5.close();
@@ -6100,7 +6123,7 @@ bool Network::writeall(unsigned int repl)
 	//writeheadways("timestamps.dat"); // commented out, since no-one uses them 
 	writeassmatrices(assignmentmatfile);
 	write_v_queues(vqueuesfile);
-	this->write_busstop_output(workingdir + "buslog_out.dat", workingdir + "busstop_sum.dat", workingdir + "busline_sum.dat", workingdir + "bus_trajectory.dat", workingdir + "passenger_boarding.dat", workingdir + "passenger_alighting.dat", workingdir + "segments_trip_loads.dat", workingdir + "selected_paths.dat", workingdir + "segments_line_loads.dat", workingdir + "od_stops_summary.dat");
+	this->write_busstop_output(workingdir + "buslog_out.dat", workingdir + "busstop_sum.dat", workingdir + "busline_sum.dat", workingdir + "bus_trajectory.dat", workingdir + "passenger_boarding.dat", workingdir + "passenger_alighting.dat", workingdir + "segments_trip_loads.dat", workingdir + "selected_paths.dat", workingdir + "segments_line_loads.dat", workingdir + "od_stops_summary.dat", workingdir + "passenger_boarding_zone.dat", workingdir + "passenger_alighting_zone.dat");
 	return true;
 }
 
@@ -6331,20 +6354,26 @@ bool Network::init()
 		(*iter3)->execute(eventlist,initvalue);
 		initvalue+=0.00001;
 	}
-	for (vector<ODstops*>::iterator iter_odstops = odstops_demand.begin(); iter_odstops < odstops_demand.end(); iter_odstops++ )
+	switch (theParameters->demand_format)
 	{
-		if ((*iter_odstops)->get_arrivalrate() != 0.0 )
-		{
-			(*iter_odstops)->execute(eventlist,initvalue); // adds an event for the generation time of the first passenger per OD in terms of stops
-			initvalue+=0.00001;
-		}
+		case 3:
+			for (vector<ODstops*>::iterator iter_odstops = odstops_demand.begin(); iter_odstops < odstops_demand.end(); iter_odstops++ )
+			{
+				if ((*iter_odstops)->get_arrivalrate() != 0.0 )
+				{
+					(*iter_odstops)->execute(eventlist,initvalue); // adds an event for the generation time of the first passenger per OD in terms of stops
+					initvalue+=0.00001;
+				}
+			}
+			break;
+		case 4:
+			for (vector<ODzone*>::iterator iter_odzones = odzones.begin(); iter_odzones < odzones.end(); iter_odzones++ )
+			{
+				(*iter_odzones)->execute(eventlist,initvalue); // adds an event for the generation time of the first passenger per origin zone
+				initvalue+=0.00001;
+			}
+			break;
 	}
-	for (vector<ODzone*>::iterator iter_odzones = odzones.begin(); iter_odzones < odzones.end(); iter_odzones++ )
-	{
-		(*iter_odzones)->execute(eventlist,initvalue); // adds an event for the generation time of the first passenger per origin zone
-		initvalue+=0.00001;
-	}
-
 #endif //_BUSES
 #ifdef _DEBUG_NETWORK	
 	cout << "turnings initialised" << endl;

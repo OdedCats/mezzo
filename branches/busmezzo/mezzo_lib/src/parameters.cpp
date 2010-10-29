@@ -95,6 +95,12 @@ Parameters::Parameters ()
    choice_model = 0;
    real_time_info = 0;
    start_pass_generation = 0;
+
+// transit control parameters
+   riding_time_weight = 0.0;
+   dwell_time_weight = 0.0;
+   waiting_time_weight = 0.0;
+   holding_time_weight = 0.0;
 }
 
 bool Parameters::read_parameters (istream & in )
@@ -506,7 +512,7 @@ bool Parameters::read_parameters (istream & in )
 		return false;
 	}
 	in >> demand_scale;
-	if (demand_format == 3)
+	if (demand_format == 3 || demand_format == 4)
 	{
 		in >> keyword;
 		if (keyword!= "choice_set_indicator=")
@@ -621,6 +627,40 @@ bool Parameters::read_parameters (istream & in )
 		}
 		in >> stop_pass_generation;
 	}
+	in >> keyword;
+	if (keyword!= "#transit_control_parameters")
+	{
+		cout << "ERROR reading Parameters file, expecting: #demand_parameters, read: " << keyword << endl;
+		return false;
+	}
+	in >> keyword;
+	if (keyword!= "riding_time_weight=")
+	{
+		cout << "ERROR reading Parameters file, expecting: riding_time_weight=, read: " << keyword << endl;
+		return false;
+	}
+	in >> riding_time_weight;
+	in >> keyword;
+	if (keyword!= "dwell_time_weight=")
+	{
+		cout << "ERROR reading Parameters file, expecting: dwell_time_weight=, read: " << keyword << endl;
+		return false;
+	}
+	in >> dwell_time_weight;
+	in >> keyword;
+	if (keyword!= "waiting_time_weight=")
+	{
+		cout << "ERROR reading Parameters file, expecting: waiting_time_weight=, read: " << keyword << endl;
+		return false;
+	}
+	in >> waiting_time_weight;
+	in >> keyword;
+	if (keyword!= "holding_time_weight=")
+	{
+		cout << "ERROR reading Parameters file, expecting: holding_time_weight=, read: " << keyword << endl;
+		return false;
+	}
+	in >> holding_time_weight;
 	return true;
 }
 
