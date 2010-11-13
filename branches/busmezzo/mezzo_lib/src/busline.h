@@ -65,7 +65,7 @@ public:
 	Busline_assign (int line_id_, int start_stop_id_, int end_stop_id_,	int passenger_load_):
 							line_id(line_id_), start_stop_id(start_stop_id_),end_stop_id(end_stop_id_),passenger_load(passenger_load_) {}
 	void write (ostream& out) { out << line_id << '\t'<< start_stop_id<< '\t'<<end_stop_id << '\t'<< passenger_load  << '\t' << endl; }
-	void reset () {line_id = 0 ; start_stop_id = 0; end_stop_id = 0; passenger_load = 0;}
+	void reset () {start_stop_id = 0; end_stop_id = 0; passenger_load = 0;}
 	int line_id;
 	int start_stop_id;
 	int end_stop_id;

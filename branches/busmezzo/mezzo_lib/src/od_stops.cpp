@@ -549,6 +549,20 @@ void ODzone::write_alighting_output_zone(ostream & out, Passenger* pass)
 	}
 }
 
+void ODzone::reset()
+{
+	boarding_utility = 0; 
+	staying_utility = 0;
+	active = false;
+	output_pass_boarding_decision_zone.clear();
+	output_pass_alighting_decision_zone.clear();
+	passengers_during_simulation.clear();
+	nr_pass_completed = 0; 
+	avg_tt = 0;
+	avg_nr_boardings = 0;
+	paths_tt.clear(); 
+}
+
 void Pass_alighting_decision_zone::write (ostream& out) 
 { 
 	out << pass_id << '\t' << origin_zone << '\t' << destination_zone << '\t' << line_id << '\t'<< trip_id << '\t'<< stop_id<< '\t'<< time << '\t'<< generation_time << '\t' << chosen_alighting_stop << '\t' ;

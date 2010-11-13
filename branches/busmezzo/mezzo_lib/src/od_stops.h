@@ -190,6 +190,7 @@ public:
 	ODzone (int zone_id);
 	~ODzone ();
 	int get_id () {return id;}
+	void reset (); 
 	map <Busstop*,pair<double,double>> get_stop_distances() {return stops_distances;}
 	void set_boarding_u (double boarding_utility_) {boarding_utility = boarding_utility_;}
 	void set_staying_u (double staying_utility_) {staying_utility = staying_utility_;}

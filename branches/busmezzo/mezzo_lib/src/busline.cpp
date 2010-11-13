@@ -54,6 +54,8 @@ void Busline::reset ()
 {
 	active = false;
 	curr_trip = trips.begin();
+	output_summary.reset();
+	output_line_assign.clear();
 }
 
 void Busline::reset_curr_trip ()
@@ -584,7 +586,8 @@ void Bustrip::reset ()
 	passengers_on_board.clear();
 	enter_time = 0;
 	next_stop = stops.begin();
-	convert_stops_vector_to_map();	
+	assign_segements.clear();
+	output_passenger_load.clear();
 }
 
 void Bustrip::convert_stops_vector_to_map ()
@@ -826,6 +829,7 @@ void Busstop::reset()
 	buses_at_stop.clear();
 	last_arrivals.clear();
 	last_departures.clear();
+	had_been_visited.clear();
 	multi_nr_waiting.clear();
 	nr_waiting.clear();
 	output_stop_visits.clear();
