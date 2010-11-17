@@ -16,6 +16,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
+//NOTE: we should replace this with the std::tr1 <random> functions.
+
 #ifndef RANDOM_HEADER
 #define RANDOM_HEADER
 

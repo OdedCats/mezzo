@@ -5,7 +5,7 @@
 
 
 Parameters::Parameters ()
-// Later this will be read from a file
+
 
 {
    viewmode = 0; // show simulation run
@@ -67,6 +67,11 @@ Parameters::Parameters ()
    delete_bad_routes= false;
    max_rel_route_cost = 2.0;
    small_od_rate = 3.0;
+// New, to be added to the file format:
+   linktime_disturbance = 0.1;
+   routesearch_iterations = 1;
+   scale_demand= 0.2;
+   renum_routes=true;
 
  // #mime_parameters
    mime_comm_step= 0.1;
@@ -418,6 +423,8 @@ bool Parameters::read_parameters (istream & in )
 		return false;
 	}
 	in >> small_od_rate;
+
+
 
 	
 	in >> keyword;

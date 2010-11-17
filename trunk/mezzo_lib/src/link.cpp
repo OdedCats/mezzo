@@ -26,7 +26,7 @@ Link::Link(int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* s
 #endif //_COLLECT_ALL	
 	avg_time=0.0;
 	avgtimes=new LinkTime();
-	avgtimes->id=id;
+	avgtimes->set_id(id);
 	histtimes=NULL;
 	nr_passed=0;
 	running_percentage=0.0;
@@ -129,20 +129,20 @@ void Link::end_of_simulation()
 {	
 	// store times for current(last) period in avgtimes and make sure all periods have values.
 	if (tmp_avg==0.0)
-		tmp_avg = histtimes->times [curr_period];
+		tmp_avg = histtimes->times() [curr_period];
 		//tmp_avg=freeflowtime;
-	avgtimes->times[curr_period] = tmp_avg;
+	avgtimes->times()[curr_period] = tmp_avg;
 	int i= 0;
-	for (i;i<histtimes->nrperiods;i++)
+	for (i;i<histtimes->get_nrperiods();i++)
 	{
-		if (avgtimes->times.count(i)==0) // no avg time exists, should be impossible, but to be sure...
+		if (avgtimes->times().count(i)==0) // no avg time exists, should be impossible, but to be sure...
 		{
-			avgtimes->times[i] = histtimes->times[i];
+			avgtimes->times()[i] = histtimes->times()[i];
 		}
 		else
 		{
-			if (avgtimes->times [i] == 0.0) // should be impossible
-				avgtimes->times[i] = histtimes->times[i];
+			if (avgtimes->times() [i] == 0.0) // should be impossible
+				avgtimes->times()[i] = histtimes->times()[i];
 		}
 
 	}
@@ -508,13 +508,13 @@ Vehicle* const  Link::exit_veh(const double time, Link* const nextlink, const in
 			double entrytime=veh->get_entry_time();
 			double traveltime=(time-entrytime);
 			avg_time=(nr_passed*avg_time + traveltime)/(nr_passed+1); // update of the average
-			if ((curr_period+1)*(avgtimes->periodlength) < entrytime )
+			if ((curr_period+1)*(avgtimes->get_periodlength()) < entrytime )
 			{			 	
 			 	if (tmp_avg==0.0)
-					tmp_avg = histtimes->times [curr_period];
+					tmp_avg = histtimes->times() [curr_period];
 					//tmp_avg=freeflowtime;
 			 	//avgtimes->times.push_back(tmp_avg);
-				avgtimes->times [curr_period] = tmp_avg;
+				avgtimes->times() [curr_period] = tmp_avg;
 			 	curr_period++;
 			 	tmp_avg=0.0;
 			 	tmp_passed=0;
@@ -573,13 +573,13 @@ Vehicle*const  Link::exit_veh(const double time)
 			double entrytime=veh->get_entry_time();
 			double traveltime=(time-entrytime);
 			avg_time=(nr_passed*avg_time + traveltime)/(nr_passed+1); // update of the average
-			if ((curr_period+1)*(avgtimes->periodlength) < entrytime )
+			if ((curr_period+1)*(avgtimes->get_periodlength()) < entrytime )
 			{		
 				if (tmp_avg==0.0)
-					tmp_avg = histtimes->times [curr_period];
+					tmp_avg = histtimes->times() [curr_period];
 				//	tmp_avg=freeflowtime;
 			 	//avgtimes->times.push_back(tmp_avg);
-				avgtimes->times [curr_period] = tmp_avg;
+				avgtimes->times() [curr_period] = tmp_avg;
 			 	curr_period++;
 			 	tmp_avg=0.0;
 
@@ -716,9 +716,9 @@ void Link::write_time(ostream& out)
 	int i = 0;
 	this->end_of_simulation(); // check everything is stored as it should, including current temp values, no empty values in avg times, etc.
 	out << "{\t" << id ;
-	for (i; i<histtimes->nrperiods;i++)
+	for (i; i<histtimes->get_nrperiods();i++)
 	{
-		newtime=(theParameters->linktime_alpha)* (avgtimes->times[i]) + (1-(theParameters->linktime_alpha)) * (histtimes->times[i]);
+		newtime=(theParameters->linktime_alpha)* (avgtimes->times()[i]) + (1-(theParameters->linktime_alpha)) * (histtimes->times()[i]);
 		out << "\t"<< newtime;
 	}
 	out << "\t}" << endl;
@@ -856,12 +856,12 @@ void Link::receive_broadcast(Vehicle* const  veh, const int lid, const vector <d
 
 const double Link::calc_diff_input_output_linktimes () const 
  {
-	if (avgtimes->times.size() > 0)
+	if (avgtimes->times().size() > 0)
 		{
 		double total = 0.0;
 
-		for (int i=0; i<avgtimes->nrperiods; i++)
-			total += avgtimes->times [i] - histtimes->times [i];
+		for (int i=0; i<avgtimes->get_nrperiods(); i++)
+			total += avgtimes->times() [i] - histtimes->times() [i];
 		return total;
 	}
 	else
@@ -870,14 +870,14 @@ const double Link::calc_diff_input_output_linktimes () const
 
 const double Link::calc_sumsq_input_output_linktimes () const
  {
-	if (avgtimes->times.size() > 0)
+	if (avgtimes->times().size() > 0)
 	{
 		double total = 0.0;
 		double diff = 0.0;
 		
-		for (int i=0; i<avgtimes->nrperiods; i++)
+		for (int i=0; i<avgtimes->get_nrperiods(); i++)
 		{
-			diff = avgtimes->times [i] - histtimes->times [i];
+			diff = avgtimes->times() [i] - histtimes->times() [i];
 			total += diff*diff;
 		}
 		return total;
@@ -890,10 +890,10 @@ const bool Link::copy_linktimes_out_in()
 	// 'safe' way of copying the output to input travel times. 
 	// If no value in output (for certain time period), input value is kept. 
 	// If no value in input, no value is copied from output. (to preserve same length)
-	if (avgtimes->times.size() > 0)
+	if (avgtimes->times().size() > 0)
 	{
-		for (int i=0; i<avgtimes->nrperiods; i++)
-			histtimes->times [i] =(theParameters->linktime_alpha)*avgtimes->times [i] + (1-(theParameters->linktime_alpha))* histtimes->times [i];
+		for (int i=0; i<avgtimes->get_nrperiods(); i++)
+			histtimes->times() [i] =(theParameters->linktime_alpha)*avgtimes->times() [i] + (1-(theParameters->linktime_alpha))* histtimes->times() [i];
 		return true;
 	}
 	else 
@@ -1012,13 +1012,13 @@ const  bool VirtualLink::full() const
 			double traveltime=(time-entrytime);
 			//eout << "virtuallink::exit_veh: entrytime: " << entrytime << " exittime " << time << endl;
 			avg_time=(nr_passed*avg_time + traveltime)/(nr_passed+1); // update of the average
-			if ((curr_period+1)*(avgtimes->periodlength) < entrytime )
+			if ((curr_period+1)*(avgtimes->get_periodlength()) < entrytime )
 			{	
 				if (tmp_avg==0.0)
-					tmp_avg = histtimes->times [curr_period];
+					tmp_avg = histtimes->times() [curr_period];
 					//tmp_avg=freeflowtime;
 //			 	avgtimes->times.push_back(tmp_avg);
-				avgtimes->times [curr_period] = tmp_avg;
+				avgtimes->times() [curr_period] = tmp_avg;
 			 	curr_period++;
 			 	tmp_avg=0.0;
 			 	tmp_passed=0;

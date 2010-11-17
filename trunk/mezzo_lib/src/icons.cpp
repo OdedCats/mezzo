@@ -58,9 +58,13 @@ void Drawing::draw(QPixmap* const  pm,QMatrix * const  wm)
 
  {
     int min_x=0, min_y=0, max_x=0, max_y=0;
-    
+    list <Icon*>::iterator iter=icons.begin();
+	min_x=(*iter)->get_x();
+	max_x=min_x;
+	min_y=(*iter)->get_y();
+	max_y=min_y;
     vector <int> result;
-    for (list <Icon*>::iterator iter=icons.begin(); iter != icons.end(); iter++)
+    for (iter; iter != icons.end(); iter++)
     {
        register int x = (*iter)->get_x();
        if (x < min_x)

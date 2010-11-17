@@ -123,6 +123,7 @@ Network::Network()
 	linkinfo=new LinkTimeInfo();
 	eventlist=new Eventlist;
 	no_ass_links=0;
+	routenr=0;
 }
 
 Network::~Network()
@@ -1817,7 +1818,7 @@ bool Network::add_od_routes()
 		addroutes ((*iter)->get_origin()->get_id(), (*iter)->get_destination()->get_id(), *iter );
 		if (theParameters->delete_bad_routes)
 		{
-			new_del_routes = (*iter)->delete_spurious_routes(runtime/4);
+			new_del_routes = (*iter)->delete_spurious_routes(runtime/2);
 			deleted_routes.insert(deleted_routes.begin(), new_del_routes.begin(), new_del_routes.end());
 			//nr_deleted += (*iter)->delete_spurious_routes(runtime/4).size(); // deletes all the spurious routes in the route set.
 		}
@@ -2274,12 +2275,12 @@ bool Network::readtimes(istream& in)
 		for (map<int,Link*>::iterator iter=linkmap.begin();iter!=linkmap.end();iter++)
 		{
 			double linktime= (*iter).second->get_freeflow_time();
-			LinkTime* ltime=new LinkTime();
-			ltime->periodlength=periodlength;
-			ltime->nrperiods=nrperiods;
-			ltime->id=(*iter).second->get_id();
+			LinkTime* ltime=new LinkTime((*iter).second->get_id(),nrperiods,periodlength);
+			//ltime->periodlength=periodlength;
+			//ltime->nrperiods=nrperiods;
+			//ltime->id=(*iter).second->get_id();
 			for (int i=0;i < nrperiods;i++)
-				(ltime->times) [i] = linktime;
+				ltime->times() [i] = linktime;
 			(*iter).second->set_hist_time(linktime);
 			(*iter).second->set_histtimes(ltime);
 			linkinfo->times.insert(pair <int,LinkTime*> ((*iter).second->get_id(),ltime )); 
@@ -2305,14 +2306,14 @@ bool Network::readtime(istream& in)
 	in  >> lid ;
 	if (linkmap.count(lid)!=0)
 	{
-		LinkTime* ltime=new LinkTime();
-		ltime->periodlength=periodlength;
-		ltime->nrperiods=nrperiods;
-		ltime->id=lid;
+		LinkTime* ltime=new LinkTime(lid,nrperiods,periodlength);
+		//ltime->periodlength=periodlength;
+		//ltime->nrperiods=nrperiods;
+		//ltime->id=lid;
 		for (int i=0;i<nrperiods;i++)
 		{
 			in >> linktime;
-			(ltime->times) [i] = linktime;
+			ltime->times() [i] = linktime;
 		}
 		map <int,Link*>::iterator l_iter;
 		l_iter = linkmap.find(lid);
@@ -2688,112 +2689,117 @@ bool Network::shortest_paths_all()
 //calculate the shortest paths for each link emanating from each origin to each destination;
 // and saving them if  there is a new path found (i.e. it's not in the routes vector already)
 {		
-	double entrytime=0.0;    // entry time for time-variant shortest path search
-	int nr_reruns=static_cast<int> (runtime/theParameters->update_interval_routes)-1; // except for last period
-	// determines the number of reruns of the shortest path alg.
-	//int routenr=routemap.size();
-	for (int i=0; i<nr_reruns; i++)
-	{
-		entrytime= i*theParameters->update_interval_routes;
-		int lastorigin = -1;
-		for (vector<ODpair*>::iterator iter1=odpairs.begin(); iter1<odpairs.end();)
+	for (int r=0; r <theParameters->routesearch_iterations; r++) // reruns for Random draws
+	{ 
+		if (theParameters->routesearch_iterations > 1 )
+			linkinfo->generate_disturbances();
+		double entrytime=0.0;    // entry time for time-variant shortest path search
+		int nr_reruns_periods=static_cast<int> (runtime/theParameters->update_interval_routes)-1; // except for last period
+		// determines the number of reruns of the shortest path alg.
+		//int routenr=routemap.size();
+		for (int i=0; i<nr_reruns_periods; i++) // RERUNS for time periods
 		{
-			// OD pairs are sorted by origin, destination
-			// For each origin in OD pairs, find the destinations that need another route
-			Origin* ori = (*iter1)->get_origin();
-			lastorigin = ori->get_id();
-#ifdef _DEBUG_SP
-			eout << "last origin: " << lastorigin << endl;
-#endif // _DEBUG_SP
-			vector <Destination*> dests;
-			bool exitloop = false;
-			while  (!exitloop)
-			{	
-				double od_rate= (*iter1)->get_rate();
-				double nr_routes= (*iter1)->get_nr_routes();
-				if ( ((od_rate > theParameters->small_od_rate) && ( (od_rate/theParameters->small_od_rate) < nr_routes)) || (nr_routes < 1) )
-					// if the od pair has not too many routes for its size
-					dests.push_back((*iter1)->get_destination());
-				iter1++;
-				if (iter1 == odpairs.end())
-					exitloop = true;
-				else
-					if (((*iter1)->get_origin()->get_id()) != lastorigin )
-						exitloop = true;
-			}
-#ifdef _DEBUG_SP
-			eout << " dests size is: " << dests.size() << endl;
-#endif //_DEBUG_SP
-			vector<Link*> outgoing=ori->get_links();
-			for (vector<Link*>::iterator iter2=outgoing.begin();iter2<outgoing.end();iter2++)
+			entrytime= i*theParameters->update_interval_routes;
+			int lastorigin = -1;
+			for (vector<ODpair*>::iterator iter1=odpairs.begin(); iter1<odpairs.end();)
 			{
-
-#ifdef _DEBUG_SP
-				eout << "shortest_paths_all: starting label correcting from root " << (*iter2)->get_id() << endl;
-#endif //_DEBUG_SP
-#ifndef _USE_VAR_TIMES
-				graph->labelCorrecting((*iter2)->get_id());  // find the shortest path from Link (*iter2) to ALL nodes
-#else
-				if (linkinfo) // if there are link info times
-					graph->labelCorrecting(link_to_graphlink[ (*iter2)->get_id() ],entrytime,linkinfo);  // find the shortest path from Link (*iter2) to ALL nodes
-				else
-					graph->labelCorrecting(link_to_graphlink[ (*iter2)->get_id() ]);  // find the shortest path from Link (*iter2) to ALL nodes NO LINKINFO
-#endif // _USE_VAR_TIMES
-#ifdef _DEBUG_SP
-				eout << "finished label correcting for root link "<<(*iter2)->get_id() << endl;
-#endif //_DEBUG_SP
-				for (vector<Destination*>::iterator iter3=dests.begin();iter3<dests.end();iter3++)
-				{				
-#ifdef _DEBUG_SP
-					eout << " see if we can reach destination " << (*iter3)->get_id()<< endl;
-#endif //_DEBUG_SP
-					if (graph->reachable(node_to_graphnode[ (*iter3)->get_id() ] )) // if the destination is reachable from this link...
-					{
-#ifdef _DEBUG_SP
-						eout << " it's reachable.." << endl;
-#endif //_DEBUG_SP
-						vector<Link*> rlinks=get_path((*iter3)->get_id());
-#ifdef _DEBUG_SP
-						eout << " gotten path" << endl;
-#endif //_DEBUG_SP
-						if (rlinks.size() > 0)
-						{
-							int frontid=(rlinks.front())->get_id();
-#ifdef _DEBUG_SP
-							eout << " gotten front " << endl;
-#endif //_DEBUG_SP
-							if (frontid!=(*iter2)->get_id())
-								rlinks.insert(rlinks.begin(),(*iter2)); // add the root link to the path
-							routenr++;
-#ifdef _DEBUG_SP
-							eout << " checking if the routenr does not already exist " << endl;
-#endif //_DEBUG_SP
-							ODVal val = ODVal(ori->get_id(), (*iter3)->get_id());
-							assert (!exists_route(routenr,val)); // Check that no route exists with same routeid, at least for this OD pair
-							//assert ( (find_if (routes.begin(),routes.end(), compare <Route> (routenr))) == routes.end() ); // No route with routenr exists
-#ifdef _DEBUG_SP
-							eout << " making route " << endl;
-#endif //_DEBUG_SP
-							Route* rptr=new  Route(routenr, ori, (*iter3), rlinks);
-							bool exists=true;
-							if (rptr)
-							{
-								//not_exists= ( (find_if (routes.begin(),routes.end(), equalmembers <Route> (*rptr))) == routes.end() ); // find if there's a route with the same links
-								exists = exists_same_route(rptr);
-								if (!exists)
-								{	
-									routemap.insert(routemap.end(),pair <ODVal, Route*> (val,rptr)); // add the newly found route
-								}
-							}
-							else
-								routenr--;  	
-
-						}
-					}		
+				// OD pairs are sorted by origin, destination
+				// For each origin in OD pairs, find the destinations that need another route
+				Origin* ori = (*iter1)->get_origin();
+				lastorigin = ori->get_id();
+	#ifdef _DEBUG_SP
+				eout << "last origin: " << lastorigin << endl;
+	#endif // _DEBUG_SP
+				vector <Destination*> dests;
+				bool exitloop = false;
+				while  (!exitloop)
+				{	
+					double od_rate= (*iter1)->get_rate();
+					double nr_routes= (*iter1)->get_nr_routes();
+					if ( ((od_rate > theParameters->small_od_rate) && ( (od_rate/theParameters->small_od_rate) < nr_routes)) || (nr_routes < 1) )
+						// if the od pair has not too many routes for its size
+						dests.push_back((*iter1)->get_destination());
+					iter1++;
+					if (iter1 == odpairs.end())
+						exitloop = true;
+					else
+						if (((*iter1)->get_origin()->get_id()) != lastorigin )
+							exitloop = true;
 				}
-			}                	
-		}
-	}
+	#ifdef _DEBUG_SP
+				eout << " dests size is: " << dests.size() << endl;
+	#endif //_DEBUG_SP
+				vector<Link*> outgoing=ori->get_links();
+				for (vector<Link*>::iterator iter2=outgoing.begin();iter2<outgoing.end();iter2++)
+				{
+
+	#ifdef _DEBUG_SP
+					eout << "shortest_paths_all: starting label correcting from root " << (*iter2)->get_id() << endl;
+	#endif //_DEBUG_SP
+	#ifndef _USE_VAR_TIMES
+					graph->labelCorrecting((*iter2)->get_id());  // find the shortest path from Link (*iter2) to ALL nodes
+	#else
+					if (linkinfo) // if there are link info times
+						graph->labelCorrecting(link_to_graphlink[ (*iter2)->get_id() ],entrytime,linkinfo);  // find the shortest path from Link (*iter2) to ALL nodes
+					else
+						graph->labelCorrecting(link_to_graphlink[ (*iter2)->get_id() ]);  // find the shortest path from Link (*iter2) to ALL nodes NO LINKINFO
+	#endif // _USE_VAR_TIMES
+	#ifdef _DEBUG_SP
+					eout << "finished label correcting for root link "<<(*iter2)->get_id() << endl;
+	#endif //_DEBUG_SP
+					for (vector<Destination*>::iterator iter3=dests.begin();iter3<dests.end();iter3++)
+					{				
+	#ifdef _DEBUG_SP
+						eout << " see if we can reach destination " << (*iter3)->get_id()<< endl;
+	#endif //_DEBUG_SP
+						if (graph->reachable(node_to_graphnode[ (*iter3)->get_id() ] )) // if the destination is reachable from this link...
+						{
+	#ifdef _DEBUG_SP
+							eout << " it's reachable.." << endl;
+	#endif //_DEBUG_SP
+							vector<Link*> rlinks=get_path((*iter3)->get_id());
+	#ifdef _DEBUG_SP
+							eout << " gotten path" << endl;
+	#endif //_DEBUG_SP
+							if (rlinks.size() > 0)
+							{
+								int frontid=(rlinks.front())->get_id();
+	#ifdef _DEBUG_SP
+								eout << " gotten front " << endl;
+	#endif //_DEBUG_SP
+								if (frontid!=(*iter2)->get_id())
+									rlinks.insert(rlinks.begin(),(*iter2)); // add the root link to the path
+								routenr++;
+	#ifdef _DEBUG_SP
+								eout << " checking if the routenr does not already exist " << endl;
+	#endif //_DEBUG_SP
+								ODVal val = ODVal(ori->get_id(), (*iter3)->get_id());
+								assert (!exists_route(routenr,val)); // Check that no route exists with same routeid, at least for this OD pair
+								//assert ( (find_if (routes.begin(),routes.end(), compare <Route> (routenr))) == routes.end() ); // No route with routenr exists
+	#ifdef _DEBUG_SP
+								eout << " making route " << endl;
+	#endif //_DEBUG_SP
+								Route* rptr=new  Route(routenr, ori, (*iter3), rlinks);
+								bool exists=true;
+								if (rptr)
+								{
+									//not_exists= ( (find_if (routes.begin(),routes.end(), equalmembers <Route> (*rptr))) == routes.end() ); // find if there's a route with the same links
+									exists = exists_same_route(rptr);
+									if (!exists)
+									{	
+										routemap.insert(routemap.end(),pair <ODVal, Route*> (val,rptr)); // add the newly found route
+									}
+								}
+								else
+									routenr--;  	
+
+							}
+						}		
+					}
+				}                	
+			}
+		} // reruns for time periods
+	} // reruns for random draws
 	return true;
 }
 
@@ -3887,6 +3893,11 @@ double Network::executemaster()
 	}
 	else
 		calc_paths=true;
+	if (routemap.size()==0) // if there are no routes read, force random draws to generate the initial route set.
+	{
+		theParameters->routesearch_iterations=3;
+		calc_paths=true;
+	}
 	if (calc_paths)
 	{
 		if (!init_shortest_path())
@@ -3895,9 +3906,12 @@ double Network::executemaster()
 			eout << "ERROR: Problem calculating shortest paths for all OD pairs " << endl; // see if there are new routes based on shortest path
 	}
 	
+	if (theParameters->renum_routes)
+		renum_routes(); 
+
 	// add the routes to the OD pairs & delete spurious routes
 	add_od_routes();
-	//renum_routes ();
+	
 	
 	writepathfile(filenames[4]); // write back the routes.
 	if (theParameters->read_signals)
@@ -3920,7 +3934,7 @@ double Network::executemaster()
 		if (!readassignmentlinksfile (workingdir + "assign_links.dat"))
 			eout << "ERROR reading the assignment matrix links: assign_links.dat " << endl; // !!! WE NEED TO FIX THIS INTO THE MAIN READ& WRITE
 	}
-
+	
 	return runtime;
 }
 

@@ -34,48 +34,30 @@ struct compare
  int id;
 };
 
+
+void LinkTime::generate_disturbances ()
+{	
+	disturbances.clear();
+	for (unsigned int i = 0; i < times_.size(); i++)
+		 disturbances [i] = (rand->urandom() -0.5)*2*theParameters->linktime_disturbance*times_[i];;
+	 
+}
+
+
 const double LinkTime::cost(const double time)
 {
-
-      /* ORIGINAL
-      if (time > nrperiods*periodlength)  // if it is later than the last period, return the
-  			//return 0.0;
-           return 0.1; // NEVER RETURN 0
-  		else
-  		{
-  			int i=static_cast <int> (time/periodlength);
-  			if (static_cast<int>(times.size()) < i)
-  				//return 0.0;
-              return 0.1; // NEVER RETURN 0
-  			else	
-	  			return times[i];
-		}
-    */
-      // NEW
-/*
-    if (times.size() == 0) // if there are no link times registered
-        return 0.1; // never return 0
-    else
-    {
-      int i; // the period to return   the time of
-      if (time > nrperiods*periodlength)  // if it is later than the last period, return the
-        i=nrperiods;     // last period
-      else
-        i=static_cast <int> (time/periodlength); // return the current period
-      if (static_cast<int>(times.size()) < i) // extra check that i is not out of bounds
-        return 0.1; // NEVER RETURN 0
-      else
-        return times[i];
-    }
-*/    
-	// FASTER..
 	unsigned int i = static_cast <int> (time/periodlength); // return the current period
-	if (times.size()==0) 
+	if (times_.size()==0) 
         return 0.1; // never return 0
     else
 	{
-		if (times.count(i)) // if exists (should always be true, but still
-			return times[i];
+		if (times_.count(i)) // if exists (should always be true, but still)
+		{
+			if (disturbances.count(i))
+				return times_[i] + disturbances [i];
+			else
+				return times_[i];
+		}
 		else
 			return 0.1;
 	}
@@ -85,15 +67,15 @@ const double LinkTime::cost(const double time)
 const double LinkTime::mean ()
 {
 
-	return (sum() / times.size());
+	return (sum() / times_.size());
 
 }
 
 const double LinkTime::sum()
 {
 	totaltime=0.0;
-	map<int,double>::iterator t_iter = times.begin();
-	for (t_iter;t_iter!=times.end();t_iter++)
+	map<int,double>::iterator t_iter = times_.begin();
+	for (t_iter;t_iter!=times_.end();t_iter++)
 	{
 		totaltime+=(*t_iter).second;	
 	}
@@ -114,6 +96,13 @@ const double LinkTimeInfo::sum()
 
 }
 
+void LinkTimeInfo::generate_disturbances ()
+{
+	map <int,LinkTime*>::iterator iter = times.begin();
+	for (iter; iter != times.end(); iter++)
+		iter->second->generate_disturbances();
+}
+
 
 
 const double LinkTimeInfo::mean()
@@ -123,7 +112,7 @@ const double LinkTimeInfo::mean()
 
 }
 
-const double LinkTimeInfo::cost (const int i, const double time)  // to be repaired. It caused crashes in the Graph.cc routines (which contain some archaic C-style array magic)
+const double LinkTimeInfo::cost (const int i, const double time)  
 
 
 {
@@ -138,7 +127,7 @@ const double LinkTimeInfo::cost (const int i, const double time)  // to be repai
 }
 
 
-const double LinkTimeInfo::graph_cost (const int i, const double time)  // to be repaired. It caused crashes in the Graph.cc routines (which contain some archaic C-style array magic)
+const double LinkTimeInfo::graph_cost (const int i, const double time)  
 
 
 {
