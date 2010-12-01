@@ -54,6 +54,7 @@ void Busline::reset ()
 {
 	active = false;
 	curr_trip = trips.begin();
+	stop_pass.clear();
 	output_summary.reset();
 	output_line_assign.clear();
 }
@@ -585,8 +586,11 @@ void Bustrip::reset ()
 	init_occupancy = line->get_initial_occupancy();
 	passengers_on_board.clear();
 	enter_time = 0;
+	last_stop_exit_time = 0;
 	next_stop = stops.begin();
 	assign_segements.clear();
+	nr_expected_alighting.clear();
+	passengers_on_board.clear();
 	output_passenger_load.clear();
 }
 
@@ -1596,7 +1600,7 @@ return total_nr_waiting;
 void Busstop::record_busstop_visit (Bustrip* trip, double enter_time)  // creates a log-file for stop-related info
 {
 	double arrival_headway = get_time_since_arrival (trip , enter_time);
-	double riding_time, total_pass_waiting_time;
+	double riding_time;
 	if (trip->get_line()->check_first_stop(this) == true)
 	{
 		riding_time = 0;
