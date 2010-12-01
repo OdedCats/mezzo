@@ -110,9 +110,8 @@ void Bus::reset ()
 {
 	occupancy = 0;
 	on_trip = false;
-	number_seats = 45;
-	capacity = 70;
 	type = 4;
+	output_vehicle.clear();
 }
 
 void Bus::set_bustype_attributes (Bustype* bty) 
@@ -177,3 +176,4 @@ Bustype::Bustype (int type_id_, string bus_type_name_, double length_, int numbe
 Bustype::~Bustype ()
 {
 }
+
