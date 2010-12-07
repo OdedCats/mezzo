@@ -247,7 +247,6 @@ int Network::reset()
 	{
 		(*sv_iter).second->reset();
 	}
-	
 	for (vector <ChangeRateAction*>::iterator cr_iter=changerateactions.begin(); cr_iter != changerateactions.end(); cr_iter++)
 	{
 		(*cr_iter)->reset();
@@ -277,6 +276,12 @@ int Network::reset()
 	for (vector<Busstop*>::iterator stops_iter = busstops.begin(); stops_iter < busstops.end(); stops_iter++)
 	{
 		(*stops_iter)->reset();
+	}
+
+	// busroutes
+	for (vector<Busroute*>::iterator route_iter = busroutes.begin(); route_iter < busroutes.end(); route_iter++)
+	{
+		(*route_iter)->reset();
 	}
 
 	// ODstops, passengers, paths
@@ -836,9 +841,12 @@ bool Network::readserver(istream& in)
 		cout << "readfile::readservers scanner jammed at " << bracket;
 		return false;
 	}
-	in  >> sid >> stype >> mu >> sd >> delay;
+	in  >> sid >> stype;
+	
 	assert (!servermap.count(sid));
-	assert ( (stype > -1) && (stype<5) && (mu>=0.0) && (sd>=0.0) && (delay>=0.0)); // to be updated when more server types are added
+	assert ( (stype > -1) && (stype<5));
+	in >> mu >> sd >> delay;
+	assert ((mu>=0.0) && (sd>=0.0) && (delay>=0.0)); // to be updated when more server types are added
 	// check id, vmax, vmin, romax;
 	// type 0= dummy server: Const server
 	// type 1=standard N(mu,sd) sever
@@ -856,9 +864,7 @@ bool Network::readserver(istream& in)
 		sptr = new DetServer(sid,stype,mu,sd,delay);
 	if (stype==3)
 	{
-		in >> delay_std;
-		assert (delay_std >=0.0);
-		sptr = new LogNormalDelayServer (sid,stype,mu,sd,delay,delay_std * theParameters->sd_server_scale);
+		sptr = new LogNormalDelayServer (sid,stype,mu,sd*theParameters->sd_server_scale,delay);
 	}
 	if (stype==4)
 	{

@@ -57,6 +57,7 @@ Parameters::Parameters ()
    od_servers_deterministic= 1;
    odserver_sigma= 0.2;
    sd_server_scale= 1.0;
+   server_type = 1;
 // #vehicle_parameters
    standard_veh_length= 7;
 // #route_parameters
@@ -374,6 +375,14 @@ bool Parameters::read_parameters (istream & in )
 		return false;
 	}
 	in >> sd_server_scale;
+
+	in >> keyword;
+	if (keyword!= "server_type=")
+	{
+		cout << "ERROR reading Parameters file, expecting: server_type=, read: " << keyword << endl;
+		return false;
+	}
+	in >> server_type;
 
 	in >> keyword;
 	if (keyword!= "#vehicle_parameters")

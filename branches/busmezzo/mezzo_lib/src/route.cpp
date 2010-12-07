@@ -227,3 +227,9 @@ void Route::write(ostream& out)
 	out << "} }" << endl;
 }
 
+void Busroute::reset()
+{
+	sumcost=0.0;
+	last_calc_time=0.0;
+
+}

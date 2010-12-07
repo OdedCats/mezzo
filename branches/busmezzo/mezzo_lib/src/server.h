@@ -124,17 +124,13 @@ class OServer : public Server
 
 class LogNormalDelayServer : public Server
 /* Delivers stochastic (delay + service) time following the lognormal distribution.
-mu is regarded as a min value + lognormal (delay, delay_std). SD is not taken into account
+mu is regarded as a min value + lognormal (delay, sd)
   */
 {
 public:
-	LogNormalDelayServer (const int id_, const int type_, const double mu_, const double sd_, const double delay_, const double delay_std_) :
-	  Server (id_,type_,mu_,sd_,delay_), delay_std (delay_std_){}
+	LogNormalDelayServer (const int id_, const int type_, const double mu_, const double sd_, const double delay_) :
+	  Server (id_,type_,mu_,sd_,delay_){}
 	double next (const double time);
-	double get_delay_std () {return delay_std;}
-	void set_delay_std (double delay_std_) {delay_std = delay_std_;}
-protected:
-	double delay_std;
 };
 
 class LogLogisticDelayServer : public Server

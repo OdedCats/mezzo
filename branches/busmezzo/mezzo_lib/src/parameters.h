@@ -144,6 +144,7 @@ public:
    bool od_servers_deterministic; //!< if true the time headways in OD servers are determiunistic, otherwise neg_exp
    double odserver_sigma; //!< Obsolete since OD servers now have Mu=Sigma  (neg exp). Was for use with previous combined normal-neg_exp servers
    double sd_server_scale; // !< for the case study - scale for SD delay at the stochastic delay server
+   int server_type; // !< can indicate that all servers are from a paricular type (3 - lognormal)
 
 // #vehicle_parameters
    int standard_veh_length; //!< used to calculate a-priori capacity of links

@@ -30,9 +30,17 @@ void Server::reset()
 }
 double Server::next(const double time)
 {
- 	double temp= _MAX(min_hdway,random->nrandom(mu,sd));
- 	return time+temp;
-
+	if (theParameters->server_type == 3)
+	{
+		double result = mu + random->lnrandom(delay, sd);
+		//double delay_std1 = theParameters->sd_server_scale * sqrt(delay_std) * sqrt (mu + delay); // This is specifically for the Tel-Aviv case study use - delay_std = total driving time for this busline
+		return (time + result) ;	
+	}
+	else
+	{
+		double temp= _MAX(min_hdway,random->nrandom(mu,sd));
+ 		return time+temp;
+	}
 }
 
 
@@ -112,10 +120,11 @@ double OServer::next(const double time)
 
 double LogNormalDelayServer::next (const double time)
 {
-	double result = mu + random->lnrandom(delay, delay_std);
+	double result = mu + random->lnrandom(delay, sd);
 	//double delay_std1 = theParameters->sd_server_scale * sqrt(delay_std) * sqrt (mu + delay); // This is specifically for the Tel-Aviv case study use - delay_std = total driving time for this busline
 	return time + result ;
 }
+
 
 double LogLogisticDelayServer::next (const double time)
 {
