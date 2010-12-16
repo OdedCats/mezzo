@@ -1588,7 +1588,7 @@ bool Network::readbusstop (istream& in) // reads a busstop
 //{ stop_id	link_id	length	has_bay	dwelltime }
   char bracket;
   int stop_id, link_id;
-  double position, length, dwelltime;
+  double position, length;
   string name;
 	bool has_bay ;
 	bool ok= true;
@@ -1598,8 +1598,8 @@ bool Network::readbusstop (istream& in) // reads a busstop
 		cout << "readfile::readsbusstop scanner jammed at " << bracket;
 		return false;
 	}
-  in >> stop_id >> name >> link_id >> position >> length >> has_bay >> dwelltime;
-  Busstop* st= new Busstop (stop_id, name, link_id, position, length, has_bay, dwelltime, theParameters->real_time_info);
+  in >> stop_id >> name >> link_id >> position >> length >> has_bay;
+  Busstop* st= new Busstop (stop_id, name, link_id, position, length, has_bay, theParameters->real_time_info);
   st->add_distance_between_stops(st,0.0);
 	in >> bracket;
 	if (bracket != '}')
@@ -4814,7 +4814,7 @@ bool Network::writeheadways(string name)
 
 }
 
-bool Network::write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10, string name11, string name12)
+bool Network::write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10, string name11)
 {
 	ofstream out1(name1.c_str(),ios_base::app);
 	ofstream out2(name2.c_str(),ios_base::app);
@@ -4827,7 +4827,6 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 	ofstream out9(name9.c_str(),ios_base::app);
 	ofstream out10(name10.c_str(),ios_base::app);
 	ofstream out11(name11.c_str(),ios_base::app);
-	ofstream out12(name12.c_str(),ios_base::app);
 	assert(out1);
 	assert(out2);
 	assert(out3);
@@ -4839,7 +4838,6 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 	assert(out9);
 	assert(out10);
 	assert(out11);
-	assert(out12);
 	// writing the crude data and summary outputs for each bus stop
 	for (vector<Busstop*>::iterator iter = busstops.begin();iter != busstops.end();iter++)
 	{	
@@ -4861,9 +4859,11 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 		(*iter)->get_output_summary().write(out3,(*iter)->get_id());
 		(*iter)->calc_line_assignment();
 		(*iter)->write_assign_output(out9);
+		(*iter)->write_ttt_output(out11);
 	}
 	out3.close();
 	out9.close();
+	out11.close();
 	// writing the trajectory output for each bus vehicle (by stops)
 	for (vector<Bus*>::iterator iter = busvehicles.begin(); iter!= busvehicles.end(); iter++)
 	{
@@ -4901,6 +4901,7 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 			}
 		}
 	}
+/*
 	if (theParameters->demand_format == 4)
 	{
 		for (vector<ODzone*>::iterator od_iter = odzones.begin(); od_iter < odzones.end(); od_iter++)
@@ -4916,7 +4917,7 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 				(*od_iter)->write_alighting_output_zone(out12, (*pass_iter1).first);
 			}
 		}
-	}
+*/
 	out5.close();
 	out6.close();
 	out8.close();
@@ -6129,7 +6130,7 @@ bool Network::writeall(unsigned int repl)
 	//writeheadways("timestamps.dat"); // commented out, since no-one uses them 
 	writeassmatrices(assignmentmatfile);
 	write_v_queues(vqueuesfile);
-	this->write_busstop_output(workingdir + "buslog_out.dat", workingdir + "busstop_sum.dat", workingdir + "busline_sum.dat", workingdir + "bus_trajectory.dat", workingdir + "passenger_boarding.dat", workingdir + "passenger_alighting.dat", workingdir + "segments_trip_loads.dat", workingdir + "selected_paths.dat", workingdir + "segments_line_loads.dat", workingdir + "od_stops_summary.dat", workingdir + "passenger_boarding_zone.dat", workingdir + "passenger_alighting_zone.dat");
+	this->write_busstop_output(workingdir + "buslog_out.dat", workingdir + "busstop_sum.dat", workingdir + "busline_sum.dat", workingdir + "bus_trajectory.dat", workingdir + "passenger_boarding.dat", workingdir + "passenger_alighting.dat", workingdir + "segments_trip_loads.dat", workingdir + "selected_paths.dat", workingdir + "segments_line_loads.dat", workingdir + "od_stops_summary.dat", workingdir + "trip_total_travel_time.dat");
 	return true;
 }
 

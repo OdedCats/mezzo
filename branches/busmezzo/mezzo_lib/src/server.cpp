@@ -28,6 +28,7 @@ void Server::reset()
 	else
 		random->randomize();
 }
+
 double Server::next(const double time)
 {
 	if (theParameters->server_type == 3)

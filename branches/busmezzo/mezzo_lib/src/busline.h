@@ -72,6 +72,17 @@ public:
 	int passenger_load;
 };
 
+class Busline_travel_times // container that holds the total travel time experienced by line's trips
+{
+public:
+	Busline_travel_times (int trip_id_, double total_travel_time_):
+							trip_id(trip_id_), total_travel_time(total_travel_time_) {}
+	void write (ostream& out) { out << trip_id << '\t'<< total_travel_time<< '\t' << endl; }
+	void reset () {total_travel_time = 0;}
+	int trip_id;
+	double total_travel_time;
+};
+
 class Busline: public Action
 {
 public:
@@ -129,6 +140,8 @@ public:
 	void calc_line_assignment();
 	void record_passenger_loads (vector<Busstop*>::iterator stop_iter); //!< creates a log-file for passenegr load assignment info
 	void write_assign_output(ostream & out);
+	void update_total_travel_time (Bustrip* trip, double time);
+	void write_ttt_output(ostream & out);
 
 	vector <Busstop*>  stops; //!< contains all the stops on this line
 
@@ -153,6 +166,7 @@ protected:
 	Output_Summary_Line output_summary;
 	map <Busstop*, int> stop_pass;
 	list <Busline_assign> output_line_assign;
+	list <Busline_travel_times> output_travel_times;
 };
 
 typedef pair<Busstop*,double> Visit_stop;
@@ -162,7 +176,7 @@ class Bustrip_assign // container object holding output data for trip assignment
 public:
 	Bustrip_assign (int line_id_,	int trip_id_,	int vehicle_id_, int start_stop_id_, int end_stop_id_,	int passenger_load_):
 							line_id(line_id_),trip_id(trip_id_),vehicle_id(vehicle_id_), start_stop_id(start_stop_id_),end_stop_id(end_stop_id_),passenger_load(passenger_load_) {}
-	void write (ostream& out) { out << line_id << '\t'<< trip_id << '\t'<< vehicle_id << '\t'<< start_stop_id<< '\t'<<end_stop_id << '\t'<< passenger_load  << '\t'	<< endl; }
+	void write (ostream& out) { out << line_id << '\t'<< trip_id << '\t'<< vehicle_id << '\t'<< start_stop_id<< '\t'<<end_stop_id << '\t'<< passenger_load  << '\t' << endl; }
 	void reset () {line_id = 0 ; trip_id = 0; vehicle_id = 0; start_stop_id = 0; end_stop_id = 0; passenger_load = 0;}
 	int line_id;
 	int trip_id;
@@ -196,6 +210,7 @@ public:
 	list <Bustrip_assign> get_output_passenger_load() {return output_passenger_load;}
 	double get_last_stop_exit_time() {return last_stop_exit_time;}
 	void set_last_stop_exit_time (double last_stop_exit_time_) {last_stop_exit_time = last_stop_exit_time_;}
+	double get_actual_dispatching_time () {return actual_dispatching_time;}
 
 // other functions:	
 //	bool is_trip_timepoint(Busstop* stop); //!< returns 1 if true, 0 if false, -1 if busstop not found
@@ -228,6 +243,7 @@ protected:
 	Busline* line; //!< pointer to the line it serves
 	int init_occupancy; //!< initial occupancy, usually 0
 	double starttime; //!< when the trip is schedule to departure from the origin
+	double actual_dispatching_time;
 	vector <Visit_stop*> :: iterator next_stop; 
 	Random* random;
 	list <Bustrip_assign> output_passenger_load;  // contains the information on travelling on the segment starting at stop
@@ -306,7 +322,7 @@ class Busstop : public Action
 public:
 	Busstop ();
 	~Busstop ();
-	Busstop (int id_, string name_, int link_id_, double position_, double length_, bool has_bay_, double dwelltime_, int rti_);
+	Busstop (int id_, string name_, int link_id_, double position_, double length_, bool has_bay_, int rti_);
 	void reset (); 
 
 // GETS & SETS:
