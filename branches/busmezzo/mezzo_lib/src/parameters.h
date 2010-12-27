@@ -189,6 +189,7 @@ public:
 	// 11 - Linear function of boarding and alighting
     // 12 - Linear function of boarding and alighting + non-linear crowding effect (Weidmann) 
     // 21 - TCRP(max doors with crowding, boarding from front door, alighting from both doors) + bay + stop capacity
+    // 22 - TCRP (max doors, boarding from front door, alighting from both doors) - crowding factor according to Weidmann
    double dwell_constant;
    double boarding_coefficient;
    double alighting_cofficient;

@@ -23,7 +23,7 @@ class Pass_path
 	// Gets and sets:
 	int get_id () {return p_id;}
 	vector <vector <Busline*>> get_alt_lines () {return alt_lines;}
-	vector <vector <Busstop*>> get_alt_transfer__stops () {return alt_transfer_stops;}
+	vector <vector <Busstop*>> get_alt_transfer_stops () {return alt_transfer_stops;}
 	vector <double> get_walking_distances () {return walking_distances;};
 	int get_number_of_transfers () {return number_of_transfers;}
 	void set_alt_transfer_stops (vector <vector <Busstop*>> trans_stops) {alt_transfer_stops = trans_stops;}

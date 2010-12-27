@@ -134,7 +134,7 @@ Busstop* Passenger::make_alighting_decision (Bustrip* boarding_bus, double time)
 				*/
 				if (boarding_bus->get_line()->get_id() == (*first_leg_lines)->get_id())
 				{
-					vector<vector<Busstop*>> alt_stops = (*path_iter)->get_alt_transfer__stops();
+					vector<vector<Busstop*>> alt_stops = (*path_iter)->get_alt_transfer_stops();
 					vector<vector<Busstop*>>::iterator stops_iter = alt_stops.begin() + 2; // pointing to the third place - the first transfer stop
 					if (path_set.size() == 1 && (*stops_iter).size() == 1)
 					{
@@ -209,7 +209,7 @@ Busstop* Passenger::make_connection_decision (double time)
 	vector<Pass_path*> path_set = OD_stop->get_path_set();
 	for (vector <Pass_path*>::iterator path_iter = path_set.begin(); path_iter < path_set.end(); path_iter++)
 	{
-		vector<vector<Busstop*>> alt_stops = (*path_iter)->get_alt_transfer__stops();
+		vector<vector<Busstop*>> alt_stops = (*path_iter)->get_alt_transfer_stops();
 		vector<vector<Busstop*>>::iterator stops_iter = alt_stops.begin()+1;
 		for (vector<Busstop*>::iterator connected_stop = (*stops_iter).begin(); connected_stop < (*stops_iter).end(); connected_stop++)
 		// going over all the stops at the second (connected) set
@@ -297,7 +297,7 @@ Busstop* Passenger::make_first_stop_decision (double time)
 				vector<Pass_path*> path_set = possible_od->get_path_set();
 				for (vector <Pass_path*>::iterator path_iter = path_set.begin(); path_iter < path_set.end(); path_iter++)
 				{
-					vector<vector<Busstop*>> alt_stops = (*path_iter)->get_alt_transfer__stops();
+					vector<vector<Busstop*>> alt_stops = (*path_iter)->get_alt_transfer_stops();
 					vector<vector<Busstop*>>::iterator stops_iter = alt_stops.begin();
 					// taking into account the walking distances from the origin to the origin stop and from the last stop till the final destination
 					candidate_origin_stops_u[(*o_stop_iter).first] += exp(theParameters->walking_time_coefficient * origin_walking_distances[(*o_stop_iter).first]/ random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4) + theParameters->walking_time_coefficient * destination_walking_distances[(*d_stop_iter).first]/ random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4) + possible_od->calc_combined_set_utility_for_connection ((*path_iter)->get_walking_distances().front(), time));
@@ -432,7 +432,7 @@ double Passenger::calc_boarding_probability_zone (Busline* arriving_bus, Busstop
 				if ((*iter_paths)->get_arriving_bus_rellevant() == false)
 				{
 					// logsum calculation
-				path_utility = (*iter_paths)->calc_waiting_utility((*iter_paths)->get_alt_transfer__stops().begin(), time, false) + theParameters->walking_time_coefficient * (destination_walking_distances[(*iter_d_stops).first] / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4));
+				path_utility = (*iter_paths)->calc_waiting_utility((*iter_paths)->get_alt_transfer_stops().begin(), time, false) + theParameters->walking_time_coefficient * (destination_walking_distances[(*iter_d_stops).first] / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4));
 					// including the walking time from the last stop till the final destination
 					staying_utility += exp(path_utility);
 				}
@@ -481,7 +481,7 @@ Busstop* Passenger::make_alighting_decision_zone (Bustrip* boarding_bus, double 
 				{
 					if (boarding_bus->get_line()->get_id() == (*first_leg_lines)->get_id())
 					{
-						vector<vector<Busstop*>> alt_stops = (*path_iter)->get_alt_transfer__stops();
+						vector<vector<Busstop*>> alt_stops = (*path_iter)->get_alt_transfer_stops();
 						vector<vector<Busstop*>>::iterator stops_iter = alt_stops.begin() + 2; // pointing to the third place - the first transfer stop
 						for (vector<Busstop*>::iterator first_transfer_stops = (*stops_iter).begin(); first_transfer_stops < (*stops_iter).end(); first_transfer_stops++)
 						{
@@ -554,7 +554,7 @@ Busstop* Passenger::make_connection_decision_zone (double time)
 		vector<Pass_path*> path_set = OD_stop->get_origin()->get_stop_od_as_origin_per_stop((*iter_d_stops).first)->get_path_set();
 		for (vector <Pass_path*>::iterator path_iter = path_set.begin(); path_iter < path_set.end(); path_iter++)
 		{
-			vector<vector<Busstop*>> alt_stops = (*path_iter)->get_alt_transfer__stops();
+			vector<vector<Busstop*>> alt_stops = (*path_iter)->get_alt_transfer_stops();
 			vector<vector<Busstop*>>::iterator stops_iter = alt_stops.begin()+1;
 			for (vector<Busstop*>::iterator connected_stop = (*stops_iter).begin(); connected_stop < (*stops_iter).end(); connected_stop++)
 			// going over all the stops at the second (connected) set

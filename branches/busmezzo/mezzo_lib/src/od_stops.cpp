@@ -77,7 +77,7 @@ bool ODstops::execute (Eventlist* eventlist, double curr_time) // generate passe
 		return true;
 	}
 // called only for generting pass.
-	if (active = true) // generate passenger from the second call, as first initialization call just set time to first passenger
+	if (active == true) // generate passenger from the second call, as first initialization call just set time to first passenger
 	{	
 		//Passenger* pass = pass_recycler.newPassenger();
 		Passenger* pass = new Passenger;
@@ -117,6 +117,7 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus, double time)
 	boarding_utility = 0.0;
 	staying_utility = 0.0;
 	double path_utility = 0.0;
+	map<Pass_path*,pair<bool,double>> set_utilities; // true - boarding, false - staying
 	vector<Busline*> first_leg_lines;
 	bool in_alt = false; // indicates if the current arriving bus is included 
 	// checks if the arriving bus is included as an option in the path set of this OD pair 
@@ -160,6 +161,8 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus, double time)
 					if ((*iter_first_leg_lines)->get_id() == arriving_bus->get_id()) // if the arriving bus is a possible first leg for this path alternative
 					{
 						path_utility = (*iter_paths)->calc_arriving_utility(time);
+						set_utilities[(*iter_paths)].first = true;
+						set_utilities[(*iter_paths)].second = path_utility;
 						boarding_utility += exp(path_utility); 
 						arriving_paths.push_back((*iter_paths));
 						(*iter_paths)->set_arriving_bus_rellevant(true);
@@ -176,7 +179,9 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus, double time)
 				// logsum calculation
 				if (check_if_path_is_dominated((*iter_paths), arriving_paths) == false)
 				{
-					path_utility = (*iter_paths)->calc_waiting_utility((*iter_paths)->get_alt_transfer__stops().begin(), time, false);
+					path_utility = (*iter_paths)->calc_waiting_utility((*iter_paths)->get_alt_transfer_stops().begin(), time, false);
+					set_utilities[(*iter_paths)].first = false;
+					set_utilities[(*iter_paths)].second = path_utility;
 					staying_utility += exp(path_utility);
 				}
 			}
@@ -185,6 +190,7 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus, double time)
 		{
 			boarding_utility = 2.0;
 			staying_utility = -2.0;
+			return 1;
 		}
 		else
 		{
@@ -196,7 +202,7 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus, double time)
 			case 1:
 				return calc_binary_logit(boarding_utility, staying_utility); 
 			case 2:
-				return calc_path_size_logit(boarding_utility, staying_utility);
+				return calc_path_size_logit(set_utilities, boarding_utility, staying_utility);
 		}
 	}
 	// what to do if the arriving bus is not included in any of the alternatives?
@@ -239,12 +245,154 @@ double ODstops::calc_binary_logit (double utility_i, double utility_j)
 	return ((exp(utility_i)) / (exp(utility_i) + exp (utility_j)));
 }
 
-double ODstops::calc_path_size_logit (double utility_i, double utility_j)
+double ODstops::calc_multinomial_logit (double utility_i, double utility_sum)
 {
-	double path_size_i = 1.0;
-	double path_size_j = 1.0;
-	return (exp(utility_i+log(path_size_i)) / (exp(utility_i+log(path_size_i)) + exp (utility_j+log(path_size_j))));
+	return ((exp(utility_i)) / utility_sum);
 }
+
+double ODstops::calc_path_size_logit (map<Pass_path*,pair<bool,double>> set_utilities, double utliity_i, double utliity_j)
+{
+	map<Pass_path*,double> u_1,u_2,f_1,f_2,e_1,e_2,p_1,p_2;
+	double sum_1 = 0.0;
+	double sum_2 = 0.0;
+	double w_ff1 = 0.0;
+	double w_ff2 = 0.0;
+	// distinguish between two clusters
+	for (map<Pass_path*,pair<bool,double>>::iterator u_iter = set_utilities.begin(); u_iter!= set_utilities.end(); u_iter++)
+	{
+		if ((*u_iter).second.first == true)
+		{
+			u_1[(*u_iter).first] = (*u_iter).second.second;
+		}
+		else
+		{
+			u_2[(*u_iter).first] = (*u_iter).second.second;
+		}
+	}
+	// PSL at the cluster level
+	// calc factors
+	if (f_1.size() < 2)
+	{
+		f_1[(*(u_1.begin())).first] = 1.0;
+	}
+	else
+	{
+		f_1 = calc_path_size_factor_nr_stops(u_1);
+	}
+	if (f_2.size() < 2)
+	{
+		f_2[(*(u_2.begin())).first] = 1.0;
+	}
+	else
+	{
+		f_2 = calc_path_size_factor_nr_stops(u_2);
+	}
+	// calc sums for prob fun
+	for (map<Pass_path*,double>::iterator set_iter = f_1.begin(); set_iter!= f_1.end(); set_iter++)
+	{
+		e_1[(*set_iter).first] = exp(u_1[(*set_iter).first]+log((*set_iter).second));
+		sum_1 += e_1[(*set_iter).first];
+	}
+	for (map<Pass_path*,double>::iterator set_iter = f_2.begin(); set_iter!= f_2.end(); set_iter++)
+	{
+		e_2[(*set_iter).first] = exp(u_2[(*set_iter).first]+log((*set_iter).second));
+		sum_2 += e_2[(*set_iter).first];
+	}
+	for (map<Pass_path*,double>::iterator set_iter = f_1.begin(); set_iter!= f_1.end(); set_iter++)
+	{
+		p_1[(*set_iter).first] = e_1[(*set_iter).first]/sum_1;
+	}
+	for (map<Pass_path*,double>::iterator set_iter = f_2.begin(); set_iter!= f_2.end(); set_iter++)
+	{
+		p_2[(*set_iter).first] = e_2[(*set_iter).first]/sum_2;
+	}
+	for (map<Pass_path*,double>::iterator set_iter = p_1.begin(); set_iter!= p_1.end(); set_iter++)
+	{
+		w_ff1 = calc_path_size_factor_between_clusters((*set_iter).first,p_2) * (*set_iter).second;
+	}
+	for (map<Pass_path*,double>::iterator set_iter = p_2.begin(); set_iter!= p_2.end(); set_iter++)
+	{
+		w_ff2 = calc_path_size_factor_between_clusters((*set_iter).first,p_1) * (*set_iter).second;
+	}
+	return (exp(utliity_i+log(w_ff1)) / (exp(utliity_i+log(w_ff1)) + exp (utliity_j+log(w_ff2))));
+}
+
+double ODstops::calc_path_size_factor_between_clusters (Pass_path* path, map<Pass_path*,double> cluster_probs)
+{
+	vector<vector<Busstop*>> alt_transfer_stops = path->get_alt_transfer_stops();
+	double factor = 0.0;
+	double nr_counted_stops = 2 * (path->get_number_of_transfers()+1); // number of stops minus origin and destination
+	double nr_stops_set_factor;
+	map<Busstop*,int> delta_stops;
+	map<Busstop*,double> stop_factor;
+	for (vector<vector<Busstop*>>::iterator alt_transfer_stops_iter = alt_transfer_stops.begin(); alt_transfer_stops_iter < alt_transfer_stops.end(); alt_transfer_stops_iter++)
+	{
+		nr_stops_set_factor = 1 / (*alt_transfer_stops_iter).size();
+		for (vector<Busstop*>::iterator stops_iter = (*alt_transfer_stops_iter).begin(); stops_iter < (*alt_transfer_stops_iter).end(); stops_iter++)
+		{
+			delta_stops[(*stops_iter)] = 0;	
+			for (map<Pass_path*,double>::iterator set_iter = cluster_probs.begin(); set_iter != cluster_probs.end(); set_iter++)
+			{
+				vector<vector<Busstop*>> alt_transfer_stops1 = (*set_iter).first->get_alt_transfer_stops();
+				for (vector<vector<Busstop*>>::iterator alt_transfer_stops_iter1 = alt_transfer_stops1.begin(); alt_transfer_stops_iter1 < alt_transfer_stops1.end(); alt_transfer_stops_iter1++)
+				{
+					for (vector<Busstop*>::iterator stops_iter1 = (*alt_transfer_stops_iter1).begin(); stops_iter1 < (*alt_transfer_stops_iter1).end(); stops_iter1++)
+					{
+						if ((*stops_iter)->get_id() == (*stops_iter1)->get_id())
+						{
+							delta_stops[(*stops_iter)]++;
+							
+						}
+					}
+				}
+				stop_factor[(*stops_iter)] = 1 / (nr_stops_set_factor * delta_stops[(*stops_iter)]);
+				factor += 1/(stop_factor[(*stops_iter)] * (*set_iter).second * nr_counted_stops); // weight the factor by the within-cluster prob. of the compared path
+			}
+		}		
+	}
+	return factor;
+}
+
+map<Pass_path*,double> ODstops::calc_path_size_factor_nr_stops (map<Pass_path*,double> cluster_set_utilities)
+{
+	map <Pass_path*,double> set_factors;
+	double nr_counted_stops;
+	double nr_stops_set_factor;
+	for (map<Pass_path*,double>::iterator set_iter = cluster_set_utilities.begin(); set_iter != cluster_set_utilities.end(); set_iter++)
+	{
+		set_factors[(*set_iter).first] = 0.0;
+		nr_counted_stops = 2 * ((*set_iter).first->get_number_of_transfers()+1); // number of stops minus origin and destination	
+		map<Busstop*,int> delta_stops;
+		map<Busstop*,double> stop_factor;
+		vector<vector<Busstop*>> alt_transfer_stops = (*set_iter).first->get_alt_transfer_stops();
+		for (vector<vector<Busstop*>>::iterator alt_transfer_stops_iter = alt_transfer_stops.begin(); alt_transfer_stops_iter < alt_transfer_stops.end(); alt_transfer_stops_iter++)
+		{
+			nr_stops_set_factor = 1 / (*alt_transfer_stops_iter).size();
+			for (vector<Busstop*>::iterator stops_iter = (*alt_transfer_stops_iter).begin(); stops_iter < (*alt_transfer_stops_iter).end(); stops_iter++)
+			{
+				delta_stops[(*stops_iter)] = 0;
+				for (map<Pass_path*,double>::iterator set_iter1 = cluster_set_utilities.begin(); set_iter1 != cluster_set_utilities.end(); set_iter1++)
+				{
+					vector<vector<Busstop*>> alt_transfer_stops1 = (*set_iter1).first->get_alt_transfer_stops();
+					for (vector<vector<Busstop*>>::iterator alt_transfer_stops_iter1 = alt_transfer_stops1.begin(); alt_transfer_stops_iter1 < alt_transfer_stops1.end(); alt_transfer_stops_iter1++)
+					{
+						for (vector<Busstop*>::iterator stops_iter1 = (*alt_transfer_stops_iter1).begin(); stops_iter1 < (*alt_transfer_stops_iter1).end(); stops_iter1++)
+						{
+							if ((*stops_iter)->get_id() == (*stops_iter1)->get_id())
+							{
+								delta_stops[(*stops_iter)]++;
+							}
+						}
+					}
+				}
+				stop_factor[(*stops_iter)] = 1 / (nr_stops_set_factor * delta_stops[(*stops_iter)]);
+				set_factors[(*set_iter).first] += 1/ (stop_factor[(*stops_iter)] * 	nr_counted_stops);
+	;
+			}
+		}
+	}
+	return set_factors;
+}	
 
 double ODstops::calc_combined_set_utility_for_alighting (Passenger* pass, Bustrip* bus_on_board, double time)
 {
@@ -253,7 +401,7 @@ double ODstops::calc_combined_set_utility_for_alighting (Passenger* pass, Bustri
 	for (vector <Pass_path*>::iterator paths = path_set.begin(); paths < path_set.end(); paths++)
 	{
 		double time_till_transfer = bus_on_board->get_line()->calc_curr_line_ivt(pass->get_OD_stop()->get_origin(),origin_stop,pass->get_OD_stop()->get_origin()->get_rti()); // in seconds
-		staying_utility += exp(random->nrandom(theParameters->in_vehicle_time_coefficient, theParameters->in_vehicle_time_coefficient / 4 ) * (time_till_transfer/60) + random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4 )  +  (*paths)->calc_waiting_utility((*paths)->get_alt_transfer__stops().begin(), time + time_till_transfer, true));
+		staying_utility += exp(random->nrandom(theParameters->in_vehicle_time_coefficient, theParameters->in_vehicle_time_coefficient / 4 ) * (time_till_transfer/60) + random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4 )  +  (*paths)->calc_waiting_utility((*paths)->get_alt_transfer_stops().begin(), time + time_till_transfer, true));
 		// taking into account IVT till this intermediate stop, transfer penalty and the utility of the path from this transfer stop till the final destination
 	}
 	return log(staying_utility);
@@ -266,7 +414,7 @@ double ODstops::calc_combined_set_utility_for_alighting_zone (Passenger* pass, B
 	for (vector <Pass_path*>::iterator paths = path_set.begin(); paths < path_set.end(); paths++)
 	{
 		double time_till_transfer = bus_on_board->get_line()->calc_curr_line_ivt(pass->get_OD_stop()->get_origin(),origin_stop,pass->get_OD_stop()->get_origin()->get_rti()); // in seconds
-		staying_utility += exp(random->nrandom(theParameters->in_vehicle_time_coefficient, theParameters->in_vehicle_time_coefficient / 4 ) * (time_till_transfer/60) + random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4 )  +  (*paths)->calc_waiting_utility((*paths)->get_alt_transfer__stops().begin(), time + time_till_transfer, true)) + theParameters->walking_time_coefficient * (pass->get_destination_walking_distance(destination_stop) / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4));
+		staying_utility += exp(random->nrandom(theParameters->in_vehicle_time_coefficient, theParameters->in_vehicle_time_coefficient / 4 ) * (time_till_transfer/60) + random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4 )  +  (*paths)->calc_waiting_utility((*paths)->get_alt_transfer_stops().begin(), time + time_till_transfer, true)) + theParameters->walking_time_coefficient * (pass->get_destination_walking_distance(destination_stop) / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4));
 		// taking into account IVT till this intermediate stop, transfer penalty and the utility of the path from this transfer stop till the final destination (incl. final walking link)
 	}
 	// in case it is walkable from the alighting stop till the final destination
@@ -293,7 +441,7 @@ double ODstops::calc_combined_set_utility_for_connection (double walking_distanc
 	{
 		bool without_walking_first = false;
 		// go only through paths that does not include walking to another stop from this connection stop
-		vector<vector<Busstop*>> alt_stops = (*paths)->get_alt_transfer__stops();
+		vector<vector<Busstop*>> alt_stops = (*paths)->get_alt_transfer_stops();
 		vector<vector<Busstop*>>::iterator alt_stops_iter = alt_stops.begin();
 		alt_stops_iter++;
 		// check if the first (connected) stop is also included in the second element (no further walking)
@@ -322,7 +470,7 @@ double ODstops::calc_combined_set_utility_for_connection_zone (Passenger* pass, 
 	{
 		bool without_walking_first = false;
 		// go only through paths that does not include walking to another stop from this connection stop
-		vector<vector<Busstop*>> alt_stops = (*paths)->get_alt_transfer__stops();
+		vector<vector<Busstop*>> alt_stops = (*paths)->get_alt_transfer_stops();
 		vector<vector<Busstop*>>::iterator alt_stops_iter = alt_stops.begin();
 		alt_stops_iter++;
 		// check if the first (connected) stop is also included in the second element (no further walking)

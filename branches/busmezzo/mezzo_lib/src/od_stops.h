@@ -98,7 +98,10 @@ public:
 	void add_paths (Pass_path* pass_path_) {path_set.push_back(pass_path_);}
 	double calc_boarding_probability (Busline* arriving_bus, double time);
 	double calc_binary_logit (double utility_i, double utility_j);
-	double calc_path_size_logit (double utility_i, double utility_j);
+	double calc_multinomial_logit (double utility_i, double utility_sum);
+	double calc_path_size_logit (map<Pass_path*,pair<bool,double>> set_utilities, double utliity_i, double utliity_j);
+	map<Pass_path*,double> calc_path_size_factor_nr_stops (map<Pass_path*,double> cluster_set_utilities);
+	double calc_path_size_factor_between_clusters (Pass_path* path, map<Pass_path*,double> cluster_probs);
 	double calc_combined_set_utility_for_alighting (Passenger* pass, Bustrip* bus_on_board, double time); // the trip that the pass. is currently on-board when calc. utility from downstream stop
 	double calc_combined_set_utility_for_alighting_zone (Passenger* pass, Bustrip* bus_on_board, double time); 
 	double calc_combined_set_utility_for_connection (double walking_distance, double time);

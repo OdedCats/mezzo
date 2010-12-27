@@ -2696,7 +2696,6 @@ void Network::find_all_paths ()
 			}
 		}
 	}
-	/*
 	// merge alternative paths
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{
@@ -2706,7 +2705,6 @@ void Network::find_all_paths ()
 	{
 		merge_paths_by_common_lines(*basic_origin);
 	}
-	*/
 	// apply static filtering rules
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{
@@ -2899,7 +2897,7 @@ void Network::merge_paths_by_stops (Busstop* stop) // merge paths with same line
 				for (vector <Pass_path*>::iterator path1 = path_set.begin(); path1 < path_set.end()-1; path1++)
 				{
 					bool perform_merge = false;
-					vector <vector <Busstop*>> stops1 = (*path1)->get_alt_transfer__stops();	
+					vector <vector <Busstop*>> stops1 = (*path1)->get_alt_transfer_stops();	
 					if (flagged_paths[(*path1)] == false)
 					{
 						for (vector <Pass_path*>::iterator path2 = path1 + 1; path2 < path_set.end(); path2++)
@@ -2909,10 +2907,10 @@ void Network::merge_paths_by_stops (Busstop* stop) // merge paths with same line
 							{
 							// both have exactly the same lines for all legs 
 								vector<vector<Busline*>>::iterator path2_line = (*path2)->get_alt_lines().begin();
-								vector<vector<Busstop*>>::iterator path2_stops = (*path2)->get_alt_transfer__stops().begin()+1;
+								vector<vector<Busstop*>>::iterator path2_stops = (*path2)->get_alt_transfer_stops().begin()+1;
 								for(vector<vector<Busline*>>::iterator path1_line = (*path1)->get_alt_lines().begin(); path1_line < (*path1)->get_alt_lines().end(); path1_line++)
 								{
-									for (vector<vector<Busstop*>>::iterator path1_stops = (*path1)->get_alt_transfer__stops().begin()+1; path1_stops < (*path1)->get_alt_transfer__stops().end(); path1_stops = path1_stops + 2)
+									for (vector<vector<Busstop*>>::iterator path1_stops = (*path1)->get_alt_transfer_stops().begin()+1; path1_stops < (*path1)->get_alt_transfer_stops().end(); path1_stops = path1_stops + 2)
 									{
 										if (compare_common_partial_routes ((*path1_line).front(),(*path2_line).front(),(*path1_stops).front(),(*path2_stops).front()) == false)
 										{
@@ -2936,7 +2934,7 @@ void Network::merge_paths_by_stops (Busstop* stop) // merge paths with same line
 							if (fulfilled_conditions == true )
 							// both have exactly the same lines for all legs AND the same route for lines on leg 1 and lines on leg 2 between stops
 							{			
-								vector <vector <Busstop*>> stops2 = (*path2)->get_alt_transfer__stops();
+								vector <vector <Busstop*>> stops2 = (*path2)->get_alt_transfer_stops();
 								vector <vector <Busstop*>>::iterator stops2_iter = stops2.begin();
 								for (vector <vector <Busstop*>>::iterator stops1_iter = stops1.begin(); stops1_iter < stops1.end(); stops1_iter++)
 								{
@@ -3033,12 +3031,12 @@ void Network::merge_paths_by_common_lines (Busstop* stop)  // merge paths with l
 						vector<vector<Busline*>> transfer_lines1_ = (*path1)->get_alt_lines();						
 						vector<vector<Busline*>>::iterator transfer_lines1 = transfer_lines1_.begin();
 						vector<vector<Busline*>>::iterator transfer_lines1_collect_iter = transfer_lines1_collect.begin();
-						vector<vector<Busstop*>> transfer_stops1_ = (*path1)->get_alt_transfer__stops();
+						vector<vector<Busstop*>> transfer_stops1_ = (*path1)->get_alt_transfer_stops();
 						if (transfer_lines1_.size() == 0) // a walking-only path - there is no need in merging
 						{
 							break;
 						}
-						vector<vector<Busstop*>> transfer_stops2_ = (*path2)->get_alt_transfer__stops();
+						vector<vector<Busstop*>> transfer_stops2_ = (*path2)->get_alt_transfer_stops();
 						vector<vector<Busline*>> transfer_lines2_ = (*path2)->get_alt_lines();
 						vector<vector<Busstop*>>::iterator transfer_stops2 = transfer_stops2_.begin()+1;
 						vector<vector<Busline*>>::iterator transfer_lines2 = transfer_lines2_.begin();
@@ -3130,7 +3128,7 @@ void Network::merge_paths_by_common_lines (Busstop* stop)  // merge paths with l
 						if (perform_merge == true && path2 == path_set.end()-1)
 						// only after all the required merging took place
 						{
-							Pass_path* merged_path = new Pass_path(pathid, transfer_lines1_collect, (*path1)->get_alt_transfer__stops(), (*path1)->get_walking_distances()); 
+							Pass_path* merged_path = new Pass_path(pathid, transfer_lines1_collect, (*path1)->get_alt_transfer_stops(), (*path1)->get_walking_distances()); 
 							pathid++;
 							merged_paths_to_be_added.push_back(merged_path);
 						}
@@ -3212,7 +3210,7 @@ void Network::static_filtering_rules (Busstop* stop)
 					{
 						lines_to_be_deleted[(*line_iter)] = false;
 					}
-					vector<vector<Busstop*>> alt_stops = (*path)->get_alt_transfer__stops();
+					vector<vector<Busstop*>> alt_stops = (*path)->get_alt_transfer_stops();
 					map<Busline*, bool> lines_to_include = (*path)->check_maybe_worthwhile_to_wait((*path)->get_alt_lines().front(), alt_stops.begin(), 0);
 					for (map<Busline*, bool>::iterator lines_to_include_iter = lines_to_include.begin(); lines_to_include_iter != lines_to_include.end(); lines_to_include_iter++)
 					{
@@ -3404,7 +3402,7 @@ bool Network::totaly_dominancy_rule (ODstops* odstops, vector<vector<Busline*>> 
 	for (vector <Pass_path*>::iterator path_iter = path_set.begin(); path_iter < path_set.end(); path_iter++)
 	{
 		vector<vector<Busline*>> lines1 = (*path_iter)->get_alt_lines();
-		vector<vector<Busstop*>> stops1 = (*path_iter)->get_alt_transfer__stops();
+		vector<vector<Busstop*>> stops1 = (*path_iter)->get_alt_transfer_stops();
 		double total_walk = 0.0;
 		for (vector<double>::iterator walk_iter = collect_walking_distances.begin(); walk_iter < collect_walking_distances.end(); walk_iter++)
 		{
@@ -3608,8 +3606,8 @@ bool Network::compare_same_stops_paths (Pass_path* path1, Pass_path* path2)
 	if (path1->get_number_of_transfers() == path2->get_number_of_transfers())
 	{
 		vector <bool> is_shared;
-		vector <vector <Busstop*>> stops1 = path1->get_alt_transfer__stops();	
-		vector <vector <Busstop*>> stops2 = path2->get_alt_transfer__stops();
+		vector <vector <Busstop*>> stops1 = path1->get_alt_transfer_stops();	
+		vector <vector <Busstop*>> stops2 = path2->get_alt_transfer_stops();
 		vector <vector <Busstop*>>::iterator stops2_iter = stops2.begin();
 		for (vector <vector <Busstop*>>::iterator stops1_iter = stops1.begin(); stops1_iter < stops1.end(); stops1_iter++)
 		{	
@@ -3694,11 +3692,11 @@ bool Network::compare_common_partial_routes (Busline* line1, Busline* line2, Bus
 
 bool Network::check_constraints_paths (Pass_path* path) // checks if the path meets all the constraints
 {
-	if (path->get_alt_transfer__stops().size() <= 4)
+	if (path->get_alt_transfer_stops().size() <= 4)
 	{
 		return true;
 	}
-	if (check_path_no_repeating_lines(path->get_alt_lines(), path->get_alt_transfer__stops()) == false)
+	if (check_path_no_repeating_lines(path->get_alt_lines(), path->get_alt_transfer_stops()) == false)
 	{
 		return false;
 	}
@@ -3784,7 +3782,7 @@ bool Network::check_sequence_no_repeating_lines(vector<vector<Busline*>> lines, 
 
 bool Network::check_path_no_repeating_stops (Pass_path* path) // chceks if the path does not include going through the same stop more than once
 {
-	vector <vector <Busstop*>> stops = path->get_alt_transfer__stops();	
+	vector <vector <Busstop*>> stops = path->get_alt_transfer_stops();	
 	for (vector <vector <Busstop*>>::iterator stops_iter1 = stops.begin(); stops_iter1 < stops.end(); stops_iter1++)
 	{	
 		for (vector <Busstop*>::iterator leg_stops1 = (*stops_iter1).begin(); leg_stops1 < (*stops_iter1).end()-1; leg_stops1++)
@@ -3866,7 +3864,7 @@ bool Network::write_path_set (string name1)
 			for (vector<Pass_path*>::iterator path_iter = path_set.begin(); path_iter < path_set.end(); path_iter++)
 			{
 				pathcounter++;
-				vector<vector<Busstop*>> stops = (*path_iter)->get_alt_transfer__stops();
+				vector<vector<Busstop*>> stops = (*path_iter)->get_alt_transfer_stops();
 				vector<vector<Busline*>> lines = (*path_iter)->get_alt_lines();
 				vector<double> walking = (*path_iter)->get_walking_distances();
 				out1 << odpairs->get_origin()->get_id() << '\t'<< odpairs->get_destination()->get_id() << '\t' << (*path_iter)->get_id()  << '\t' << stops.size() << '\t' << '{' << '\t';
