@@ -2906,24 +2906,24 @@ void Network::merge_paths_by_stops (Busstop* stop) // merge paths with same line
 							if (fulfilled_conditions == true)
 							{
 							// both have exactly the same lines for all legs 
-								vector<vector<Busline*>>::iterator path2_line = (*path2)->get_alt_lines().begin();
-								vector<vector<Busstop*>>::iterator path2_stops = (*path2)->get_alt_transfer_stops().begin()+1;
-								for(vector<vector<Busline*>>::iterator path1_line = (*path1)->get_alt_lines().begin(); path1_line < (*path1)->get_alt_lines().end(); path1_line++)
+								vector<vector<Busline*>> path2_lines = (*path2)->get_alt_lines();
+								vector<vector<Busline*>>::iterator path2_line = path2_lines.begin();
+								vector<vector<Busline*>> path1_lines = (*path1)->get_alt_lines();
+								vector<vector<Busstop*>> path1_set_stops = (*path1)->get_alt_transfer_stops();
+								vector<vector<Busstop*>>::iterator start_stops = path1_set_stops.begin()+1;
+								for(vector<vector<Busline*>>::iterator path1_line = path1_lines.begin(); path1_line < path1_lines.end(); path1_line++)
 								{
-									for (vector<vector<Busstop*>>::iterator path1_stops = (*path1)->get_alt_transfer_stops().begin()+1; path1_stops < (*path1)->get_alt_transfer_stops().end(); path1_stops = path1_stops + 2)
+									vector<Busline*> line1 = (*path1_line);
+									vector<Busline*> line2 = (*path2_line);
+									vector<Busstop*> start_stop = (*start_stops);
+									vector<Busstop*> end_stop = (*(start_stops+1));
+									// do they have the same routes between stops?
+									if (compare_common_partial_routes (line1.front(),line2.front(),start_stop.front(),end_stop.front()) == false)
 									{
-										if (compare_common_partial_routes ((*path1_line).front(),(*path2_line).front(),(*path1_stops).front(),(*path2_stops).front()) == false)
-										{
-											fulfilled_conditions = false;
-											break;
-										}
-										path2_stops++;
-										path2_stops++;
-									}
-									if (fulfilled_conditions == false)
-									{
+										fulfilled_conditions = false;
 										break;
 									}
+									start_stops = start_stops + 2;
 									path2_line++;
 								}
 								if (fulfilled_conditions == false)
