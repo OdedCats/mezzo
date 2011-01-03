@@ -1330,6 +1330,10 @@ double Busstop::calc_dwelltime (Bustrip* trip)  //!< calculates the dwelltime of
 			crowdedness_ratio = max(0,(trip->get_busv()->get_occupancy()- trip->get_busv()->get_number_seats())/ (trip->get_busv()->get_capacity()- trip->get_busv()->get_number_seats()));
 			dwelltime = (theParameters->dwell_constant + theParameters->boarding_coefficient * nr_boarding + theParameters->alighting_cofficient * nr_alighting) * (1 + 0.75 * pow(crowdedness_ratio,2));
 			break;
+		case 13:
+			crowdedness_ratio = max(0,(trip->get_busv()->get_occupancy()- trip->get_busv()->get_number_seats())/ (trip->get_busv()->get_capacity()- trip->get_busv()->get_number_seats()));
+			dwelltime = (theParameters->dwell_constant + max(theParameters->boarding_coefficient * nr_boarding, theParameters->alighting_cofficient * nr_alighting)) * (1 + 0.75 * pow(crowdedness_ratio,2));
+			break;
 		case 21:
 			if (trip->get_busv()->get_occupancy() > trip->get_busv()->get_number_seats())
 			{
@@ -1342,6 +1346,20 @@ double Busstop::calc_dwelltime (Bustrip* trip)  //!< calculates the dwelltime of
 			break;
 	}
 	return max (dwelltime + random->nrandom(0, theParameters->dwell_std_error), theParameters->dwell_constant);
+}
+
+double Busstop::find_exit_time_bus_in_front (Bus* bus)
+{
+	if (buses_at_stop.empty() == true)
+	{
+		return 0;
+	}
+	else
+	{
+		map <double,Bus*>::iterator iter_bus = buses_at_stop.end();
+		iter_bus--;
+		return (*iter_bus).first;
+	}
 }
 
 void Busstop::occupy_length (Bus* bus) // a bus arrived - decrease the left space at the stop
@@ -1409,12 +1427,16 @@ double Busstop::get_time_since_departure (Bustrip* trip, double time) // calcula
 double Busstop::calc_exiting_time (Eventlist* eventlist, Bustrip* trip, double time)
 {
 	dwelltime = passenger_activity_at_stop (eventlist, trip,time);
+	if (theParameters->buses_can_overtake_at_stops == 0) // if the buses can't overtake at stops - depends on the bus in front
+	{
+		dwelltime = max(dwelltime, find_exit_time_bus_in_front(trip->get_busv())-time);
+	}
 	double ready_to_depart = time + dwelltime;
 	switch (trip->get_line()->get_holding_strategy())
 	{
 		// for no control:
 		case 0:
-			return time + dwelltime; // since it isn't a time-point stop, it will simply exit after dwell time
+			return ready_to_depart; // since it isn't a time-point stop, it will simply exit after dwell time
 		// for headway based (looking on headway from preceding bus):
 		case 1:
 			if (trip->get_line()->is_line_timepoint(this) == true) // if it is a time point

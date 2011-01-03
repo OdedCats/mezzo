@@ -106,6 +106,7 @@ Parameters::Parameters ()
    double boarding_coefficient = 2.0;
    double alighting_cofficient = 1.0;
    double dwell_std_error= 1.0;
+   bool buses_can_overtake_at_stops = true;
    
    // in case of function forms 21
    double share_alighting_front_door = 0.0;
@@ -693,6 +694,13 @@ bool Parameters::read_parameters (istream & in )
 		return false;
 	}
 	in >> dwell_std_error;
+	in >> keyword;
+	if (keyword!= "buses_can_overtake_at_stops=")
+	{
+		cout << "ERROR reading Parameters file, expecting: buses_can_overtake_at_stops=, read: " << keyword << endl;
+		return false;
+	}
+	in >> buses_can_overtake_at_stops;
 	if (dwell_time_function_form == 21)
 	{
 		in >> keyword;
