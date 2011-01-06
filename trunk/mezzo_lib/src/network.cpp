@@ -4268,7 +4268,10 @@ bool Network::init()
 		}
 		else // otherwise initialise them
 		{
-			(*iter0)->execute(eventlist,initvalue);
+			//double mean_headway=3600.0/(*iter0)->get_rate();
+			//double startvalue = random->urandom(0,mean_headway);
+			double startvalue = initvalue;
+			(*iter0)->execute(eventlist,startvalue);
 			initvalue += 0.00001;
 			iter0++;
 		}
