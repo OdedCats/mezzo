@@ -29,6 +29,7 @@ class Passenger;
 class ODstops;
 class Change_arrival_rate;
 class Bustrip_assign;
+class Dwell_time_function;
 
 typedef pair<Bustrip*,double> Start_trip;
 typedef vector <Passenger*> passengers;
@@ -322,7 +323,7 @@ class Busstop : public Action
 public:
 	Busstop ();
 	~Busstop ();
-	Busstop (int id_, string name_, int link_id_, double position_, double length_, bool has_bay_, int rti_);
+	Busstop (int id_, string name_, int link_id_, double position_, double length_, bool has_bay_, bool can_overtake_, int rti_);
 	void reset (); 
 
 // GETS & SETS:
@@ -389,7 +390,7 @@ public:
 	void update_last_departures (Bustrip* trip, double time); //!< everytime a bus EXITS it updates the last_departures vector 
 	double get_time_since_arrival (Bustrip* trip, double time); //!< calculates the headway (defined as the differnece in time between sequential arrivals) 
 	double get_time_since_departure (Bustrip* trip, double time); //!< calculates the headway (defined as the differnece in time between sequential departures) 
-	double find_exit_time_bus_in_front (Bus* bus); // returns the exit time of the bus vehicle that entered the bus stop before a certain bus (the bus in front)
+	double find_exit_time_bus_in_front (); // returns the exit time of the bus vehicle that entered the bus stop before a certain bus (the bus in front)
 
 // output-related functions
 	void write_output(ostream & out);
@@ -404,7 +405,8 @@ protected:
 	int id; //!< stop id
 	string name; //!< name of the bus stop "T-centralen"
 	int link_id; //!< link it is on, maybe later a pointer to the respective link if needed
-	bool has_bay; //!< TRUE if it has a bay, so that vehicles on same lane can pass.
+	bool has_bay; //!< TRUE if it has a bay so it has an extra dwell time
+	bool can_overtake; // !< 0 - can't overtake, 1 - can overtake freely; TRUE if it is possible for a bus to overtake another bus that stops in front of it (if FALSE - dwell time is subject to the exit time of a blocking bus)
 	double length; //!< length of the busstop, determines how many buses can be served at the same time
 	double position; //!< relative position from the upstream node of the link (beteen 0 to 1)
 	double avaliable_length; //!< length of the busstop minus occupied length
@@ -470,6 +472,30 @@ protected:
 	TD_demand arrival_rates_TD; //!< parameter lambda that defines the poission proccess of passengers arriving at the stop
 	TD_demand alighting_fractions_TD; //!< parameter that defines the poission process of the alighting passengers 
 
+};
+
+class Dwell_time_function // container that holds the total travel time experienced by line's trips
+{
+public:
+	Dwell_time_function (int function_id_, int dwell_time_function_form_, double dwell_constant_, double boarding_coefficient_, double alighting_cofficient_, double dwell_std_error_, double share_alighting_front_door_, double crowdedness_binary_factor_, double bay_coefficient_, double over_stop_capacity_coefficient_):
+							function_id(function_id_), dwell_time_function_form (dwell_time_function_form_), dwell_constant(dwell_constant_), boarding_coefficient(boarding_coefficient_), alighting_cofficient(alighting_cofficient_), dwell_std_error(dwell_std_error_), share_alighting_front_door(share_alighting_front_door_),crowdedness_binary_factor(crowdedness_binary_factor_),bay_coefficient(bay_coefficient_),over_stop_capacity_coefficient(over_stop_capacity_coefficient_) {}
+	Dwell_time_function (int function_id_, int dwell_time_function_form_, double dwell_constant_, double boarding_coefficient_, double alighting_cofficient_, double dwell_std_error_, double bay_coefficient_, double over_stop_capacity_coefficient_):
+							function_id(function_id_), dwell_time_function_form (dwell_time_function_form_), dwell_constant(dwell_constant_), boarding_coefficient(boarding_coefficient_), alighting_cofficient(alighting_cofficient_), dwell_std_error(dwell_std_error_),bay_coefficient(bay_coefficient_),over_stop_capacity_coefficient(over_stop_capacity_coefficient_) {}
+	int get_id () {return function_id;}
+
+	// dwell time parameters
+	int function_id;
+   int dwell_time_function_form; 
+	// 11 - Linear function of boarding and alighting
+    // 12 - Linear function of boarding and alighting + non-linear crowding effect (Weidmann) 
+    // 13 - Max (boarding, alighting) + non-linear crowding effect (Weidmann) 
+    // 21 - TCRP(max doors with crowding, boarding from front door, alighting from both doors) + bay + stop capacity
+
+   double dwell_constant, boarding_coefficient, alighting_cofficient, dwell_std_error;
+   
+   double share_alighting_front_door, crowdedness_binary_factor; // only for TCRP functions
+   
+   double bay_coefficient, over_stop_capacity_coefficient; // extra delays
 };
 
 #endif //_BUSLINE

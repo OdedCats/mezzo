@@ -97,23 +97,6 @@ Parameters::Parameters ()
    real_time_info = 0;
    start_pass_generation = 0;
 
-// dwell time parameters
-   int dwell_time_function_form = 11; 
-	// 11 - Linear function of boarding and alighting
-    // 12 - Linear function of boarding and alighting + non-linear crowding effect (Weidmann) 
-    // 21 - TCRP(max doors with crowding, boarding from front door, alighting from both doors) + bay + stop capacity
-   double dwell_constant = 3.0;
-   double boarding_coefficient = 2.0;
-   double alighting_cofficient = 1.0;
-   double dwell_std_error= 1.0;
-   bool buses_can_overtake_at_stops = true;
-   
-   // in case of function forms 21
-   double share_alighting_front_door = 0.0;
-   double crowdedness_binary_factor = 0.0;
-   double bay_coefficient= 0.0;
-   double over_stop_capacity_coefficient = 0.0;
-
 // transit control parameters
    riding_time_weight = 0.0;
    dwell_time_weight = 0.0;
@@ -652,85 +635,6 @@ bool Parameters::read_parameters (istream & in )
 			return false;
 		}
 		in >> stop_pass_generation;
-	}
-	in >> keyword;
-	if (keyword!= "#dwell_time_parameters")
-	{
-		cout << "ERROR reading Parameters file, expecting: #dwell_time_parameters, read: " << keyword << endl;
-		return false;
-	}
-	in >> keyword;
-	if (keyword!= "dwell_time_function_form=")
-	{
-		cout << "ERROR reading Parameters file, expecting: dwell_time_function_form=, read: " << keyword << endl;
-		return false;
-	}
-	in >> dwell_time_function_form;
-	in >> keyword;
-	if (keyword!= "dwell_constant=")
-	{
-		cout << "ERROR reading Parameters file, expecting: dwell_constant=, read: " << keyword << endl;
-		return false;
-	}
-	in >> dwell_constant;
-	in >> keyword;
-	if (keyword!= "boarding_coefficient=")
-	{
-		cout << "ERROR reading Parameters file, expecting: boarding_coefficient=, read: " << keyword << endl;
-		return false;
-	}
-	in >> boarding_coefficient;
-	in >> keyword;
-	if (keyword!= "alighting_cofficient=")
-	{
-		cout << "ERROR reading Parameters file, expecting: alighting_cofficient=, read: " << keyword << endl;
-		return false;
-	}
-	in >> alighting_cofficient;
-	in >> keyword;
-	if (keyword!= "dwell_std_error=")
-	{
-		cout << "ERROR reading Parameters file, expecting: dwell_std_error=, read: " << keyword << endl;
-		return false;
-	}
-	in >> dwell_std_error;
-	in >> keyword;
-	if (keyword!= "buses_can_overtake_at_stops=")
-	{
-		cout << "ERROR reading Parameters file, expecting: buses_can_overtake_at_stops=, read: " << keyword << endl;
-		return false;
-	}
-	in >> buses_can_overtake_at_stops;
-	if (dwell_time_function_form == 21)
-	{
-		in >> keyword;
-		if (keyword!= "share_alighting_front_door=")
-		{
-			cout << "ERROR reading Parameters file, expecting: share_alighting_front_door=, read: " << keyword << endl;
-			return false;
-		}
-		in >> share_alighting_front_door;
-		in >> keyword;
-		if (keyword!= "crowdedness_binary_factor=")
-		{
-			cout << "ERROR reading Parameters file, expecting: crowdedness_binary_factor=, read: " << keyword << endl;
-			return false;
-		}
-		in >> crowdedness_binary_factor;
-		in >> keyword;
-		if (keyword!= "bay_coefficient=")
-		{
-			cout << "ERROR reading Parameters file, expecting: bay_coefficient=, read: " << keyword << endl;
-			return false;
-		}
-		in >> bay_coefficient;
-		in >> keyword;
-		if (keyword!= "over_stop_capacity_coefficient=")
-		{
-			cout << "ERROR reading Parameters file, expecting: over_stop_capacity_coefficient=, read: " << keyword << endl;
-			return false;
-		}
-		in >> over_stop_capacity_coefficient;
 	}
 	in >> keyword;
 	if (keyword!= "#transit_control_parameters")

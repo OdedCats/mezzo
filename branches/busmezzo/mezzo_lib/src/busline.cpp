@@ -811,12 +811,13 @@ Busstop::Busstop()
 	length = 20;
 	position = 0;
 	has_bay = false;
+	can_overtake = true;
 	dwelltime = 0;
 	rti = 0;
 }
 
-Busstop::Busstop (int id_, string name_, int link_id_, double position_, double length_, bool has_bay_, int rti_):
-	id(id_), name(name_), link_id(link_id_), position (position_), length(length_), has_bay(has_bay_), rti (rti_)
+Busstop::Busstop (int id_, string name_, int link_id_, double position_, double length_, bool has_bay_, bool can_overtake_, int rti_):
+	id(id_), name(name_), link_id(link_id_), position (position_), length(length_), has_bay(has_bay_), can_overtake(can_overtake_), rti (rti_)
 {
 	avaliable_length = length;
 	nr_boarding = 0;
@@ -969,6 +970,10 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 		bus->get_curr_trip()->set_enter_time (time);
 		exit_time = calc_exiting_time(eventlist, bus->get_curr_trip(), time); // get the expected exit time according to dwell time calculations and time point considerations
 		occupy_length (bus);
+		while (buses_at_stop.find(exit_time) != buses_at_stop.end()) // in case there is another bus listed with exactly the same time
+		{
+			exit_time = exit_time + 1.0;
+		}
 		buses_at_stop [exit_time] = bus; 
 		eventlist->add_event (exit_time, this); // book an event for the time it exits the stop
 		record_busstop_visit ( bus->get_curr_trip(), bus->get_curr_trip()->get_enter_time()); // document stop-related info
@@ -1320,35 +1325,39 @@ double Busstop::calc_dwelltime (Bustrip* trip)  //!< calculates the dwelltime of
 	double out_of_stop_coefficient = 3.0; // Taking in consideration the increasing dwell time when bus stops out of the stop
 	double bay_coefficient = 4.0;
 	*/
+    Dwell_time_function* dt_func = trip->get_bustype()->get_dt_function();
 
-	switch (theParameters->dwell_time_function_form)
+	switch (dt_func->dwell_time_function_form)
 	{
 		case 11:
-			dwelltime = theParameters->dwell_constant + theParameters->boarding_coefficient * nr_boarding + theParameters->alighting_cofficient * nr_alighting;
+			dwelltime = dt_func->dwell_constant + dt_func->boarding_coefficient * nr_boarding + dt_func->alighting_cofficient * nr_alighting;
 			break;
 		case 12:
 			crowdedness_ratio = max(0,(trip->get_busv()->get_occupancy()- trip->get_busv()->get_number_seats())/ (trip->get_busv()->get_capacity()- trip->get_busv()->get_number_seats()));
-			dwelltime = (theParameters->dwell_constant + theParameters->boarding_coefficient * nr_boarding + theParameters->alighting_cofficient * nr_alighting) * (1 + 0.75 * pow(crowdedness_ratio,2));
+			dwelltime = (dt_func->dwell_constant + dt_func->boarding_coefficient * nr_boarding + dt_func->alighting_cofficient * nr_alighting) * (1 + 0.75 * pow(crowdedness_ratio,2));
 			break;
 		case 13:
+			dwelltime = (dt_func->dwell_constant + max(dt_func->boarding_coefficient * nr_boarding, dt_func->alighting_cofficient * nr_alighting));
+			break;
+		case 14:
 			crowdedness_ratio = max(0,(trip->get_busv()->get_occupancy()- trip->get_busv()->get_number_seats())/ (trip->get_busv()->get_capacity()- trip->get_busv()->get_number_seats()));
-			dwelltime = (theParameters->dwell_constant + max(theParameters->boarding_coefficient * nr_boarding, theParameters->alighting_cofficient * nr_alighting)) * (1 + 0.75 * pow(crowdedness_ratio,2));
+			dwelltime = (dt_func->dwell_constant + max(dt_func->boarding_coefficient * nr_boarding, dt_func->alighting_cofficient * nr_alighting)) * (1 + 0.75 * pow(crowdedness_ratio,2));
 			break;
 		case 21:
 			if (trip->get_busv()->get_occupancy() > trip->get_busv()->get_number_seats())
 			{
 				crowded = 1;
 			}      
-			double time_front_door = theParameters->boarding_coefficient * nr_boarding + theParameters->alighting_cofficient * theParameters->share_alighting_front_door * nr_alighting + theParameters->crowdedness_binary_factor * crowded * nr_boarding;
-			double time_rear_door = theParameters->alighting_cofficient * (1-theParameters->share_alighting_front_door) * nr_alighting;
-			dwelltime = has_bay * theParameters->bay_coefficient + theParameters->over_stop_capacity_coefficient * check_out_of_stop(trip->get_busv()) + 
-			max(time_front_door, time_rear_door) + theParameters->dwell_constant;
+			double time_front_door = dt_func->boarding_coefficient * nr_boarding + dt_func->alighting_cofficient * dt_func->share_alighting_front_door * nr_alighting + dt_func->crowdedness_binary_factor * crowded * nr_boarding;
+			double time_rear_door = dt_func->alighting_cofficient * (1-dt_func->share_alighting_front_door) * nr_alighting;
+			dwelltime = has_bay * dt_func->bay_coefficient + dt_func->over_stop_capacity_coefficient * check_out_of_stop(trip->get_busv()) + 
+			max(time_front_door, time_rear_door) + dt_func->dwell_constant;
 			break;
 	}
-	return max (dwelltime + random->nrandom(0, theParameters->dwell_std_error), theParameters->dwell_constant);
+	return max (dwelltime + random->nrandom(0, dt_func->dwell_std_error), dt_func->dwell_constant);
 }
 
-double Busstop::find_exit_time_bus_in_front (Bus* bus)
+double Busstop::find_exit_time_bus_in_front ()
 {
 	if (buses_at_stop.empty() == true)
 	{
@@ -1427,9 +1436,9 @@ double Busstop::get_time_since_departure (Bustrip* trip, double time) // calcula
 double Busstop::calc_exiting_time (Eventlist* eventlist, Bustrip* trip, double time)
 {
 	dwelltime = passenger_activity_at_stop (eventlist, trip,time);
-	if (theParameters->buses_can_overtake_at_stops == 0) // if the buses can't overtake at stops - depends on the bus in front
+	if (can_overtake == false) // if the buses can't overtake at this stop - then it depends on the bus in front
 	{
-		dwelltime = max(dwelltime, find_exit_time_bus_in_front(trip->get_busv())-time);
+		dwelltime = max(dwelltime, find_exit_time_bus_in_front()-time + 1.0);
 	}
 	double ready_to_depart = time + dwelltime;
 	switch (trip->get_line()->get_holding_strategy())

@@ -834,7 +834,7 @@ bool Network::readserver(istream& in)
 {
 	char bracket;
 	int sid, stype;
-  double mu, sd, delay, delay_std;
+  double mu, sd, delay;
 	in >> bracket;
 	if (bracket != '{')
 	{
@@ -1184,7 +1184,7 @@ bool Network::readroute(istream& in)
 }
 
 // read BUS routes
-bool Network::readbusroutes(string name) // reads the busroutes, similar to readroutes
+bool Network::readtransitroutes(string name) // reads the busroutes, similar to readroutes
 {
 	ifstream in(name.c_str());
 	assert (in);
@@ -1288,7 +1288,7 @@ bool Network::readbusroute(istream& in)
 	return true;
 }
 
-bool Network::readbuslines(string name) // reads the busstops, buslines, trips, passengers rates, bustypes and busvehicles
+bool Network::readtransitnetwork(string name) //!< reads the stops, distances between stops, lines, trips and travel disruptions
 {
 	ifstream in(name.c_str()); // open input file
 	assert (in);
@@ -1299,7 +1299,7 @@ bool Network::readbuslines(string name) // reads the busstops, buslines, trips, 
 #ifdef _DEBUG_NETWORK
 	cout << keyword << endl;
 #endif //_DEBUG_NETWORK
-	if (keyword!="busstops:")
+	if (keyword!="stops:")
 	{
 		cout << " readbuslines: no << stops: >> keyword " << endl;
 		in.close();
@@ -1340,12 +1340,36 @@ bool Network::readbuslines(string name) // reads the busstops, buslines, trips, 
 			} 	
 		}
 	}
+	// in case of passenger route choice - read walking distances between stops
+	if (theParameters->demand_format == 3 || theParameters->demand_format == 4)
+	{
+		in >> keyword;
+		if (keyword!="stops_distances:")
+		{
+			cout << " readbuslines: no << busstops_distances: >> keyword " << endl;
+			in.close();
+			return false;
+		}
+		in >> nr;
+		limit = i + nr;
+		for (i; i<limit;i++)
+		{
+			if (!readbusstops_distances(in))
+			{
+				cout << " readbuslines: readbusstops_distances returned false for line nr " << (i+1) << endl;
+				in.close();
+				return false;
+			}	 
+			// set distnaces between busstops to stops
+		}
+	}
+
 	// Second read the buslines
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
 	cout << keyword << endl;
 #endif //_DEBUG_NETWORK
-	if (keyword!="buslines:")
+	if (keyword!="lines:")
 	{
 		cout << " readbuslines: no << buslines: >> keyword " << endl;
 		in.close();
@@ -1373,7 +1397,7 @@ in >> keyword;
 #ifdef _DEBUG_NETWORK
 	cout << keyword << endl;
 #endif //_DEBUG_NETWORK
-	if (keyword!="bustrips:")
+	if (keyword!="trips:")
 	{
 		cout << " readbuslines: no << bustrips: >> keyword " << endl;
 		in.close();
@@ -1419,178 +1443,34 @@ in >> keyword;
 		}
 		// set busline to trip
 	}
-	// Forth read the passengers rates
-in >> keyword;
-#ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
-#endif //_DEBUG_NETWORK
-	if (keyword!="passenger_rates:")
+	in >> keyword;
+	if (keyword!="travel_time_disruptions:")
 	{
-		cout << " readbuslines: no << passenger_rates: >> keyword " << endl;
+		cout << " readbuslines: no << travel_time_disruptions: >> keyword " << endl;
+		in.close();
 		return false;
 	}
 	in >> nr;
 	limit = i + nr;
-	
-	in >> keyword;
-	if (keyword!="format:")
-	{
-		cout << " readbuslines: no << format: >> keyword " << endl;
-		return false;
-	}
-	in >> format; // Give an indication for demand matrix format
 	for (i; i<limit;i++)
 	{
- 		if (format == 1) 
+		if (!read_travel_time_disruptions(in))
 		{
-			if (!read_passenger_rates_format1(in))
-			{
-				cout << " readbuslines: read_passenger_rates returned false for line nr " << (i+1) << endl;
-   				return false;
-			} 
-		}
-		if (format == 10) 
-		{
-			if (!read_passenger_rates_format1_TD_basic(in, nr))
-			{
-				cout << " readbuslines: read_passenger_rates returned false" << endl;
-   				return false;
-			} 
-			i = limit;
-		}
-		if (format == 2)
-		{
-			if (!read_passenger_rates_format2(in))
-			{
-				cout << " readbuslines: read_passenger_rates returned false for line nr " << (i+1) << endl;
-   				return false;
-			} 
-		}
-		if (format == 3)
-		{
-			if (!read_passenger_rates_format3(in))
-			{
-				cout << " readbuslines: read_passenger_rates returned false for line nr " << (i+1) << endl;
-   				return false;
-			} 
-		}
-		if (format == 4)
-		{
-			if (!read_passenger_rates_format4(in))
-			{
-				cout << " readbuslines: read_passenger_rates returned false for line nr " << (i+1) << endl;
-   				return false;
-			} 
-		}
-		if (format!=1 && format!=2 && format!=3 && format!=4 && format!=10)
-		{
-			cout << " readbuslines: read_passenger_rates returned false for wrong format coding " << (i+1) << endl;
-   			return false;
-		}
-	}
-	if (format == 3 || format ==4)
-	{
-		in >> keyword;
-		if (keyword!="busstops_distances:")
-		{
-			cout << " readbuslines: no << busstops_distances: >> keyword " << endl;
+			cout << " readbuslines: read_travel_time_disruptions returned false for line nr " << (i+1) << endl;
 			in.close();
 			return false;
-		}
-		in >> nr;
-		limit = i + nr;
-		for (i; i<limit;i++)
-		{
-			if (!readbusstops_distances(in))
-			{
-				cout << " readbuslines: readbusstops_distances returned false for line nr " << (i+1) << endl;
-				in.close();
-				return false;
-			}	 
-			// set distnaces between busstops to stops
-		}
-		generate_stop_ods();
-		if (theParameters->choice_set_indicator == 0)
-		{
-			find_all_paths ();
-		}
-		// read travel time disruptions input (only for case of pass. route choice)
-		in >> keyword;
-		if (keyword!="travel_time_disruptions:")
-		{
-			cout << " readbuslines: no << travel_time_disruptions: >> keyword " << endl;
-			in.close();
-			return false;
-		}
-		in >> nr;
-		limit = i + nr;
-		for (i; i<limit;i++)
-		{
-			if (!read_travel_time_disruptions(in))
-			{
-				cout << " readbuslines: read_travel_time_disruptions returned false for line nr " << (i+1) << endl;
-				in.close();
-				return false;
-			}	
-		}
-	}
-
-	// Fifth read bus types
-in >> keyword;
-#ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
-#endif //_DEBUG_NETWORK
-	if (keyword!="bustypes:")
-	{
-		cout << " readbustypes: no << bustypes: >> keyword " << endl;
-		return false;
-	}
-	in >> nr;
-	limit = i + nr;
-	for (i; i<limit;i++)
-	{
- 		if (!read_bustype(in))
-		{
-			cout << " readbustypes: read_bustypes returned false for line nr " << (i+1) << endl;
-   			return false;
-		} 
-	}
-
-	// Sixth read the bus vehicles
-	in >> keyword;
-#ifdef _DEBUG_NETWORK
-	cout << keyword << endl;
-#endif //_DEBUG_NETWORK
-	if (keyword!="busvehicles:")
-	{
-		cout << " readbusvehicle: no << busvehicles: >> keyword " << endl;
-		return false;
-	}
-	in >> nr;
-	limit = i + nr;
-	for (i; i<limit;i++)
-	{
- 		if (!read_busvehicle(in))
-		{
-			cout << " readbusvehicles: read_busvehicle returned false for line nr " << (i+1) << endl;
-   			return false;
-		} 
+		}	
 	}
 return true;
 }
 
 bool Network::readbusstop (istream& in) // reads a busstop
 {
-
-	//{ stop_id	link_id	length	has_bay	dwelltime }
-//	char bracket;
-//	int stop_id, link_id;
-//{ stop_id	link_id	length	has_bay	dwelltime }
   char bracket;
   int stop_id, link_id;
   double position, length;
   string name;
-	bool has_bay ;
+	bool has_bay, can_overtake;
 	bool ok= true;
 	in >> bracket;
 	if (bracket != '{')
@@ -1598,8 +1478,8 @@ bool Network::readbusstop (istream& in) // reads a busstop
 		cout << "readfile::readsbusstop scanner jammed at " << bracket;
 		return false;
 	}
-  in >> stop_id >> name >> link_id >> position >> length >> has_bay;
-  Busstop* st= new Busstop (stop_id, name, link_id, position, length, has_bay, theParameters->real_time_info);
+  in >> stop_id >> name >> link_id >> position >> length >> has_bay >> can_overtake;
+  Busstop* st= new Busstop (stop_id, name, link_id, position, length, has_bay, can_overtake, theParameters->real_time_info);
   st->add_distance_between_stops(st,0.0);
 	in >> bracket;
 	if (bracket != '}')
@@ -1955,6 +1835,93 @@ bool Network::readbustrip_format3(istream& in) // reads a trip
 	{
 		cout << "readfile::readbusstop scanner jammed at " << bracket;
 		return false;
+	}
+	return true;
+}
+
+bool Network::readtransitdemand (string name)
+{
+	ifstream in(name.c_str()); // open input file
+	assert (in);
+	string keyword;
+	int format, limit;
+	int nr= 0;
+	int i=0;
+in >> keyword;
+#ifdef _DEBUG_NETWORK
+	cout << keyword << endl;
+#endif //_DEBUG_NETWORK
+	if (keyword!="passenger_rates:")
+	{
+		cout << " readbuslines: no << passenger_rates: >> keyword " << endl;
+		return false;
+	}
+	in >> nr;
+	limit = i + nr;
+	
+	in >> keyword;
+	if (keyword!="format:")
+	{
+		cout << " readbuslines: no << format: >> keyword " << endl;
+		return false;
+	}
+	in >> format; // Give an indication for demand matrix format
+	for (i; i<limit;i++)
+	{
+ 		if (format == 1) 
+		{
+			if (!read_passenger_rates_format1(in))
+			{
+				cout << " readbuslines: read_passenger_rates returned false for line nr " << (i+1) << endl;
+   				return false;
+			} 
+		}
+		if (format == 10) 
+		{
+			if (!read_passenger_rates_format1_TD_basic(in, nr))
+			{
+				cout << " readbuslines: read_passenger_rates returned false" << endl;
+   				return false;
+			} 
+			i = limit;
+		}
+		if (format == 2)
+		{
+			if (!read_passenger_rates_format2(in))
+			{
+				cout << " readbuslines: read_passenger_rates returned false for line nr " << (i+1) << endl;
+   				return false;
+			} 
+		}
+		if (format == 3)
+		{
+			if (!read_passenger_rates_format3(in))
+			{
+				cout << " readbuslines: read_passenger_rates returned false for line nr " << (i+1) << endl;
+   				return false;
+			} 
+		}
+		if (format == 4)
+		{
+			if (!read_passenger_rates_format4(in))
+			{
+				cout << " readbuslines: read_passenger_rates returned false for line nr " << (i+1) << endl;
+   				return false;
+			} 
+		}
+		if (format!=1 && format!=2 && format!=3 && format!=4 && format!=10)
+		{
+			cout << " readbuslines: read_passenger_rates returned false for wrong format coding " << (i+1) << endl;
+   			return false;
+		}
+	}
+	if (format == 3 || format == 4)
+	{
+		generate_stop_ods();
+		if (theParameters->choice_set_indicator == 0)
+		{
+			find_all_paths ();
+		}
 	}
 	return true;
 }
@@ -4050,12 +4017,128 @@ bool Network::read_transit_path(istream& in)
 
 /////////////// Transit path-set generation functions: end
 
+bool Network::readtransitfleet (string name) // !< reads transit vehicle types, vehicle scheduling and dwell time functions
+{
+	ifstream in(name.c_str()); // open input file
+	assert (in);
+	string keyword;
+	int nr= 0;
+	int i=0;
+	int limit;
+in >> keyword;
+#ifdef _DEBUG_NETWORK
+	cout << keyword << endl;
+#endif //_DEBUG_NETWORK
+	if (keyword!="dwell_time_functions:")
+	{
+		cout << " readbustypes: no << bustypes: >> keyword " << endl;
+		return false;
+	}
+	in >> nr;
+	limit = i + nr;
+	for (i; i<limit;i++)
+	{
+ 		if (!read_dwell_time_function(in))
+		{
+			cout << " readbustypes: read_bustypes returned false for line nr " << (i+1) << endl;
+   			return false;
+		} 
+	}
+in >> keyword;
+	if (keyword!="vehicle_types:")
+	{
+		cout << " readbustypes: no << bustypes: >> keyword " << endl;
+		return false;
+	}
+	in >> nr;
+	limit = i + nr;
+	for (i; i<limit;i++)
+	{
+ 		if (!read_bustype(in))
+		{
+			cout << " readbustypes: read_bustypes returned false for line nr " << (i+1) << endl;
+   			return false;
+		} 
+	}
+in >> keyword;
+#ifdef _DEBUG_NETWORK
+	cout << keyword << endl;
+#endif //_DEBUG_NETWORK
+	if (keyword!="vehicle_scheduling:")
+	{
+		cout << " readbusvehicle: no << busvehicles: >> keyword " << endl;
+		return false;
+	}
+	in >> nr;
+	limit = i + nr;
+	for (i; i<limit;i++)
+	{
+ 		if (!read_busvehicle(in))
+		{
+			cout << " readbusvehicles: read_busvehicle returned false for line nr " << (i+1) << endl;
+   			return false;
+		} 
+	}
+	return true;
+}
+
+bool Network::read_dwell_time_function (istream& in)
+{
+   char bracket;
+	int func_id;
+// dwell time parameters
+   int dwell_time_function_form; 
+	// 11 - Linear function of boarding and alighting
+    // 12 - Linear function of boarding and alighting + non-linear crowding effect (Weidmann) 
+    // 13 - Max (boarding, alighting) + non-linear crowding effect (Weidmann) 
+    // 21 - TCRP(max doors with crowding, boarding from front door, alighting from both doors) + bay + stop capacity
+   double dwell_constant;
+   double boarding_coefficient;
+   double alighting_cofficient;
+   double dwell_std_error;
+   
+   // in case of TCRP function form
+   double share_alighting_front_door;
+   double crowdedness_binary_factor;
+
+   // extra delays
+   double bay_coefficient;
+   double over_stop_capacity_coefficient;
+  in >> bracket;
+  if (bracket != '{')
+  {
+  	cout << "readfile::readsbusstop scanner jammed at " << bracket;
+  	return false;
+  }
+	in >> func_id >> dwell_time_function_form >> dwell_constant >> boarding_coefficient >> alighting_cofficient >> dwell_std_error >> bay_coefficient >> over_stop_capacity_coefficient;
+	if (dwell_time_function_form == 21)
+	{
+		in >> share_alighting_front_door >> crowdedness_binary_factor;
+	}
+	if (dwell_time_function_form == 21)
+	{
+		Dwell_time_function* dt= new Dwell_time_function (func_id,dwell_time_function_form,dwell_constant,boarding_coefficient,alighting_cofficient,dwell_std_error,share_alighting_front_door,crowdedness_binary_factor,bay_coefficient,over_stop_capacity_coefficient);
+		dt_functions.push_back (dt);
+	}
+	else
+	{
+		Dwell_time_function* dt= new Dwell_time_function (func_id,dwell_time_function_form,dwell_constant,boarding_coefficient,alighting_cofficient,dwell_std_error,bay_coefficient,over_stop_capacity_coefficient);
+		dt_functions.push_back (dt);
+	}
+  in >> bracket;
+  if (bracket != '}')
+  {
+    cout << "readfile::readbustype scanner jammed at " << bracket;
+    return false;
+  }
+}
+
 bool Network::read_bustype (istream& in) // reads a bustype
 {
 
 //{ type_id	length	number_seats	capacity }
   char bracket;
-  int type_id, number_seats, capacity;
+  int type_id, number_seats, capacity, dtf_id;
   double length;
   string bus_type_name;
   bool ok= true;
@@ -4066,8 +4149,9 @@ bool Network::read_bustype (istream& in) // reads a bustype
   	cout << "readfile::readsbusstop scanner jammed at " << bracket;
   	return false;
   }
-  in >> type_id  >> bus_type_name >> length >> number_seats >> capacity;
-  Bustype* bt= new Bustype (type_id, bus_type_name, length, number_seats, capacity);
+  in >> type_id  >> bus_type_name >> length >> number_seats >> capacity >> dtf_id;
+  Dwell_time_function* dtf=(*(find_if(dt_functions.begin(), dt_functions.end(), compare <Dwell_time_function> (dtf_id) )));
+  Bustype* bt= new Bustype (type_id, bus_type_name, length, number_seats, capacity,dtf);
   in >> bracket;
   if (bracket != '}')
   {
@@ -5981,9 +6065,11 @@ double Network::executemaster(QPixmap * pm_,QMatrix * wm_)
 	this->readsignalcontrols(filenames[2]);
 	// NEW 2007_03_08
 #ifdef _BUSES
-	// read the busroutes & Lines
-	this->readbusroutes (workingdir + "busroutes.dat"); //FIX IN THE MAIN READ & WRITE
-	this->readbuslines (workingdir + "buslines.dat"); //FIX IN THE MAIN READ & WRITE
+	// read the transit system input
+	this->readtransitroutes (workingdir + "transit_routes.dat"); //FIX IN THE MAIN READ & WRITE
+	this->readtransitnetwork (workingdir + "transit_network.dat"); //FIX IN THE MAIN READ & WRITE
+	this->readtransitfleet (workingdir + "transit_fleet.dat");
+	this->readtransitdemand (workingdir + "transit_demand.dat");
 	if (theParameters->choice_set_indicator == 1)
 	{
 		this->read_transit_path_sets (workingdir +"path_set_generation.dat");
@@ -6066,10 +6152,11 @@ double Network::executemaster()
 
 	readsignalcontrols(filenames[2]);
 #ifdef _BUSES
-	// NEW 2007_03_08
-	// read the busroutes & Lines
-	this->readbusroutes (workingdir +"busroutes.dat");//FIX IN THE MAIN READ & WRITE
-	this->readbuslines (workingdir +"buslines.dat");//FIX IN THE MAIN READ & WRITE
+	// read the transit system input
+	this->readtransitroutes (workingdir + "transit_routes.dat"); //FIX IN THE MAIN READ & WRITE
+	this->readtransitnetwork (workingdir + "transit_network.dat"); //FIX IN THE MAIN READ & WRITE
+	this->readtransitfleet (workingdir + "transit_fleet.dat");
+	this->readtransitdemand (workingdir + "transit_demand.dat");
 	if (theParameters->choice_set_indicator == 1)
 	{
 		this->read_transit_path_sets (workingdir +"path_set_generation.dat");

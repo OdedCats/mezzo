@@ -184,24 +184,6 @@ public:
    double start_pass_generation; 
    double stop_pass_generation;
 
-// dwell time parameters
-   int dwell_time_function_form; 
-	// 11 - Linear function of boarding and alighting
-    // 12 - Linear function of boarding and alighting + non-linear crowding effect (Weidmann) 
-    // 13 - Max (boarding, alighting) + non-linear crowding effect (Weidmann) 
-    // 21 - TCRP(max doors with crowding, boarding from front door, alighting from both doors) + bay + stop capacity
-   double dwell_constant;
-   double boarding_coefficient;
-   double alighting_cofficient;
-   double dwell_std_error;
-   bool buses_can_overtake_at_stops; // 0 - can't overtake, 1 - can overtake freely
-   
-   // in case of function forms 21
-   double share_alighting_front_door;
-   double crowdedness_binary_factor;
-   double bay_coefficient;
-   double over_stop_capacity_coefficient;
-
 // transit control parameters
    double riding_time_weight;
    double dwell_time_weight;

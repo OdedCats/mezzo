@@ -352,7 +352,6 @@ Busstop* Passenger::make_first_stop_decision (double time)
 map<Busstop*,double> Passenger::sample_walking_distances (ODzone* zone)
 {
 	map<Busstop*,double> walking_distances;
-	double walking_distance;
 	map <Busstop*,pair<double,double>> stop_distances = zone->get_stop_distances();
 	for (map <Busstop*,pair<double,double>>::iterator stop_iter = stop_distances.begin(); stop_iter != stop_distances.end(); stop_iter++)
 	{
