@@ -2592,6 +2592,60 @@ bool Network::readparameters(string name)
 
 }
 
+void Network::complete_turnpenalties()
+{
+	map <int,Junction*>::iterator j_iter=junctionmap.begin();
+	//map <int,Turning*>::iterator t_iter=turningmap.begin();
+	vector <Link*> inlinks, outlinks;
+	vector <Turning*> turns;
+	vector <Link*>::iterator il_iter, ol_iter;
+	vector <Turning*>::iterator t_iter;
+	vector <TurnPenalty*>::iterator tp_iter;
+	int in_id, out_id;
+	for (j_iter; j_iter!=junctionmap.end(); j_iter++)
+	{
+		inlinks = j_iter->second->get_incoming();
+		outlinks = j_iter->second->get_outgoing();
+		turns = j_iter->second->get_turnings();
+		for (il_iter=inlinks.begin(); il_iter != inlinks.end(); il_iter++)
+		{
+			in_id=(*il_iter)->get_id();
+			for (ol_iter=outlinks.begin(); ol_iter!=outlinks.end();ol_iter++)
+			{
+				bool found = false;
+				out_id = (*ol_iter)->get_id();
+				for (t_iter=turns.begin(); t_iter != turns.end(); t_iter++) // check if this turning exists
+				{
+					if ((*t_iter)->check_links(in_id, out_id))
+						found=true;
+				}
+				if (!found)
+				{
+					for (tp_iter=turnpenalties.begin(); tp_iter != turnpenalties.end(); tp_iter++) // check if there already is an explicit turning penalty defined.
+					{
+						if ( ((*tp_iter)->from_link == in_id) && ((*tp_iter)->to_link == out_id) )
+						{
+							found = true;
+							break;
+						}
+					}
+				}
+				if (!found) // add a new turn penalty for missing turning.
+				{
+					TurnPenalty* tptr=new TurnPenalty();
+					tptr->from_link=in_id;
+					tptr->to_link=out_id;
+					tptr->cost=theParameters->turn_penalty_cost;
+					turnpenalties.insert(turnpenalties.begin(),tptr);
+					eout << "added a missing turning penalty for inlink " << in_id << ", outlink " << out_id << endl;
+				}
+			}
+		}
+	}
+
+
+}
+
 bool Network::init_shortest_path()
 /* Initialises the shortest path graph with the link costs
 */
@@ -2599,7 +2653,8 @@ bool Network::init_shortest_path()
 	int lid,in,out;
 
 	double cost, mu, sd;
-	random=new (Random);
+	//if (!random)
+		random=new (Random);
 
 	if (randseed != 0)
 		random->seed(randseed);
@@ -2631,8 +2686,11 @@ bool Network::init_shortest_path()
 #endif //_DEBUG_SP
 		graph->addLink(link_to_graphlink[lid],node_to_graphnode[in],node_to_graphnode[out],cost);
 	}
+	// FIRST FILL IN MISSING TURNING PENALTIES
+	complete_turnpenalties();
+	
 	// ADD THE TURNPENALTIES;
-
+	
 	// first set all the indices
 	graph->set_downlink_indices();
 
@@ -4229,6 +4287,7 @@ bool Network::writeassmatrices(string name)
 bool Network::init()
 
 {
+	random->seed(42);
 	// initialise the turining events
 	double initvalue =0.1;
 	for(map<int,Turning*>::iterator iter=turningmap.begin(); iter!=turningmap.end(); iter++)
@@ -4268,9 +4327,11 @@ bool Network::init()
 		}
 		else // otherwise initialise them
 		{
-			//double mean_headway=3600.0/(*iter0)->get_rate();
-			//double startvalue = random->urandom(0,mean_headway);
-			double startvalue = initvalue;
+			double mean_headway=300.0;
+			if ((*iter0)->get_rate() > 0.0 ) 
+				mean_headway = 3600.0/(*iter0)->get_rate();
+			double startvalue = random->urandom(0,mean_headway);
+			//double startvalue = initvalue;
 			(*iter0)->execute(eventlist,startvalue);
 			initvalue += 0.00001;
 			iter0++;

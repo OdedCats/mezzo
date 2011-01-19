@@ -23,6 +23,7 @@ Turning::Turning(int id_, Node* node_, Server* server_, Link* inlink_, Link* out
 		active = true; // turning is active by default
 		out_full = false;
 		hold_green=false;
+		((Junction*) node) ->add_turning(this); // add to turnings in node
 	}
 
 Turning::~Turning()
@@ -44,6 +45,14 @@ void Turning::reset()
 	ok = false;
 	out_full = false;
 }
+
+bool Turning::check_links( const int in,  const int out)
+{ 
+	return ( (in == inlink->get_id()) && (out == outlink->get_id()));
+}
+
+
+
 bool Turning::process_veh(double time)
 
 {

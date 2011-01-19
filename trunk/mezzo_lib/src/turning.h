@@ -61,6 +61,7 @@ public:
 	bool is_active() {return active;}
 	bool is_blocked() { return blocked;}
 	bool giveway_can_pass(double time); // returns true if vehicle from minor turning can pass
+	bool check_links( const int in,  const int out); 
 	bool check_controlling(double time); // checks all controlling turnings if vehicle can pass.
 	const bool get_hold_green() const { return hold_green;}
 	void set_hold_green(const bool val) {hold_green=val;}

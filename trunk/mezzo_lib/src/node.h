@@ -159,6 +159,9 @@ class Junction : public Node
 	 void register_links(map <int,Link*> linkmap) ;
    	 vector <Link*> get_incoming() {return incoming;}
 	 vector <Link*> get_outgoing() {return outgoing;}
+	 vector <Turning*> get_turnings() { return turnings;}
+	 void add_turning (Turning* turn_) { turnings.push_back(turn_);}
+
 	private:
 	 vector <Turning*> turnings; // This seems to be unused at the moment!
 	 vector <Link*>  incoming;
