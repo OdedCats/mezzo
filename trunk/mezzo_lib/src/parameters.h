@@ -164,6 +164,7 @@ public:
 
 //#iteration_control
    int max_iter; // max number of iterations
+   int max_route_iter; // max number of route_search_iterations, runs as outer loop around the 'equilibrium' iterations !! NOT yet in file.
    double rel_gap_threshold; // relative gap threshold. For the moment linktime rel_gap, will be route_flow_relgap
 
 

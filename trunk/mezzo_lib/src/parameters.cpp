@@ -69,7 +69,7 @@ Parameters::Parameters ()
    small_od_rate = 3.0;
 // New, to be added to the file format:
    linktime_disturbance = 0.1;
-   routesearch_iterations = 1;
+   routesearch_iterations = 2;
    scale_demand= 0.2;
    renum_routes=true;
 
@@ -82,6 +82,7 @@ Parameters::Parameters ()
 
  //#iteration_control
    max_iter=10;
+   max_route_iter=3; // not yet in file!!
    rel_gap_threshold=0.01;
   
    	//state vars

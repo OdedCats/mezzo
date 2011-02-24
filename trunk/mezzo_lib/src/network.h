@@ -146,6 +146,7 @@ public:
 	void end_of_simulation(double time); //!< finalise all the temp values into containers (linktimes)
 	double step(double timestep); //!< executes one step of simulation, called by the gui, returns current value of time
 	const double run_iterations (); // runs iterations until max_iter or until mal_rel_gap_threshold  is reached (see Parameters). Returns rel_gap
+	const void run_route_iterations(); // outer loop around run_iterations to find iteratively the route choice set.
 	const bool check_convergence(const int iter_, const double rel_gap_ltt_ ,const double rel_gap_rf_); // returns true if convergence criterium is reached or if max_iter is reached.
 	bool writeall(unsigned int repl=0); //writes the output, appends replication number to output files
 	bool readnetwork(string name); //!< reads the network and creates the appropriate structures

@@ -56,13 +56,18 @@ public:
 	void reset (double rate_);
 	const unsigned int get_total_nr_veh() const {return total_nr_veh;}  
 	const bool execute(Eventlist* eventlist, const double time);
-	void set_rate(double rate){server->set_rate((3600/rate),theParameters->odserver_sigma);active=true;}
+	void set_rate(double rate){server->set_rate((3600/rate),theParameters->odserver_sigma);}
+	void set_active(const bool val) {active=val;}
+	const bool get_active() {return active;}
+	const bool move_event(Eventlist* eventlist,  double new_time);
 	void book_later(Eventlist* eventlist, double time);
+	
 private:
 	ODpair* odpair;
 	ODServer* server;
 	bool active; // indicates if an odpair is active
 	unsigned int total_nr_veh;
+	double booked_time; // currently booked time in the eventlist
 };
 
 class ODpair
@@ -96,7 +101,7 @@ public:
 	
 //SETS
 	void add_route(Route* route);
-	void set_rate(double rate_) {rate=rate_; odaction->set_rate(rate);}
+	void set_rate(double newrate_, double time) ;
 	
 //OTHER	
 	bool execute(Eventlist* eventlist, double time);
@@ -126,6 +131,7 @@ private:
 	double totalU;    // total utility  = sum of all utilities
 	double subU;    //subsum of utilities
 	vector <Route*>::iterator shortest_route; // stores the shortest_known_route
+	Eventlist* eventlist_; // to keep track of the eventlist pointer locally
 };
 
 

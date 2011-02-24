@@ -67,6 +67,7 @@ class Eventlist
 						
 						thelist.erase (thelist.begin());
    						return temp;}	
+	const bool move_event (const double time, const double new_time,  Action* action); // moves an event to a new time. If new_time = -1 the event will be removed altogether
   						
  private:
   multimap <double, Action*> :: iterator lastupdate; // to give add_event a guess where to insert the new value

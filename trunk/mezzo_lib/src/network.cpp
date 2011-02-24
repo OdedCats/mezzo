@@ -124,6 +124,9 @@ Network::Network()
 	eventlist=new Eventlist;
 	no_ass_links=0;
 	routenr=0;
+	random=new (Random);
+	if (randseed != 0)
+		random->seed(randseed);
 }
 
 Network::~Network()
@@ -2654,7 +2657,7 @@ bool Network::init_shortest_path()
 
 	double cost, mu, sd;
 	//if (!random)
-		random=new (Random);
+		
 
 	if (randseed != 0)
 		random->seed(randseed);
@@ -4413,6 +4416,25 @@ bool Network::run(int period)
 
 }
 */
+
+// const void Network::run_route_iterations()
+/*
+{
+	int i = 0;
+	 for (i;i<theParameters->max_route_iter; i++)
+	 {
+		run_iterations()
+		if (i<theParameters->(max_route_iter-1)) // except for last iteration, then we keep the results.
+		{
+			copy_linktimes_out_in();
+			reset();
+		}
+	 }
+
+}
+
+*/
+
 const double Network::run_iterations ()
 {
 	// do iterations
@@ -4852,7 +4874,7 @@ const bool MatrixAction::execute(Eventlist* eventlist, const double time)
 		else
 		{
 		//init new rate
-			odptr->set_rate(iter->rate);
+			odptr->set_rate(iter->rate,time);
 		}
 	}
 	return true;

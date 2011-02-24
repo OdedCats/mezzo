@@ -102,6 +102,7 @@ const bool ODaction::execute(Eventlist* eventlist, const double time)
 	#endif //_DEBUG_OD
 	  // book myself in eventlist
 	  eventlist->add_event(new_time,this);
+	  booked_time=new_time;
 	  return ok;
   }
   else
@@ -115,6 +116,15 @@ const bool ODaction::execute(Eventlist* eventlist, const double time)
 void ODaction::book_later(Eventlist* eventlist, double time)
 {
 	eventlist->add_event(time, this);
+	booked_time = time;
+}
+
+const bool ODaction::move_event(Eventlist* eventlist, double new_time)
+{
+	return eventlist->move_event(booked_time, new_time, this);
+	booked_time=new_time;
+	if (booked_time < 0)
+		active=false;
 }
 
 Origin* ODpair::get_origin()
@@ -360,16 +370,18 @@ void ODpair::reset()
  	
 bool ODpair::execute(Eventlist* eventlist, double time)
 {
+	eventlist_=eventlist; // store pointer locally, for easier manipulation of events.
 	if (rate > 0)
 	{
 		double temp = 3600 / (rate); // the optimal time to start generating.
-		double delay =  (this->random->urandom(1.2, temp));
+		double delay =  (this->random->urandom(1.2, temp)); // check if this should be done here as well!
 		odaction->book_later (eventlist, time+delay);
 		return true;
 	}
-	else
-		return odaction->execute(eventlist, time);
-
+	// TEST: do nothing for now
+	//else
+		//return odaction->execute(eventlist, time);
+	return true;
 }
 
 const double ODpair::get_rate()
@@ -377,6 +389,32 @@ const double ODpair::get_rate()
 	return rate;
 }
 
+void ODpair::set_rate(double newrate_, double time) 
+{
+	if (rate==0) // if od pair currently inactive
+	{
+		if (newrate_!=0)  // od pair is about to become active
+		{
+			odaction->set_active(true);
+			odaction->set_rate(newrate_);
+			odaction->book_later(eventlist_,time); 
+		}
+			// if newrate_== 0 as well, nothing changes...
+	}
+	else // if rate!=0, OD pair is currently active
+		if (newrate_!=0) // so from non-zero to non-zero rate, od pair stays active
+		{
+			odaction->set_rate(newrate_);
+			odaction->move_event(eventlist_,time); // move the next generation event for the action to current time
+		}
+		else // if newrate_ == 0 So the OD pair goes from active to inactive
+		{
+			odaction->set_rate(newrate_);
+			odaction->set_active(false);
+			odaction->move_event(eventlist_,-1.0);	//remove the generation event from the list!
+		}
+	rate=newrate_; 
+}
 
 void ODpair::report (list <double>   collector)
 {

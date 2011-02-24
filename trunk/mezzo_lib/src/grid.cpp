@@ -25,6 +25,14 @@ const bool Grid::write_empty(ostream& out)
 	while (!grid.empty())
 	{
 		row=(*grid.begin());
+		if (!row.empty())
+		{
+			long int ori = static_cast<int>(row.front());
+			row.pop_front();
+			long int dest = static_cast<int>(row.front());
+			row.pop_front();
+			out << ori << "\t" << dest <<"\t";
+		}		
 		while (!row.empty())
 		{
 			out << row.front() << "\t";
