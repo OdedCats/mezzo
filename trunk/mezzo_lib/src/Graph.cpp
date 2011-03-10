@@ -65,7 +65,7 @@ void Graph<T, I>::addLink(int i, int u, int d, // required
 
 
 template <class T, class I>
-void Graph<T, I>::linkCost(int i, const T w)
+void Graph<T, I>::linkCost(const int i, const T w)
 {
    link(i)->cost_ = w;
 }
@@ -78,7 +78,7 @@ void Graph<T, I>::linkCost(int i, const T w)
 //--------------------------------------------------------------------
 
 template <class T, class I>
-void Graph<T, I>::penalty(int up, int dn, const T w)
+void Graph<T, I>::penalty(const int up, const int dn, const T w)
 {
    GraphLink<T, I> *l = link(up);
    GraphNode<T, I> *n = node(l->dnNode_);
@@ -121,7 +121,7 @@ void Graph<T, I>::penalty(int up, int dn, const T w)
 //--------------------------------------------------------------------
 
 template <class T, class I>
-void Graph<T, I>::labelSetting(int s, const T scp)
+void Graph<T, I>::labelSetting(const int s, const T scp)
 {
    cout << "starting label setting" << endl;
    scope_ = scp;
@@ -310,7 +310,7 @@ void Graph<T, I>::labelSetting(int s, const T scp)
 //--------------------------------------------------------------------
 
 template <class T, class I>
-void Graph<T, I>::labelCorrecting(int s, double entry, I *info)
+void Graph<T, I>::labelCorrecting(const int s, const double entry, I *info)
 {
    int nlinks = nLinks();
 
@@ -490,7 +490,7 @@ void Graph<T, I>::calcCostToNodes(T *label)
 //--------------------------------------------------------------------
 
 template <class T, class I>
-void Graph<T, I>::printPathToNode(int des, ostream &os)
+void Graph<T, I>::printPathToNode( const int des, ostream &os)
 {
    if (root_ == SP_UNSET) return;
    int p = node(des)->predecessor_;
@@ -524,7 +524,7 @@ void Graph<T, I>::printPathToNode(int des, ostream &os)
 //--------------------------------------------------------------------
 
 template <class T, class I>
-void Graph<T, I>::printPathToLink(int des, ostream &os)
+void Graph<T, I>::printPathToLink(const int des, ostream &os)
 {
    if (root_ == SP_UNSET) return;
    int p = link(des)->predecessor_;
@@ -565,7 +565,7 @@ void Graph<T, I>::printPathToLink(int des, ostream &os)
 
 template <class T, class I>
 void Graph<T, I>::printLinkPathTree
-(int reachable_only, ostream &os)
+(const int reachable_only, ostream &os)
 {
    if (root_ == SP_UNSET) return;
    int i, p;
@@ -591,7 +591,7 @@ void Graph<T, I>::printLinkPathTree
 
 template <class T, class I>
 void Graph<T, I>::printNodePathTree
-(int reachable_only, ostream &os)
+(const int reachable_only, ostream &os)
 {
    if (root_ == SP_UNSET) return;
    int i, p;
@@ -616,7 +616,7 @@ void Graph<T, I>::printNodePathTree
 }
 
 template <class T, class I>
-void Graph<T, I>::printLinkCode(int i, ostream &os)
+void Graph<T, I>::printLinkCode(const int i, ostream &os)
 {
    if (i == SP_START) os << "<None>";
    else if (i == SP_UNSET) os << "<N/A>";
@@ -628,7 +628,7 @@ void Graph<T, I>::printLinkCode(int i, ostream &os)
 }
 
 template <class T, class I>
-void Graph<T, I>::printCost(T &x, ostream &os)
+void Graph<T, I>::printCost(const T &x, ostream &os)
 {
    if (x < infinity_) os << x;
    else os << "Inf";
@@ -650,7 +650,7 @@ struct compare_val
 
 
 template <class T, class I>
-vector<int> Graph<T, I>::shortest_path_vector(int des)
+const vector<int> Graph<T, I>::shortest_path_vector(const int des)
 {
    //cout << "entered the shortest_path_vector routine " << endl;
    assert (root_ != SP_UNSET);
@@ -706,14 +706,32 @@ void Graph<T, I>::set_downlink_indices()
 }
 
 template <class T, class I>
-void Graph<T, I>::set_turning_prohibitor(int inlink, int outlink)
+const bool Graph<T, I>::set_turning_prohibitor(int inlink, int outlink)
 {
   GraphLink<T, I> *l_in = link(inlink);
   GraphLink<T, I> *l_out = link(outlink);
+  if (!l_in)
+  {
+	  eout << " void Graph<T, I>::set_turning_prohibitor " << inlink << " to " <<  outlink << " : inlink missing." << endl;
+	  return false;
+  }	  
+  if (!l_out)
+  {
+	  eout << " void Graph<T, I>::set_turning_prohibitor " << inlink << " to " <<  outlink << " : outlink missing." << endl;
+	  return false;
+  }
   assert (l_in && l_out); // to make sure they exist
-  int index=l_out->dnIndex(); // this is the downstream index of this link.
+  int index=-1;
+  index = l_out->dnIndex(); // this is the downstream index of this link.
+//	eout << " void Graph<T, I>::set_turning_prohibitor " << inlink << " to " <<  outlink << " test index: " << index << endl;
    l_in->dnLegal_=(l_in->dnLegal_) ^ (1 << index);     // set the bit for this turning to 0 in the dnLegal_ variable of inlink.
+   if (l_in->dnLegal(index) != 0)
+   {
+	   eout << " void Graph<T, I>::set_turning_prohibitor " << inlink << " to " <<  outlink << " problem setting turning penalty as dnLegal for the l_in is not 0, but " << l_in->dnLegal(index) << endl;
+	   return false;
+   }
   assert (l_in->dnLegal(index) == 0); // to check all went fine with the shaky bitshifting :) 
+  return true;
 }
 
 #endif // GRAPH_IMPLEMENTATION

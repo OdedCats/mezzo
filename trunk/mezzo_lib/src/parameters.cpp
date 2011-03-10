@@ -69,8 +69,8 @@ Parameters::Parameters ()
    small_od_rate = 3.0;
 // New, to be added to the file format:
    linktime_disturbance = 0.1;
-   routesearch_iterations = 2;
-   scale_demand= 0.2;
+   routesearch_iterations = 1;
+   scale_demand= 0.1;
    renum_routes=true;
 
  // #mime_parameters

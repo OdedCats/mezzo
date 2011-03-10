@@ -64,23 +64,23 @@ class GraphNode
       GraphNode() : predecessor_(SP_UNSET), cost_(0) { }
       virtual ~GraphNode() { }
 
-      inline void addUpLink(int up) {
+      inline void addUpLink(const int up) {
 		 upLinks_.push_back(up);
       }
-      inline void addDnLink(int dn) {
+      inline void addDnLink(const int dn) {
 		 dnLinks_.push_back(dn);
       }
 
-      inline  int nUpLinks() { return upLinks_.size(); }
-      inline  int nDnLinks() { return dnLinks_.size(); }
+      inline  const int nUpLinks() const { return upLinks_.size(); }
+      inline  const int nDnLinks() const { return dnLinks_.size(); }
 
-      inline int predecessor() { return predecessor_; }
-      inline T& cost() { return cost_; }
+      inline const int predecessor() const { return predecessor_; }
+      inline const T& cost() { return cost_; }
 
       // The caller is responsible for index boundaries
 
-      inline int upLink( int i) { return upLinks_[i]; }
-      inline int dnLink( int i) { return dnLinks_[i]; }
+      inline const int upLink( const int i) const { return upLinks_[i]; }
+      inline const int dnLink( const int i) const { return dnLinks_[i]; }
 };
 
 
@@ -119,18 +119,18 @@ class GraphLink
 		 }
       }
 
-      inline int upNode() { return upNode_; }
-      inline int dnNode() { return dnNode_; }
+      inline const int upNode() const { return upNode_; }
+      inline const int dnNode() const { return dnNode_; }
 
-      inline int predecessor() { return predecessor_; }
+	  inline const int predecessor() const { return predecessor_; }
 
-      inline char dnLegal( int i) {
+      inline const char dnLegal( const int i) const {
 		 return (dnLegal_ & (1 << i)); // the ith bit
       }
-      inline char dnIndex() { return dnIndex_; }
+      inline const char dnIndex() const { return dnIndex_; }
 
-      inline T& penalty( int i) { return penalties_[i]; }
-      inline T& cost() { return cost_; }
+      inline const T& penalty( const int i) const { return penalties_[i]; }
+      inline const T& cost() const { return cost_; }
 };
 
 
@@ -168,25 +168,25 @@ class Graph
 
       // For ith node
 
-      inline T& nodeCost(int i) {
+      inline const T& nodeCost(const int i) const {
 		 return nodes_[i].cost();
       }
-      inline T& costToNode(int i) {
+      inline const T& costToNode(const int i) const {
 		 return nodeCost(i);
       }
-      inline int predecessorToNode(int i) {
+      inline const int predecessorToNode(const int i) const {
 		 return  nodes_[i].predecessor();
       }
 
       // For ith link
 
-      inline T& linkCost(int i) {
+      inline const T& linkCost(const int i) const {
 		 return links_[i].cost();
       }
-      inline T& costToLink(int i) {
+      inline const T& costToLink(const int i) const {
 		 return linkCost(i);
       }
-      inline int predecessorToLink(int i) {
+      inline const int predecessorToLink(const int i) const {
 		 return links_[i].predecessor();
       }
 
@@ -196,44 +196,44 @@ class Graph
       // first bit (from the right most) corresponds to the first
       // downstream link.
 
-      void addLink(int i, int u, int d,
-				   const T w = 1, char grade = 0,
-				   char legal = (char) 0xFF, 
-				   char index = 0);
+      void addLink(const int i, const int u,const int d,
+				   const T w = 1, const char grade = 0,
+				  const char legal = (char) 0xFF, 
+				   const char index = 0);
 
       // Update the link cost
 
-      void linkCost(int i, const T w);
+      void linkCost(const int i, const T w);
 
       // Add or update the turning penalty
 
-      void penalty(int i, int j, const T w);
+      void penalty(const int i, const int j, const T w);
 
       // Calculating one-to-many dynamic shortest path (link-based)
 
-      void labelCorrecting(int root, double t = 0, I *info = NULL);
+      void labelCorrecting(const int root, const double entry = 0, I *info = NULL);
 
       // Searching links within a given scope (link-based, using the
       // default link cost)
       
-      void labelSetting(int root, const T scp = 0x7FFF);
+      void labelSetting(const int root, const T scp = 0x7FFF);
 
       // Print path information for debugging
 
-      void printPathToNode(int v, ostream &os = cout);
-      void printPathToLink(int e, ostream &os = cout);
-      void printNodePathTree(int ro = 1, ostream &os = cout);
-      void printLinkPathTree(int ro = 1, ostream &os = cout);
-      void printLinkCode(int i, ostream &os = cout);
-      void printCost(T &x, ostream &os = cout);
+      void printPathToNode(const int v, ostream &os = cout);
+      void printPathToLink(const int e, ostream &os = cout);
+      void printNodePathTree(const int ro = 1, ostream &os = cout);
+      void printLinkPathTree(const int ro = 1, ostream &os = cout);
+      void printLinkCode(const int i, ostream &os = cout);
+      void printCost(const T &x, ostream &os = cout);
 
 		// added by Wilco Burghout 2001-11-13
-		vector<int> shortest_path_vector(int des);
-		inline const bool reachable(int des)
+		const vector<int> shortest_path_vector(const int des);
+		inline const bool reachable(const int des)
 			{return (node(des)->predecessor_!=SP_UNSET);}
       // added by Wilco 2004_06_01
       void set_downlink_indices();
-      void set_turning_prohibitor(int inlink, int outlink);
+      const bool set_turning_prohibitor(const int inlink, const int outlink);
 };
 
 #include "Graph.cpp"

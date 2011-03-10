@@ -91,13 +91,13 @@ void Origin::reset()
 
 
 
-void Origin::register_links(map <int,Link*> linkmap)
+void Origin::register_links(const map <int,Link*> & linkmap)
 /*
  	Registers all links that are outgoing from this origin
 */
 {
 	// register the links
-	for (map <int,Link*>::iterator iter=linkmap.begin(); iter != linkmap.end(); iter++)
+	for (map <int,Link*>::const_iterator iter=linkmap.begin(); iter != linkmap.end(); iter++)
  	{
 		if ((*iter).second->get_in_node_id()==id)
  		{
@@ -269,10 +269,10 @@ void Origin::add_odpair(ODpair* odpair)
 	odpairs.insert(odpairs.begin(),odpair);
 }
 
-void Junction::register_links(map <int,Link*> linkmap)
+void Junction::register_links(const map  <int,Link*>  & linkmap)
 {
 	// register the links
-	for (map <int,Link*>::iterator iter=linkmap.begin(); iter != linkmap.end(); iter++)
+	for (map <int,Link*>::const_iterator iter=linkmap.begin(); iter != linkmap.end(); iter++)
  	{
 		if ((*iter).second->get_in_node_id()==id)
  		{
@@ -315,9 +315,9 @@ Destination::~Destination()
 	}
 }
 
-void Destination::register_links(map <int,Link*> linkmap)
+void Destination::register_links(const map <int,Link*> & linkmap)
 {
-	for (map <int, Link*>::iterator iter=linkmap.begin(); iter != linkmap.end(); iter++)
+	for (map <int, Link*>::const_iterator iter=linkmap.begin(); iter != linkmap.end(); iter++)
  	{
 		if ((*iter).second->get_out_node_id()==id)
  		{

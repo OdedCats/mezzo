@@ -2703,7 +2703,12 @@ bool Network::init_shortest_path()
 		//graph->penalty((*iter1)->from_link, (*iter1)->to_link,(*iter1)->cost);
 		int from = link_to_graphlink[(*iter1)->from_link];
 		int to = link_to_graphlink[(*iter1)->to_link];
-		graph->set_turning_prohibitor(from, to);
+		bool ok=graph->set_turning_prohibitor(from, to);
+		if (!ok)
+		{
+			eout << "Network::init_shortest_path: problem setting the turning penalty from link " << (*iter1)->from_link << " to link "  << (*iter1)->to_link  << endl;
+			
+		}
 	}
 
 	theParameters->shortest_paths_initialised= true;
@@ -2840,6 +2845,7 @@ bool Network::shortest_paths_all()
 	#ifdef _DEBUG_SP
 								eout << " making route " << endl;
 	#endif //_DEBUG_SP
+								assert (rlinks.size()>0);
 								Route* rptr=new  Route(routenr, ori, (*iter3), rlinks);
 								bool exists=true;
 								if (rptr)
@@ -3763,17 +3769,19 @@ bool Network::readmaster(string name) // new  version that skips empty entries f
 	#ifdef _VISSIMCOM	
 
 		//VISSIMFILE
-		stringlist=parse_line(inputfile); // read line
-		nr_elements=stringlist.size();
-		temp =stringlist[0]; // first item on line
+		//stringlist=parse_line(inputfile); // read line
+		//nr_elements=stringlist.size();
+		//temp =stringlist[0]; // first item on line
+		inputfile>>temp; // read keyword
 		if (temp!="vissimfile=")
 			throw (string ("expecting vissimfile=, read " + temp) );
 		else
 		{
-			if (nr_elements > 1)
-				vissimfile = stringlist[1];
-			else
-				throw (string ("expecting vissimfile file (obligatory), following " + temp) ); 			// NOTE: here the full path is specified! (since it may be somewhere else)
+			//if (nr_elements > 1)
+				//vissimfile = stringlist[1];
+				inputfile >> vissimfile;
+			//else
+			//	throw (string ("expecting vissimfile file (obligatory), following " + temp) ); 			// NOTE: here the full path is specified! (since it may be somewhere else)
 		}
 		
 	#endif //_VISSIMCOM
@@ -3956,7 +3964,7 @@ double Network::executemaster()
 		calc_paths=true;
 	if (routemap.size()==0) // if there are no routes read, force random draws to generate the initial route set.
 	{
-		theParameters->routesearch_iterations=3;
+		theParameters->routesearch_iterations=1;
 		calc_paths=true;
 	}
 	if (calc_paths)
