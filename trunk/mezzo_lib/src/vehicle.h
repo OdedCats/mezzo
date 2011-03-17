@@ -50,11 +50,15 @@ class Vehicle
    Link* const  get_curr_link() const ;
    Route* const get_route() const {return route;}
    Link* const nextlink() const ;
+
+   void advance_to_next_link(Link* const next);
    const int get_id() const {return id;}
    const int get_type() const {return type;}
    const  int get_oid() const ;
    const int get_did() const ;
-	void set_entered() {entered=true;theParameters->veh_in_network++;}
+   const int get_currlink_id() const {return cur_link_id;};
+   const int get_nextlink_id() const {return next_link_id;}
+	void set_entered(); 
 	void add_meters(const int meters_) {meters+=meters_;}
 	void set_meters(const int meters_) {meters=meters_;}
 	const int get_meters () const {return meters;}
@@ -62,6 +66,8 @@ class Vehicle
 
   protected:
 	int id;
+	int cur_link_id;
+    int next_link_id;
 	Route* route;
 	ODpair * odpair;
 	double start_time;
@@ -71,6 +77,8 @@ class Vehicle
 	double exit_time; 	
 	double arrival_time;
 	Link* curr_link;
+	vector <Link*> ::const_iterator cur_link_iter;
+	vector <Link*> ::const_iterator next_link_iter;
 	bool entered;
 	int switched;
 	int meters;

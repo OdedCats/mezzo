@@ -13,6 +13,7 @@ QT+= core gui
 #qt3support 
 #activeqt xml network svg
 QMAKE= $(QTDIR)/bin/qmake
+QMAKE_LFLAGS += /LARGEADDRESSAWARE
 
 # Input
 HEADERS += src/busline.h \

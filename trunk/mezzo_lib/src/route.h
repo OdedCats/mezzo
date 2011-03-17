@@ -44,6 +44,8 @@ class Route
 	Route(const int id, Route* const route, const vector<Link*> & links_); // copy constructor that copies route and overwrites remaining part starting from links_.front()
 	void reset(); // resets all variables to initial state
 	Link* const nextlink(Link* const currentlink) const;
+	vector <Link*>::const_iterator firstlink_iter() {return links.begin();}
+	vector <Link*>::const_iterator lastlink_iter() {return links.last();}
 	Link* const firstlink() const {	return (links.front());}
 	const int get_id () const {return id;}
 	void set_id(const int id_) {id=id_;}
@@ -80,7 +82,7 @@ class Route
 	Origin* origin;
 	Destination* destination;
 	vector <Link*> links; // ordered sequence of the links in the route
-	map <int, Link*> linkmap; // in addition to the 'links' vector, to enable fast lookup
+	//map <int, Link*> linkmap; // in addition to the 'links' vector, to enable fast lookup
 	//map <int, Vehicle*> departures;
 	vector <int> routeflows; //  for each OD time period the nr of departures.
 	vector <int> prev_routeflows; //  routeflows previous iteration.

@@ -151,7 +151,10 @@ public:
 	bool writeall(unsigned int repl=0); //writes the output, appends replication number to output files
 	bool readnetwork(string name); //!< reads the network and creates the appropriate structures
 	bool init(); //!< creates eventlist and initializes first actions for all turnings at time 0 and starts the Communicator
+
 	void complete_turnpenalties(); //!< checks the turnings and completes the list of turning penalties for the shortest path
+	void remove_orphan_nodes (); //!< removes all nodes that have no links connected from the network.
+	
 	bool init_shortest_path(); //!< builds the shortest path graph
 	vector<Link*> get_path(int destid); //!<gives the links on the shortest path to destid (from current rootlink)
 	bool shortest_paths_all(); //!< calculates shortest paths and generates the routes

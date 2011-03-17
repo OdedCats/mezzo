@@ -14,7 +14,9 @@ QT+= core gui
 #qt3support 
 # activeqt xml network svg
 QMAKE= $(QTDIR)/bin/qmake
-CONFIG += uic4 staticlib debug
+CONFIG += uic4 staticlib 
+#debug
+QMAKE_LFLAGS += /LARGEADDRESSAWARE
 
 # Input
 HEADERS += src/assist.h \

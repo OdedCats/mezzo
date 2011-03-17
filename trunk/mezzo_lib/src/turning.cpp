@@ -224,7 +224,7 @@ const bool TurnAction::execute (Eventlist* eventlist, const double time)
     		new_time=turning->nexttime; // otherwise the function process_veh has provided a next time.
 			if (new_time < time)
 			{
-				eout << "trouble in the turning action:: exectute. newtime < current time " << endl;
+				eout << "trouble in the turning action:: exectute. newtime < current time : " << time << endl;
 				new_time=time+0.1;
 			}
 		 }

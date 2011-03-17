@@ -22,7 +22,7 @@
 #include <iostream>
 #include <vector>
 using namespace std;
-//#include "STL_Configure.h"
+
 
 enum { SP_UNSET = -2, SP_START = -1 };
 

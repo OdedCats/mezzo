@@ -12,6 +12,8 @@ Vehicle::Vehicle()
  entered=false;
  switched=0;
  meters=0;
+ cur_link_id = -1;
+ next_link_id = -1;
 }
 
 
@@ -20,6 +22,8 @@ Vehicle::Vehicle(const int id_, const int type_, const double length_, Route*con
 	entered=false;	
 	switched=0;
 	meters=0;
+	cur_link_id = -1;
+	next_link_id = -1;
 }
 
 void Vehicle::init (const int id_, const int type_, const double length_, Route* const route_, ODpair* const odpair_, const double time_)
@@ -35,7 +39,33 @@ void Vehicle::init (const int id_, const int type_, const double length_, Route*
  switched=0;
  meters=0;
  route->register_veh_departure(start_time);
+ cur_link_id = -1;
+ next_link_id = -1;
 }
+
+void Vehicle::set_entered()
+{
+	entered=true;
+	theParameters->veh_in_network++;
+	cur_link_iter=route->firstlink_iter();
+	cur_link_id=(*cur_link_iter)->get_id();
+	next_link_iter=cur_link_iter;
+	next_link_iter++;
+	next_link_id=(*next_link_iter)->get_id();
+}
+
+void Vehicle::advance_to_next_link(Link* const next)
+{
+	cur_link_iter++;
+	cur_link_id=(*cur_link_iter)->get_id();
+	assert ((*cur_link_iter) == next);
+	next_link_iter++;
+	if (next_link_iter!=route->lastlink_iter())
+		next_link_id=(*next_link_iter)->get_id();
+
+
+}
+
 
 void Vehicle::set_curr_link(Link* const  curr_link_)
 {

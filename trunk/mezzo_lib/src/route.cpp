@@ -25,7 +25,7 @@ Route::Route(const int id_, Origin* const origin_, Destination* const destinatio
 	{
 			Link* link=(*iter);
 			link->register_route(this);
-			linkmap [link->get_id()]=link;
+		//	linkmap [link->get_id()]=link;
 	}
 #ifdef _DEBUG_ROUTE 	
  	eout << "new route: rid,oid,did : lid* " << id << ","<< origin->get_id();
@@ -213,11 +213,11 @@ Link* const Route::nextlink(Link* const currentlink) const
 
 const bool Route::has_link(const int lid) const 
 {
-  //return ( (find_if (links.begin(),links.end(), compare <Link> (lid))) < links.end() ); // the link exists
-	if (linkmap.count(lid))
+  return ( (find_if (links.begin(),links.end(), compare <Link> (lid))) < links.end() ); // the link exists
+/*	if (linkmap.count(lid))
 		return true;
 	else
-		return false;
+		return false;*/
 }
 
 

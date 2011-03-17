@@ -10,6 +10,7 @@ QT -=  gui
 #core
 DEFINES += _NO_GUI
 QMAKE= $(QTDIR)/bin/qmake
+QMAKE_LFLAGS += /LARGEADDRESSAWARE
 
 # Input
 HEADERS += ../mezzo_lib/src/busline.h \

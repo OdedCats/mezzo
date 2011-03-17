@@ -307,7 +307,8 @@ Route* ODpair::select_route(double time)          // to be changed
 	}
 
 	// if it exits the loop without selecting a route
-	eout << "TROUBLE: No Route selected! Returning the first in list" <<  endl;
+	eout << "WARNING: ODpair::select_route: No Route selected! Returning the first in list, Origin " << origin->get_id() << " Destination: " << destination->get_id();
+	eout << " - Nr of routes " << routes.size() << endl;
 	return routes.front(); // to be sure that in any case a route is returned
 }
  	

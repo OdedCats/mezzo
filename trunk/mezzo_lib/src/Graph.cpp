@@ -45,11 +45,11 @@ Graph<T, I>::Graph(const int n, const int m, const T u, const T p)
 //--------------------------------------------------------------------
 
 template <class T, class I>
-void Graph<T, I>::addLink(int i, int u, int d, // required
+void Graph<T, I>::addLink(const int i, const int u,const  int d, // required
 						  const T w,	// following is optional
-						  char grade,
-						  char legal,
-						  char index)
+						  const char grade,
+						  const char legal,
+						  const char index)
 {
    GraphLink<T, I> *arc = link(i);
    arc->upNode_ = u;
