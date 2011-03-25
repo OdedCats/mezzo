@@ -45,7 +45,8 @@ class Route
 	void reset(); // resets all variables to initial state
 	Link* const nextlink(Link* const currentlink) const;
 	vector <Link*>::const_iterator firstlink_iter() {return links.begin();}
-	vector <Link*>::const_iterator lastlink_iter() {return links.last();}
+	vector <Link*>::const_iterator lastlink_iter() {return --(links.end());}
+	vector <Link*>::const_iterator nextlink_iter(Link* const currentlink) ;
 	Link* const firstlink() const {	return (links.front());}
 	const int get_id () const {return id;}
 	void set_id(const int id_) {id=id_;}

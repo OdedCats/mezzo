@@ -329,7 +329,7 @@ void Q::switchroute(Vehicle* const veh, Route* const curr_route, Route* const al
 	//eout << "Route change: Vh= " << Vh << " and Va= " << Va << endl;
 	Pa=(exp(Va)/(exp(Va)+exp(Vh)));
 	if (random->urandom() <= Pa)
-		veh->set_route(alt_route); // switched=1 automatically set by changing route
+		veh->set_alternative_route(alt_route); // switched=1 automatically set by changing route
 }
 
 //calculates the space occupied by the queueing part of the vehicles, taking the individual vehicle lengths

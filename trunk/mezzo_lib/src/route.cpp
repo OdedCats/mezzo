@@ -208,6 +208,15 @@ Link* const Route::nextlink(Link* const currentlink) const
  return NULL;
 }
 
+vector <Link*>::const_iterator Route::nextlink_iter(Link* const currentlink) 
+{
+	vector<Link*>::const_iterator iter=find(links.begin(), links.end(), currentlink);
+	iter++;
+	if (iter==links.end())
+		eout << "Route::nextlink_iter: error! there is no next link! route id "<< id << endl;
+	return iter;
+}
+	
 
 
 

@@ -43,7 +43,7 @@ class Vehicle
    const ODVal get_odids () const  ;
    void set_exit_time(const double time){exit_time=time;}
    void set_entry_time(const double time){entry_time=time;}
-   void set_route (Route* const  route_) {route=route_; switched=1;}
+   void set_alternative_route (Route* const  route_) {route=route_; switched=1;}
    void set_switched(const int i) {switched=i;}
    const double get_entry_time() const  {return entry_time;}
    void set_curr_link(Link* const curr_link_);
@@ -56,8 +56,7 @@ class Vehicle
    const int get_type() const {return type;}
    const  int get_oid() const ;
    const int get_did() const ;
-   const int get_currlink_id() const {return cur_link_id;};
-   const int get_nextlink_id() const {return next_link_id;}
+ //  const int get_nextlink_id() const {return next_link_id;}
 	void set_entered(); 
 	void add_meters(const int meters_) {meters+=meters_;}
 	void set_meters(const int meters_) {meters=meters_;}
@@ -66,8 +65,7 @@ class Vehicle
 
   protected:
 	int id;
-	int cur_link_id;
-    int next_link_id;
+	//int next_link_id;
 	Route* route;
 	ODpair * odpair;
 	double start_time;
@@ -77,7 +75,7 @@ class Vehicle
 	double exit_time; 	
 	double arrival_time;
 	Link* curr_link;
-	vector <Link*> ::const_iterator cur_link_iter;
+	
 	vector <Link*> ::const_iterator next_link_iter;
 	bool entered;
 	int switched;
