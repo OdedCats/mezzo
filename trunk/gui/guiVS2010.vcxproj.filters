@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Makefile">
+      <UniqueIdentifier>{fbd3b508-470c-4164-97ec-183e4a98019c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Forms">
+      <UniqueIdentifier>{646fc01d-e395-4365-9339-14a42fbc08bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Generated">
+      <UniqueIdentifier>{32489e4a-fb82-4f3e-8cc5-bc1931b1a1d5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\batchrundlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="canvas_qt4.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\nodedlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\outputview.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="parametersdialog_qt4.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\positionbackground.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\batchrundlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="canvas_qt4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\nodedlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\outputview.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="parametersdialog_qt4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\positionbackground.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_batchrundlg.h">
+      <Filter>Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_canvas_qt4.h">
+      <Filter>Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_nodedlg.h">
+      <Filter>Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_parametersdialog_qt4.h">
+      <Filter>Generated</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="mezzo.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="gui.pro">
+      <Filter>Makefile</Filter>
+    </None>
+    <None Include="Makefile">
+      <Filter>Makefile</Filter>
+    </None>
+    <None Include="ui\batchrundlg.ui">
+      <Filter>Forms</Filter>
+    </None>
+    <None Include="canvas_qt4.ui">
+      <Filter>Forms</Filter>
+    </None>
+    <None Include="ui\nodedlg.ui">
+      <Filter>Forms</Filter>
+    </None>
+    <None Include="ui\outputview.ui">
+      <Filter>Forms</Filter>
+    </None>
+    <None Include="parametersdialog_qt4.ui">
+      <Filter>Forms</Filter>
+    </None>
+    <None Include="ui\positionbackground.ui">
+      <Filter>Forms</Filter>
+    </None>
+    <None Include="readme.txt" />
+  </ItemGroup>
+</Project>
