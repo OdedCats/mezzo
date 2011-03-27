@@ -108,6 +108,5 @@
     <None Include="ui\positionbackground.ui">
       <Filter>Forms</Filter>
     </None>
-    <None Include="readme.txt" />
   </ItemGroup>
 </Project>

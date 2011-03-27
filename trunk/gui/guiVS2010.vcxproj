@@ -102,7 +102,6 @@ nmake release</NMakeReBuildCommandLine>
     <None Include="ui\outputview.ui" />
     <None Include="parametersdialog_qt4.ui" />
     <None Include="ui\positionbackground.ui" />
-    <None Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mezzoAnalyzer\mezzoAnalyzerVS2010.vcxproj">
