@@ -2,8 +2,9 @@
 
 TEMPLATE = app
 TARGET = mezzo_gui
-INCLUDEPATH += $(QTDIR)/include $(QTDIR)/include/QtCore $(QTDIR)/include/QtGui $(QTDIR)/include/QtDesigner $(QTDIR)/include/QtNetwork $(QTDIR)/include/ActiveQt 
-#$(QTDIR)/include/Qt3Support
+INCLUDEPATH += $(QTDIR)/include 
+#$(QTDIR)/include/QtCore $(QTDIR)/include/QtGui $(QTDIR)/include/QtDesigner $(QTDIR)/include/QtNetwork $(QTDIR)/include/ActiveQt 
+
 
 CONFIG(debug, debug|release) {
      LIBS +=  -L../mezzo_lib/Debug -lmezzo_lib -L../mezzoAnalyzer/Debug -lmezzoAnalyzer 
@@ -16,10 +17,8 @@ LIBS += -L$(QTDIR)/lib -lQtCore -lQtGui -lQtNetwork  -lQtDesigner
 #-lQt3Support
 
 QT+= core gui 
-#qt3support 
-#activeqt xml network svg
+
 CONFIG += uic4 embed_manifest_exe
-#debug
 
 # Input
 HEADERS += canvas_qt4.h parametersdialog_qt4.h src/nodedlg.h src/batchrundlg.h src/outputview.h src/positionbackground.h

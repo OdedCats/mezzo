@@ -38,6 +38,8 @@ ODaction::ODaction(ODpair* odpair_):odpair(odpair_)
 	double rate = odpair->get_rate();
 	double mu = 0.0;
 	total_nr_veh=0;
+	booked_time=0.0;
+	last_gen_time=0.0;
 	active = false;
 	if (rate >= 1)
 	{
@@ -56,6 +58,8 @@ ODaction::~ODaction()
 void ODaction::reset(double rate_)
 {
 	total_nr_veh=0;
+	booked_time=0.0;
+	last_gen_time=0.0;
 	server->reset();
 	if (rate_ < 1)
 	{
@@ -103,6 +107,7 @@ const bool ODaction::execute(Eventlist* eventlist, const double time)
 	  // book myself in eventlist
 	  eventlist->add_event(new_time,this);
 	  booked_time=new_time;
+	  last_gen_time=time;
 	  return ok;
   }
   else
@@ -398,15 +403,25 @@ void ODpair::set_rate(double newrate_, double time)
 		{
 			odaction->set_active(true);
 			odaction->set_rate(newrate_);
-			odaction->book_later(eventlist_,time); 
+			double temp=random->urandom(1,50); // to space out generations
+			odaction->book_later(eventlist_,time+temp); 
 		}
 			// if newrate_== 0 as well, nothing changes...
 	}
 	else // if rate!=0, OD pair is currently active
 		if (newrate_!=0) // so from non-zero to non-zero rate, od pair stays active
 		{
+			// re-adjust the generation event, by moving according to ratio of new_rate/rate;
+			double ratio = newrate_/rate;
+			double last_gen=odaction->get_last_gen_time();
+			double next_gen = odaction->get_booked_time();
+			double headway=	next_gen-last_gen;
+			double new_time=last_gen+ratio*headway;
+			if (new_time < time)
+				new_time=time + random->urandom(1,50);
+			eout << "INFO: ODpair::set_rate(): at time "<< time << " moving ODaction from " << next_gen << " to " << new_time << endl;
 			odaction->set_rate(newrate_);
-			odaction->move_event(eventlist_,time); // move the next generation event for the action to current time
+			odaction->move_event(eventlist_,new_time); // move the next generation event for the action to current time
 		}
 		else // if newrate_ == 0 So the OD pair goes from active to inactive
 		{

@@ -61,6 +61,9 @@ public:
 	const bool get_active() {return active;}
 	const bool move_event(Eventlist* eventlist,  double new_time);
 	void book_later(Eventlist* eventlist, double time);
+	const double get_booked_time() const {return booked_time;}
+	const double get_last_gen_time() const {return last_gen_time;}
+
 	
 private:
 	ODpair* odpair;
@@ -68,6 +71,7 @@ private:
 	bool active; // indicates if an odpair is active
 	unsigned int total_nr_veh;
 	double booked_time; // currently booked time in the eventlist
+	double last_gen_time; // last time a vehicle was generated
 };
 
 class ODpair
