@@ -35,8 +35,8 @@
 // use the generated ui form header  
 #include "../ui_batchrundlg.h"
 // network definition
-#include "../mezzo_lib/src/network.h"
-#include "../mezzo_lib/src/linktimes.h"
+#include "../../mezzo_lib/src/network.h"
+#include "../../mezzo_lib/src/linktimes.h"
 
 class BatchrunDlg : public QDialog, public Ui::Batchrun
 {

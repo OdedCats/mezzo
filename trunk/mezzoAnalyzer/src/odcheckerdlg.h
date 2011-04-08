@@ -47,9 +47,9 @@
 
 
 // use the generated ui form header  
-#include "../mezzoAnalyzer/ui_odcheckdlg.h"
+#include "../ui_odcheckdlg.h"
 // use the mainwindow and network definitions 
-#include "../mezzo_lib/src/network.h"
+#include "../../mezzo_lib/src/network.h"
 // include custom item delegate
 #include "odtabledelegate.h"
 
@@ -105,7 +105,7 @@ protected:
 	ODTableViewDelegate* itemdelegate_; // table item control delegate
 	Network* mezzonet_;
 	ODpair* odsel_;
-	vector<std::pair<int, QString>>* paintrouteseq_;  // record of the painted routes
+	vector< std::pair<int, QString> >* paintrouteseq_;  // record of the painted routes
 
 };
 

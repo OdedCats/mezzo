@@ -131,25 +131,37 @@ Network::Network()
 
 Network::~Network()
 {
-	delete linkinfo;
-	delete eventlist;
+	if(NULL != linkinfo){
+		delete linkinfo;
+	}
+	if(NULL != eventlist){
+		delete eventlist;
+	}
 	
 #ifdef _MIME
-	delete communicator;
+	if (NULL != communicator) {
+		delete communicator;
+		}
 #endif //_MIME
 	for (map <int, Origin*>::iterator iter=originmap.begin();iter!=originmap.end();)
 	{			
-		delete (iter->second); // calls automatically destructor
+		if (NULL != iter->second) {
+			delete (iter->second); // calls automatically destructor
+		}
 		iter=originmap.erase(iter);	
 	}
 	for (map <int, Destination*>::iterator iter1=destinationmap.begin();iter1!=destinationmap.end();)
 	{			
-		delete (iter1->second); // calls automatically destructor
+		if (NULL != iter1->second) {
+			delete (iter1->second); // calls automatically destructor
+		}
 		iter1=destinationmap.erase(iter1);	
 	}
 	for (map <int, Junction*>::iterator iter2=junctionmap.begin();iter2!=junctionmap.end();)
 	{			
-		delete (iter2->second); // calls automatically destructor
+		if (NULL!=iter2->second) {
+			delete (iter2->second); // calls automatically destructor
+		}
 		iter2=junctionmap.erase(iter2);	
 	}
 	for (map <int,Node*>::iterator iter3=nodemap.begin();iter3!=nodemap.end();)
@@ -158,49 +170,67 @@ Network::~Network()
 	}
 	for (map <int,Link*>::iterator iter4=linkmap.begin();iter4!=linkmap.end();)
 	{			
+		if (NULL != iter4->second) {
 		delete (iter4->second); // calls automatically destructor
+		}
 		iter4=linkmap.erase(iter4);	
 	}
 	for (vector <Incident*>::iterator iter5=incidents.begin();iter5<incidents.end();)
 	{			
+		if (NULL != *iter5) {
 		delete (*iter5); // calls automatically destructor
+		}
 		iter5=incidents.erase(iter5);	
 	}	
 
 	// for now keep OD pairs in vector
 	for (vector <ODpair*>::iterator iter6=odpairs.begin();iter6!=odpairs.end();)
 	{
+		if (NULL != *iter6) {
 		delete (*iter6);
+		}
 		iter6=odpairs.erase(iter6);
 	}
 	for (multimap <ODVal, Route*>::iterator iter7=routemap.begin();iter7!=routemap.end();)
 	{			
+		if (NULL != iter7->second) {
 		delete (iter7->second); // calls automatically destructor
+		}
 		iter7=routemap.erase(iter7);	
 	}
 	for (map <int, Sdfunc*>::iterator iter8=sdfuncmap.begin();iter8!=sdfuncmap.end();)
 	{			
+		if (NULL != iter8->second) {
 		delete (iter8->second); // calls automatically destructor
+		}
 		iter8=sdfuncmap.erase(iter8);	
 	}
 	for (map <int, Server*>::iterator iter9=servermap.begin();iter9!=servermap.end();)
 	{			
+		if (NULL != iter9->second) {
 		delete (iter9->second); // calls automatically destructor
+		}
 		iter9=servermap.erase(iter9);	
 	}
 	for (map <int, Turning*>::iterator iter10=turningmap.begin();iter10!=turningmap.end();)
 	{			
+		if (NULL != iter10->second) {
 		delete (iter10->second); // calls automatically destructor
+		}
 		iter10=turningmap.erase(iter10);	
 	}
 	for (vector <Vtype*>::iterator iter11=vehtypes.vtypes.begin();iter11<vehtypes.vtypes.end();)
 	{			
+		if (NULL != *iter11) {
 		delete (*iter11); // calls automatically destructor
+		}
 		iter11=vehtypes.vtypes.erase(iter11);	
 	}
 	for (vector <TurnPenalty*>::iterator iter12= turnpenalties.begin(); iter12 < turnpenalties.end();)
 	{
+		if (NULL != *iter12) {
 		delete (*iter12);
+		}
 		iter12=turnpenalties.erase(iter12);
 	}
 }
@@ -2105,7 +2135,7 @@ bool Network::readvtype (istream & in)
 	}
 	in  >> id >> label >> prob >> length;
 
-	assert ( (prob >= 0.0) && (prob<=1.0) && (length>0.0) ); // 0.0 means unused in the vehicle míx
+	assert ( (prob >= 0.0) && (prob<=1.0) && (length>0.0) ); // 0.0 means unused in the vehicle mix
 	in >> bracket;
 	if (bracket != '}')
 	{
@@ -2936,10 +2966,10 @@ bool Network::shortest_paths_all()
 bool Network::find_alternatives_all (int lid, double penalty, Incident* incident)
 // Makes sure that each affected link has an alternative
 {
-	map <int, map <int,Link*>> affected_links_per_dest; // indexed by destination, each destination will have a nr of affected links
+	map <int, map <int,Link*> > affected_links_per_dest; // indexed by destination, each destination will have a nr of affected links
 	map <int, Origin*> affected_origins; // Simple map of affected origins
 	map <int, Link*> affected_links; // simple map of affected links
-	map <int, set <int>> links_without_alternative; // all links,dests without a 'ready' alternative. indexed by link_id, dest_id
+	map <int, set <int> > links_without_alternative; // all links,dests without a 'ready' alternative. indexed by link_id, dest_id
 	// Find all the affected links
 	Link* incident_link=linkmap[lid];
 	multimap <int, Route*> i_routemap = incident_link->get_routes();// get all routes through incident link
@@ -2964,7 +2994,7 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 		affected_origins [oid] = ori;
 	}
 	// per destination, for all affected links, find out if they have an alternative that does not go through incident link
-	map<int, map <int,Link*>>::iterator lm_iter=affected_links_per_dest.begin();
+	map<int, map <int,Link*> >::iterator lm_iter=affected_links_per_dest.begin();
 	for (lm_iter; lm_iter!=affected_links_per_dest.end(); lm_iter++)
 	{
 		int dest = (*lm_iter).first;
@@ -3012,7 +3042,7 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 			initok = init_shortest_path();
 		if (initok)
 		{
-			map <int, set <int >>::iterator mi = links_without_alternative.begin();
+			map <int, set <int > >::iterator mi = links_without_alternative.begin();
 			for (mi; mi != links_without_alternative.end();mi++)
 		 {
 			 // get shortest path and add.
@@ -4028,7 +4058,7 @@ double Network::executemaster()
 		calc_paths=true;
 	if (routemap.size()==0) // if there are no routes read, force random draws to generate the initial route set.
 	{
-		theParameters->routesearch_iterations=1;
+		theParameters->routesearch_iterations=2;
 		calc_paths=true;
 	}
 	if (calc_paths)
@@ -4156,7 +4186,7 @@ const double Network::calc_abs_diff_input_output_linktimes()
 	for (map <int, Link*>::iterator iter1=linkmap.begin();iter1!=linkmap.end();iter1++)
 	{	
 		if ((*iter1).second->get_nr_passed() > 0 )
-			total+=abs((*iter1).second->calc_diff_input_output_linktimes());
+			total+=fabs((*iter1).second->calc_diff_input_output_linktimes());
 	}
 	return total;
 

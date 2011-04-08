@@ -31,7 +31,7 @@
 // use the generated ui form header  
 #include "../ui_nodedlg.h"
 // node definition
-#include "../mezzo_lib/src/node.h"
+#include "../../mezzo_lib/src/node.h"
 
 class NodeDlg : public QDialog, public Ui::NodeDlg
 {

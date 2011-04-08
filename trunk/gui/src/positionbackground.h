@@ -31,7 +31,7 @@ the user selects the MOEs for link thickness and link colour display.
 // use the generated ui form header  
 #include "../ui_positionbackground.h"
 // network definition
-#include "../mezzo_lib/src/network.h" // also includes the parameters
+#include "../../mezzo_lib/src/network.h" // also includes the parameters
 
 class PositionBackground : public QDialog, public Ui::PositionBackground
 {

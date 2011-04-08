@@ -272,7 +272,7 @@ void MainForm::process_masterfile()
 		QString workingdir = fn.left(pos+1);
 		theNetwork->set_workingdir (string(workingdir.toLatin1()));
 		// make a STL compatible string
-		string name=fn.toLatin1();
+		string name=string(fn.toLatin1().data());
 		if (theNetwork->readmaster(name))
 			runtime=theNetwork->executemaster(&pm2,&wm);
 		else
@@ -373,8 +373,8 @@ void MainForm::on_loadbackground_activated()
 	QString fn( QFileDialog::getOpenFileName(this, "Open background image",QString::null,"PNG Files (*.png)" ) );
     if (!fn.isEmpty())
     {
-		string haha=fn.toLatin1();
-		theNetwork->set_background (haha);
+		string tempname=string(fn.toLatin1().data());
+		theNetwork->set_background (tempname);
     }
 }
 

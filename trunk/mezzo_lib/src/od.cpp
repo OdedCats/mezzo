@@ -52,7 +52,9 @@ ODaction::ODaction(ODpair* odpair_):odpair(odpair_)
 
 ODaction::~ODaction()
 {
+	if (NULL != server) {
 	delete server;
+	}
 }
 
 void ODaction::reset(double rate_)

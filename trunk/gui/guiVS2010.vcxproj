@@ -111,6 +111,10 @@ nmake release</NMakeReBuildCommandLine>
     <ProjectReference Include="..\mezzo_lib\mezzo_libVS2010.vcxproj">
       <Project>{e32f58a9-4da9-441d-a9f5-057f6a77b1aa}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>true</Private>
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

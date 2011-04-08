@@ -18,7 +18,7 @@ ODCheckerDlg::ODCheckerDlg(QWidget* parent):QDialog(parent)
    colCnt_=0;
    networkset_=false;
    allroutesdrawn_=false;
-   paintrouteseq_=new vector<std::pair<int,QString>>(0);	
+   paintrouteseq_=new vector< std::pair<int,QString> >(0);	
 
    // create the model for the tableview
    itemmodel_=new QStandardItemModel(0,5);
@@ -238,7 +238,7 @@ void ODCheckerDlg::loadDestCombwithO(const QString& curtext)
 		loadInitOD();
 	}
 	else{
-		QString& desttext=destcomb->currentText();
+		QString desttext=destcomb->currentText();
 		if(desttext=="None"){
 
 			//clear the destination combobox
@@ -272,7 +272,7 @@ void ODCheckerDlg::loadOrigCombwithD(const QString& curtext)
 		loadInitOD();
 	}
 	else{
-		QString& origtext=origcomb->currentText();
+		QString origtext=origcomb->currentText();
 		if(origtext=="None"){
 
 			//clear the destination combobox
@@ -460,7 +460,7 @@ void ODCheckerDlg::drawRoute(const QString& colortext, const int& index)
 		if(colortext=="none"||colortext=="None"){
 			
 			// remove the current index from the paint list
-			vector<std::pair<int,QString>>::iterator iter;
+			vector<std::pair<int,QString> >::iterator iter;
 			for(iter=paintrouteseq_->begin();iter!=paintrouteseq_->end();iter++){
 				if((*iter).first==index){
 					paintrouteseq_->erase(iter);
@@ -479,7 +479,7 @@ void ODCheckerDlg::drawRoute(const QString& colortext, const int& index)
 			// first check if the index is already existed 
 			// in the drawing sequence 
 			bool routedrawn=false;
-			vector<std::pair<int,QString>>::iterator iter;
+			vector<std::pair<int,QString> >::iterator iter;
 			for(iter=paintrouteseq_->begin();iter!=paintrouteseq_->end();iter++){
 				if((*iter).first==index){
 					routedrawn=true;

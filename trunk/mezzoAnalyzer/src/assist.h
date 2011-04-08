@@ -19,7 +19,7 @@
 #ifndef MEZZOASSIST_H
 #define MEZZOASSIST_H
 
-#include "../mezzo_lib/src/od.h" 
+#include "../../mezzo_lib/src/od.h" 
 
 namespace assist{
 	

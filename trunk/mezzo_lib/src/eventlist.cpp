@@ -27,11 +27,12 @@ Eventlist::~Eventlist()
 void Eventlist::reset()
 {
 	multimap <double, Action*> :: iterator iter = thelist.begin();
-	for (iter; iter != thelist.end(); iter)
+	/*for (iter; iter != thelist.end(); iter)
 	{
 		// DO NOT delete the Actions, since they are simply reset (in Network), NOT re-created
 		iter = thelist.erase(iter);
-	}
+	}*/
+	thelist.clear();
 	lastupdate=thelist.end();
 }
 

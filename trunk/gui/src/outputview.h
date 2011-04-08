@@ -31,7 +31,7 @@ the user selects the MOEs for link thickness and link colour display.
 // use the generated ui form header  
 #include "../ui_outputview.h"
 // network definition
-#include "../mezzo_lib/src/network.h" // also includes the parameters
+#include "../../mezzo_lib/src/network.h" // also includes the parameters
 
 
 class OutputView : public QDialog, public Ui::OutputView
