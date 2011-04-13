@@ -48,8 +48,8 @@ template <class T, class I>
 void Graph<T, I>::addLink(const int i, const int u,const  int d, // required
 						  const T w,	// following is optional
 						  const char grade,
-						  const char legal,
-						  const char index)
+						  const unsigned short int legal,
+						  const unsigned short int index)
 {
    GraphLink<T, I> *arc = link(i);
    arc->upNode_ = u;

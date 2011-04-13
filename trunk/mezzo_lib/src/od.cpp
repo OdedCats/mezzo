@@ -414,14 +414,14 @@ void ODpair::set_rate(double newrate_, double time)
 		if (newrate_!=0) // so from non-zero to non-zero rate, od pair stays active
 		{
 			// re-adjust the generation event, by moving according to ratio of new_rate/rate;
-			double ratio = newrate_/rate;
+			double ratio = rate/newrate_;
 			double last_gen=odaction->get_last_gen_time();
 			double next_gen = odaction->get_booked_time();
 			double headway=	next_gen-last_gen;
 			double new_time=last_gen+ratio*headway;
 			if (new_time < time)
 				new_time=time + random->urandom(1,50);
-			eout << "INFO: ODpair::set_rate(): at time "<< time << " moving ODaction from " << next_gen << " to " << new_time << endl;
+			//eout << "INFO: ODpair::set_rate(): at time "<< time << " moving ODaction from " << next_gen << " to " << new_time << endl;
 			odaction->set_rate(newrate_);
 			odaction->move_event(eventlist_,new_time); // move the next generation event for the action to current time
 		}
