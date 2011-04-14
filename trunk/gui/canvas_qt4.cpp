@@ -25,6 +25,7 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 
 	// first create a Network object
 	theNetwork = new Network();
+	setWindowTitle(QString::fromStdString(version));
 	fn = "";
 	started_from_commandline=false;
 	panelx=Canvas->width();
@@ -206,6 +207,7 @@ void MainForm::on_closenetwork_activated()
 	// Create a new Network
 	theNetwork = new Network();
 	fn ="";
+	setWindowTitle(QString::fromStdString(version));
 
 	//display empty pixmap
 	copyPixmap();
@@ -281,6 +283,7 @@ void MainForm::process_masterfile()
 			close();
 		}
 		
+		setWindowTitle(QString::fromStdString(version + " - " + name));
 		// initialize the buttons
 		initialised=true;
 		activateToolbars(initialised);
