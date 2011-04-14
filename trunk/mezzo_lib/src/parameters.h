@@ -30,7 +30,7 @@
 #include "Random.h"
 
 #ifndef _NO_GUI
-#include <qcolor.h>
+#include <qcolor>
 #endif
 
 

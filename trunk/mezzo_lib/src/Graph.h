@@ -100,8 +100,8 @@ class GraphLink
       T *penalties_;		// turning penalties to dnLinks
       char grade_;		// link grade (0=freeway 1=otherwise)
 
-      unsigned short int dnLegal_;		// is downstream links connected
-      unsigned short int dnIndex_;		// index as an downstream link
+      unsigned int dnLegal_;		// is downstream links connected
+      unsigned int dnIndex_;		// index as an downstream link
 
       T cost_;			// default cost
       int predecessor_;		// for storing path
@@ -124,10 +124,10 @@ class GraphLink
 
 	  inline const int predecessor() const { return predecessor_; }
 
-      inline const unsigned short int dnLegal( const int i) const {
+      inline const unsigned int dnLegal( const int i) const {
 		 return (dnLegal_ & (1 << i)); // the ith bit
       }
-      inline const unsigned short int dnIndex() const { return dnIndex_; }
+      inline const unsigned int dnIndex() const { return dnIndex_; }
 
       inline const T& penalty( const int i) const { return penalties_[i]; }
       inline const T& cost() const { return cost_; }
@@ -198,8 +198,8 @@ class Graph
 
       void addLink(const int i, const int u,const int d,
 				   const T w = 1, const char grade = 0,
-				  const unsigned short int legal = (unsigned short int) 0xFFFF, 
-				   const unsigned short int index = 0);
+				  const unsigned int legal = (unsigned int) 0xFFFFFFFF, 
+				   const unsigned int index = 0);
 
       // Update the link cost
 
