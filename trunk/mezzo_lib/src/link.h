@@ -125,6 +125,7 @@ public:
 		}
 	const bool copy_linktimes_out_in(); //!< copies the output travel times to input (historical) travel times
 	const double get_hist_time() const {return hist_time;}
+	const LinkTime* get_hist_times() { return histtimes;} // returns histtimes.
 	const double get_cost (const double time) const {
 		if (histtimes)	
 			return histtimes->cost(time);

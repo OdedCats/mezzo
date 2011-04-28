@@ -2401,10 +2401,16 @@ bool Network::copy_linktimes_out_in()
 {
 	bool ok=true;
 	map<int,Link*>::iterator l_iter=linkmap.begin();
+	//double before = this->calc_sumsq_input_output_linktimes();
 	for (l_iter;l_iter!=linkmap.end();l_iter++)
 	{
 		ok = ok  && ((*l_iter).second->copy_linktimes_out_in());
+		int index= (*l_iter).first;
+		
+		linkinfo->times [index]->set_times ( (*l_iter).second->get_histtimes()->get_times() );
 	}
+	//double after = this->calc_sumsq_input_output_linktimes();
+	//eout << "Network::copy_linktimes_out_in: ssq before " << before << " and after " << after << endl;
 	return ok;
 }
 
@@ -2846,9 +2852,9 @@ bool Network::shortest_paths_all()
 //calculate the shortest paths for each link emanating from each origin to each destination;
 // and saving them if  there is a new path found (i.e. it's not in the routes vector already)
 {		
-	for (int r=0; r <theParameters->routesearch_iterations; r++) // reruns for Random draws
+	for (int r=0; r <theParameters->routesearch_random_draws; r++) // reruns for Random draws
 	{ 
-		if (theParameters->routesearch_iterations > 1 )
+		if (theParameters->routesearch_random_draws > 1 )
 			linkinfo->generate_disturbances();
 		double entrytime=0.0;    // entry time for time-variant shortest path search
 		int nr_reruns_periods=static_cast<int> (runtime/theParameters->update_interval_routes)-1; // except for last period
@@ -2873,7 +2879,7 @@ bool Network::shortest_paths_all()
 				{	
 					double od_rate= (*iter1)->get_rate();
 					double nr_routes= (*iter1)->get_nr_routes();
-					if ( ((od_rate > theParameters->small_od_rate) && ( (od_rate/theParameters->small_od_rate) < nr_routes)) || (nr_routes < 1) )
+					if ( ((od_rate > theParameters->small_od_rate) /* && ( (od_rate/theParameters->small_od_rate) < nr_routes)*/) || (nr_routes < 1) )
 						// if the od pair has not too many routes for its size
 						dests.push_back((*iter1)->get_destination());
 					iter1++;
@@ -4058,7 +4064,7 @@ double Network::executemaster()
 		calc_paths=true;
 	if (routemap.size()==0) // if there are no routes read, force random draws to generate the initial route set.
 	{
-		theParameters->routesearch_iterations=2;
+		theParameters->routesearch_random_draws=2;
 		calc_paths=true;
 	}
 	if (calc_paths)
@@ -4519,23 +4525,38 @@ bool Network::run(int period)
 }
 */
 
-// const void Network::run_route_iterations()
-/*
+ const void Network::run_route_iterations()
+
 {
 	int i = 0;
 	 for (i;i<theParameters->max_route_iter; i++)
 	 {
-		run_iterations()
-		if (i<theParameters->(max_route_iter-1)) // except for last iteration, then we keep the results.
+		eout << "INFO: Network::run_route_iterations: iteration " << i << " Number of routes: " << routemap.size() << endl;
+		//double before = linkinfo->sum();
+		//eout << "INFO: Link Info sum before " << before << endl;
+		run_iterations();
+		//double after = linkinfo->sum();
+		//eout << "INFO: Link Info sum before " << after << endl;
+		if (i < (theParameters->max_route_iter-1)) // except for last iteration, then we keep the results.
 		{
-			copy_linktimes_out_in();
-			reset();
+			
+			//bool ok = copy_linktimes_out_in();
+			//reset();
+			// update linktimeinfo
+			// TEST
+			//bool okish=init_shortest_path();
+			bool ok = shortest_paths_all();
+			eout << " shortest paths all works : " << ok << endl;
+			this->renum_routes();
+			bool ok1 = this->add_od_routes();
+			this->reset();
 		}
+		
 	 }
-
+  writepathfile(filenames[4]); // write back the routes.
 }
 
-*/
+
 
 const double Network::run_iterations ()
 {
@@ -4550,6 +4571,8 @@ const double Network::run_iterations ()
 
 	for (i; i<theParameters->max_iter; i++)
 	{
+		eout << "          INFO: Network::run_iterations: iteration " << i << " with mean traveltime " << linkinfo->mean() << endl;
+		//	eout << " and size " << linkinfo->times.size() <<  " before and " ;
 		curtime=step(runtime);
 		end_of_simulation(runtime);
 		relgap_ltt=calc_rel_gap_linktimes();
@@ -4559,13 +4582,17 @@ const double Network::run_iterations ()
 		if (check_convergence(i, relgap_ltt, relgap_rf))
 		{
 			close_convergence_file();
+			eout << endl;
 			return relgap_ltt;
 		}
 		else if (i<(theParameters->max_iter -1))
 		{
 			ok=copy_linktimes_out_in();
+			//eout << linkinfo->mean() << " and size " << linkinfo->times.size()<< " after copying the out-in linktimes " << endl;
 			reset();
 		}
+		else
+			eout << endl;
 	}
 	//check convergence
 	convergence_out << "Not converged after " << i << " iterations. threshold = " << theParameters->rel_gap_threshold << endl;

@@ -69,7 +69,7 @@ Parameters::Parameters ()
    small_od_rate = 3.0;
 // New, to be added to the file format:
    linktime_disturbance = 0.1;
-   routesearch_iterations = 1;
+   routesearch_random_draws = 2;
    scale_demand= 0.1;
    renum_routes=true;
 
@@ -82,9 +82,12 @@ Parameters::Parameters ()
 
  //#iteration_control
    max_iter=10;
-   max_route_iter=3; // not yet in file!!
    rel_gap_threshold=0.01;
-  
+   // following are not yet implemented in file. testing their use first
+   max_route_iter=3; // not yet in file!!
+   temp_route_iter=3; // iterations after each route iteration.
+   route_iter_demand_scale= 0.5; // diminish the demand by this factor to avoid gridlock and crazy routes. not yet in file
+
    	//state vars
    shortest_paths_initialised = false;
    veh_in_network = 0;

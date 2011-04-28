@@ -282,8 +282,8 @@ void MainForm::process_masterfile()
 			eout << "ERROR READING THE MASTER FILE: " << name.c_str() << " Exiting" << endl;
 			close();
 		}
-		
-		setWindowTitle(QString::fromStdString(version + " - " + name));
+		string title = version + " - " + name;
+		setWindowTitle(title.data());
 		// initialize the buttons
 		initialised=true;
 		activateToolbars(initialised);

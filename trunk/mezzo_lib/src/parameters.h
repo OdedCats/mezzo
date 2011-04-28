@@ -162,15 +162,18 @@ public:
    double small_od_rate; //!< minimum od_rate for an od-pair to have more than 1 route
    // NEW, to be added to the parameters file format
    double linktime_disturbance; //!< random disturbance factor for generating multiple routes for single search.
-   int routesearch_iterations;
+   int routesearch_random_draws; // number of re-draws for the route searches
    double scale_demand;
    bool renum_routes;
 
 //#iteration_control
    int max_iter; // max number of iterations
-   int max_route_iter; // max number of route_search_iterations, runs as outer loop around the 'equilibrium' iterations !! NOT yet in file.
    double rel_gap_threshold; // relative gap threshold. For the moment linktime rel_gap, will be route_flow_relgap
-
+		// to be implemented:
+   int max_route_iter; // max number of route_search_iterations, runs as outer loop around the 'equilibrium' iterations !! NOT yet in file.
+   int temp_route_iter; // temp number of iterations, after a route search iteration, should be fairly small;
+   double route_iter_demand_scale; // scales down the demand for the route search iterations, to avoid gridlock and crazy routes around it.
+   
 
 // #mime_parameters: ONLY for use in HYBRID situations
    double mime_comm_step; //!< Communication step for MICRO-MESO information exchange

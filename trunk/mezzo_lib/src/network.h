@@ -216,6 +216,8 @@ public:
 	// GET's
 	const double get_currenttime(){return time;}
 	const double get_runtime(){return runtime;}
+	const bool get_calc_paths() const {return calc_paths;}
+
 	//const double get_time_alpha(){return time_alpha;}
 	Parameters* get_parameters () {return theParameters;} 
 	const vector <ODpair*>& get_odpairs () {return odpairs;} // keep as vector
@@ -458,12 +460,16 @@ public:
 			runtime_=theNetwork->executemaster();
 		}
 	void run ()
-	  {				
-		  if (theNetwork->get_parameters()->max_iter > 1)
-			  theNetwork->run_iterations();
+	  {	
+		  if (theNetwork->get_parameters()->max_route_iter > 1)
+			  theNetwork->run_route_iterations();
 		  else
-				theNetwork->step(runtime_);
-				
+		  {
+			  if (theNetwork->get_parameters()->max_iter > 1)
+				  theNetwork->run_iterations();
+			  else
+					theNetwork->step(runtime_);
+		  }
 	  }
 	void iterate()
 	{

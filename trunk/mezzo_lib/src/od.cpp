@@ -167,7 +167,8 @@ vector <rateval> ODpair::get_route_rates()
 
 void ODpair::add_route(Route* route)
 {
-	routes.insert(routes.end(),route);
+	if (NULL == get_route(route->get_id()))
+		routes.insert(routes.end(),route);
 }
 
  Route* ODpair::get_route(int id)
