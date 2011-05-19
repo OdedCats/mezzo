@@ -13,7 +13,8 @@ CONFIG(debug, debug|release) {
      LIBS +=  -L../mezzo_lib/Release -lmezzo_lib -L../mezzoAnalyzer/Release -lmezzoAnalyzer 
  }
 
-LIBS += -L$(QTDIR)/lib -lQtCore -lQtGui -lQtNetwork  -lQtDesigner 
+LIBS += -L$(QTDIR)/lib -lQtCore -lQtGui -lQtNetwork  
+#-lQtDesigner 
 #-lQt3Support
 
 QT+= core gui 

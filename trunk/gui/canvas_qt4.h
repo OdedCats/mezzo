@@ -51,7 +51,7 @@ public:
 		on_batch_run_activated();
 		brdlg->autorun();
 		//brdlg->close();
-		on_quit_activated();
+		//on_quit_activated();
 	}
 	void process_masterfile();
 	// access ports

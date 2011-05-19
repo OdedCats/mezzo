@@ -1,55 +1,56 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>Batchrun</class>
- <widget class="QDialog" name="Batchrun" >
-  <property name="geometry" >
+ <widget class="QDialog" name="Batchrun">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>415</width>
-    <height>514</height>
+    <width>445</width>
+    <height>567</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Batch Run</string>
   </property>
-  <property name="windowIcon" >
+  <property name="windowIcon">
    <iconset>
     <normaloff>:/images/batchrun.gif</normaloff>:/images/batchrun.gif</iconset>
   </property>
-  <widget class="QDialogButtonBox" name="buttonBox" >
-   <property name="geometry" >
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>480</y>
-     <width>341</width>
+     <x>89</x>
+     <y>530</y>
+     <width>340</width>
      <height>32</height>
     </rect>
    </property>
-   <property name="orientation" >
+   <property name="orientation">
     <enum>Qt::Horizontal</enum>
    </property>
-   <property name="standardButtons" >
+   <property name="standardButtons">
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
    </property>
   </widget>
-  <widget class="QTabWidget" name="tabWidget" >
-   <property name="geometry" >
+  <widget class="QTabWidget" name="tabWidget">
+   <property name="geometry">
     <rect>
-     <x>16</x>
-     <y>19</y>
-     <width>381</width>
-     <height>461</height>
+     <x>10</x>
+     <y>10</y>
+     <width>421</width>
+     <height>511</height>
     </rect>
    </property>
-   <property name="currentIndex" >
+   <property name="currentIndex">
     <number>0</number>
    </property>
-   <widget class="QWidget" name="IterationsTab" >
-    <attribute name="title" >
-     <string>Iterations</string>
+   <widget class="QWidget" name="SDUETab">
+    <attribute name="title">
+     <string>Dynamic User Equilibrium</string>
     </attribute>
-    <widget class="QRadioButton" name="iterate_traveltimes_rb" >
-     <property name="geometry" >
+    <widget class="QRadioButton" name="sdue_rb">
+     <property name="geometry">
       <rect>
        <x>20</x>
        <y>10</y>
@@ -57,27 +58,30 @@
        <height>18</height>
       </rect>
      </property>
-     <property name="text" >
-      <string>Iterate Travel Times - "Dynamic Equilibrium"</string>
+     <property name="toolTip">
+      <string>Iterates to an SDUE equilibrium</string>
      </property>
-     <property name="checked" >
-      <bool>true</bool>
+     <property name="text">
+      <string>Stochastic Dynamic User Equilibrium (SDUE)</string>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
      </property>
     </widget>
-    <widget class="QGroupBox" name="convergence_gb" >
-     <property name="geometry" >
+    <widget class="QGroupBox" name="convergence_gb">
+     <property name="geometry">
       <rect>
        <x>10</x>
        <y>120</y>
-       <width>351</width>
+       <width>391</width>
        <height>151</height>
       </rect>
      </property>
-     <property name="title" >
-      <string>Convergence</string>
+     <property name="title">
+      <string>SDUE Convergence</string>
      </property>
-     <widget class="QSpinBox" name="max_iterations_val" >
-      <property name="geometry" >
+     <widget class="QSpinBox" name="max_iterations_val">
+      <property name="geometry">
        <rect>
         <x>250</x>
         <y>20</y>
@@ -85,18 +89,18 @@
         <height>22</height>
        </rect>
       </property>
-      <property name="minimum" >
+      <property name="minimum">
        <number>2</number>
       </property>
-      <property name="maximum" >
+      <property name="maximum">
        <number>999</number>
       </property>
-      <property name="value" >
+      <property name="value">
        <number>10</number>
       </property>
      </widget>
-     <widget class="QCheckBox" name="max_iterations_cb" >
-      <property name="geometry" >
+     <widget class="QCheckBox" name="max_iterations_cb">
+      <property name="geometry">
        <rect>
         <x>20</x>
         <y>20</y>
@@ -104,21 +108,21 @@
         <height>18</height>
        </rect>
       </property>
-      <property name="toolTip" >
-       <string>Max nr of iterations for the Batch run</string>
+      <property name="toolTip">
+       <string>Max nr of iterations for the SDUE assignment</string>
       </property>
-      <property name="text" >
+      <property name="text">
        <string>Max Nr Iterations</string>
       </property>
-      <property name="checkable" >
+      <property name="checkable">
        <bool>true</bool>
       </property>
-      <property name="checked" >
+      <property name="checked">
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QCheckBox" name="max_relgap_cb" >
-      <property name="geometry" >
+     <widget class="QCheckBox" name="max_relgap_cb">
+      <property name="geometry">
        <rect>
         <x>20</x>
         <y>50</y>
@@ -126,18 +130,23 @@
         <height>18</height>
        </rect>
       </property>
-      <property name="toolTip" >
-       <string>The maximum Root Mean Square Normalized error between Input-Output traveltimes. between 0.00 and 1.00</string>
+      <property name="toolTip">
+       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;The maximum relative gap allowed for convergence.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Applies to both Link travel times and Route Flows if checked.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
-      <property name="text" >
+      <property name="text">
        <string>Max Relative Gap</string>
       </property>
-      <property name="checked" >
+      <property name="checked">
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QLineEdit" name="max_relgap_val" >
-      <property name="geometry" >
+     <widget class="QLineEdit" name="max_relgap_val">
+      <property name="geometry">
        <rect>
         <x>250</x>
         <y>50</y>
@@ -145,18 +154,18 @@
         <height>20</height>
        </rect>
       </property>
-      <property name="inputMask" >
+      <property name="inputMask">
        <string>0.0000; </string>
       </property>
-      <property name="text" >
+      <property name="text">
        <string>0.0100</string>
       </property>
-      <property name="maxLength" >
+      <property name="maxLength">
        <number>6</number>
       </property>
      </widget>
-     <widget class="QCheckBox" name="relgap_link_tt" >
-      <property name="geometry" >
+     <widget class="QCheckBox" name="relgap_link_tt">
+      <property name="geometry">
        <rect>
         <x>60</x>
         <y>100</y>
@@ -164,21 +173,21 @@
         <height>18</height>
        </rect>
       </property>
-      <property name="toolTip" >
+      <property name="toolTip">
        <string>The maximum Root Mean Square Normalized error between Input-Output traveltimes. between 0.00 and 1.00</string>
       </property>
-      <property name="text" >
+      <property name="text">
        <string>Link travel times</string>
       </property>
-      <property name="checked" >
+      <property name="checked">
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QCheckBox" name="relgap_route_flows" >
-      <property name="enabled" >
+     <widget class="QCheckBox" name="relgap_route_flows">
+      <property name="enabled">
        <bool>true</bool>
       </property>
-      <property name="geometry" >
+      <property name="geometry">
        <rect>
         <x>60</x>
         <y>120</y>
@@ -186,18 +195,18 @@
         <height>18</height>
        </rect>
       </property>
-      <property name="toolTip" >
+      <property name="toolTip">
        <string>The maximum Root Mean Square Normalized error between Input-Output traveltimes. between 0.00 and 1.00</string>
       </property>
-      <property name="text" >
+      <property name="text">
        <string>Route Flows</string>
       </property>
-      <property name="checked" >
-       <bool>false</bool>
+      <property name="checked">
+       <bool>true</bool>
       </property>
      </widget>
-     <widget class="QLabel" name="label_5" >
-      <property name="geometry" >
+     <widget class="QLabel" name="label_5">
+      <property name="geometry">
        <rect>
         <x>260</x>
         <y>80</y>
@@ -205,44 +214,44 @@
         <height>20</height>
        </rect>
       </property>
-      <property name="text" >
+      <property name="text">
        <string>Current RGAP</string>
       </property>
      </widget>
-     <widget class="QLabel" name="relgap_ltt" >
-      <property name="geometry" >
+     <widget class="QLabel" name="relgap_ltt">
+      <property name="geometry">
        <rect>
-        <x>280</x>
+        <x>270</x>
         <y>100</y>
-        <width>56</width>
+        <width>61</width>
         <height>16</height>
        </rect>
       </property>
-      <property name="text" >
+      <property name="text">
        <string/>
       </property>
-      <property name="textFormat" >
+      <property name="textFormat">
        <enum>Qt::PlainText</enum>
       </property>
      </widget>
-     <widget class="QLabel" name="relgap_rf" >
-      <property name="geometry" >
+     <widget class="QLabel" name="relgap_rf">
+      <property name="geometry">
        <rect>
-        <x>280</x>
+        <x>270</x>
         <y>120</y>
-        <width>56</width>
+        <width>61</width>
         <height>16</height>
        </rect>
       </property>
-      <property name="text" >
+      <property name="text">
        <string/>
       </property>
-      <property name="textFormat" >
+      <property name="textFormat">
        <enum>Qt::PlainText</enum>
       </property>
      </widget>
-     <widget class="QLabel" name="rmsn_lf" >
-      <property name="geometry" >
+     <widget class="QLabel" name="rmsn_lf">
+      <property name="geometry">
        <rect>
         <x>280</x>
         <y>140</y>
@@ -250,125 +259,125 @@
         <height>16</height>
        </rect>
       </property>
-      <property name="text" >
+      <property name="text">
        <string/>
       </property>
-      <property name="textFormat" >
+      <property name="textFormat">
        <enum>Qt::PlainText</enum>
       </property>
      </widget>
     </widget>
-    <widget class="QGroupBox" name="progress_gb" >
-     <property name="geometry" >
+    <widget class="QGroupBox" name="progress_gb">
+     <property name="geometry">
       <rect>
-       <x>0</x>
-       <y>320</y>
+       <x>30</x>
+       <y>360</y>
        <width>371</width>
        <height>111</height>
       </rect>
      </property>
-     <property name="title" >
-      <string>Progress</string>
+     <property name="title">
+      <string>SDUE Progress</string>
      </property>
-     <widget class="QProgressBar" name="totalPb" >
-      <property name="enabled" >
+     <widget class="QProgressBar" name="totalPb">
+      <property name="enabled">
        <bool>true</bool>
       </property>
-      <property name="geometry" >
+      <property name="geometry">
        <rect>
-        <x>110</x>
+        <x>140</x>
         <y>80</y>
         <width>241</width>
         <height>20</height>
        </rect>
       </property>
-      <property name="value" >
+      <property name="value">
        <number>0</number>
       </property>
      </widget>
-     <widget class="QLabel" name="label" >
-      <property name="geometry" >
+     <widget class="QLabel" name="label">
+      <property name="geometry">
        <rect>
-        <x>120</x>
-        <y>30</y>
-        <width>51</width>
-        <height>16</height>
+        <x>20</x>
+        <y>20</y>
+        <width>101</width>
+        <height>20</height>
        </rect>
       </property>
-      <property name="text" >
-       <string>Iteration</string>
+      <property name="text">
+       <string>SDUE Iteration</string>
       </property>
      </widget>
-     <widget class="QLabel" name="cur_iter" >
-      <property name="geometry" >
+     <widget class="QLabel" name="cur_iter">
+      <property name="geometry">
        <rect>
-        <x>170</x>
-        <y>30</y>
-        <width>21</width>
+        <x>120</x>
+        <y>20</y>
+        <width>31</width>
         <height>16</height>
        </rect>
       </property>
-      <property name="text" >
+      <property name="text">
        <string/>
       </property>
      </widget>
-     <widget class="QLabel" name="label_3" >
-      <property name="geometry" >
+     <widget class="QLabel" name="label_3">
+      <property name="geometry">
        <rect>
-        <x>190</x>
-        <y>30</y>
+        <x>152</x>
+        <y>20</y>
         <width>16</width>
         <height>16</height>
        </rect>
       </property>
-      <property name="text" >
+      <property name="text">
        <string>of</string>
       </property>
      </widget>
-     <widget class="QLabel" name="total_iter" >
-      <property name="geometry" >
+     <widget class="QLabel" name="total_iter">
+      <property name="geometry">
        <rect>
-        <x>210</x>
-        <y>30</y>
-        <width>21</width>
+        <x>170</x>
+        <y>20</y>
+        <width>31</width>
         <height>16</height>
        </rect>
       </property>
-      <property name="text" >
+      <property name="text">
        <string>10</string>
       </property>
      </widget>
-     <widget class="QProgressBar" name="currIterPb" >
-      <property name="enabled" >
+     <widget class="QProgressBar" name="currIterPb">
+      <property name="enabled">
        <bool>true</bool>
       </property>
-      <property name="geometry" >
+      <property name="geometry">
        <rect>
-        <x>110</x>
+        <x>140</x>
         <y>50</y>
         <width>241</width>
         <height>20</height>
        </rect>
       </property>
-      <property name="value" >
+      <property name="value">
        <number>0</number>
       </property>
      </widget>
-     <widget class="QLabel" name="label_2" >
-      <property name="geometry" >
+     <widget class="QLabel" name="label_2">
+      <property name="geometry">
        <rect>
         <x>20</x>
         <y>50</y>
-        <width>82</width>
+        <width>101</width>
         <height>16</height>
        </rect>
       </property>
-      <property name="text" >
-       <string>Curr. Iteration</string>
+      <property name="text">
+       <string>Current Iteration</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_4" >
-      <property name="geometry" >
+     <widget class="QLabel" name="label_4">
+      <property name="geometry">
        <rect>
         <x>20</x>
         <y>80</y>
@@ -376,45 +385,51 @@
         <height>16</height>
        </rect>
       </property>
-      <property name="text" >
-       <string>Total</string>
+      <property name="text">
+       <string>Total SDUE</string>
       </property>
      </widget>
     </widget>
-    <widget class="QLineEdit" name="alpha" >
-     <property name="geometry" >
+    <widget class="QLineEdit" name="alpha">
+     <property name="geometry">
       <rect>
-       <x>260</x>
-       <y>40</y>
+       <x>240</x>
+       <y>80</y>
        <width>48</width>
        <height>20</height>
       </rect>
      </property>
-     <property name="inputMask" >
+     <property name="inputMask">
       <string>0.00; </string>
      </property>
-     <property name="text" >
+     <property name="text">
       <string>0.60</string>
      </property>
-     <property name="maxLength" >
+     <property name="maxLength">
       <number>4</number>
      </property>
     </widget>
-    <widget class="QLabel" name="label_6" >
-     <property name="geometry" >
+    <widget class="QLabel" name="label_6">
+     <property name="geometry">
       <rect>
-       <x>81</x>
-       <y>40</y>
-       <width>159</width>
+       <x>31</x>
+       <y>80</y>
+       <width>201</width>
        <height>20</height>
       </rect>
      </property>
-     <property name="text" >
+     <property name="toolTip">
+      <string>Factor for smoothing the output link travel times with the input times between iterations</string>
+     </property>
+     <property name="statusTip">
+      <string/>
+     </property>
+     <property name="text">
       <string>Smoothing factor link travel times</string>
      </property>
     </widget>
-    <widget class="QToolButton" name="runButton" >
-     <property name="geometry" >
+    <widget class="QToolButton" name="runButton">
+     <property name="geometry">
       <rect>
        <x>50</x>
        <y>280</y>
@@ -422,19 +437,19 @@
        <height>31</height>
       </rect>
      </property>
-     <property name="toolTip" >
-      <string>Run</string>
+     <property name="toolTip">
+      <string>Run the SDUE assignment</string>
      </property>
-     <property name="text" >
+     <property name="text">
       <string>...</string>
      </property>
-     <property name="icon" >
-      <iconset resource="../canvas_qt4.qrc" >
+     <property name="icon">
+      <iconset resource="../canvas_qt4.qrc">
        <normaloff>:/images/bt_play.png</normaloff>:/images/bt_play.png</iconset>
      </property>
     </widget>
-    <widget class="QToolButton" name="stopButton" >
-     <property name="geometry" >
+    <widget class="QToolButton" name="stopButton">
+     <property name="geometry">
       <rect>
        <x>80</x>
        <y>280</y>
@@ -442,19 +457,24 @@
        <height>31</height>
       </rect>
      </property>
-     <property name="toolTip" >
-      <string>Stop &amp; reset</string>
+     <property name="toolTip">
+      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Stop the SDUE assignment.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Finishes the current iteration and then stops.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
-     <property name="text" >
+     <property name="text">
       <string>...</string>
      </property>
-     <property name="icon" >
-      <iconset resource="../canvas_qt4.qrc" >
+     <property name="icon">
+      <iconset resource="../canvas_qt4.qrc">
        <normaloff>:/images/bt_stop.png</normaloff>:/images/bt_stop.png</iconset>
      </property>
     </widget>
-    <widget class="QToolButton" name="saveButton" >
-     <property name="geometry" >
+    <widget class="QToolButton" name="saveButton">
+     <property name="geometry">
       <rect>
        <x>110</x>
        <y>280</y>
@@ -462,19 +482,19 @@
        <height>31</height>
       </rect>
      </property>
-     <property name="toolTip" >
-      <string>Stop &amp; reset</string>
+     <property name="toolTip">
+      <string>Save the simulation results</string>
      </property>
-     <property name="text" >
+     <property name="text">
       <string>...</string>
      </property>
-     <property name="icon" >
-      <iconset resource="../canvas_qt4.qrc" >
+     <property name="icon">
+      <iconset resource="../canvas_qt4.qrc">
        <normaloff>:/images/filesave.png</normaloff>:/images/filesave.png</iconset>
      </property>
     </widget>
-    <widget class="QCheckBox" name="overwriteHisttimes" >
-     <property name="geometry" >
+    <widget class="QCheckBox" name="overwriteHisttimes">
+     <property name="geometry">
       <rect>
        <x>180</x>
        <y>290</y>
@@ -482,29 +502,458 @@
        <height>21</height>
       </rect>
      </property>
-     <property name="text" >
+     <property name="toolTip">
+      <string>Overwrites the historical (input) link travel times with the output link travel times.</string>
+     </property>
+     <property name="text">
       <string>Overwrite hist. times</string>
      </property>
-     <property name="checked" >
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="routesearch_rb">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>40</y>
+       <width>331</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Searches new routes and iterates to SDUE equilibrium.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;See &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Route Search Options&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; for parameters that control the outer route search loop.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>Route Search + SDUE</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>320</y>
+       <width>401</width>
+       <height>161</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Route Search Progress</string>
+     </property>
+     <widget class="QLabel" name="cur_route_iter">
+      <property name="geometry">
+       <rect>
+        <x>160</x>
+        <y>20</y>
+        <width>31</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_12">
+      <property name="geometry">
+       <rect>
+        <x>192</x>
+        <y>20</y>
+        <width>16</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>of</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_13">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>20</y>
+        <width>141</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Route Search Iteration</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="total_route_iter">
+      <property name="geometry">
+       <rect>
+        <x>210</x>
+        <y>20</y>
+        <width>31</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>10</string>
+      </property>
+     </widget>
+    </widget>
+    <zorder>groupBox</zorder>
+    <zorder>sdue_rb</zorder>
+    <zorder>convergence_gb</zorder>
+    <zorder>progress_gb</zorder>
+    <zorder>alpha</zorder>
+    <zorder>label_6</zorder>
+    <zorder>runButton</zorder>
+    <zorder>stopButton</zorder>
+    <zorder>saveButton</zorder>
+    <zorder>overwriteHisttimes</zorder>
+    <zorder>routesearch_rb</zorder>
+   </widget>
+   <widget class="QWidget" name="RouteSearchOptionsTab">
+    <attribute name="title">
+     <string>Route Search Options</string>
+    </attribute>
+    <widget class="QSpinBox" name="max_route_iterations_val">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>20</y>
+       <width>51</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Max nr of &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Route Iterations&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;. Each Route Iteration runs an SDUE assignment as an inner loop.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>50</number>
+     </property>
+     <property name="value">
+      <number>3</number>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="random_draws_val">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>110</y>
+       <width>51</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Max number of random draws per route time period</string>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>10</number>
+     </property>
+     <property name="value">
+      <number>3</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_7">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>110</y>
+       <width>141</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Max number of random draws per route time period</string>
+     </property>
+     <property name="statusTip">
+      <string/>
+     </property>
+     <property name="text">
+      <string>Max nr random draws</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_8">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>20</y>
+       <width>211</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="toolTip">
+      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Max nr of &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Route Iterations&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;. Each Route Iteration runs an SDUE assignment as an inner loop.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>Max number of Route Iterations</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="disturbances_cb">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>80</y>
+       <width>281</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Use random disturbances of link travel times to find all small variations of a route. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>Use Random Disturbances on link times</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="disturbance_val">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>140</y>
+       <width>48</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>disturbance factor for the link times</string>
+     </property>
+     <property name="inputMask">
+      <string>0.00; </string>
+     </property>
+     <property name="text">
+      <string>0.10</string>
+     </property>
+     <property name="maxLength">
+      <number>4</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_9">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>140</y>
+       <width>141</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string/>
+     </property>
+     <property name="statusTip">
+      <string/>
+     </property>
+     <property name="text">
+      <string>Disturbance factor</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="prune_cb">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>240</y>
+       <width>281</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Use random disturbances of link travel times to find all small variations of a route. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>Prune excessively long (expensive) routes</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="max_rel_cost_val">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>270</y>
+       <width>48</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Max relative cost compared to shortest (lowest cost) path.</string>
+     </property>
+     <property name="inputMask">
+      <string>0.00; </string>
+     </property>
+     <property name="text">
+      <string>2.00</string>
+     </property>
+     <property name="maxLength">
+      <number>4</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_10">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>270</y>
+       <width>141</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Max relative cost compared to shortest (lowest cost) path.</string>
+     </property>
+     <property name="statusTip">
+      <string/>
+     </property>
+     <property name="text">
+      <string>Max relative cost</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="scale_cb">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>170</y>
+       <width>251</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Use random disturbances of link travel times to find all small variations of a route. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>Scale down demand for route search</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_11">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>200</y>
+       <width>141</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string/>
+     </property>
+     <property name="statusTip">
+      <string/>
+     </property>
+     <property name="text">
+      <string>Scale factor</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="scale_val">
+     <property name="geometry">
+      <rect>
+       <x>261</x>
+       <y>197</y>
+       <width>48</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>scale factor for demand</string>
+     </property>
+     <property name="inputMask">
+      <string>0.00; </string>
+     </property>
+     <property name="text">
+      <string>0.50</string>
+     </property>
+     <property name="maxLength">
+      <number>4</number>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="renum_cb">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>330</y>
+       <width>281</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Use random disturbances of link travel times to find all small variations of a route. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>Renumber routes</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
       <bool>true</bool>
      </property>
     </widget>
    </widget>
-   <widget class="QWidget" name="ReplicationsTab" >
-    <attribute name="title" >
-     <string>Replications</string>
-    </attribute>
-   </widget>
-   <widget class="QWidget" name="ODestimationTab" >
-    <attribute name="title" >
+   <widget class="QWidget" name="ODestimationTab">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="toolTip">
+     <string>Not yet implemented</string>
+    </property>
+    <attribute name="title">
      <string>ODestimation</string>
     </attribute>
    </widget>
   </widget>
  </widget>
  <resources>
-  <include location="../canvas_qt4.qrc" />
-  <include location="../canvas_qt4.qrc" />
+  <include location="../canvas_qt4.qrc"/>
+  <include location="../canvas_qt4.qrc"/>
  </resources>
  <connections>
   <connection>
@@ -513,11 +962,11 @@
    <receiver>Batchrun</receiver>
    <slot>accept()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>248</x>
      <y>254</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>157</x>
      <y>274</y>
     </hint>
@@ -529,11 +978,11 @@
    <receiver>Batchrun</receiver>
    <slot>reject()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>316</x>
      <y>260</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
     </hint>

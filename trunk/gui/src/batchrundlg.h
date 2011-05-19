@@ -55,11 +55,22 @@ public:
 	
 	//SLOTS
 	private slots:
-	void on_runButton_clicked();
+	void on_runButton_clicked(); // these on...clicked() slots will auto connect to the relevant actions
 	void on_stopButton_clicked();
 	void on_saveButton_clicked();
 	void on_max_iterations_val_valueChanged(int i);
-	
+
+	// Route Search Options tab
+	void on_max_route_iterations_val_valueChanged(int i);
+	void on_disturbances_cb_clicked(bool checked);
+	void on_random_draws_val_valueChanged (int i);
+	void on_disturbance_val_textEdited (const QString & text);
+	void on_scale_cb_clicked(bool checked);
+	void on_scale_val_textEdited (const QString & text);
+	void on_prune_cb_clicked(bool checked);
+	void on_max_rel_cost_val_textEdited (const QString & text);
+	void on_renum_cb_clicked(bool checked);
+
 
  signals:
     void paintRequest();
@@ -67,7 +78,8 @@ public:
 	
 private:
 //private methods
-	void run_iterations();
+	void run_iterations(); // A much more elaborate version of the one in Network, providing repainting of the network, progress etc.
+	void run_route_iterations(); // A much more elaborate version of the one in Network, providing repainting of the network, progress etc.
 	const bool checkConvergence(const int i, const double rmsn_ltt_, const double relgap_rf_);
 //VARS
 	QWidget* parent_;

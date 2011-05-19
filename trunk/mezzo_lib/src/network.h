@@ -189,6 +189,7 @@ public:
 	bool open_convergence_file(string name); //!< opents  the convergence  file.
 	void write_line_convergence(const int iteration, const double rgap_ltt, const double rgap_rf) { convergence_out << iteration << '\t' << rgap_ltt << '\t' << rgap_rf << endl;}
 	void close_convergence_file(); //!< closes the convergence file
+	ofstream & get_convergence_stream() { return convergence_out;}
 	bool writeassmatrices(string name); //!< writes the assignment matrices
 	bool write_v_queues(string name); //!< writes the virtual queue lengths
 
@@ -226,6 +227,8 @@ public:
 	map <int, Destination*>& get_destinations() {return destinationmap;}
 	map <int, Node*>& get_nodes() {return nodemap;}
 	map <int,Link*>& get_links() {return linkmap;}
+
+	const unsigned int get_nr_routes() { return routemap.size(); }
 	
 	multimap<ODVal, Route*>::iterator find_route (int id, ODVal val);
 	bool exists_route (int id, ODVal val); // checks if route with this ID exists for OD pair val

@@ -127,6 +127,8 @@ Network::Network()
 	random=new (Random);
 	if (randseed != 0)
 		random->seed(randseed);
+	else
+		random->seed(42);
 }
 
 Network::~Network()
@@ -1878,7 +1880,7 @@ bool Network::add_od_routes()
 	}
 	nr_deleted = deleted_routes.size();
 	if (nr_deleted > 0 )
-		eout<< "WARNING: add_od_routes:  " << nr_deleted << " routes deleted" << endl;
+		eout<< "INFO: add_od_routes: pruning excessively long routes.  " << nr_deleted << " routes deleted" << endl;
 
 	// write the new routes file.
 	vector <Route*>::iterator del=deleted_routes.begin();
@@ -1906,7 +1908,7 @@ bool Network::add_od_routes()
 
 bool Network::addroutes (int oid, int did, ODpair* odpair)
 {
-
+	odpair->delete_routes();
 	ODVal od_v(oid, did);
 	multimap <ODVal,Route*>::iterator r_iter, r_lower, r_upper;
 	r_lower = routemap.lower_bound(od_v); // get lower boundary of all routes with this OD
@@ -2584,6 +2586,8 @@ bool Network::readpathfile(string name)
 
 bool Network::writepathfile(string name)
 {
+	if (name=="")
+		name=filenames [4];
 	ofstream out(name.c_str());
 	assert(out);
 	out << "routes:" << '\t'<< routemap.size() << endl;
@@ -4528,32 +4532,36 @@ bool Network::run(int period)
  const void Network::run_route_iterations()
 
 {
+	open_convergence_file(workingdir+"convergence.dat");
 	int i = 0;
+	bool breaksim = false;
 	 for (i;i<theParameters->max_route_iter; i++)
 	 {
-		eout << "INFO: Network::run_route_iterations: iteration " << i << " Number of routes: " << routemap.size() << endl;
-		//double before = linkinfo->sum();
-		//eout << "INFO: Link Info sum before " << before << endl;
+		//eout << "INFO: Network::run_route_iterations: iteration " << i << " Number of routes: " << routemap.size() << endl;
+		convergence_out << "RouteSearch Iteration: " << i+1 << " Nr routes: " << routemap.size() << endl;
 		run_iterations();
-		//double after = linkinfo->sum();
-		//eout << "INFO: Link Info sum before " << after << endl;
+		if (breaksim)
+			break;
+		unsigned int old_nr_routes= routemap.size();
 		if (i < (theParameters->max_route_iter-1)) // except for last iteration, then we keep the results.
 		{
-			
-			//bool ok = copy_linktimes_out_in();
-			//reset();
-			// update linktimeinfo
-			// TEST
-			//bool okish=init_shortest_path();
-			bool ok = shortest_paths_all();
-			eout << " shortest paths all works : " << ok << endl;
-			this->renum_routes();
-			bool ok1 = this->add_od_routes();
-			this->reset();
+			if (!theParameters->shortest_paths_initialised)
+				init_shortest_path();
+			shortest_paths_all();
+			if (theParameters->renum_routes)
+				renum_routes();
+			add_od_routes();
+			reset();
 		}
-		
+		unsigned int new_nr_routes= routemap.size();
+		if (old_nr_routes==new_nr_routes)
+		{
+			//eout << "INFO: Network::run_route_iterations: no new routes found in iteration " << i << " exiting. " << endl;
+			breaksim=true;
+		}
 	 }
   writepathfile(filenames[4]); // write back the routes.
+  close_convergence_file();
 }
 
 
@@ -4564,24 +4572,28 @@ const double Network::run_iterations ()
 	int i = 0;
 	double curtime= 0.0;
 	bool ok=false;
-	double relgap_ltt=0.0;
-	double relgap_rf=0.0;
+	double relgap_ltt=1.0;
+	double relgap_rf=1.0;
 	theParameters->overwrite_histtimes=true; // to ensure that the  histtimes are overwritten with the 'equilibrium times'.
-	open_convergence_file(workingdir+"convergence.dat");
+	//open_convergence_file(workingdir+"convergence.dat");
 
 	for (i; i<theParameters->max_iter; i++)
 	{
-		eout << "          INFO: Network::run_iterations: iteration " << i << " with mean traveltime " << linkinfo->mean() << endl;
-		//	eout << " and size " << linkinfo->times.size() <<  " before and " ;
+		//eout << "          INFO: Network::run_iterations: iteration " << i+1 << " with sum of link travel times: " << linkinfo->sum() << endl;
+		
 		curtime=step(runtime);
 		end_of_simulation(runtime);
 		relgap_ltt=calc_rel_gap_linktimes();
-		relgap_rf=calc_rel_gap_routeflows();
+		if (i > 0)
+			relgap_rf=calc_rel_gap_routeflows();
+		else 
+			relgap_rf = 1.0;
 		// write results in convergence file
-		convergence_out << i << '\t' << relgap_ltt << '\t' << relgap_rf << endl;
+		convergence_out << i+1 << '\t' << relgap_ltt << '\t' << relgap_rf << endl;
 		if (check_convergence(i, relgap_ltt, relgap_rf))
 		{
-			close_convergence_file();
+			//close_convergence_file();
+			convergence_out << endl;
 			eout << endl;
 			return relgap_ltt;
 		}
@@ -4596,7 +4608,8 @@ const double Network::run_iterations ()
 	}
 	//check convergence
 	convergence_out << "Not converged after " << i << " iterations. threshold = " << theParameters->rel_gap_threshold << endl;
-	close_convergence_file();
+	convergence_out << endl;
+	// close_convergence_file();
 	return -1.0;
 }
 const bool Network::check_convergence(const int iter_, const double rel_gap_ltt_, const double rel_gap_rf_)

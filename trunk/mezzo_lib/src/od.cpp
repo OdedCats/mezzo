@@ -212,7 +212,7 @@ vector <Route*> ODpair::delete_spurious_routes(double time)
 		//threshold = 1.5; // all  routes > 1.5*min_cost will be deleted
 		threshold=theParameters->max_rel_route_cost;
 		//maxroutes = static_cast <int>(rate +1); // if the rate is small there should be few routes only
-		reason = " small OD, large cost ";
+		reason = " large cost ";
 	}
 	else
 	{
@@ -227,10 +227,11 @@ vector <Route*> ODpair::delete_spurious_routes(double time)
 	  if ((*iter1)->cost(time) > (threshold*min_cost))
 	  {
 		  // remove from route choice set
-		  
+#ifdef DEBUG_ROUTES
 		  eout << " erased route " << (*iter1)->get_id() << " from route choice set for OD pair ("
 			  << odids().first << "," << odids().second << ") because: " << reason << ", cost: "<< (*iter1)->cost(time) << 
 			  ", mincost: " << min_cost << ", rate: " << rate << endl;
+#endif //
 		  thrown.push_back((*iter1));
 		  iter1=routes.erase(iter1);
 	  }

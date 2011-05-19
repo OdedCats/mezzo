@@ -68,9 +68,11 @@ Parameters::Parameters ()
    max_rel_route_cost = 2.0;
    small_od_rate = 3.0;
 // New, to be added to the file format:
+   use_linktime_disturbances=true;
    linktime_disturbance = 0.1;
-   routesearch_random_draws = 2;
-   scale_demand= 0.1;
+   routesearch_random_draws = 3;
+   scale_demand= false;
+   scale_demand_factor= 0.5; // diminish the demand by this factor to avoid gridlock and crazy routes. not yet in file
    renum_routes=true;
 
  // #mime_parameters
@@ -82,12 +84,10 @@ Parameters::Parameters ()
 
  //#iteration_control
    max_iter=10;
-   rel_gap_threshold=0.01;
+   rel_gap_threshold=0.02;
    // following are not yet implemented in file. testing their use first
    max_route_iter=3; // not yet in file!!
-   temp_route_iter=3; // iterations after each route iteration.
-   route_iter_demand_scale= 0.5; // diminish the demand by this factor to avoid gridlock and crazy routes. not yet in file
-
+ 
    	//state vars
    shortest_paths_initialised = false;
    veh_in_network = 0;

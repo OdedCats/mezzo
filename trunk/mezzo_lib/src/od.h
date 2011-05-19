@@ -117,6 +117,7 @@ public:
 	bool less_than(ODpair* od); 
 	vector <Route*> delete_spurious_routes(double time=0.0); // deletes spurious routes (with unrealistic costs) and returns ids of routes deleted
 	Route* filteredRoute(int index);
+	void delete_routes(){routes.clear();} // deletes all routes, used before adding the new route set.
 private:
 	int id;  // for later use
 	ODaction* odaction;
