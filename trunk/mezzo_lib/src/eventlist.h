@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* Defines the eventlist for processing and storing events. Each event is a pair of
+/*! Defines the eventlist for processing and storing events. Each event is a pair of
 	(time, Action*). the eventlist steps through the list and calls the function
 	with the time it's called as parameter.
 	Action is an abstract class from which the components using the eventlist for
@@ -37,10 +37,10 @@ using namespace std;
 class Eventlist;
 
 
-class Action // Abstract class that is inherited by all Action types to perform actions at the appropriate time, when called by the eventlist.
+class Action //!<  Abstract class that is inherited by all Action types to perform actions at the appropriate time, when called by the eventlist.
 {	
 	public:
-		virtual const bool execute(Eventlist* eventlist, const double time) = 0; // pure virtual, force inherited classes to defy proper behaviour.
+		virtual const bool execute(Eventlist* eventlist, const double time) = 0; //!<  pure virtual, force inherited classes to defy proper behaviour.
 	private:
 };
 
@@ -53,10 +53,10 @@ class Eventlist
   public:
 	 Eventlist () {lastupdate=thelist.end();}
 	 ~Eventlist ();
-	 void reset (); // resets the eventlist, throws out all the Actions
+	 void reset (); //!<  resets the eventlist, throws out all the Actions
   	 inline const bool add_event(const double time_, Action* action)
 				{ 
-						//lastupdate = 
+						
 						thelist.insert (lastupdate, Valtype (time_,action));
   						return true;
 				}
@@ -67,10 +67,10 @@ class Eventlist
 						
 						thelist.erase (thelist.begin());
    						return temp;}	
-	const bool move_event (const double time, const double new_time,  Action* action); // moves an event to a new time. If new_time = -1 the event will be removed altogether
+	const bool move_event (const double time, const double new_time,  Action* action); //!<  moves an event to a new time. If new_time = -1 the event will be removed altogether
   						
  private:
-  multimap <double, Action*> :: iterator lastupdate; // to give add_event a guess where to insert the new value
+  multimap <double, Action*> :: iterator lastupdate; //!<  to give add_event a guess where to insert the new value
   Valtype value;
   	multimap <double, Action*> thelist;
 };

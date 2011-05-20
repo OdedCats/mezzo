@@ -17,7 +17,7 @@
 */
 
 /*! Mainform is the main GUI class
- * It contains the main network graph display, and calls the Network->step() repeatedly to simulate
+ * It contains the main network graph display, and calls the Network->step() repeatedly to simulate and redraw
  *
  */
 
@@ -50,11 +50,11 @@ public:
 	{
 		on_batch_run_activated();
 		brdlg->autorun();
-		//brdlg->close();
-		//on_quit_activated();
+		brdlg->close();
+		on_quit_activated();
 	}
 	void process_masterfile();
-	// access ports
+	
 	Network* getMezzoNet(){return (theNetwork);}
 	void set_started_from_commandline(const bool value) { started_from_commandline=value;}
 	const bool get_started_from_commandline() {return started_from_commandline;}
@@ -128,7 +128,7 @@ private:
     QMatrix mod2stdViewMat_; //!< define transition from basic model to standard view
 	QMatrix viewMat_;		  //!< define transition from standard view to current view
 	QSize viewSize_;
-	QSize canvasOffset; // off set in X and Y of the Canvas to the Mainform
+	QSize canvasOffset; //!< offset in X and Y of the Canvas to the Mainform
 	QPixmap pm1, pm2; //!< shared pixmaps on which the network is drawn off-screen
 	QRect* zoomrect_;
 	double scalefactor;

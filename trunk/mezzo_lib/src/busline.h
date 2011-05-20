@@ -43,17 +43,17 @@ public:
 													  //!< this function does the real work. It initiates 
 													  //!< the current Bustrip and books the next one
 
-	int get_id () {return id;} // returns id, used in the compare <..> functions for find and find_if algorithms
+	int get_id () {return id;} //!< returns id, used in the compare <..> functions for find and find_if algorithms
 	void add_stops (vector <Busstop*>&  st) {stops.reserve (st.size()); copy (st.begin(), st.end(), stops.begin());}
 	void add_trip(Bustrip* trip, double starttime){trips.push_back(Start_trip(trip,starttime));}
 	// variables
 	int id; // line ID
-	string name; // name of the busline "46 Sofia"
-//	int vtype; // vehicle type. There are usually multiple types of Busses
-	vector <Busstop*> stops; // contains all the stops on this line.
-	vector <Start_trip> trips; // the trips that are to be made
-	Busroute* busroute; // the route (in terms of links) that the busses follow
-	Vtype* vtype; // the type of vehicle for the buses to be generated.
+	string name; //!< name of the busline "46 Sofia"
+
+	vector <Busstop*> stops; //!< contains all the stops on this line.
+	vector <Start_trip> trips; //!< the trips that are to be made
+	Busroute* busroute; //!< the route (in terms of links) that the busses follow
+	Vtype* vtype; //!< the type of vehicle for the buses to be generated.
 	ODpair* odpair; 
 
 	bool active; // is true when the busline has started generating trips

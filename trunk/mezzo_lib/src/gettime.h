@@ -22,7 +22,7 @@
 #include <time.h>
 
 const double timestamp ()
-/*
+/*!
 	After some hours of digging through the UNIX and LINUX legacy of time
 	standards and functions, i used the simplest in sys/timeb.h and converted it
 	to return the number of seconds and msecs since 00:00:00 january 1 1970.

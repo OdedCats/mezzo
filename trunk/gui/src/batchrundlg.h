@@ -16,16 +16,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*
- * definition of the batch run dialog
- *
- * Wilco
- * Last modification: 2008-09-30
- *
- * This dialogue sets up the batch run functions, for automatic iterations
- * for instance to create stable travel times (input = output travel times, i.e.
- * drivers' expectations are in line with the experienced travel times. Also called
- * "dynamic equilibrium"
+/*!
+ * definition of the SDUE (Stochastic Dynamic Equilibrium) batch run dialog
+ * This dialogue sets up the SDUE and Route Search batch run functions
+ * Depending on the selected function the model iterates to a SDUE, or runs
+ * an outer loop for new route searches, while an inner loop re-converges to SDUE
+ * between route searches.
+ * Route searches are repeated with random noise on the link travel times, and for
+ * each update period (defined by the Parameters->update_interval_routes)
  */
 
 #ifndef  BATCHRUNDLG_H
@@ -55,7 +53,7 @@ public:
 	
 	//SLOTS
 	private slots:
-	void on_runButton_clicked(); // these on...clicked() slots will auto connect to the relevant actions
+	void on_runButton_clicked(); //!< these on...clicked() slots will auto connect to the relevant actions
 	void on_stopButton_clicked();
 	void on_saveButton_clicked();
 	void on_max_iterations_val_valueChanged(int i);
@@ -78,8 +76,8 @@ public:
 	
 private:
 //private methods
-	void run_iterations(); // A much more elaborate version of the one in Network, providing repainting of the network, progress etc.
-	void run_route_iterations(); // A much more elaborate version of the one in Network, providing repainting of the network, progress etc.
+	void run_iterations(); //!< A much more elaborate version of the one in Network, providing repainting of the network, progress etc.
+	void run_route_iterations(); //!< A much more elaborate version of the one in Network, providing repainting of the network, progress etc.
 	const bool checkConvergence(const int i, const double rmsn_ltt_, const double relgap_rf_);
 //VARS
 	QWidget* parent_;

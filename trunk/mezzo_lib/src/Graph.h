@@ -30,10 +30,10 @@ template <class T, class I> class Graph;
 template <class T, class I> class GraphNode;
 template <class T, class I> class GraphLink;
 
-// The time dependent shortest path algorithm requires an information
-// object (I) provides the time (in)variant cost on each link.  The
-// following dummy class can be used bypass this requirement.
-
+/*! The time dependent shortest path algorithm requires an information
+* object (I) provides the time (in)variant cost on each link.  The
+* following dummy class can be used bypass this requirement.
+*/
 template <class T>
 class GraphNoInfo
 {
@@ -42,7 +42,10 @@ class GraphNoInfo
       ~GraphNoInfo() { }
       T cost(int, double) { return 1; }
 };
+ 
+/*! defines the GraphNode class
 
+*/
 template <class T, class I>
 class GraphNode
 {
@@ -83,7 +86,9 @@ class GraphNode
       inline const int dnLink( const int i) const { return dnLinks_[i]; }
 };
 
+/*! defines the GraphLink class
 
+*/
 template <class T, class I>
 class GraphLink
 {
@@ -133,7 +138,12 @@ class GraphLink
       inline const T& cost() const { return cost_; }
 };
 
+/*! defines the Graph class
+* This is the main class for time-dependent shortest path searches. class T is the cost value object and 
+* class I the information type object (containing the Link Cost information objects (which may be complex
+* and time-dependent).
 
+*/
 template <class T, class I>
 class Graph
 {
@@ -142,9 +152,9 @@ class Graph
       vector<GraphNode<T, I> /*ALLOCATOR*/> nodes_;
       vector<GraphLink<T, I> /*ALLOCATOR*/> links_;
 
-      T	infinity_;		// a value represents infinity large
-      T downGradePenalty_;	// for change to a lower grade link
-      T	scope_;			// maximum range in label setting
+      T	infinity_;		//!< a value represents infinity large
+      T downGradePenalty_;	//!< for change to a lower grade link
+      T	scope_;			//!< maximum range in label setting
 
    private:
 

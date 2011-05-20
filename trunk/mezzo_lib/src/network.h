@@ -15,6 +15,17 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+/*! @mainpage Mezzo - Mesoscopic Traffic Simulator
+ *	 @author Wilco Burghout
+ *	@section intro Introduction
+ *  Mezzo is a discrete-event traffic simulation model that simulates road traffic on the level of individual vehicles, but with an aggregated behaviour on links. The model is especially designed to simulate large networks and can be used in combination with a microscopic simulator to work as a hybrid model, where a specific area of interest is simulated in microscopic detail (all vehicle movements and driver decisions are simulated explicitly) while the surrounding network is simulated att mesoscopic level (aggregated behaviour ). Mezzo is free and Open Source software (GPLv3) and can be downloaded and used by anyone. Any modification or adaptation of the source code is allowed, but has to result in (new) GPL open source software, and keep the original license and copyright notice. We maintain a development blog (http://mezzo_dev.blogspot.com) where all recent and coming developments are discussed.
+ *  The main page for Mezzo is http://www.ctr.kth.se/mezzo
+
+
+ */
+
+
+
 
 #ifndef NETWORK_HH
 #define NETWORK_HH
@@ -90,7 +101,7 @@ public:
 struct ODSlice
 {
 public:
-	const bool remove_rate(const ODVal& odid); // removes od_rate for given od_id.
+	const bool remove_rate(const ODVal& odid); //!< removes od_rate for given od_id.
 	vector <ODRate> rates;	
 };
 
@@ -100,9 +111,9 @@ class  ODMatrix
 public:
 	ODMatrix ();
 	void add_slice(const double time, ODSlice* slice);
-	void reset(Eventlist* eventlist,vector <ODpair*> * odpairs); // rebooks all the MatrixActions
-	const vector <double> get_loadtimes(); // returns the loadtimes for each OD slice, slice 0 at t=0 has index [0], etc.
-	const bool remove_rate(const ODVal& odid); // removes od_rates for given od_id for all slices
+	void reset(Eventlist* eventlist,vector <ODpair*> * odpairs); //!< rebooks all the MatrixActions
+	const vector <double> get_loadtimes(); //!< returns the loadtimes for each OD slice, slice 0 at t=0 has index [0], etc.
+	const bool remove_rate(const ODVal& odid); //!< removes od_rates for given od_id for all slices
 private:
 	vector < pair <double,ODSlice*> > slices;	
 };
@@ -121,12 +132,7 @@ private:
  * such as Links, Nodes, ODpairs, etc. as well as all the main simulation, reading and writing functions
  * It is included in the GUI part (MainForm in canvas_qt4.h) that calls it's public functions to read in the input files, simulate
  * and write results.
- *
- * last modifications:
- * add map <int,Object*> containers for Nodes, Links, Routes, Origins, Destinations, Junctions for faster look-up.
- * modified find_alternatives_all (int lid, double penalty, Incident* incident) to use the routemap structure at links for finding alternative routes.
- * Wilco Burghout
- * last change: 2008-01-11
+ * For Mezzo Standalone it is wrapped inside NetworkThread, for future multithreading
   
  */
 
@@ -145,9 +151,9 @@ public:
 	int reset(); //!< resets the simulation to 0, clears all the state variables. returns runtime
 	void end_of_simulation(double time); //!< finalise all the temp values into containers (linktimes)
 	double step(double timestep); //!< executes one step of simulation, called by the gui, returns current value of time
-	const double run_iterations (); // runs iterations until max_iter or until mal_rel_gap_threshold  is reached (see Parameters). Returns rel_gap
-	const void run_route_iterations(); // outer loop around run_iterations to find iteratively the route choice set.
-	const bool check_convergence(const int iter_, const double rel_gap_ltt_ ,const double rel_gap_rf_); // returns true if convergence criterium is reached or if max_iter is reached.
+	const double run_iterations (); //!< runs iterations until max_iter or until mal_rel_gap_threshold  is reached (see Parameters). Returns rel_gap
+	const void run_route_iterations(); //!< outer loop around run_iterations to find iteratively the route choice set.
+	const bool check_convergence(const int iter_, const double rel_gap_ltt_ ,const double rel_gap_rf_); //!< returns true if convergence criterium is reached or if max_iter is reached.
 	bool writeall(unsigned int repl=0); //writes the output, appends replication number to output files
 	bool readnetwork(string name); //!< reads the network and creates the appropriate structures
 	bool init(); //!< creates eventlist and initializes first actions for all turnings at time 0 and starts the Communicator
@@ -203,8 +209,8 @@ public:
 	void removeRoute(Route* theroute);
 	void reset_link_icons(); //!< makes sure all the link-icons are shown normally when the run button is pressed. This corrects the colours in case of an incident file (it colours show affected links)
 		
-	void set_output_moe_thickness ( unsigned int val ) ; // sets the output moe for the link thickness  for analysis
-	void set_output_moe_colour ( unsigned int val ) ; // sets the output moe for the link colours for analysis
+	void set_output_moe_thickness ( unsigned int val ) ; //!< sets the output moe for the link thickness  for analysis
+	void set_output_moe_colour ( unsigned int val ) ; //!< sets the output moe for the link colours for analysis
 
 #ifndef _NO_GUI
 	void recenter_image();   //!< sets the image in the center and adapts zoom to fit window
@@ -231,8 +237,8 @@ public:
 	const unsigned int get_nr_routes() { return routemap.size(); }
 	
 	multimap<ODVal, Route*>::iterator find_route (int id, ODVal val);
-	bool exists_route (int id, ODVal val); // checks if route with this ID exists for OD pair val
-	bool exists_same_route (Route* route); // checks if a similar route with the same links already exists
+	bool exists_route (int id, ODVal val); //!< checks if route with this ID exists for OD pair val
+	bool exists_same_route (Route* route); //!< checks if a similar route with the same links already exists
 // STATISTICS
 	//Linktimes
 	const double calc_rel_gap_linktimes(); //!< calculates the relative gap for the output-input link travel times
@@ -376,7 +382,7 @@ protected:
 	unsigned int replication;
 	int runtime; //!< == stoptime
 	int starttime;
-	int routenr; // id for next route to be created (> max route id)
+	int routenr; //!< id for next route to be created (> max route id)
 	bool calc_paths; //!< if true new shortest paths are calculated and new paths added to the route file
 	double time;
 	int no_ass_links; //!< number of links observed in assignment matrix
@@ -399,13 +405,13 @@ protected:
 }; 
 //end of network definition
 
-//! Incident Class contains the methods needed for the simulation of incidents on a link.
-//! It derives from Action, and the execute() creates four events:
-//! 1. Set the incident on the affected link at the pre-specified time. This changes the speed-density function
-//! 2. Start the broadcast of information to the affected links and origins
-//! 3. End the incident on the affected link
-//! 4. End the broadcast of the information.
-
+/*! Incident Class contains the methods needed for the simulation of incidents on a link.
+  * It derives from Action, and the execute() creates four events:
+  * 1. Set the incident on the affected link at the pre-specified time. This changes the speed-density function
+  * 2. Start the broadcast of information to the affected links and origins
+  * 3. End the incident on the affected link
+  * 4. End the broadcast of the information.
+  */
 class Incident: public Action
 {
 public:
@@ -439,6 +445,10 @@ private:
 #endif
 };
 
+/*! TurnPenalty contains the explicit penalties to turn from one link to another
+* (usually very large to indicate a forbidden turn)
+ *
+*/
 class TurnPenalty
 {
 public:
@@ -447,7 +457,12 @@ public:
 	double cost;
 };
 
+/*! NetworkThread wraps the Network class in a QThread and provides an interface for future
+* multithreading. 
+* 
+*/
 class NetworkThread: public QThread
+
 {
 public:
 
@@ -456,12 +471,12 @@ public:
 			theNetwork= new Network();
 			if (seed_)
 					theNetwork->seed(seed_);
-		}
+		} //!< Constructor, requires a Master file name
 	void init () 
 		{
 			theNetwork->readmaster(masterfile_);
 			runtime_=theNetwork->executemaster();
-		}
+		} //!< Reads the master file and initializes the Network objects, eventlist etc.
 	void run ()
 	  {	
 		  if (theNetwork->get_parameters()->max_route_iter > 1)
@@ -473,7 +488,8 @@ public:
 			  else
 					theNetwork->step(runtime_);
 		  }
-	  }
+	  } //!< Runs the simulation, to SDUE equilibrium. If the Parameters->max_route_iter > 1 it will run an outer loop, searching for new routes
+	//!< and run an inner loop for SDUE assignment after each route search iteration.
 	void iterate()
 	{
 		double result= theNetwork->run_iterations();
