@@ -54,9 +54,10 @@ LinkTimeInfo contains the LinkTime for all links in the network. It is used by t
 	 ~LinkTime() {delete rand;}
 
 
- // generates the random disturbances vector, where each is element is a disturbance of the associated link travel time
-// disturbances are zero mean: uniform (-0.5,0.5) * 2*theParameters->linktime_disturbance * times_ [i];  linktime_disturbance is the percentace of disturbance, relative to link times.
- void generate_disturbances (); 
+	void generate_disturbances (); //!< generates the random disturbances vector, where each is element is a disturbance of the associated link travel time
+								//!< disturbances are zero mean: uniform (-0.5,0.5) * 2*theParameters->linktime_disturbance * times_ [i];  linktime_disturbance is the percentace of disturbance, relative to link times.
+
+	void zero_disturbances(); //!< sets disturbances to zero
 
   // GETS and SETS
   const int get_id() const {return id;}
@@ -101,6 +102,7 @@ LinkTimeInfo contains the LinkTime for all links in the network. It is used by t
 	const double graph_cost (const int i, const double time=0.0);
 	void set_graphlink_to_link (const map <int,int> & map) {graphlink_to_link = map;}
 	void generate_disturbances ();
+	void zero_disturbances ();
 	const double mean ();
 	const double sum();
 

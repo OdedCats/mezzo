@@ -73,7 +73,7 @@ const int min_speed=-1; //OLD PARAM to override the SD functions' min speeds, if
 
 // OLD q.hh parameters Determine Route-Changing behaviour. Needs to be changed with the route-switching module.
 const double perc_receive_broadcast=0.7; // percentage of drivers that receive the INCIDENT broadcast.
-const double dont_know_delay=0.114; // percentage of drivers that don't know delay
+const double dont_know_delay=0.114; // percentage of drivers that don't know (cannot estimate) delay on current route.
 
 
 //OD parameters
@@ -93,20 +93,20 @@ public:
 	
 	// Drawing parameters
 		
-	// parameters for output analysis
-	unsigned int viewmode; //<! Sets the view mode for the graphics: 0 = simulation run (standard), 1= show output data (such as flows etc)
-	double max_thickness_value; // regulates scaling of values to thickness
-	double max_colour_value;
-	double min_thickness_value;
-	double min_colour_value;
-	bool inverse_colour_scale;
-	int thickness_width;
-	int show_period;
+	// parameters/variables for Output View
+	unsigned int viewmode; //! Sets the view mode for the graphics: 0 = simulation run (standard), 1= show output data (such as flows etc)
+	double max_thickness_value; //!< max MOE value for showing link thickness in output view. Regulates scaling of values to thickness
+	double max_colour_value; //!< link colour indicating max MOE value in output view.
+	double min_thickness_value; //!< min MOE value for showing link thickness in output view.
+	double min_colour_value; //!< link colour indicating min MOE value in output view.
+	bool inverse_colour_scale; //!< inverse colours for MIN and MAX MOE value in output view.
+	int thickness_width; //!< multiplicator for thickness MOE value in output view.
+	int show_period; //!< selects which time period to show in output view
 	double running_time; //!< total running time
 	bool show_link_names;//!< if true show link names in output
 	bool show_link_ids; //!< if true link ids are shown in output
-	
-	bool draw_link_ids; //!< If true link ID's are shown
+	// Simulation view
+	bool draw_link_ids; //!< If true link ID's are shown in simulation view
 	int link_thickness; //!< Thickness with which links are drawn
 	int node_thickness; //!< Thickness with which nodes are drawn	
 	int node_radius; //!< Radius with which nodes are drawn
@@ -161,34 +161,34 @@ public:
    double max_rel_route_cost; //!< max relative cost of a route, compared to the minimum cost route, to be allowed in the choice set.
    double small_od_rate; //!< minimum od_rate for an od-pair to have more than 1 route
    // NEW, to be added to the parameters file format
-   bool use_linktime_disturbances; // if true use linktime disturbances to generate multiple route variations for each search
+   bool use_linktime_disturbances; //!< if true use linktime disturbances to generate multiple route variations for each search
    double linktime_disturbance; //!< random disturbance factor for generating multiple routes for single search.
-   int routesearch_random_draws; // number of re-draws for the route searches
-   bool scale_demand;// if true demand is scaled down for route searches with the factor below
-   double scale_demand_factor; // scale factor for demand during route searches
+   int routesearch_random_draws; //!< number of re-draws for the route searches
+   bool scale_demand;//!< if true demand is scaled down for route searches with the factor below
+   double scale_demand_factor; //!< scale factor for demand during route searches
    bool renum_routes;
 
 //#iteration_control
-   int max_iter; // max number of iterations
-   double rel_gap_threshold; // relative gap threshold. For the moment linktime rel_gap, will be route_flow_relgap
-		// to be implemented:
-   int max_route_iter; // max number of route_search_iterations, runs as outer loop around the 'equilibrium' iterations !! NOT yet in file.
+   int max_iter; //!< max number of iterations
+   double rel_gap_threshold; //!< relative gap threshold. For the moment linktime rel_gap, will be route_flow_relgap
+// to be implemented:
+   int max_route_iter; //!< max number of route_search_iterations, runs as outer loop around the 'equilibrium' iterations !! NOT yet in file.
    
 
 // #mime_parameters: ONLY for use in HYBRID situations
    double mime_comm_step; //!< Communication step for MICRO-MESO information exchange
    int mime_min_queue_length; //!< min queue length for stopping / starting shockwaves
    double mime_queue_dis_speed; //!< queue dissipation speed if not calculated from flow & density data
-// TODO: Implement the use of the following paramaters
+// TODO: Implement the use of the following parameters
    double vissim_step; //!< time step for the VISSIM micro model
    double sim_speed_factor; //!< REALTIME factor to keep the hybrid model running at a fixed speed
 
 	
    // statevars:
    bool shortest_paths_initialised; //!< true if shortest paths have been initialised
-   int veh_in_network; // nr of vehicles in network at any moment
-   bool overwrite_histtimes; // if true the input (historical) link travel times are overwritten when output files are saved.
-   vector <double> od_loadtimes; // contains the load times for all slices in the OD matrix
+   int veh_in_network; //!< nr of vehicles in network at any moment
+   bool overwrite_histtimes; //!< if true the input (historical) link travel times are overwritten when output files are saved.
+   vector <double> od_loadtimes; //!< contains the load times for all slices in the OD matrix
 
 
 		// Flags for input files. If true, these files should be read, otherwise they are created.

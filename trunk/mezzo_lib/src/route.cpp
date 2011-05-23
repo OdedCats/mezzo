@@ -242,7 +242,7 @@ const bool Route::has_link_after(const int lid, const int curr_lid) const
 const double Route::cost(const double time) 
 {
 	if ((sumcost>0.0) & (last_calc_time+theParameters->update_interval_routes < time))
-		return sumcost;// this means the cost has already been calculated once this update interval
+		return sumcost;// this means the cost has already been calculated once this update interval, return cached value.
 	else
 	{
 		double temp_time=time;

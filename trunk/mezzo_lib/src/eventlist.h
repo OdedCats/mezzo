@@ -40,7 +40,7 @@ class Eventlist;
 class Action //!<  Abstract class that is inherited by all Action types to perform actions at the appropriate time, when called by the eventlist.
 {	
 	public:
-		virtual const bool execute(Eventlist* eventlist, const double time) = 0; //!<  pure virtual, force inherited classes to defy proper behaviour.
+		virtual const bool execute(Eventlist* eventlist, const double time) = 0; //!<  pure virtual, forces inherited classes to define proper behaviour. This function is called by the eventlist whenever the booked time for the event comes up.
 	private:
 };
 
@@ -60,7 +60,7 @@ class Eventlist
 						thelist.insert (lastupdate, Valtype (time_,action));
   						return true;
 				}
-  	inline const double next ()
+  	inline const double next () //!< advances to the next event and executes the associated action.
   						{
 						double temp = thelist.begin()->first;
 						(thelist.begin()->second)->execute(this,temp);
@@ -70,7 +70,7 @@ class Eventlist
 	const bool move_event (const double time, const double new_time,  Action* action); //!<  moves an event to a new time. If new_time = -1 the event will be removed altogether
   						
  private:
-  multimap <double, Action*> :: iterator lastupdate; //!<  to give add_event a guess where to insert the new value
+  multimap <double, Action*> :: iterator lastupdate; //!<  to give add_event a guess where to insert the new value, not used anymore.
   Valtype value;
   	multimap <double, Action*> thelist;
 };

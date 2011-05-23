@@ -2968,6 +2968,7 @@ bool Network::shortest_paths_all()
 			}
 		} // reruns for time periods
 	} // reruns for random draws
+	linkinfo->zero_disturbances(); // set disturbances to zero
 	return true;
 }
 

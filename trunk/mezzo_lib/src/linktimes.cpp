@@ -39,8 +39,15 @@ void LinkTime::generate_disturbances ()
 {	
 	disturbances.clear();
 	for (unsigned int i = 0; i < times_.size(); i++)
-		 disturbances [i] = (rand->urandom() -0.5)*2*theParameters->linktime_disturbance*times_[i];;
+		 disturbances [i] = (rand->urandom() -0.5)*2*theParameters->linktime_disturbance*times_[i];
 	 
+}
+
+void LinkTime::zero_disturbances()
+{
+	disturbances.clear();
+	for (unsigned int i = 0;i < times_.size(); i++)
+		 disturbances [i] = 0.0;
 }
 
 
@@ -101,6 +108,13 @@ void LinkTimeInfo::generate_disturbances ()
 	map <int,LinkTime*>::iterator iter = times.begin();
 	for (iter; iter != times.end(); iter++)
 		iter->second->generate_disturbances();
+}
+
+void LinkTimeInfo::zero_disturbances ()
+{
+	map <int,LinkTime*>::iterator iter = times.begin();
+	for (iter; iter != times.end(); iter++)
+		iter->second->zero_disturbances();
 }
 
 
