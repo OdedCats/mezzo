@@ -1,8 +1,9 @@
 #include <QtGui>
 #include "outputview.h"
 
-OutputView::OutputView(QWidget* )
+OutputView::OutputView(QWidget* parent )
 {
+	parent_=parent;
 	theNetwork=NULL;
 	setupUi(this);
 	// populate the ThicknessMOE and ColourMOE comboboxes
@@ -30,6 +31,8 @@ void OutputView::show()
 		theParameters->inverse_colour_scale = true; // so high speeds are green and low speeds red
 		inverseColourScale->setChecked(theParameters->inverse_colour_scale);
 		maxThickness->setValue(theParameters->thickness_width);
+		cutoff ->setValue(theParameters->cutoff);
+		textsize ->setValue(theParameters->text_size);
 	}
 }
 
@@ -51,6 +54,7 @@ void OutputView::on_ThicknessMOE_currentIndexChanged(int index)
 		// draw legend
 		draw_thickness_legend();
 		set_thickness_unit(index);
+		parent_->repaint();
 	}
 }
 
@@ -81,7 +85,7 @@ void OutputView::on_ColourMOE_currentIndexChanged(int index)
 		// draw legend
 		draw_colour_legend();
 		set_colour_unit(index);
-		
+		parent_->repaint();
 	}
 }
 
@@ -194,6 +198,7 @@ void OutputView::on_inverseColourScale_toggled()
 {
 	theParameters->inverse_colour_scale=inverseColourScale->isChecked();
 	draw_colour_legend();
+	parent_->repaint();
 }
 
 void OutputView::on_maxThickness_valueChanged(int i)
@@ -201,6 +206,17 @@ void OutputView::on_maxThickness_valueChanged(int i)
 	theParameters->thickness_width = i;
 	thickness_legend->resize(thickness_legend->width(),theParameters->thickness_width);
 }
+
+void OutputView::on_cutoff_valueChanged(int i)
+{
+	theParameters->cutoff = i;
+}
+
+void OutputView::on_textsize_valueChanged(int i)
+{
+	theParameters->text_size = i;
+}
+
 
 void OutputView::on_showLinkNames_toggled(bool checked)
 {
@@ -210,4 +226,9 @@ void OutputView::on_showLinkNames_toggled(bool checked)
 void OutputView::on_showLinkIds_toggled (bool checked)
 {
 	theParameters->show_link_ids=checked;
+}
+
+void OutputView::on_showDataValues_toggled (bool checked)
+{
+	theParameters->show_data_values=checked;
 }

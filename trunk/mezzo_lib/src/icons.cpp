@@ -250,6 +250,9 @@ void LinkIcon::draw(QPixmap *const  pm,QMatrix * const wm)   // draw the stuff o
 
 	else if (theParameters->viewmode ==1) // output view
 	{
+		double thickness_value = 0.0;
+		double colour_value = 0.0;
+		bool small_values=false;
 		
 		QPen pen1;
 		// init the painter
@@ -273,9 +276,15 @@ void LinkIcon::draw(QPixmap *const  pm,QMatrix * const wm)   // draw the stuff o
 		else
 		{
 			double thicknessval =1.0;
+			
 			if (moe_thickness)
 			{
+				thickness_value=moe_thickness->get_value(theParameters->show_period-1);
 				double thickness_perc = moe_thickness->get_value(theParameters->show_period-1)/theParameters->max_thickness_value; // percentage of max value in data set
+				double cutoff = theParameters->cutoff/100.0;
+				if (thickness_perc < cutoff)
+					small_values=true;
+				
 				thicknessval = theParameters->thickness_width*thickness_perc; // the width to be drawn, this should
 				if (thicknessval < 1.0)
 					thicknessval = 1.0;
@@ -287,12 +296,16 @@ void LinkIcon::draw(QPixmap *const  pm,QMatrix * const wm)   // draw the stuff o
 			QColor outputcolour = theParameters->linkcolor;
 			if (moe_colour) // if an ColourMOE  is set
 			{
+				colour_value = moe_colour->get_value(theParameters->show_period-1);
 				double colour_perc = moe_colour->get_value(theParameters->show_period-1)/theParameters->max_colour_value; // percentage of max value in data set
 			    
 				
 				int r,g,b;
-				if (colour_perc < 0.05)
+				if (colour_perc < theParameters->cutoff/100)
+				{
 					outputcolour = theParameters->linkcolor;
+					//small_values = true;
+				}
 				else
 				{
 					if (theParameters->inverse_colour_scale)
@@ -338,11 +351,19 @@ void LinkIcon::draw(QPixmap *const  pm,QMatrix * const wm)   // draw the stuff o
 			showtext=true;
 			linktext += " " + QString::fromLatin1(	link->get_name().c_str());
 		}
+
+		if (theParameters->show_data_values) // values
+		{
+			showtext=true;
+			linktext += " (" + QString::number(static_cast<int>(thickness_value)) + "/" + QString::number(static_cast<int>(colour_value)) + ")";
+			if (small_values)
+				showtext=false;
+		}
 		
 		if (showtext)
 		{
 			paint.setFont(QFont ("Helvetica", theParameters->text_size));
-			QPen pen4 ( Qt::red , 1*scale_);
+			QPen pen4 ( Qt::blue , 1*scale_);
 			paint.setPen(pen4);
 			//paint.drawText (((startx+stopx)/2)+shiftx*theParameters->text_size - 2*theParameters->text_size,((starty+stopy)/2)+shifty*theParameters->text_size, linktext);
 			double x = startx + (stopx-startx)/3 + shiftx;

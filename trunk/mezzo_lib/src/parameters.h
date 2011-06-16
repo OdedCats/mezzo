@@ -50,7 +50,7 @@ extern int vid;     // global vehicle id nr.
 //extern double time_alpha;
 extern std::ofstream eout; // for all debugging output
 
-const string version = "Mezzo 0.58.2";
+const string version = "Mezzo 0.58.3";
 
 // OLD Network.hh parameters
 
@@ -102,9 +102,11 @@ public:
 	bool inverse_colour_scale; //!< inverse colours for MIN and MAX MOE value in output view.
 	int thickness_width; //!< multiplicator for thickness MOE value in output view.
 	int show_period; //!< selects which time period to show in output view
+	int cutoff; //!< cutoff percentage (0-100) in int format for which data labels are shown
 	double running_time; //!< total running time
 	bool show_link_names;//!< if true show link names in output
 	bool show_link_ids; //!< if true link ids are shown in output
+	bool show_data_values; //!< if true data values are shown in output.
 	// Simulation view
 	bool draw_link_ids; //!< If true link ID's are shown in simulation view
 	int link_thickness; //!< Thickness with which links are drawn

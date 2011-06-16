@@ -580,7 +580,9 @@ void MainForm::copyPixmap()
 }
 
 void MainForm::paintEvent(QPaintEvent *  event )
-{}
+{
+		
+}
 
 void MainForm::seed(int sd )
 {

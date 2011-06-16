@@ -57,11 +57,13 @@ public:
 		void on_ColourMOE_currentIndexChanged(int index);
 		void on_inverseColourScale_toggled();
 		void on_maxThickness_valueChanged(int i);
-
+		void on_cutoff_valueChanged(int i);
+		void on_textsize_valueChanged(int i);
 		void on_showLinkNames_toggled(bool checked);
 		void on_showLinkIds_toggled (bool checked);
+		void on_showDataValues_toggled (bool checked);
 private:
-	
+	QWidget* parent_;
 	Network* theNetwork;
 	Parameters* theParameters;  //!< The parameters object, which contains the global parameters for the simulation and GUI	
 };
