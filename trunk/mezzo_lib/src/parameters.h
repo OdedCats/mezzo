@@ -50,7 +50,7 @@ extern int vid;     // global vehicle id nr.
 //extern double time_alpha;
 extern std::ofstream eout; // for all debugging output
 
-const string version = "Mezzo 0.58.3";
+const string version = "Mezzo 0.59.0";
 
 // OLD Network.hh parameters
 
@@ -151,6 +151,8 @@ public:
 // #server_parameters
    bool od_servers_deterministic; //!< if true the time headways in OD servers are determiunistic, otherwise neg_exp
    double odserver_sigma; //!< Obsolete since OD servers now have Mu=Sigma  (neg exp). Was for use with previous combined normal-neg_exp servers
+ //TODO implement in file format  
+   bool implicit_nr_servers; //!<if true the number of servers through a turning is calculated by MIN(nr incoming lanes , nr outgoing lanes), otherwise it is one per defined turning, but parallel turnings may be defined.
 
 // #vehicle_parameters
    int standard_veh_length; //!< used to calculate a-priori capacity of links
@@ -173,7 +175,7 @@ public:
 //#iteration_control
    int max_iter; //!< max number of iterations
    double rel_gap_threshold; //!< relative gap threshold. For the moment linktime rel_gap, will be route_flow_relgap
-// to be implemented:
+// TODO: to be implemented:
    int max_route_iter; //!< max number of route_search_iterations, runs as outer loop around the 'equilibrium' iterations !! NOT yet in file.
    
 

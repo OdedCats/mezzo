@@ -4,7 +4,7 @@
 #include <string>
 #include "grid.h"
 
-Link::Link(int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* sdfunc_): id(id_), in_node (in_),
+Link::Link(int id_, Node* in_, Node* out_, int length_, double nr_lanes_, Sdfunc* sdfunc_): id(id_), in_node (in_),
 		out_node(out_), length(length_), nr_lanes(nr_lanes_), sdfunc(sdfunc_)
 {
 	maxcap=static_cast<int> (length*nr_lanes/theParameters->standard_veh_length);
@@ -68,7 +68,7 @@ Link::Link()
 	freeflowtime=1.0;	
 	selected = false;
 	length= 100;
-	nr_lanes=1;
+	nr_lanes=1.0;
 
 }		
 
@@ -823,7 +823,7 @@ const unsigned int Link::nr_alternative_routes(const int dest, const int inciden
 	}
   return count;
 }
-void Link::set_incident(Sdfunc* const sdptr, const bool blocked_, const double blocked_until_)
+void Link::set_incident(Sdfunc* const sdptr, const bool blocked_, const double )//blocked_until_) // Why is blocked_until_ not used anymore?
 {
 	temp_sdfunc=sdfunc;
 	sdfunc=sdptr;
@@ -908,7 +908,7 @@ InputLink::InputLink(const int id_, Origin* const  out_)
 	out_node=out_;
 	maxcap=65535; //
 	length=0;
-    nr_lanes=0;
+    nr_lanes=0.0;
     queue=new Q(maxcap, 1.0);
     histtimes=NULL;
     avgtimes=NULL;
@@ -971,7 +971,7 @@ VirtualLink::~VirtualLink()
 		delete (histtimes);*/
 }
 
-VirtualLink::VirtualLink(const int id_, Node* const in_, Node* const out_, const int length_, const int nr_lanes_, Sdfunc*const  sdfunc_) : Link(id_,in_,out_,length_,nr_lanes_,sdfunc_) 
+VirtualLink::VirtualLink(const int id_, Node* const in_, Node* const out_, const int length_, const double nr_lanes_, Sdfunc*const  sdfunc_) : Link(id_,in_,out_,length_,nr_lanes_,sdfunc_) 
  {
 	blocked=false;
    linkdensity=0.0;

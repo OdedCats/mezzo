@@ -99,7 +99,7 @@ class Vehicle;
 class Link
 {
 public:
-	Link (int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* sdfunc_);
+	Link (int id_, Node* in_, Node* out_, int length_, double nr_lanes_, Sdfunc* sdfunc_);
 	Link();
 	virtual ~Link();
 	void end_of_simulation(); // consolidates all temp values in their containers
@@ -109,7 +109,7 @@ public:
 	const int get_out_node_id () const ;
 	const int get_in_node_id() const ;
 	const int get_length() const  {return length;}	
-	const int get_nr_lanes() const {return nr_lanes;}
+	const double get_nr_lanes() const {return nr_lanes;}
 	const string get_name()const  {return name;}
 	void set_name(const string name_) {name=name_;}
 	const int size() const; 
@@ -225,7 +225,7 @@ protected:
 	Q* queue;
 	Sdfunc* temp_sdfunc;
 	int length; // length of the link in meters
-	int nr_lanes; // nr of lanes in the link
+	double nr_lanes; // nr of lanes in the link
 	Sdfunc* sdfunc;
 	Grid* grid;
 #ifndef _NO_GUI	
@@ -285,7 +285,7 @@ class VirtualLink : public Link
 	public:
 
     VirtualLink():Link() {blocked=false; linkdensity=0.0;}
-    VirtualLink(const int id_, Node*const  in_, Node* const out_, const int length_=1000, const int nr_lanes_=1, Sdfunc* const sdfunc_=NULL);
+    VirtualLink(const int id_, Node*const  in_, Node* const out_, const int length_=1000, const double nr_lanes_=1.0, Sdfunc* const sdfunc_=NULL);
 //	VirtualLink(int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* sdfunc_);
 
     const bool enter_veh(Vehicle* const veh, const double time); // overloaded from link. Places vehicle on sendlist.

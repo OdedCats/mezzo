@@ -9,8 +9,10 @@ Turning::Turning(int id_, Node* node_, Server* server_, Link* inlink_, Link* out
   // one turnaction for MIN (nr_lanes_in, nr_lanes_out).
 
 	{
-		int nr_servers= _MIN(outlink->get_nr_lanes(),inlink->get_nr_lanes());
-		for (int i=0; i < nr_servers; i++)
+		int nr_servers=1;
+		if (theParameters->implicit_nr_servers)
+			nr_servers = _MIN(outlink->get_nr_lanes(),inlink->get_nr_lanes());
+		for (unsigned int i=0; i < nr_servers; i++)
 			turnactions.push_back(new TurnAction(this));
 		delay=server->get_delay();
 #ifdef _DEBUG_TURNING	

@@ -377,7 +377,7 @@ void LinkIcon::draw(QPixmap *const  pm,QMatrix * const wm)   // draw the stuff o
 	}
 }
 
-const bool LinkIcon::within_boundary(const double x, const double y, const int rad) // Question: Why is rad not used??
+const bool LinkIcon::within_boundary(const double x, const double y, const int) //rad) // Question: Why is rad not used??
 {
 
 	int rad2=linkicon_leng_/12;

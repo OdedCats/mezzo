@@ -112,7 +112,7 @@ void Q::update_exit_times(const double time, const Link* const nextlink, const i
           t2=vehicle->get_length()/v_exit; //  extra time it takes to drive to the stopline (in addition to the time included in t0)
                                 // not completely correct: it should be the length of the vehicle in front. But on average it doesnt matter
           newtime=t0+t1+t2;
-          int nr_lanes=vehicle->get_curr_link()->get_nr_lanes();
+          int nr_lanes=static_cast<int>(0.5 + vehicle->get_curr_link()->get_nr_lanes());
           for (int i=0; (i<nr_lanes) && (viter!=vehicles.end()) ; i++) // for each lane there is a shockwave
           {
             viter->first=newtime;

@@ -635,7 +635,8 @@ bool Network::readlinks(istream& in)
 bool Network::readlink(istream& in)
 {
 	char bracket;
-	int lid, innode, outnode, length,nrlanes,sdid;
+	int lid, innode, outnode, length,sdid;
+	double nrlanes;
 	string name;
 	in >> bracket;
 	if (bracket != '{')
@@ -661,7 +662,7 @@ bool Network::readlink(istream& in)
 	}
 	// find the nodes and sdfunc pointers
 
-	assert ( (length>0) && (nrlanes > 0) );           // check that the length and nrlanes are positive
+	assert ( (length>0.0) && (nrlanes > 0.0) );           // check that the length and nrlanes are positive
 #ifndef _UNSAFE
 	assert (!linkmap.count(lid));
 #endif // _UNSAFE  
@@ -743,7 +744,8 @@ bool Network::readvirtuallinks(string name)
 bool Network::readvirtuallink(istream& in)
 {
 	char bracket;
-	int lid, innode, outnode, length,nrlanes,sdid;
+	int lid, innode, outnode, length,sdid;
+	double nrlanes;
 	in >> bracket;
 	if (bracket != '{')
 	{
@@ -792,7 +794,7 @@ bool Network::readvirtuallink(istream& in)
 		return false;
 	}
 	// find the nodes and sdfunc pointers
-	assert ( (length>0) && (nrlanes > 0) );           // check that the length and nrlanes are positive
+	assert ( (length>0.0) && (nrlanes > 0.0) );           // check that the length and nrlanes are positive
 	assert (!virtuallinkmap.count(lid));
 	assert (nodemap.count(innode));
 	Node* inptr = nodemap [innode];

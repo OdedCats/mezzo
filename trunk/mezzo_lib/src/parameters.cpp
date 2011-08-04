@@ -60,6 +60,7 @@ Parameters::Parameters ()
 // #server_parameters
    od_servers_deterministic= 1;
    odserver_sigma= 0.2;
+   implicit_nr_servers=true;
 // #vehicle_parameters
    standard_veh_length= 7;
 // #route_parameters
