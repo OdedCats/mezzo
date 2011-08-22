@@ -60,6 +60,7 @@ Parameters::Parameters ()
 // #server_parameters
    od_servers_deterministic= 1;
    odserver_sigma= 0.2;
+// NEW:
    implicit_nr_servers=true;
 // #vehicle_parameters
    standard_veh_length= 7;
@@ -70,13 +71,14 @@ Parameters::Parameters ()
    delete_bad_routes= false;
    max_rel_route_cost = 2.0;
    small_od_rate = 3.0;
-// New, to be added to the file format:
+// NEW:
    use_linktime_disturbances=true;
    linktime_disturbance = 0.1;
    routesearch_random_draws = 3;
    scale_demand= false;
-   scale_demand_factor= 0.5; // diminish the demand by this factor to avoid gridlock and crazy routes. not yet in file
+   scale_demand_factor= 0.5; // diminish the demand by this factor to avoid gridlock and crazy routes.
    renum_routes=true;
+   overwrite_histtimes=false;
 
  // #mime_parameters
    mime_comm_step= 0.1;
@@ -94,7 +96,7 @@ Parameters::Parameters ()
    	//state vars
    shortest_paths_initialised = false;
    veh_in_network = 0;
-   overwrite_histtimes=false;
+   
 }
 
 bool Parameters::read_parameters (istream & in )

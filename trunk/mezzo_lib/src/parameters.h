@@ -171,6 +171,8 @@ public:
    bool scale_demand;//!< if true demand is scaled down for route searches with the factor below
    double scale_demand_factor; //!< scale factor for demand during route searches
    bool renum_routes;
+   bool overwrite_histtimes; //!< if true the input (historical) link travel times are overwritten when output files are saved.
+
 
 //#iteration_control
    int max_iter; //!< max number of iterations
@@ -191,7 +193,6 @@ public:
    // statevars:
    bool shortest_paths_initialised; //!< true if shortest paths have been initialised
    int veh_in_network; //!< nr of vehicles in network at any moment
-   bool overwrite_histtimes; //!< if true the input (historical) link travel times are overwritten when output files are saved.
    vector <double> od_loadtimes; //!< contains the load times for all slices in the OD matrix
 
 
