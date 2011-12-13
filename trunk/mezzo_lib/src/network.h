@@ -486,7 +486,16 @@ public:
 			  if (theNetwork->get_parameters()->max_iter > 1)
 				  theNetwork->run_iterations();
 			  else
+			  {			
 					theNetwork->step(runtime_);
+					std::ofstream file;
+					file.open("conv.txt",ios_base::app);
+					
+					theNetwork->end_of_simulation(runtime_);
+					double relgap_ltt=theNetwork->calc_rel_gap_linktimes();
+					file << relgap_ltt << endl;
+					file.close();
+			  }
 		  }
 	  } //!< Runs the simulation, to SDUE equilibrium. If the Parameters->max_route_iter > 1 it will run an outer loop, searching for new routes
 	//!< and run an inner loop for SDUE assignment after each route search iteration.

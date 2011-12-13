@@ -93,17 +93,11 @@ public:
 	
 	// Drawing parameters
 		
-	// parameters/variables for Output View
-	unsigned int viewmode; //! Sets the view mode for the graphics: 0 = simulation run (standard), 1= show output data (such as flows etc)
-	double max_thickness_value; //!< max MOE value for showing link thickness in output view. Regulates scaling of values to thickness
-	double max_colour_value; //!< link colour indicating max MOE value in output view.
-	double min_thickness_value; //!< min MOE value for showing link thickness in output view.
-	double min_colour_value; //!< link colour indicating min MOE value in output view.
-	bool inverse_colour_scale; //!< inverse colours for MIN and MAX MOE value in output view.
+
+	
+	// parameters for Output View
 	int thickness_width; //!< multiplicator for thickness MOE value in output view.
-	int show_period; //!< selects which time period to show in output view
 	int cutoff; //!< cutoff percentage (0-100) in int format for which data labels are shown
-	double running_time; //!< total running time
 	bool show_link_names;//!< if true show link names in output
 	bool show_link_ids; //!< if true link ids are shown in output
 	bool show_data_values; //!< if true data values are shown in output.
@@ -190,30 +184,40 @@ public:
    double sim_speed_factor; //!< REALTIME factor to keep the hybrid model running at a fixed speed
 
 	
-   // statevars:
+   // State variables
    bool shortest_paths_initialised; //!< true if shortest paths have been initialised
    int veh_in_network; //!< nr of vehicles in network at any moment
    vector <double> od_loadtimes; //!< contains the load times for all slices in the OD matrix
 
+   	// variables for Output View
+	unsigned int viewmode; //! Sets the view mode for the graphics: 0 = simulation run (standard), 1= show output data (such as flows etc)
+	double max_thickness_value; //!< max MOE value for showing link thickness in output view. Regulates scaling of values to thickness
+	double max_colour_value; //!< link colour indicating max MOE value in output view.
+	double min_thickness_value; //!< min MOE value for showing link thickness in output view.
+	double min_colour_value; //!< link colour indicating min MOE value in output view.
+	bool inverse_colour_scale; //!< inverse colours for MIN and MAX MOE value in output view.
+	double running_time; //!< total running time
+	int show_period; //!< selects which time period to show in output view
 
-		// Flags for input files. If true, these files should be read, otherwise they are created.
-		bool read_turnings; 
-		bool read_signals;
-		bool read_histtimes; 
-		bool read_routes;
-		bool read_incidents;
-		bool read_virtuallinks;
-		bool read_serverrates;
-		bool read_background;
-		//Flags for output files
-		bool write_linktimes;
-		bool write_output;
-		bool write_summary;
-		bool write_speeds;
-		bool write_inflows;
-		bool write_outflows;
-		bool write_queuelengths;
-		bool write_densities;
+	// Flags for input files. If true, these files should be read, otherwise they are created.
+	bool read_turnings; 
+	bool read_signals;
+	bool read_histtimes; 
+	bool read_routes;
+	bool read_incidents;
+	bool read_virtuallinks;
+	bool read_serverrates;
+	bool read_background;
+
+	//Flags for output files. if true these values should be collected and written. TODO: implement selective collection of data.
+	bool write_linktimes;
+	bool write_output;
+	bool write_summary;
+	bool write_speeds;
+	bool write_inflows;
+	bool write_outflows;
+	bool write_queuelengths;
+	bool write_densities;
 		
 
 

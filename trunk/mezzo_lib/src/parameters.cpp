@@ -7,21 +7,9 @@
 Parameters::Parameters ()
 
 
-{
-   viewmode = 0; // show simulation run
-   max_thickness_value=1;
-   max_colour_value=1;
-   min_thickness_value=1;
-   min_colour_value=1;
-   inverse_colour_scale=false;
-   thickness_width=20;
-   cutoff = 5;
-   show_period = 1; // maybe later start at 0 with empty results (everything 0)
-   show_link_names = false;
-   show_link_ids = false;
-   show_data_values = false;
-
-
+{  
+//#drawing_parameters
+	// Simulation view
    draw_link_ids = false;
    link_thickness = 3;
    node_thickness = 2;
@@ -41,7 +29,15 @@ Parameters::Parameters ()
    selectedcolor=Qt::green;
 #endif
    gui_update_step= 0.2;
-   zerotime = 27000; // simulation starts standard at 7:30
+   zerotime= 27000; // simulation starts standard at 7:30
+// #output_view
+   thickness_width= 20;
+   cutoff= 5;
+   show_link_names= false;
+   show_link_ids= false;
+   show_data_values= false;
+
+   
    moe_speed_update= 300.0;
    moe_inflow_update= 300.0;
    moe_outflow_update= 300.0;
@@ -59,9 +55,9 @@ Parameters::Parameters ()
    max_wait = 5.0;
 // #server_parameters
    od_servers_deterministic= 1;
-   odserver_sigma= 0.2;
+   odserver_sigma= 0.2; // unused for the moment
 // NEW:
-   implicit_nr_servers=true;
+   implicit_nr_servers=false;
 // #vehicle_parameters
    standard_veh_length= 7;
 // #route_parameters
@@ -69,16 +65,16 @@ Parameters::Parameters ()
    mnl_theta = -0.00417;
    kirchoff_alpha = -1.0;
    delete_bad_routes= false;
-   max_rel_route_cost = 2.0;
+   max_rel_route_cost = 2.0; // routes that are more expensive are pruned
    small_od_rate = 3.0;
 // NEW:
-   use_linktime_disturbances=true;
-   linktime_disturbance = 0.1;
-   routesearch_random_draws = 3;
+   use_linktime_disturbances= true;
+   linktime_disturbance= 0.1; // adds an amount (factor) of disturbance to link times during route search
+   routesearch_random_draws= 3;
    scale_demand= false;
-   scale_demand_factor= 0.5; // diminish the demand by this factor to avoid gridlock and crazy routes.
-   renum_routes=true;
-   overwrite_histtimes=false;
+   scale_demand_factor= 0.5; // diminish the demand by this factor to avoid gridlock and crazy routes during route search.
+   renum_routes= true; // renumber the routes
+   overwrite_histtimes= false; // overwrite the histtimes file after running simulation
 
  // #mime_parameters
    mime_comm_step= 0.1;
@@ -91,11 +87,22 @@ Parameters::Parameters ()
    max_iter=10;
    rel_gap_threshold=0.02;
    // following are not yet implemented in file. testing their use first
-   max_route_iter=3; // not yet in file!!
+   //NEW:
+   max_route_iter=1; 
  
    	//state vars
    shortest_paths_initialised = false;
    veh_in_network = 0;
+   // stat vars Output view
+   viewmode = 0; // show simulation run
+   max_thickness_value=1;
+   max_colour_value=1;
+   min_thickness_value=1;
+   min_colour_value=1;
+   inverse_colour_scale=false;
+   show_period = 1; // maybe later start at 0 with empty results (everything 0)
+   
+   
    
 }
 
