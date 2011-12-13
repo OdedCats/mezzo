@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Visual C++"
+	Version="9.00"
+	Name="mezzoAnalyzer"
+	ProjectGUID="{9AC6C523-2B36-463F-99E6-5A6ECE5D3A3B}"
+	Keyword="MakeFileProj"
+	TargetFrameworkVersion="131072"
+	>
+	<Platforms>
+		<Platform
+			Name="Win32"
+		/>
+	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
+	<Configurations>
+		<Configuration
+			Name="Debug|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="0"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="qmake&#x0D;&#x0A;nmake debug"
+				ReBuildCommandLine="qmake&#x0D;&#x0A;nmake clean&#x0D;&#x0A;nmake debug"
+				CleanCommandLine="nmake clean"
+				Output="debug\mezzoAnalyzer.a"
+				PreprocessorDefinitions="WIN32;_DEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="0"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="qmake&#x0D;&#x0A;nmake release "
+				ReBuildCommandLine="qmake &#x0D;&#x0A;nmake clean&#x0D;&#x0A;nmake release"
+				CleanCommandLine="nmake clean"
+				Output="release\mezzoAnalyzer.lib"
+				PreprocessorDefinitions="WIN32;NDEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+	</Configurations>
+	<References>
+	</References>
+	<Files>
+		<Filter
+			Name="Source Files"
+			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			>
+			<File
+				RelativePath=".\src\odcheckerdlg.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\odtabledelegate.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\odtablemodel.cpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
+			<File
+				RelativePath=".\src\assist.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\odcheckerdlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\odtabledelegate.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\odtablemodel.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Resource Files"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			>
+		</Filter>
+		<Filter
+			Name="Forms"
+			>
+			<File
+				RelativePath=".\ui\odcheckdlg.ui"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Makefile"
+			>
+			<File
+				RelativePath=".\mezzoAnalyzer.pro"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Generated"
+			>
+			<File
+				RelativePath=".\ui_odcheckdlg.h"
+				>
+			</File>
+		</Filter>
+		<File
+			RelativePath=".\readme.txt"
+			>
+		</File>
+	</Files>
+	<Globals>
+	</Globals>
+</VisualStudioProject>
