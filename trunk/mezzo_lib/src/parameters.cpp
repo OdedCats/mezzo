@@ -9,7 +9,7 @@ Parameters::Parameters ()
 
 {  
 //#drawing_parameters
-	// Simulation view
+//#simulation view
    draw_link_ids = false;
    link_thickness = 3;
    node_thickness = 2;
@@ -36,8 +36,7 @@ Parameters::Parameters ()
    show_link_names= false;
    show_link_ids= false;
    show_data_values= false;
-
-   
+//#moe_parameters 
    moe_speed_update= 300.0;
    moe_inflow_update= 300.0;
    moe_outflow_update= 300.0;
@@ -51,13 +50,13 @@ Parameters::Parameters ()
 // #turning_parameters
    default_lookback_size= 20;
    turn_penalty_cost= 99999.0;
-   use_giveway = false;
-   max_wait = 5.0;
+   use_giveway= false;
+   max_wait= 5.0;
 // #server_parameters
    od_servers_deterministic= 1;
    odserver_sigma= 0.2; // unused for the moment
 // NEW:
-   implicit_nr_servers=false;
+   implicit_nr_servers= false;
 // #vehicle_parameters
    standard_veh_length= 7;
 // #route_parameters
@@ -88,7 +87,7 @@ Parameters::Parameters ()
    rel_gap_threshold=0.02;
    // following are not yet implemented in file. testing their use first
    //NEW:
-   max_route_iter=1; 
+   max_route_iter=3; 
  
    	//state vars
    shortest_paths_initialised = false;
@@ -113,6 +112,13 @@ bool Parameters::read_parameters (istream & in )
 	if (keyword!= "#drawing_parameters")
 	{
 		eout << "ERROR reading Parameters file, expecting: #drawing_parameters, read: " << keyword << endl;
+		return false;
+	}
+
+	in >> keyword;
+	if (keyword!= "#simulation_view")
+	{
+		eout << "ERROR reading Parameters file, expecting: #simulation_view, read: " << keyword << endl;
 		return false;
 	}
 
@@ -166,12 +172,44 @@ bool Parameters::read_parameters (istream & in )
 	in >> selected_thickness;
 	
 	in >> keyword;
-	if (keyword!= "show_background_image=")
+	if (keyword!= "text_size=")
 	{
-		eout << "ERROR reading Parameters file, expecting: show_background_image=, read: " << keyword << endl;
+		eout << "ERROR reading Parameters file, expecting: text_size=, read: " << keyword << endl;
+		return false;
+	}
+	in >> text_size;
+
+	in >> keyword;
+	if (keyword!= "show_background=")
+	{
+		eout << "ERROR reading Parameters file, expecting: show_background=, read: " << keyword << endl;
 		return false;
 	}
 	in >> show_background;
+
+	in >> keyword;
+	if (keyword!= "background_x=")
+	{
+		eout << "ERROR reading Parameters file, expecting: background_x=, read: " << keyword << endl;
+		return false;
+	}
+	in >> background_x;
+
+	in >> keyword;
+	if (keyword!= "background_y=")
+	{
+		eout << "ERROR reading Parameters file, expecting: background_y=, read: " << keyword << endl;
+		return false;
+	}
+	in >> background_y;
+
+	in >> keyword;
+	if (keyword!= "background_scale=")
+	{
+		eout << "ERROR reading Parameters file, expecting: background_scale=, read: " << keyword << endl;
+		return false;
+	}
+	in >> background_scale;
 
 	in >> keyword;
 	if (keyword!= "linkcolor=")
@@ -236,6 +274,61 @@ bool Parameters::read_parameters (istream & in )
 		return false;
 	}
 	in >> gui_update_step;
+
+	in >> keyword;
+	if (keyword!= "zerotime=")
+	{
+		eout << "ERROR reading Parameters file, expecting: zerotime=, read: " << keyword << endl;
+		return false;
+	}
+	in >> zerotime;
+	
+	in >> keyword;
+	if (keyword!= "#output_view")
+	{
+		eout << "ERROR reading Parameters file, expecting: #output_view, read: " << keyword << endl;
+		return false;
+	}
+
+	in >> keyword;
+	if (keyword!= "thickness_width=")
+	{
+		eout << "ERROR reading Parameters file, expecting: thickness_width=, read: " << keyword << endl;
+		return false;
+	}
+	in >> thickness_width;
+
+	in >> keyword;
+	if (keyword!= "cutoff=")
+	{
+		eout << "ERROR reading Parameters file, expecting: cutoff=, read: " << keyword << endl;
+		return false;
+	}
+	in >> cutoff;
+
+	in >> keyword;
+	if (keyword!= "show_link_names=")
+	{
+		eout << "ERROR reading Parameters file, expecting: show_link_names=, read: " << keyword << endl;
+		return false;
+	}
+	in >> show_link_names;
+
+	in >> keyword;
+	if (keyword!= "show_link_ids=")
+	{
+		eout << "ERROR reading Parameters file, expecting: show_link_ids=, read: " << keyword << endl;
+		return false;
+	}
+	in >> show_link_ids;
+
+	in >> keyword;
+	if (keyword!= "show_data_values=")
+	{
+		eout << "ERROR reading Parameters file, expecting: show_data_values=, read: " << keyword << endl;
+		return false;
+	}
+	in >> show_data_values;
 
 	in >> keyword;
 	if (keyword!= "#moe_parameters")
@@ -348,6 +441,25 @@ bool Parameters::read_parameters (istream & in )
 	in >> turn_penalty_cost;
 
 	in >> keyword;
+	if (keyword!= "use_giveway=")
+	{
+		eout << "ERROR reading Parameters file, expecting: use_giveway=, read: " << keyword << endl;
+		return false;
+	}
+	in >> use_giveway;
+
+	in >> keyword;
+	if (keyword!= "max_wait=")
+	{
+		eout << "ERROR reading Parameters file, expecting: max_wait=, read: " << keyword << endl;
+		return false;
+	}
+	in >> max_wait;
+
+
+
+
+	in >> keyword;
 	if (keyword!= "#server_parameters")
 	{
 		eout << "ERROR reading Parameters file, expecting: #server_parameters, read: " << keyword << endl;
@@ -369,6 +481,14 @@ bool Parameters::read_parameters (istream & in )
 		return false;
 	}
 	in >> odserver_sigma;
+
+	in >> keyword;
+	if (keyword!= "implicit_nr_servers=")
+	{
+		eout << "ERROR reading Parameters file, expecting: implicit_nr_servers=, read: " << keyword << endl;
+		return false;
+	}
+	in >> implicit_nr_servers;
 
 	in >> keyword;
 	if (keyword!= "#vehicle_parameters")
@@ -440,8 +560,61 @@ bool Parameters::read_parameters (istream & in )
 	}
 	in >> small_od_rate;
 
+	in >> keyword;
+	if (keyword!= "use_linktime_disturbances=")
+	{
+		eout << "ERROR reading Parameters file, expecting: use_linktime_disturbances=, read: " << keyword << endl;
+		return false;
+	}
+	in >> use_linktime_disturbances;
 
+	in >> keyword;
+	if (keyword!= "linktime_disturbance=")
+	{
+		eout << "ERROR reading Parameters file, expecting: linktime_disturbance=, read: " << keyword << endl;
+		return false;
+	}
+	in >> linktime_disturbance;
 
+	in >> keyword;
+	if (keyword!= "routesearch_random_draws=")
+	{
+		eout << "ERROR reading Parameters file, expecting: routesearch_random_draws=, read: " << keyword << endl;
+		return false;
+	}
+	in >> routesearch_random_draws;
+
+	in >> keyword;
+	if (keyword!= "scale_demand=")
+	{
+		eout << "ERROR reading Parameters file, expecting: scale_demand=, read: " << keyword << endl;
+		return false;
+	}
+	in >> scale_demand;
+
+	in >> keyword;
+	if (keyword!= "scale_demand_factor=")
+	{
+		eout << "ERROR reading Parameters file, expecting: scale_demand_factor=, read: " << keyword << endl;
+		return false;
+	}
+	in >> scale_demand_factor;
+
+	in >> keyword;
+	if (keyword!= "renum_routes=")
+	{
+		eout << "ERROR reading Parameters file, expecting: renum_routes=, read: " << keyword << endl;
+		return false;
+	}
+	in >> renum_routes;
+
+	in >> keyword;
+	if (keyword!= "overwrite_histtimes=")
+	{
+		eout << "ERROR reading Parameters file, expecting: overwrite_histtimes=, read: " << keyword << endl;
+		return false;
+	}
+	in >> overwrite_histtimes;
 	
 	in >> keyword;
 	if (keyword!= "#mime_parameters")
@@ -514,6 +687,13 @@ bool Parameters::read_parameters (istream & in )
 		}
 		in >> rel_gap_threshold;
 	
+		in >> keyword;
+		if (keyword!= "max_route_iter=")
+		{
+			eout << "ERROR reading Parameters file, expecting: max_route_iter=, read: " << keyword << endl;
+			return false;
+		}
+		in >> max_route_iter;
 	
 	}
 

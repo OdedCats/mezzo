@@ -977,7 +977,19 @@ bool Network::readturning(istream& in)
 		tptr->from_link=inlink;
 		tptr->to_link=outlink;
 		tptr->cost=theParameters->turn_penalty_cost;
-		turnpenalties.insert(turnpenalties.begin(),tptr);
+		// if not exists
+		bool exists=false;
+		for (vector<TurnPenalty*>::iterator iter=turnpenalties.begin(); iter != turnpenalties.end(); iter++)
+		{
+			if ( ((*iter)->from_link == inlink) && ((*iter)->to_link == outlink) )
+				// exists
+			{
+				exists=true;
+				 break;
+			}
+		}
+		if (!exists)
+			turnpenalties.insert(turnpenalties.begin(),tptr);
 		return true;
 	}
 	assert (servermap.count(sid));
@@ -1777,6 +1789,9 @@ bool Network::register_links()
 
 bool Network::readods(istream& in)
 {
+	// create the first default OD matrix slice
+	//ODSlice* odslice=new ODSlice();
+
 	string keyword;
 	in >> keyword;
 #ifdef _DEBUG_NETWORK
@@ -1810,6 +1825,9 @@ bool Network::readods(istream& in)
 	{
 		(*iter)->register_ods(&odpairs);
 	}
+
+	// add the default OD slice to the OD matrix
+	//odmatrix.add_slice(0.0,odslice);
 	return true;
 }
 
@@ -1858,6 +1876,9 @@ bool Network::readod(istream& in, double scale)
 	odpairs.insert(odpairs.begin(),odpair);
 	(o_iter->second)->add_odpair(odpair);
 	// set od list
+
+	// create 
+
 #ifdef _DEBUG_NETWORK
 	eout << " read an od"<<endl;
 #endif //_DEBUG_NETWORK
