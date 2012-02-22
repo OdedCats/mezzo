@@ -39,7 +39,7 @@ void LinkTime::generate_disturbances ()
 {	
 	disturbances.clear();
 	for (unsigned int i = 0; i < times_.size(); i++)
-		 disturbances [i] = (rand->urandom() -0.5)*2*theParameters->linktime_disturbance*times_[i];
+		 disturbances [i] = (rand->urandom() -0.5)*theParameters->linktime_disturbance*times_[i];
 	 
 }
 
@@ -66,7 +66,8 @@ const double LinkTime::cost(const double time)
 				return times_[i];
 		}
 		else
-			return 0.1;
+			// fallback
+			return (--times_.end())->second;
 	}
     
 }

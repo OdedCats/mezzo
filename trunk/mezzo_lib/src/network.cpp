@@ -2881,8 +2881,10 @@ bool Network::shortest_paths_all()
 {		
 	for (int r=0; r <theParameters->routesearch_random_draws; r++) // reruns for Random draws
 	{ 
-		if (theParameters->routesearch_random_draws > 1 )
+		if (theParameters->use_linktime_disturbances)
 			linkinfo->generate_disturbances();
+		else
+			linkinfo->zero_disturbances();
 		double entrytime=0.0;    // entry time for time-variant shortest path search
 		int nr_reruns_periods=static_cast<int> (runtime/theParameters->update_interval_routes)-1; // except for last period
 		// determines the number of reruns of the shortest path alg.
@@ -4092,7 +4094,8 @@ double Network::executemaster()
 		calc_paths=true;
 	if (routemap.size()==0) // if there are no routes read, force random draws to generate the initial route set.
 	{
-		theParameters->routesearch_random_draws=2;
+		if (theParameters->routesearch_random_draws < 1)
+			theParameters->routesearch_random_draws = 1;
 		calc_paths=true;
 	}
 	if (calc_paths)
