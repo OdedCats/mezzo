@@ -5,7 +5,10 @@ TEMPLATE = app
 CONFIG +=  console embed_manifest_exe
 #CONFIG -= qt
 TARGET = mezzo_s
-DEPENDPATH += . ../mezzo_lib/src
+DEPENDPATH += . ../mezzo_lib/src ../getp/codegen/lib/getP
+INCLUDEPATH +=  ../getp/codegen/lib/getP
+LIBPATH +=  ../getp/codegen/lib/getP
+LIBS += -lgetp
 QT -=  gui
 #core
 DEFINES += _NO_GUI

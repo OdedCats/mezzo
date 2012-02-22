@@ -2,7 +2,7 @@
 
 TEMPLATE = app
 TARGET = mezzo_gui
-INCLUDEPATH += $(QTDIR)/include 
+INCLUDEPATH += $(QTDIR)/include ../getp/codegen/lib/getP
 #$(QTDIR)/include/QtCore $(QTDIR)/include/QtGui $(QTDIR)/include/QtDesigner $(QTDIR)/include/QtNetwork $(QTDIR)/include/ActiveQt 
 
 
@@ -13,7 +13,7 @@ CONFIG(debug, debug|release) {
      LIBS +=  -L../mezzo_lib/Release -lmezzo_lib -L../mezzoAnalyzer/Release -lmezzoAnalyzer 
  }
 
-LIBS += -L$(QTDIR)/lib -lQtCore -lQtGui -lQtNetwork  
+LIBS += -L$(QTDIR)/lib -lQtCore -lQtGui -lQtNetwork 
 #-lQtDesigner 
 #-lQt3Support
 

@@ -3,10 +3,10 @@ TEMPLATE = lib
 CONFIG += staticlib 
 #debug
 TARGET = mezzo_lib
-DEPENDPATH += . src
-INCLUDEPATH += $(QTDIR)/include 
+DEPENDPATH += . src ../getp/codegen/lib/getP
+INCLUDEPATH += $(QTDIR)/include  ../getp/codegen/lib/getP
 #$(QTDIR)/include/Qt3Support 
-LIBS+=  -L$(QTDIR)/lib -lQtCore -lQtGui 
+LIBS+=  -L$(QTDIR)/lib -lQtCore -lQtGui -lgetp
 #-lQt3Support 
 #-lpthread $(SUBLIBS)
 QT+= core gui 
