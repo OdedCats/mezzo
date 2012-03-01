@@ -86,36 +86,44 @@ bool Turning::process_veh(double time)
       return false;
     }
     else	
-	{
-		if (check_controlling(time))
+	{	double next_outlink_time=outlink->next_accept_time();
+		if (time>= next_outlink_time) // if outlink can accept vehicles
 		{
-			Vehicle* veh=inlink->exit_veh(time, outlink, size);
-			if (inlink->exit_ok())
+			if (check_controlling(time))
 			{
-				ok=outlink->enter_veh(veh, time+delay);	
-			   if (ok)
-				 return true;
+				Vehicle* veh=inlink->exit_veh(time, outlink, size);
+				if (inlink->exit_ok())
+				{
+					ok=outlink->enter_veh(veh, time+delay);	
+				   if (ok)
+					 return true;
+				   else
+				   {
+					 eout << " turning " << id << " dropped a vehicle, because outlink couldnt enter vehicle" << endl;
+					 nexttime=inlink->next_action(time);
+					 delete veh;
+					 return false;
+				   }           
+				}
 			   else
-			   {
-				 eout << " turning " << id << " dropped a vehicle, because outlink couldnt enter vehicle" << endl;
-				 nexttime=inlink->next_action(time);
-				 delete veh;
-				 return false;
-			   }           
+				{
+					nexttime=inlink->next_action(time);
+				   if (nexttime <= time)
+					   eout << "nexttime <= time in Turning::process_veh, from inlink::next_action " << endl;
+				  return false;
+				}
 			}
-		   else
+			else // vehicle has to give way, needs to wait
 			{
-				nexttime=inlink->next_action(time);
-			   if (nexttime <= time)
-				   eout << "nexttime <= time in Turning::process_veh, from inlink::next_action " << endl;
-			  return false;
+				// ask when to try again?
+				// simply next time in the server for now,. Maybe we can do something smarter later
+				nexttime = next_time(time);
 			}
 		}
-		else // vehicle has to give way, needs to wait
+		else // outlink cannot yet accept vehicles
 		{
-			// ask when to try again?
-			// simply next time in the server for now,. Maybe we can do something smarter later
-			nexttime = next_time(time);
+			nexttime=next_outlink_time;
+			ok=false;
 		}
 	 }
    }

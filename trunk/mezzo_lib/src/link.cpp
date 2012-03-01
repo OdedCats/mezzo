@@ -23,7 +23,8 @@ Link::Link(int id_, Node* in_, Node* out_, int length_, double nr_lanes_, Sdfunc
 	string names[nr_fields]= {"time","vid","lid","entry?","density","qlength","speed","earliest_exit_time"};
    vector <string> fields(names,names+nr_fields);
 	grid=new Grid(nr_fields,fields);
-#endif //_COLLECT_ALL	
+#endif //_COLLECT_ALL
+	time_last_entry=0.0;
 	avg_time=0.0;
 	avgtimes=new LinkTime();
 	avgtimes->set_id(id);
@@ -65,6 +66,7 @@ Link::Link()
 	*/
 	blocked_until=-1.0; // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
 	nr_exits_blocked=0; // set by the turning movements if they are blocked
+	time_last_entry=0.0;
 	freeflowtime=1.0;	
 	selected = false;
 	length= 100;
@@ -116,6 +118,7 @@ void Link::reset()
 	moe_density->reset();
 	blocked_until=-1.0; // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
 	nr_exits_blocked=0; // set by the turning movements if they are blocked
+	time_last_entry=0.0;
 	freeflowtime=(length/(sdfunc->speed(0.0)));
 	if (freeflowtime < 1.0)
       freeflowtime=1.0;
@@ -422,6 +425,16 @@ const double Link::speed_density(const double density_) const
 {
     return sdfunc->speed(density_);
 }
+
+const double Link::next_accept_time () const
+{
+	if (time_last_entry == 0.0) 
+		return time_last_entry;
+	else
+		return (theParameters->min_headway_inflow / this->nr_lanes) +time_last_entry;
+
+}
+
 const bool Link::enter_veh(Vehicle* const veh, const double time)
 {
    double ro=0.0;
@@ -454,6 +467,7 @@ const bool Link::enter_veh(Vehicle* const veh, const double time)
    veh->set_curr_link(this);
    veh->set_entry_time(time);
    update_icon(time);	
+   time_last_entry=time;
 #ifdef _COLLECT_ALL	
 	list <double> collector;	
 	collector.push_back(time);

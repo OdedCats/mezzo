@@ -143,6 +143,10 @@ public:
 	const bool veh_exiting(const double time, const Link* const nextlink, const int lookback) const; 
 	void update_icon(const double time);
 
+	const double get_time_last_entry() const {return time_last_entry;}
+	void set_time_last_entry (const double val) {time_last_entry=val;} 
+	const double next_accept_time () const;
+
 #ifndef _NO_GUI   
 	LinkIcon* const get_icon() const {return icon;} // returns pointer to icon, allows icon to be changed, but not the pointer
 	void set_icon(LinkIcon* const icon_) {icon=icon_; icon->set_pointers(&queue_percentage, &running_percentage);} // sets icon.
@@ -236,6 +240,7 @@ protected:
 	bool blocked; // set if the link is shut off during an incident
 	double blocked_until; // set to -1 if not active, otherwise it has the time when the queue that blocks the link will reach the upstream node.
 	int nr_exits_blocked; // set by the turning movements if they are blocked
+	double time_last_entry; // shows the last time a vehicle entered this link
 	double avg_time; // average traversal time
 	double tmp_avg; // temp var for average for period
 	int tmp_passed; // temp var for nr passed for period
