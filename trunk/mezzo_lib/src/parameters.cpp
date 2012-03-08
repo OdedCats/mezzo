@@ -460,7 +460,14 @@ bool Parameters::read_parameters (istream & in )
 	in >> max_wait;
 
 
-
+	in >> keyword;
+	if (keyword!= "min_headway_inflow=")
+	{
+		eout << "ERROR reading Parameters file, expecting: min_headway_inflow=, read: " << keyword << endl;
+		return false;
+	}
+	in >> min_headway_inflow;
+	
 
 	in >> keyword;
 	if (keyword!= "#server_parameters")

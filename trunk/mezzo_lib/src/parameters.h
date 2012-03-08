@@ -50,7 +50,7 @@ extern int vid;     // global vehicle id nr.
 //extern double time_alpha;
 extern std::ofstream eout; // for all debugging output
 
-const string version = "Mezzo 0.59.0";
+const string version = "Mezzo 0.60.0";
 
 // OLD Network.hh parameters
 
@@ -76,8 +76,6 @@ const double perc_receive_broadcast=0.7; // percentage of drivers that receive t
 const double dont_know_delay=0.114; // percentage of drivers that don't know (cannot estimate) delay on current route.
 
 
-//OD parameters
-//const double small_od_rate = 3.0; // determines when a OD can have more than 1 route
 
 // PARAMETER CLASS
 /*!  Here go all the global parameters used in the simulation and the GUI
