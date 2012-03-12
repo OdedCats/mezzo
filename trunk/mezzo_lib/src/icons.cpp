@@ -226,7 +226,8 @@ void LinkIcon::draw(QPixmap *const  pm,QMatrix * const wm)   // draw the stuff o
    		int x_1=static_cast <int> ((1.0-(*queuepercentage))*(stopx-startx)+startx);   // x and y for queue-end
    		int y_1=static_cast <int> ((1.0-(*queuepercentage))*(stopy-starty)+starty);
 		paint.setPen(pen2);
-		paint.drawLine( x_1+shiftx,y_1+shifty, stopx+shiftx,stopy+shifty ); // draw the queue
+		if (*queuepercentage > 0.0)
+			paint.drawLine( x_1+shiftx,y_1+shifty, stopx+shiftx,stopy+shifty ); // draw the queue
 
 		//draw the running part
 		paint.setPen(pen3);
