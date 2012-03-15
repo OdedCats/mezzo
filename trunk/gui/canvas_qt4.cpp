@@ -493,12 +493,32 @@ void MainForm::on_actionAnalyzeOutput_toggled()
 
 }
 
+
+
 void MainForm::activate_AnalyzeOutput() 
 {	
 	actionAnalyzeOutput->setEnabled(true);
 	actionAnalyzeOutput->setChecked(true);
 	on_actionAnalyzeOutput_toggled();
 }
+
+
+void MainForm::on_actionSlow_toggled(bool value)
+{
+	if (value)
+	{
+		theParameters->gui_update_step=1;
+		pmdlg->updatefactor->setValue(1);
+	}
+	else
+	{
+		theParameters->gui_update_step=1000;
+		pmdlg->updatefactor->setValue(100);
+	}
+
+}
+
+
 
 void MainForm::on_horizontalSlider_valueChanged()
 {

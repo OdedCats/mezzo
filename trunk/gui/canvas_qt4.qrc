@@ -1,5 +1,6 @@
 <RCC>
-  <qresource prefix="/" >
+  <qresource prefix="/">
+    <file>images/turtle.png</file>
     <file>images/batchrun.png</file>
     <file>images/background_map.jpg</file>
     <file>images/move.png</file>

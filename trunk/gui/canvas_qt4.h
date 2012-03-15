@@ -84,6 +84,7 @@ private slots:
 	void on_actionAnalyzeOutput_toggled(); //!< Turns on output analysis dialogue
 	void on_horizontalSlider_valueChanged(); // !< changes output view period
 	void on_actionPositionBackground_activated();//!< opens Position Background Dialogue
+	void on_actionSlow_toggled(bool); //!< if checked the simulation is slowed down
 		
 	// other slots	
 	void keyPressEvent(QKeyEvent* e);  //!< handle for key presses

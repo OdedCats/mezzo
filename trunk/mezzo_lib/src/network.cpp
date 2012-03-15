@@ -1606,7 +1606,7 @@ bool Network::readsignalcontrols(string name)
 bool Network::readsignalcontrol(istream & in)
 {
 	char bracket;
-	int controlid, nr_plans;
+	int controlid, nr_plans, ctype;
 	bool ok= true;
 	in >> bracket;
 	if (bracket != '{')
@@ -1614,8 +1614,8 @@ bool Network::readsignalcontrol(istream & in)
 		eout << "ERROR: readfile::readsignalcontrol scanner jammed at " << bracket;
 		return false;
 	}
-	in >> controlid >> nr_plans;
-	SignalControl* sc = new SignalControl(controlid);
+	in >> controlid >> ctype >> nr_plans;
+	SignalControl* sc = new SignalControl(controlid, ctype);
 
 	for (int i=0; i < nr_plans; i++)
 	{

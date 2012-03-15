@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>ParametersDialog</class>
- <widget class="QDialog" name="ParametersDialog" >
-  <property name="geometry" >
+ <widget class="QDialog" name="ParametersDialog">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,45 +10,37 @@
     <height>328</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Parameters</string>
   </property>
-  <property name="windowIcon" >
-   <iconset resource="canvas_qt4.qrc" >:/images/icon-tool.png</iconset>
+  <property name="windowIcon">
+   <iconset resource="canvas_qt4.qrc">
+    <normaloff>:/images/icon-tool.png</normaloff>:/images/icon-tool.png</iconset>
   </property>
-  <property name="sizeGripEnabled" >
+  <property name="sizeGripEnabled">
    <bool>true</bool>
   </property>
-  <layout class="QVBoxLayout" >
-   <property name="spacing" >
+  <layout class="QVBoxLayout">
+   <property name="spacing">
     <number>6</number>
    </property>
-   <property name="leftMargin" >
-    <number>11</number>
-   </property>
-   <property name="topMargin" >
-    <number>11</number>
-   </property>
-   <property name="rightMargin" >
-    <number>11</number>
-   </property>
-   <property name="bottomMargin" >
+   <property name="margin">
     <number>11</number>
    </property>
    <item>
-    <widget class="QTabWidget" name="tabWidget" >
-     <property name="enabled" >
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="enabled">
       <bool>true</bool>
      </property>
-     <property name="currentIndex" >
-      <number>0</number>
+     <property name="currentIndex">
+      <number>1</number>
      </property>
-     <widget class="QWidget" name="Widget8" >
-      <attribute name="title" >
+     <widget class="QWidget" name="Widget8">
+      <attribute name="title">
        <string>Display</string>
       </attribute>
-      <widget class="QLabel" name="textLabel3" >
-       <property name="geometry" >
+      <widget class="QLabel" name="textLabel3">
+       <property name="geometry">
         <rect>
          <x>300</x>
          <y>10</y>
@@ -55,15 +48,15 @@
          <height>20</height>
         </rect>
        </property>
-       <property name="text" >
-        <string>&lt;b>Thickness&lt;/b></string>
+       <property name="text">
+        <string>&lt;b&gt;Thickness&lt;/b&gt;</string>
        </property>
-       <property name="wordWrap" >
+       <property name="wordWrap">
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QLabel" name="textLabel3_2" >
-       <property name="geometry" >
+      <widget class="QLabel" name="textLabel3_2">
+       <property name="geometry">
         <rect>
          <x>370</x>
          <y>10</y>
@@ -71,15 +64,15 @@
          <height>20</height>
         </rect>
        </property>
-       <property name="text" >
-        <string>&lt;b>Radius&lt;/b></string>
+       <property name="text">
+        <string>&lt;b&gt;Radius&lt;/b&gt;</string>
        </property>
-       <property name="wordWrap" >
+       <property name="wordWrap">
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QLabel" name="textLabel1_3" >
-       <property name="geometry" >
+      <widget class="QLabel" name="textLabel1_3">
+       <property name="geometry">
         <rect>
          <x>10</x>
          <y>70</y>
@@ -87,15 +80,15 @@
          <height>20</height>
         </rect>
        </property>
-       <property name="text" >
-        <string>&lt;b>&lt;i>Node&lt;/i>&lt;/b></string>
+       <property name="text">
+        <string>&lt;b&gt;&lt;i&gt;Node&lt;/i&gt;&lt;/b&gt;</string>
        </property>
-       <property name="wordWrap" >
+       <property name="wordWrap">
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QLabel" name="textLabel1_3_2" >
-       <property name="geometry" >
+      <widget class="QLabel" name="textLabel1_3_2">
+       <property name="geometry">
         <rect>
          <x>10</x>
          <y>100</y>
@@ -103,15 +96,15 @@
          <height>20</height>
         </rect>
        </property>
-       <property name="text" >
-        <string>&lt;b>&lt;i>Queue&lt;/i>&lt;/b></string>
+       <property name="text">
+        <string>&lt;b&gt;&lt;i&gt;Queue&lt;/i&gt;&lt;/b&gt;</string>
        </property>
-       <property name="wordWrap" >
+       <property name="wordWrap">
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QLabel" name="textLabel1_2" >
-       <property name="geometry" >
+      <widget class="QLabel" name="textLabel1_2">
+       <property name="geometry">
         <rect>
          <x>10</x>
          <y>40</y>
@@ -119,15 +112,15 @@
          <height>20</height>
         </rect>
        </property>
-       <property name="text" >
-        <string>&lt;i>&lt;b>Link&lt;/b>&lt;/i></string>
+       <property name="text">
+        <string>&lt;i&gt;&lt;b&gt;Link&lt;/b&gt;&lt;/i&gt;</string>
        </property>
-       <property name="wordWrap" >
+       <property name="wordWrap">
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QLabel" name="textLabel1" >
-       <property name="geometry" >
+      <widget class="QLabel" name="textLabel1">
+       <property name="geometry">
         <rect>
          <x>110</x>
          <y>10</y>
@@ -135,15 +128,15 @@
          <height>20</height>
         </rect>
        </property>
-       <property name="text" >
-        <string>&lt;b>Show&lt;/b></string>
+       <property name="text">
+        <string>&lt;b&gt;Show&lt;/b&gt;</string>
        </property>
-       <property name="wordWrap" >
+       <property name="wordWrap">
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QLabel" name="textLabel1_3_2_2" >
-       <property name="geometry" >
+      <widget class="QLabel" name="textLabel1_3_2_2">
+       <property name="geometry">
         <rect>
          <x>10</x>
          <y>130</y>
@@ -151,15 +144,15 @@
          <height>20</height>
         </rect>
        </property>
-       <property name="text" >
-        <string>&lt;b>&lt;i>Background&lt;/i>&lt;/b></string>
+       <property name="text">
+        <string>&lt;b&gt;&lt;i&gt;Background&lt;/i&gt;&lt;/b&gt;</string>
        </property>
-       <property name="wordWrap" >
+       <property name="wordWrap">
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QPushButton" name="NodeColorButton" >
-       <property name="geometry" >
+      <widget class="QPushButton" name="NodeColorButton">
+       <property name="geometry">
         <rect>
          <x>190</x>
          <y>70</y>
@@ -167,12 +160,12 @@
          <height>25</height>
         </rect>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>Node Color...</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="QueueColorButton" >
-       <property name="geometry" >
+      <widget class="QPushButton" name="QueueColorButton">
+       <property name="geometry">
         <rect>
          <x>190</x>
          <y>100</y>
@@ -180,12 +173,12 @@
          <height>25</height>
         </rect>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>Queue Color...</string>
        </property>
       </widget>
-      <widget class="QCheckBox" name="ShowBgImage" >
-       <property name="geometry" >
+      <widget class="QCheckBox" name="ShowBgImage">
+       <property name="geometry">
         <rect>
          <x>100</x>
          <y>130</y>
@@ -193,15 +186,15 @@
          <height>20</height>
         </rect>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>Image</string>
        </property>
-       <property name="checked" >
+       <property name="checked">
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QCheckBox" name="LinkIds" >
-       <property name="geometry" >
+      <widget class="QCheckBox" name="LinkIds">
+       <property name="geometry">
         <rect>
          <x>100</x>
          <y>40</y>
@@ -209,12 +202,12 @@
          <height>20</height>
         </rect>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>Link IDs</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="BgColorButton" >
-       <property name="geometry" >
+      <widget class="QPushButton" name="BgColorButton">
+       <property name="geometry">
         <rect>
          <x>190</x>
          <y>130</y>
@@ -222,12 +215,12 @@
          <height>25</height>
         </rect>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>Bg Color...</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="LinkColorButton" >
-       <property name="geometry" >
+      <widget class="QPushButton" name="LinkColorButton">
+       <property name="geometry">
         <rect>
          <x>190</x>
          <y>40</y>
@@ -235,12 +228,12 @@
          <height>25</height>
         </rect>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>Link Color...</string>
        </property>
       </widget>
-      <widget class="QSpinBox" name="NodeThickness" >
-       <property name="geometry" >
+      <widget class="QSpinBox" name="NodeThickness">
+       <property name="geometry">
         <rect>
          <x>310</x>
          <y>70</y>
@@ -248,12 +241,12 @@
          <height>20</height>
         </rect>
        </property>
-       <property name="value" >
+       <property name="value">
         <number>1</number>
        </property>
       </widget>
-      <widget class="QSpinBox" name="NodeRadius" >
-       <property name="geometry" >
+      <widget class="QSpinBox" name="NodeRadius">
+       <property name="geometry">
         <rect>
          <x>370</x>
          <y>70</y>
@@ -261,15 +254,15 @@
          <height>20</height>
         </rect>
        </property>
-       <property name="minimum" >
+       <property name="minimum">
         <number>1</number>
        </property>
-       <property name="value" >
+       <property name="value">
         <number>4</number>
        </property>
       </widget>
-      <widget class="QSpinBox" name="LinkThickness" >
-       <property name="geometry" >
+      <widget class="QSpinBox" name="LinkThickness">
+       <property name="geometry">
         <rect>
          <x>310</x>
          <y>40</y>
@@ -277,12 +270,12 @@
          <height>20</height>
         </rect>
        </property>
-       <property name="value" >
+       <property name="value">
         <number>1</number>
        </property>
       </widget>
-      <widget class="QSpinBox" name="QueueThickness" >
-       <property name="geometry" >
+      <widget class="QSpinBox" name="QueueThickness">
+       <property name="geometry">
         <rect>
          <x>310</x>
          <y>100</y>
@@ -290,17 +283,17 @@
          <height>20</height>
         </rect>
        </property>
-       <property name="value" >
+       <property name="value">
         <number>6</number>
        </property>
       </widget>
      </widget>
-     <widget class="QWidget" name="tab" >
-      <attribute name="title" >
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
        <string>Simulation</string>
       </attribute>
-      <widget class="QLabel" name="TextLabel2" >
-       <property name="geometry" >
+      <widget class="QLabel" name="TextLabel2">
+       <property name="geometry">
         <rect>
          <x>10</x>
          <y>30</y>
@@ -308,15 +301,15 @@
          <height>20</height>
         </rect>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>Refresh rate:</string>
        </property>
-       <property name="wordWrap" >
+       <property name="wordWrap">
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QSpinBox" name="refreshrate" >
-       <property name="geometry" >
+      <widget class="QSpinBox" name="refreshrate">
+       <property name="geometry">
         <rect>
          <x>90</x>
          <y>30</y>
@@ -324,18 +317,18 @@
          <height>25</height>
         </rect>
        </property>
-       <property name="focusPolicy" >
+       <property name="focusPolicy">
         <enum>Qt::ClickFocus</enum>
        </property>
-       <property name="maximum" >
+       <property name="maximum">
         <number>5000</number>
        </property>
-       <property name="value" >
+       <property name="value">
         <number>100</number>
        </property>
       </widget>
-      <widget class="QLabel" name="TextLabel4" >
-       <property name="geometry" >
+      <widget class="QLabel" name="TextLabel4">
+       <property name="geometry">
         <rect>
          <x>390</x>
          <y>30</y>
@@ -343,15 +336,15 @@
          <height>22</height>
         </rect>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>%</string>
        </property>
-       <property name="wordWrap" >
+       <property name="wordWrap">
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QLabel" name="TextLabel5" >
-       <property name="geometry" >
+      <widget class="QLabel" name="TextLabel5">
+       <property name="geometry">
         <rect>
          <x>180</x>
          <y>80</y>
@@ -359,15 +352,15 @@
          <height>22</height>
         </rect>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>%</string>
        </property>
-       <property name="wordWrap" >
+       <property name="wordWrap">
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QLabel" name="TextLabel3" >
-       <property name="geometry" >
+      <widget class="QLabel" name="TextLabel3">
+       <property name="geometry">
         <rect>
          <x>180</x>
          <y>30</y>
@@ -375,15 +368,15 @@
          <height>22</height>
         </rect>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>ms</string>
        </property>
-       <property name="wordWrap" >
+       <property name="wordWrap">
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QLabel" name="TextLabel6" >
-       <property name="geometry" >
+      <widget class="QLabel" name="TextLabel6">
+       <property name="geometry">
         <rect>
          <x>390</x>
          <y>80</y>
@@ -391,15 +384,15 @@
          <height>22</height>
         </rect>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>px</string>
        </property>
-       <property name="wordWrap" >
+       <property name="wordWrap">
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QSpinBox" name="simspeed" >
-       <property name="geometry" >
+      <widget class="QSpinBox" name="simspeed">
+       <property name="geometry">
         <rect>
          <x>90</x>
          <y>130</y>
@@ -407,30 +400,30 @@
          <height>25</height>
         </rect>
        </property>
-       <property name="focusPolicy" >
+       <property name="focusPolicy">
         <enum>Qt::ClickFocus</enum>
        </property>
-       <property name="toolTip" >
+       <property name="toolTip">
         <string>100% is 1:1</string>
        </property>
-       <property name="whatsThis" >
+       <property name="whatsThis">
         <string>Updatefactor determines how much time is reserved for simulation and how much for updating the screen. 100% means fastest simulation. 99% is already much slower, but the GUI responds much nicer.</string>
        </property>
-       <property name="minimum" >
+       <property name="minimum">
         <number>0</number>
        </property>
-       <property name="maximum" >
+       <property name="maximum">
         <number>2000</number>
        </property>
-       <property name="singleStep" >
+       <property name="singleStep">
         <number>10</number>
        </property>
-       <property name="value" >
+       <property name="value">
         <number>100</number>
        </property>
       </widget>
-      <widget class="QLabel" name="TextLabel7" >
-       <property name="geometry" >
+      <widget class="QLabel" name="TextLabel7">
+       <property name="geometry">
         <rect>
          <x>180</x>
          <y>130</y>
@@ -438,15 +431,15 @@
          <height>22</height>
         </rect>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>%</string>
        </property>
-       <property name="wordWrap" >
+       <property name="wordWrap">
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QLabel" name="TextLabel11" >
-       <property name="geometry" >
+      <widget class="QLabel" name="TextLabel11">
+       <property name="geometry">
         <rect>
          <x>10</x>
          <y>130</y>
@@ -454,15 +447,15 @@
          <height>20</height>
         </rect>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>Sim speeds:</string>
        </property>
-       <property name="wordWrap" >
+       <property name="wordWrap">
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QLabel" name="TextLabel10" >
-       <property name="geometry" >
+      <widget class="QLabel" name="TextLabel10">
+       <property name="geometry">
         <rect>
          <x>230</x>
          <y>80</y>
@@ -470,15 +463,15 @@
          <height>20</height>
         </rect>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>Pan factor:</string>
        </property>
-       <property name="wordWrap" >
+       <property name="wordWrap">
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QLabel" name="TextLabel8" >
-       <property name="geometry" >
+      <widget class="QLabel" name="TextLabel8">
+       <property name="geometry">
         <rect>
          <x>220</x>
          <y>30</y>
@@ -486,15 +479,15 @@
          <height>20</height>
         </rect>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>Update factor:</string>
        </property>
-       <property name="wordWrap" >
+       <property name="wordWrap">
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QSpinBox" name="updatefactor" >
-       <property name="geometry" >
+      <widget class="QSpinBox" name="updatefactor">
+       <property name="geometry">
         <rect>
          <x>300</x>
          <y>30</y>
@@ -502,30 +495,30 @@
          <height>25</height>
         </rect>
        </property>
-       <property name="focusPolicy" >
+       <property name="focusPolicy">
         <enum>Qt::ClickFocus</enum>
        </property>
-       <property name="toolTip" >
+       <property name="toolTip">
         <string>100% is max speed</string>
        </property>
-       <property name="whatsThis" >
+       <property name="whatsThis">
         <string>Updatefactor determines how much time is reserved for simulation and how much for updating the screen. 100% means fastest simulation. 99% is already much slower, but the GUI responds much nicer.</string>
        </property>
-       <property name="minimum" >
+       <property name="minimum">
         <number>1</number>
        </property>
-       <property name="maximum" >
+       <property name="maximum">
         <number>100</number>
        </property>
-       <property name="singleStep" >
+       <property name="singleStep">
         <number>1</number>
        </property>
-       <property name="value" >
+       <property name="value">
         <number>100</number>
        </property>
       </widget>
-      <widget class="QLabel" name="TextLabel9" >
-       <property name="geometry" >
+      <widget class="QLabel" name="TextLabel9">
+       <property name="geometry">
         <rect>
          <x>10</x>
          <y>80</y>
@@ -533,15 +526,15 @@
          <height>20</height>
         </rect>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>Zoom factor:</string>
        </property>
-       <property name="wordWrap" >
+       <property name="wordWrap">
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QSpinBox" name="zoomfactor" >
-       <property name="geometry" >
+      <widget class="QSpinBox" name="zoomfactor">
+       <property name="geometry">
         <rect>
          <x>90</x>
          <y>80</y>
@@ -549,30 +542,30 @@
          <height>25</height>
         </rect>
        </property>
-       <property name="focusPolicy" >
+       <property name="focusPolicy">
         <enum>Qt::ClickFocus</enum>
        </property>
-       <property name="toolTip" >
+       <property name="toolTip">
         <string>100% is 1:1</string>
        </property>
-       <property name="whatsThis" >
+       <property name="whatsThis">
         <string>Updatefactor determines how much time is reserved for simulation and how much for updating the screen. 100% means fastest simulation. 99% is already much slower, but the GUI responds much nicer.</string>
        </property>
-       <property name="minimum" >
+       <property name="minimum">
         <number>1</number>
        </property>
-       <property name="maximum" >
+       <property name="maximum">
         <number>200</number>
        </property>
-       <property name="singleStep" >
+       <property name="singleStep">
         <number>1</number>
        </property>
-       <property name="value" >
+       <property name="value">
         <number>150</number>
        </property>
       </widget>
-      <widget class="QSpinBox" name="panfactor" >
-       <property name="geometry" >
+      <widget class="QSpinBox" name="panfactor">
+       <property name="geometry">
         <rect>
          <x>300</x>
          <y>80</y>
@@ -580,25 +573,25 @@
          <height>25</height>
         </rect>
        </property>
-       <property name="focusPolicy" >
+       <property name="focusPolicy">
         <enum>Qt::ClickFocus</enum>
        </property>
-       <property name="toolTip" >
+       <property name="toolTip">
         <string/>
        </property>
-       <property name="whatsThis" >
+       <property name="whatsThis">
         <string/>
        </property>
-       <property name="minimum" >
+       <property name="minimum">
         <number>1</number>
        </property>
-       <property name="maximum" >
+       <property name="maximum">
         <number>200</number>
        </property>
-       <property name="singleStep" >
+       <property name="singleStep">
         <number>10</number>
        </property>
-       <property name="value" >
+       <property name="value">
         <number>20</number>
        </property>
       </widget>
@@ -606,44 +599,35 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" >
-     <property name="spacing" >
+    <layout class="QHBoxLayout">
+     <property name="spacing">
       <number>6</number>
      </property>
-     <property name="leftMargin" >
-      <number>0</number>
-     </property>
-     <property name="topMargin" >
-      <number>0</number>
-     </property>
-     <property name="rightMargin" >
-      <number>0</number>
-     </property>
-     <property name="bottomMargin" >
+     <property name="margin">
       <number>0</number>
      </property>
      <item>
-      <widget class="QPushButton" name="buttonHelp" >
-       <property name="text" >
+      <widget class="QPushButton" name="buttonHelp">
+       <property name="text">
         <string>&amp;Help</string>
        </property>
-       <property name="shortcut" >
+       <property name="shortcut">
         <string>F1</string>
        </property>
-       <property name="autoDefault" >
+       <property name="autoDefault">
         <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
       <spacer>
-       <property name="orientation" >
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeType" >
+       <property name="sizeType">
         <enum>QSizePolicy::Expanding</enum>
        </property>
-       <property name="sizeHint" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>20</width>
          <height>20</height>
@@ -652,30 +636,30 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonOk" >
-       <property name="text" >
+      <widget class="QPushButton" name="buttonOk">
+       <property name="text">
         <string>&amp;OK</string>
        </property>
-       <property name="shortcut" >
+       <property name="shortcut">
         <string/>
        </property>
-       <property name="autoDefault" >
+       <property name="autoDefault">
         <bool>true</bool>
        </property>
-       <property name="default" >
+       <property name="default">
         <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonCancel" >
-       <property name="text" >
+      <widget class="QPushButton" name="buttonCancel">
+       <property name="text">
         <string>&amp;Cancel</string>
        </property>
-       <property name="shortcut" >
+       <property name="shortcut">
         <string/>
        </property>
-       <property name="autoDefault" >
+       <property name="autoDefault">
         <bool>true</bool>
        </property>
       </widget>
@@ -684,14 +668,13 @@
    </item>
   </layout>
  </widget>
- <layoutdefault spacing="6" margin="11" />
- <pixmapfunction></pixmapfunction>
+ <layoutdefault spacing="6" margin="11"/>
  <includes>
-  <include location="global" >qcolordialog.h</include>
-  <include location="global" >qmatrix.h</include>
+  <include location="global">qcolordialog.h</include>
+  <include location="global">qmatrix.h</include>
  </includes>
  <resources>
-  <include location="canvas_qt4.qrc" />
+  <include location="canvas_qt4.qrc"/>
  </resources>
  <connections>
   <connection>
@@ -700,11 +683,11 @@
    <receiver>ParametersDialog</receiver>
    <slot>accept()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>293</x>
      <y>291</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>20</x>
      <y>20</y>
     </hint>
@@ -716,11 +699,11 @@
    <receiver>ParametersDialog</receiver>
    <slot>reject()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>376</x>
      <y>291</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>20</x>
      <y>20</y>
     </hint>
@@ -732,11 +715,11 @@
    <receiver>ParametersDialog</receiver>
    <slot>ShowBgImage_toggled(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>113</x>
      <y>164</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>20</x>
      <y>20</y>
     </hint>

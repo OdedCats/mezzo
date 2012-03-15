@@ -31,7 +31,7 @@ class SignalPlan;
 class SignalControl : public Action
 {
 public:
-	SignalControl (int id_):id(id_) {active = false;}
+	SignalControl (int id_, int type_):id(id_),type(type_) {active = false;}
 	void reset() ;
 	void add_signal_plan (SignalPlan* signalplan_) { signalplans.push_back(signalplan_);}
 	virtual const bool execute(Eventlist* eventlist, const double time);
@@ -40,18 +40,20 @@ protected:
 	vector<SignalPlan*>::iterator current_signal_plan;
 	bool active;
 	int id;
+	int type;
 };
 
 class SignalPlan : public Action
 {
 public:
-	SignalPlan (int id_, double start_, double stop_, double cycletime_, double offset_)  :
+	SignalPlan (int id_, double start_, double stop_,  double offset_, double cycletime_)  :
 	  id(id_), cycletime(cycletime_), offset(offset_), start(start_), stop(stop_)
 			{active=false;}
 	void reset() ;
 	virtual const bool execute(Eventlist* eventlist, const double time);
-	double get_start() {return start;}
-	void add_stage(Stage* stage_) {stages.push_back(stage_);}
+	const double get_start() const {return start;}
+	const double get_cycletime() const {return cycletime;}
+	void add_stage(Stage* stage_) ;
 protected:
 	int id;
 	double cycletime;
@@ -67,8 +69,11 @@ protected:
 class Stage : public Action
 {
 public:
-	Stage (int id_, double start_, double duration_): id(id_), start(start_), duration(duration_) { active = false;}
+	Stage (int id_, double start_, double duration_): id(id_), start(start_), 
+		duration(duration_) { active = false;}
 	const int get_id() {return id;}
+	void set_parent(SignalPlan* plan) {parent=plan;}
+	const SignalPlan* get_parent() const {return parent;}
 	void reset() {stop();} //already implemented in void stop(), but reset is universal
 	const double get_start() const {return start;}
 	const double get_duration() const {return duration;}
@@ -84,6 +89,7 @@ protected:
 	bool active; // true if current Stage is active
 	//double intergreen;
 	vector <Turning*> turnings;
+	SignalPlan* parent;
 };
 
 #endif // SIGNAL_H

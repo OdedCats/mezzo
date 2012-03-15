@@ -33,7 +33,42 @@ void  SignalControl::reset()
 }
 
 //Signalplan functions
+void SignalPlan::add_stage(Stage* stage_) 
+{	
+	stages.push_back(stage_);
+	stage_->set_parent(this);
+}
 
+const bool SignalPlan::execute(Eventlist* eventlist, const double time)
+{
+	if (!active)
+	{	
+		// activate all the stages
+		for (current_stage = stages.begin(); current_stage != stages.end(); current_stage++) // start at the first stage when this plan becomes active
+		{
+			double book_time=time+offset+(*current_stage)->get_start();
+			eventlist->add_event(book_time,(*current_stage));
+		}
+		active = true;
+#ifdef _DEBUG_SIGNALS
+		eout << "Signal plan " << id << " activated. Nr of stages " << stages.size() << endl;
+#endif // _DEBUG_SIGNALS	
+		eventlist->add_event(stop,this);
+	}
+	else // at end of signal plan turn all stages to red
+	{
+		active = false;
+		for (vector<Stage*>::iterator iter= stages.begin(); iter < stages.end(); iter++)
+		{
+			(*iter)->stop();
+		}
+
+	}
+	
+	return true;
+}
+
+/****************** OLD ******************
 const bool SignalPlan::execute(Eventlist* eventlist, const double time)
 {
 	if (!active)
@@ -87,7 +122,7 @@ const bool SignalPlan::execute(Eventlist* eventlist, const double time)
 	
 	return true;
 }
-
+*********************/
 void SignalPlan::reset()
 {
 	active = false;
@@ -117,6 +152,8 @@ const bool Stage::execute(Eventlist* eventlist, const double time)
 	else // disactivate turnings
 	{
 		stop();
+		double book_time=time+parent->get_cycletime()-duration;
+		eventlist->add_event(book_time,this); // add the event to re-start this stage
 #ifdef _DEBUG_SIGNALS
 		eout << "Stage " << id << " stopped. " << endl;
 #endif // _DEBUG_SIGNALS	
