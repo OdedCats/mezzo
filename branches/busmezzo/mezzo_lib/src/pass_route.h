@@ -5,10 +5,12 @@
 #include "parameters.h" 
 #include "od_stops.h"
 #include "Random.h"
+#include "Passenger.h" 
 
 class Busline;
 class Busstop;
 class ODstops;
+class Passenger;
 
 class Pass_path
 {
@@ -34,15 +36,15 @@ class Pass_path
 	int find_number_of_transfers ();
 	double calc_total_scheduled_in_vehicle_time ();
 	double calc_total_walking_distance ();
-	double calc_total_waiting_time (double time, bool without_first_waiting, bool alighting_decision, double avg_walking_speed);
+	double calc_total_waiting_time (double time, bool without_first_waiting, bool alighting_decision, double avg_walking_speed, bool has_network_rti);
 //	double calc_total_scheduled_waiting_time (double time, bool without_first_waiting);
-	double calc_curr_leg_headway (vector<Busline*> leg_lines, vector <vector <Busstop*>>::iterator stop_iter, double time);
+	double calc_curr_leg_headway (vector<Busline*> leg_lines, vector <vector <Busstop*>>::iterator stop_iter, double time, bool has_network_rti);
 //	double calc_curr_leg_waiting_schedule (vector<Busline*> leg_lines, vector <vector <Busstop*>>::iterator stop_iter, double arriving_time);
-	double calc_curr_leg_waiting_RTI (vector<Busline*> leg_lines, vector <vector <Busstop*>>::iterator stop_iter, double arriving_time);
+	double calc_curr_leg_waiting_RTI (vector<Busline*> leg_lines, vector <vector <Busstop*>>::iterator stop_iter, double arriving_time, bool has_network_rti);
 
-	double calc_arriving_utility (double time);
-	double calc_waiting_utility (vector <vector <Busstop*>>::iterator stop_iter, double time, bool alighting_decision);
-	map<Busline*, bool> check_maybe_worthwhile_to_wait (vector<Busline*> leg_lines, vector <vector <Busstop*>>::iterator stop_iter, bool dynamic_indicator); // returns false for lines which are not worthwhile to wait for in any case
+	double calc_arriving_utility (double time, bool has_network_rti);
+	double calc_waiting_utility (ODstops* odstops, Passenger* pass, vector <vector <Busstop*>>::iterator stop_iter, double time, bool alighting_decision, bool has_network_rti, bool without_first_waiting);
+	map<Busline*, bool> check_maybe_worthwhile_to_wait (vector<Busline*> leg_lines, vector <vector <Busstop*>>::iterator stop_iter, bool dynamic_indicator, bool has_network_rti); // returns false for lines which are not worthwhile to wait for in any case
 
 protected:
 	int p_id;

@@ -30,6 +30,7 @@ class ODstops;
 class Change_arrival_rate;
 class Bustrip_assign;
 class Dwell_time_function;
+class Pass_path;
 
 typedef pair<Bustrip*,double> Start_trip;
 typedef vector <Passenger*> passengers;
@@ -236,7 +237,8 @@ public:
 	map <Busstop*, passengers> passengers_on_board; // passenger on-board storaged by their alighting stop (format 3)
 	map <Busstop*, int> nr_expected_alighting; //!< number of passengers expected to alight at the busline's stops (format 2)
 	map <Busstop*, int> assign_segements; // contains the number of pass. travelling between trip segments
-
+	
+	bool comply;
 protected:
 	int id; //!< course nr
 	Bus* busv; //!< pointer to the bus vehicle
@@ -335,6 +337,7 @@ public:
 	double get_alighting_fractions (Bustrip* trip) {return alighting_fractions[trip->get_line()];}
 	const ODs_for_stop & get_stop_as_origin () {return stop_as_origin;}
 	ODstops* get_stop_od_as_origin_per_stop (Busstop* stop) {return stop_as_origin[stop];}
+	void assign_path_to_od_stop (Busstop* destination_stop, Pass_path* pass_path);
 	double get_length () {return length;}
 	double get_avaliable_length () {return avaliable_length;}
 	void set_avaliable_length (double avaliable_length_) {avaliable_length = avaliable_length_;}
@@ -477,18 +480,20 @@ protected:
 class Dwell_time_function // container that holds the total travel time experienced by line's trips
 {
 public:
-	Dwell_time_function (int function_id_, int dwell_time_function_form_, double dwell_constant_, double boarding_coefficient_, double alighting_cofficient_, double dwell_std_error_, double share_alighting_front_door_, double crowdedness_binary_factor_, double bay_coefficient_, double over_stop_capacity_coefficient_):
-							function_id(function_id_), dwell_time_function_form (dwell_time_function_form_), dwell_constant(dwell_constant_), boarding_coefficient(boarding_coefficient_), alighting_cofficient(alighting_cofficient_), dwell_std_error(dwell_std_error_), share_alighting_front_door(share_alighting_front_door_),crowdedness_binary_factor(crowdedness_binary_factor_),bay_coefficient(bay_coefficient_),over_stop_capacity_coefficient(over_stop_capacity_coefficient_) {}
-	Dwell_time_function (int function_id_, int dwell_time_function_form_, double dwell_constant_, double boarding_coefficient_, double alighting_cofficient_, double dwell_std_error_, double bay_coefficient_, double over_stop_capacity_coefficient_):
-							function_id(function_id_), dwell_time_function_form (dwell_time_function_form_), dwell_constant(dwell_constant_), boarding_coefficient(boarding_coefficient_), alighting_cofficient(alighting_cofficient_), dwell_std_error(dwell_std_error_),bay_coefficient(bay_coefficient_),over_stop_capacity_coefficient(over_stop_capacity_coefficient_) {}
+	Dwell_time_function (int function_id_, int dwell_time_function_form_, double dwell_constant_, int nr_alighting_doors_, double boarding_coefficient_, double alighting_cofficient_, double dwell_std_error_, double share_alighting_front_door_, double crowdedness_binary_factor_, double bay_coefficient_, double over_stop_capacity_coefficient_):
+							function_id(function_id_), dwell_time_function_form (dwell_time_function_form_), dwell_constant(dwell_constant_), nr_alighting_doors(nr_alighting_doors_), boarding_coefficient(boarding_coefficient_), alighting_cofficient(alighting_cofficient_), dwell_std_error(dwell_std_error_), share_alighting_front_door(share_alighting_front_door_),crowdedness_binary_factor(crowdedness_binary_factor_),bay_coefficient(bay_coefficient_),over_stop_capacity_coefficient(over_stop_capacity_coefficient_) {}
+	Dwell_time_function (int function_id_, int dwell_time_function_form_, double dwell_constant_, int nr_alighting_doors_, double boarding_coefficient_, double alighting_cofficient_, double dwell_std_error_, double bay_coefficient_, double over_stop_capacity_coefficient_):
+							function_id(function_id_), dwell_time_function_form (dwell_time_function_form_), dwell_constant(dwell_constant_), nr_alighting_doors(nr_alighting_doors_), boarding_coefficient(boarding_coefficient_), alighting_cofficient(alighting_cofficient_), dwell_std_error(dwell_std_error_),bay_coefficient(bay_coefficient_),over_stop_capacity_coefficient(over_stop_capacity_coefficient_) {}
 	int get_id () {return function_id;}
 
 	// dwell time parameters
-	int function_id;
+   int function_id;
    int dwell_time_function_form; 
+   int nr_alighting_doors;
 	// 11 - Linear function of boarding and alighting
     // 12 - Linear function of boarding and alighting + non-linear crowding effect (Weidmann) 
-    // 13 - Max (boarding, alighting) + non-linear crowding effect (Weidmann) 
+    // 13 - Max (boarding, alighting)  
+    // 14 - Max (boarding, alighting) + non-linear crowding effect (Weidmann)
     // 21 - TCRP(max doors with crowding, boarding from front door, alighting from both doors) + bay + stop capacity
 
    double dwell_constant, boarding_coefficient, alighting_cofficient, dwell_std_error;

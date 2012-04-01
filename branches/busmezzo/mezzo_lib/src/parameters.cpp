@@ -93,8 +93,10 @@ Parameters::Parameters ()
    max_walking_distance = 2500;
    max_waiting_time = 1800.0;
    dominancy_perception_threshold = 0;
+   expectations_diff = 0.0;
    choice_model = 0;
    real_time_info = 0;
+   ratio_network_information = 0;
    start_pass_generation = 0;
 
 // transit control parameters
@@ -102,6 +104,8 @@ Parameters::Parameters ()
    dwell_time_weight = 0.0;
    waiting_time_weight = 0.0;
    holding_time_weight = 0.0;
+   compliance_share = 1.0;
+   max_holding_time = 120.0;
 }
 
 bool Parameters::read_parameters (istream & in )
@@ -608,6 +612,13 @@ bool Parameters::read_parameters (istream & in )
 		}
 		in >> dominancy_perception_threshold;
 		in >> keyword;
+		if (keyword!= "expectations_diff=")
+		{
+			cout << "ERROR reading Parameters file, expecting: expectations_diff=, read: " << keyword << endl;
+			return false;
+		}
+		in >> expectations_diff;
+		in >> keyword;
 		if (keyword!= "choice_model=")
 		{
 			cout << "ERROR reading Parameters file, expecting: choice_model=, read: " << keyword << endl;
@@ -621,6 +632,13 @@ bool Parameters::read_parameters (istream & in )
 			return false;
 		}
 		in >> real_time_info;
+		in >> keyword;
+		if (keyword!= "ratio_network_information=")
+		{
+			cout << "ERROR reading Parameters file, expecting: ratio_network_information=, read: " << keyword << endl;
+			return false;
+		}
+		in >> ratio_network_information;
 		in >> keyword;
 		if (keyword!= "start_pass_generation=")
 		{
@@ -670,6 +688,20 @@ bool Parameters::read_parameters (istream & in )
 		return false;
 	}
 	in >> holding_time_weight;
+	in >> keyword;
+	if (keyword!= "compliance_share=")
+	{
+		cout << "ERROR reading Parameters file, expecting: compliance_share=, read: " << keyword << endl;
+		return false;
+	}
+	in >> compliance_share;
+	in >> keyword;
+	if (keyword!= "max_holding_time=")
+	{
+		cout << "ERROR reading Parameters file, expecting: max_holding_time=, read: " << keyword << endl;
+		return false;
+	}
+	in >> max_holding_time;
 	return true;
 }
 

@@ -349,9 +349,10 @@ protected:
 	vector <Dwell_time_function*> dt_functions;
     vector <Bustype*> bustypes; // types of bus vehicles
     vector <Bus*> busvehicles; // a list of the bus vehicles
-	vector <ODstops*> odstops;
+	//vector <ODstops*> v_odstops;
+	map <pair<Busstop*,Busstop*>,ODstops*> v_odstops;
 	vector <ODzone*> odzones; 
-	vector <ODstops*> odstops_demand; // contains only ODs with a non-zero demand
+	map <pair<Busstop*,Busstop*>,ODstops*> odstops_demand; // contains only ODs with a non-zero demand
 	vector<Busstop*> collect_im_stops; // compose the list of stops for a path
 	vector<double> collect_walking_distances; // compose the list of walking distances for a path
 	map <ODstops*, vector<Busline*>> od_direct_lines; // contains all direct lines between a pair of stops

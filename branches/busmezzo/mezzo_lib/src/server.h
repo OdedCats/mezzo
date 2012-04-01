@@ -131,6 +131,7 @@ public:
 	LogNormalDelayServer (const int id_, const int type_, const double mu_, const double sd_, const double delay_) :
 	  Server (id_,type_,mu_,sd_,delay_){}
 	double next (const double time);
+	void reset();
 };
 
 class LogLogisticDelayServer : public Server

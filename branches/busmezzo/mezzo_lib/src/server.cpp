@@ -126,6 +126,13 @@ double LogNormalDelayServer::next (const double time)
 	return time + result ;
 }
 
+void LogNormalDelayServer::reset()
+{
+	if (randseed != 0)
+	   random->seed(randseed);
+	else
+		random->randomize();
+}
 
 double LogLogisticDelayServer::next (const double time)
 {

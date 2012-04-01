@@ -179,8 +179,10 @@ public:
    double max_walking_distance;
    double max_waiting_time;
    double dominancy_perception_threshold;
+   double expectations_diff;
    int choice_model; // !< RUM used at passengers' route choice decisions: 1 - MNL; 2 - PSL with legs defining overlapping.
-   int real_time_info; //!< real-time information at the network: 0 - none; 1 - for all lines stoping at each stop; 2 - for all lines stoping at all connected stop; 3 - for the entire network.
+   int real_time_info; //!< real-time information at the network: 0 - none; 1 - for all lines stoping at each stop; 2 - for all lines stoping at all connected stop; 3 - for the entire network; 4 - stop specific.
+   double ratio_network_information; // percentage of passengers that have access to real-time info regardless of their location
    double start_pass_generation; 
    double stop_pass_generation;
 
@@ -189,6 +191,8 @@ public:
    double dwell_time_weight;
    double waiting_time_weight;
    double holding_time_weight;
+   double compliance_share; // share of drivers that comply with the holding control strategy
+   double max_holding_time; // at stop
 
 // TODO: Implement the use of the following paramaters
    double vissim_step; //!< time step for the VISSIM micro model

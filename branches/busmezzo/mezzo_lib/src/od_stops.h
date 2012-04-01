@@ -96,7 +96,7 @@ public:
 
 	// Path set
 	void add_paths (Pass_path* pass_path_) {path_set.push_back(pass_path_);}
-	double calc_boarding_probability (Busline* arriving_bus, double time);
+	double calc_boarding_probability (Passenger* pass, Busline* arriving_bus, double time, bool has_network_rti);
 	double calc_binary_logit (double utility_i, double utility_j);
 	double calc_multinomial_logit (double utility_i, double utility_sum);
 	double calc_path_size_logit (map<Pass_path*,pair<bool,double>> set_utilities, double utliity_i, double utliity_j);
@@ -104,7 +104,7 @@ public:
 	double calc_path_size_factor_between_clusters (Pass_path* path, map<Pass_path*,double> cluster_probs);
 	double calc_combined_set_utility_for_alighting (Passenger* pass, Bustrip* bus_on_board, double time); // the trip that the pass. is currently on-board when calc. utility from downstream stop
 	double calc_combined_set_utility_for_alighting_zone (Passenger* pass, Bustrip* bus_on_board, double time); 
-	double calc_combined_set_utility_for_connection (double walking_distance, double time);
+	double calc_combined_set_utility_for_connection (Passenger* pass, double walking_distance, double time, bool has_network_rti);
 	double calc_combined_set_utility_for_connection_zone (Passenger* pass, double walking_distance, double time);
 	bool check_if_path_is_dominated (Pass_path* considered_path, vector<Pass_path*> arriving_paths);
 
@@ -133,6 +133,9 @@ protected:
 	vector <Passenger*> passengers_during_simulation;
 	int nr_pass_completed;
 	double avg_tt;
+	double avg_tinvehicle;
+	double avg_twait;
+	double avg_twalk;
 	double avg_nr_boardings;
 	vector <pair<vector<Busstop*>, pair <int,double>>> paths_tt;
 
