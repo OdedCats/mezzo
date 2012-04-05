@@ -820,10 +820,33 @@ Busstop::Busstop()
 	dwelltime = 0;
 }
 
-Busstop::Busstop (int id_, string name_, int link_id_, double position_, double length_, bool has_bay_, bool can_overtake_, int rti_):
-	id(id_), name(name_), link_id(link_id_), position (position_), length(length_), has_bay(has_bay_), can_overtake(can_overtake_), rti (rti_)
+Busstop::Busstop (int id_, string name_, is_centroid_, int link_id_, double position_, double length_, bool has_bay_, bool can_overtake_, int rti_):
+	id(id_), name(name_), link_id(link_id_), is_centroid (is_centroid_), position (position_), length(length_), has_bay(has_bay_), can_overtake(can_overtake_), rti (rti_)
 {
+	is_centroid = false;
 	avaliable_length = length;
+	nr_boarding = 0;
+	nr_alighting = 0;
+	dwelltime = 0;
+	is_origin = false;
+	is_destination = false;
+	last_arrivals.clear();
+	last_departures.clear();
+	random = new (Random);
+	if (randseed != 0)
+		{
+		random->seed(randseed);
+		}
+	else
+	{
+		random->randomize();
+	}
+}
+
+Busstop::Busstop (int id_, string name_, is_centroid_):
+	id(id_), name(name_), (is_centroid_)
+{
+	is_centroid = true;
 	nr_boarding = 0;
 	nr_alighting = 0;
 	dwelltime = 0;

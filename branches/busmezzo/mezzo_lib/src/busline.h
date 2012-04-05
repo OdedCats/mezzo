@@ -325,7 +325,8 @@ class Busstop : public Action
 public:
 	Busstop ();
 	~Busstop ();
-	Busstop (int id_, string name_, int link_id_, double position_, double length_, bool has_bay_, bool can_overtake_, int rti_);
+	Busstop (int id_, string name_, is_centroid_, int link_id_, double position_, double length_, bool has_bay_, bool can_overtake_, int rti_);
+	Busstop (int id_, string name_, is_centroid_);
 	void reset (); 
 
 // GETS & SETS:
@@ -339,6 +340,7 @@ public:
 	ODstops* get_stop_od_as_origin_per_stop (Busstop* stop) {return stop_as_origin[stop];}
 	void assign_path_to_od_stop (Busstop* destination_stop, Pass_path* pass_path);
 	double get_length () {return length;}
+	bool get_is_centroid () {return is_centroid;}
 	double get_avaliable_length () {return avaliable_length;}
 	void set_avaliable_length (double avaliable_length_) {avaliable_length = avaliable_length_;}
 	bool get_bay () {return has_bay;}
@@ -407,6 +409,7 @@ public:
 protected:
 	int id; //!< stop id
 	string name; //!< name of the bus stop "T-centralen"
+	bool is_centroid; //!< TRUE if this stop is only a centroid and NOT an actual stop, otherwise FALSE
 	int link_id; //!< link it is on, maybe later a pointer to the respective link if needed
 	bool has_bay; //!< TRUE if it has a bay so it has an extra dwell time
 	bool can_overtake; // !< 0 - can't overtake, 1 - can overtake freely; TRUE if it is possible for a bus to overtake another bus that stops in front of it (if FALSE - dwell time is subject to the exit time of a blocking bus)

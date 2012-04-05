@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E32F58A9-4DA9-441D-A9F5-057F6A77B1AA}</ProjectGuid>
+    <Keyword>MakeFileProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <NMakeBuildCommandLine Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">qmake
+nmake debug</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">qmake
+nmake clean
+nmake debug</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nmake clean</NMakeCleanCommandLine>
+    <NMakeOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Debug\mezzo_lib.lib</NMakeOutput>
+    <NMakePreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeIncludeSearchPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <NMakeAssemblySearchPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
+    <NMakeForcedUsingAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <NMakeBuildCommandLine Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">qmake
+nmake release</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">qmake
+nmake clean
+nmake release</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">nmake clean</NMakeCleanCommandLine>
+    <NMakeOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Release\mezzo_lib.lib</NMakeOutput>
+    <NMakePreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeIncludeSearchPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <NMakeAssemblySearchPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
+    <NMakeForcedUsingAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="src\busline.cpp" />
+    <ClCompile Include="src\eventlist.cpp" />
+    <ClCompile Include="src\Graph.cpp" />
+    <ClCompile Include="src\grid.cpp" />
+    <ClCompile Include="src\icons.cpp" />
+    <ClCompile Include="src\link.cpp" />
+    <ClCompile Include="src\linktimes.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\network.cpp" />
+    <ClCompile Include="src\node.cpp" />
+    <ClCompile Include="src\od.cpp" />
+    <ClCompile Include="src\od_stops.cpp" />
+    <ClCompile Include="src\parameters.cpp" />
+    <ClCompile Include="src\pass_route.cpp" />
+    <ClCompile Include="src\passenger.cpp" />
+    <ClCompile Include="src\pvm.cpp" />
+    <ClCompile Include="src\q.cpp" />
+    <ClCompile Include="src\Random.cpp" />
+    <ClCompile Include="src\route.cpp" />
+    <ClCompile Include="src\sdfunc.cpp" />
+    <ClCompile Include="src\server.cpp" />
+    <ClCompile Include="src\signature.cpp" />
+    <ClCompile Include="src\trafficsignal.cpp" />
+    <ClCompile Include="src\turning.cpp" />
+    <ClCompile Include="src\vehicle.cpp" />
+    <ClCompile Include="src\vissimcom.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\busline.h" />
+    <ClInclude Include="src\eventlist.h" />
+    <ClInclude Include="src\gettime.h" />
+    <ClInclude Include="src\Graph.h" />
+    <ClInclude Include="src\grid.h" />
+    <ClInclude Include="src\icons.h" />
+    <ClInclude Include="src\link.h" />
+    <ClInclude Include="src\linktimes.h" />
+    <ClInclude Include="src\MMath.h" />
+    <ClInclude Include="src\network.h" />
+    <ClInclude Include="src\node.h" />
+    <ClInclude Include="src\od.h" />
+    <ClInclude Include="src\od_stops.h" />
+    <ClInclude Include="src\parameters.h" />
+    <ClInclude Include="src\pass_route.h" />
+    <ClInclude Include="src\passenger.h" />
+    <ClInclude Include="src\pvm.h" />
+    <ClInclude Include="src\q.h" />
+    <ClInclude Include="src\Random.h" />
+    <ClInclude Include="src\route.h" />
+    <ClInclude Include="src\sdfunc.h" />
+    <ClInclude Include="src\server.h" />
+    <ClInclude Include="src\signature.h" />
+    <ClInclude Include="src\trafficsignal.h" />
+    <ClInclude Include="src\turning.h" />
+    <ClInclude Include="src\vehicle.h" />
+    <ClInclude Include="src\vissimcom.h" />
+    <ClInclude Include="src\vtypes.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="mezzo_lib.pro" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

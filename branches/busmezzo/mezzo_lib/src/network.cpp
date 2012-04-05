@@ -1470,23 +1470,31 @@ bool Network::readbusstop (istream& in) // reads a busstop
   int stop_id, link_id, rti;
   double position, length;
   string name;
-	bool has_bay, can_overtake;
-	bool ok= true;
-	in >> bracket;
-	if (bracket != '{')
-	{
-		cout << "readfile::readsbusstop scanner jammed at " << bracket;
-		return false;
-	}
-  in >> stop_id >> name >> link_id >> position >> length >> has_bay >> can_overtake >> rti;
-  Busstop* st;
-  if (theParameters->real_time_info == 4)
+  bool is_centroid, has_bay, can_overtake;
+  bool ok= true;
+  in >> bracket;
+  if (bracket != '{')
   {
-	st= new Busstop (stop_id, name, link_id, position, length, has_bay, can_overtake, rti);
+	cout << "readfile::readsbusstop scanner jammed at " << bracket;
+	return false;
+  }
+  Busstop* st;
+  in >> stop_id >> name >> is_centroid;
+  if (is_centroid = true)
+  {
+	  st= new Busstop (stop_id, name, true);
   }
   else
   {
-	st= new Busstop (stop_id, name, link_id, position, length, has_bay, can_overtake, theParameters->real_time_info);
+	in >> link_id >>  position >> length >> has_bay >> can_overtake >> rti;
+	if (theParameters->real_time_info == 4)
+	{
+		st= new Busstop (stop_id, name, link_id, position, length, has_bay, can_overtake, rti);
+	}
+	else
+	{
+		st= new Busstop (stop_id, name, link_id, position, length, has_bay, can_overtake, theParameters->real_time_info);
+	}
   }
   st->add_distance_between_stops(st,0.0);
 	in >> bracket;
