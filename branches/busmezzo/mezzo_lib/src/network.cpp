@@ -1489,11 +1489,11 @@ bool Network::readbusstop (istream& in) // reads a busstop
 	in >> link_id >>  position >> length >> has_bay >> can_overtake >> rti;
 	if (theParameters->real_time_info == 4)
 	{
-		st= new Busstop (stop_id, name, link_id, position, length, has_bay, can_overtake, rti);
+		st= new Busstop (stop_id, name, is_centroid, link_id, position, length, has_bay, can_overtake, rti);
 	}
 	else
 	{
-		st= new Busstop (stop_id, name, link_id, position, length, has_bay, can_overtake, theParameters->real_time_info);
+		st= new Busstop (stop_id, name, is_centroid, link_id, position, length, has_bay, can_overtake, theParameters->real_time_info);
 	}
   }
   st->add_distance_between_stops(st,0.0);

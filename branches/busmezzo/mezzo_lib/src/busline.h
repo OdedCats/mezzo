@@ -325,8 +325,8 @@ class Busstop : public Action
 public:
 	Busstop ();
 	~Busstop ();
-	Busstop (int id_, string name_, is_centroid_, int link_id_, double position_, double length_, bool has_bay_, bool can_overtake_, int rti_);
-	Busstop (int id_, string name_, is_centroid_);
+	Busstop (int id_, string name_, bool is_centroid_, int link_id_, double position_, double length_, bool has_bay_, bool can_overtake_, int rti_);
+	Busstop (int id_, string name_, bool is_centroid_);
 	void reset (); 
 
 // GETS & SETS:

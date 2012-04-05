@@ -820,7 +820,7 @@ Busstop::Busstop()
 	dwelltime = 0;
 }
 
-Busstop::Busstop (int id_, string name_, is_centroid_, int link_id_, double position_, double length_, bool has_bay_, bool can_overtake_, int rti_):
+Busstop::Busstop (int id_, string name_, bool is_centroid_, int link_id_, double position_, double length_, bool has_bay_, bool can_overtake_, int rti_):
 	id(id_), name(name_), link_id(link_id_), is_centroid (is_centroid_), position (position_), length(length_), has_bay(has_bay_), can_overtake(can_overtake_), rti (rti_)
 {
 	is_centroid = false;
@@ -843,8 +843,8 @@ Busstop::Busstop (int id_, string name_, is_centroid_, int link_id_, double posi
 	}
 }
 
-Busstop::Busstop (int id_, string name_, is_centroid_):
-	id(id_), name(name_), (is_centroid_)
+Busstop::Busstop (int id_, string name_, bool is_centroid_):
+	id(id_), name(name_), is_centroid(is_centroid_)
 {
 	is_centroid = true;
 	nr_boarding = 0;
