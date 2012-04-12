@@ -12,7 +12,7 @@ Turning::Turning(int id_, Node* node_, Server* server_, Link* inlink_, Link* out
 		int nr_servers=1;
 		if (theParameters->implicit_nr_servers)
 			nr_servers = _MIN(outlink->get_nr_lanes(),inlink->get_nr_lanes());
-		for (unsigned int i=0; i < nr_servers; i++)
+		for (int i=0; i < nr_servers; i++)
 			turnactions.push_back(new TurnAction(this));
 		delay=server->get_delay();
 #ifdef _DEBUG_TURNING	
@@ -131,42 +131,45 @@ bool Turning::process_veh(double time)
 }
 bool Turning::check_controlling(double time) 
 {
-	if (!theParameters->use_giveway)
-		return true;
-	if (waiting && ((time-waiting_since) > theParameters->max_wait))
+	if ((!theParameters->use_giveway) || (controlling_turnings.size() == 0 )) // bypass
+		return true; // can pass
+	if (waiting && ((time-waiting_since) > theParameters->max_wait)) // if maximum wait has passed return true, reset counters
 	{	
 		waiting=false;
 		waiting_since = 0.0;
+		return true; // can pass
 	}
-	bool can_pass = true;
+	bool can_pass = true; // initialize at true
 	// Check all controlling turnings if vehicle can pass
 	vector <Turning*>::iterator gv = controlling_turnings.begin();
 	for (gv ; gv != controlling_turnings.end(); gv++)
 	{
-		can_pass = can_pass && (*gv)->giveway_can_pass(time);
+		can_pass = can_pass && (*gv)->giveway_can_pass(time); // if any of the controlling turnings gives false, can_pass is false
 	}
 	if (!can_pass)
 	{
-		waiting = true;
-		waiting_since=time;
-		return false; // just for debugging
+		if (!waiting) // if not already waiting, set the counter 
+		{
+			waiting = true;
+			waiting_since=time;
+		}
+		return false; // cannot pass
 	}
 	else
 	{
 		waiting=false;
-		waiting_since = 0.0;
-		return true;
+		waiting_since = 0.0; //reset counter.
+		return true; // can pass
 	}
 }
 
 bool Turning::giveway_can_pass(double time) // returns true if vehicle from minor turning can pass
 {
-	//TODO
-	// implement a max waiting time
 	if (!active)// if turning is not active (red light)
-		return true;
+		return true; // can pass
 	else
 	{
+		// Simplest possible implementation
 		// check if there is any vehicle in the incoming link ready to make this turn.
 		return !(inlink->veh_exiting(time,outlink,size));
 	}
