@@ -145,96 +145,109 @@ Network::~Network()
 		delete communicator;
 		}
 #endif //_MIME
-	for (map <int, Origin*>::iterator iter=originmap.begin();iter!=originmap.end();)
+	for (map <int, Origin*>::iterator iter=originmap.begin();iter!=originmap.end();++iter)
 	{			
 		if (NULL != iter->second) {
 			delete (iter->second); // calls automatically destructor
 		}
-		iter=originmap.erase(iter);	
+		//iter=originmap.erase(iter);	
 	}
-	for (map <int, Destination*>::iterator iter1=destinationmap.begin();iter1!=destinationmap.end();)
+	originmap.clear();
+	for (map <int, Destination*>::iterator iter1=destinationmap.begin();iter1!=destinationmap.end();++iter1)
 	{			
 		if (NULL != iter1->second) {
 			delete (iter1->second); // calls automatically destructor
 		}
-		iter1=destinationmap.erase(iter1);	
+		//iter1=destinationmap.erase(iter1);	
 	}
-	for (map <int, Junction*>::iterator iter2=junctionmap.begin();iter2!=junctionmap.end();)
+	destinationmap.clear();
+	for (map <int, Junction*>::iterator iter2=junctionmap.begin();iter2!=junctionmap.end();++iter2)
 	{			
 		if (NULL!=iter2->second) {
 			delete (iter2->second); // calls automatically destructor
 		}
-		iter2=junctionmap.erase(iter2);	
+		//iter2=junctionmap.erase(iter2);	
 	}
+	junctionmap.clear();
+	/*
 	for (map <int,Node*>::iterator iter3=nodemap.begin();iter3!=nodemap.end();)
 	{			
 		iter3=nodemap.erase(iter3);	
-	}
-	for (map <int,Link*>::iterator iter4=linkmap.begin();iter4!=linkmap.end();)
+	}*/
+	nodemap.clear();
+	for (map <int,Link*>::iterator iter4=linkmap.begin();iter4!=linkmap.end();++iter4)
 	{			
 		if (NULL != iter4->second) {
 		delete (iter4->second); // calls automatically destructor
 		}
-		iter4=linkmap.erase(iter4);	
+		//iter4=linkmap.erase(iter4);	
 	}
-	for (vector <Incident*>::iterator iter5=incidents.begin();iter5<incidents.end();)
+	linkmap.clear();
+	for (vector <Incident*>::iterator iter5=incidents.begin();iter5<incidents.end();++iter5)
 	{			
 		if (NULL != *iter5) {
 		delete (*iter5); // calls automatically destructor
 		}
-		iter5=incidents.erase(iter5);	
+		//iter5=incidents.erase(iter5);	
 	}	
-
+	incidents.clear();
 	// for now keep OD pairs in vector
-	for (vector <ODpair*>::iterator iter6=odpairs.begin();iter6!=odpairs.end();)
+	for (vector <ODpair*>::iterator iter6=odpairs.begin();iter6!=odpairs.end();++iter6)
 	{
 		if (NULL != *iter6) {
 		delete (*iter6);
 		}
-		iter6=odpairs.erase(iter6);
+		//iter6=odpairs.erase(iter6);
 	}
-	for (multimap <ODVal, Route*>::iterator iter7=routemap.begin();iter7!=routemap.end();)
+	odpairs.clear();
+	for (multimap <ODVal, Route*>::iterator iter7=routemap.begin();iter7!=routemap.end();++iter7)
 	{			
 		if (NULL != iter7->second) {
 		delete (iter7->second); // calls automatically destructor
 		}
-		iter7=routemap.erase(iter7);	
+		//iter7=routemap.erase(iter7);	
 	}
-	for (map <int, Sdfunc*>::iterator iter8=sdfuncmap.begin();iter8!=sdfuncmap.end();)
+	routemap.clear();
+	for (map <int, Sdfunc*>::iterator iter8=sdfuncmap.begin();iter8!=sdfuncmap.end();++iter8)
 	{			
 		if (NULL != iter8->second) {
 		delete (iter8->second); // calls automatically destructor
 		}
-		iter8=sdfuncmap.erase(iter8);	
+		//iter8=sdfuncmap.erase(iter8);	
 	}
-	for (map <int, Server*>::iterator iter9=servermap.begin();iter9!=servermap.end();)
+	sdfuncmap.clear();
+	for (map <int, Server*>::iterator iter9=servermap.begin();iter9!=servermap.end();++iter9)
 	{			
 		if (NULL != iter9->second) {
 		delete (iter9->second); // calls automatically destructor
 		}
-		iter9=servermap.erase(iter9);	
+		//iter9=servermap.erase(iter9);	
 	}
-	for (map <int, Turning*>::iterator iter10=turningmap.begin();iter10!=turningmap.end();)
+	servermap.clear();
+	for (map <int, Turning*>::iterator iter10=turningmap.begin();iter10!=turningmap.end();++iter10)
 	{			
 		if (NULL != iter10->second) {
 		delete (iter10->second); // calls automatically destructor
 		}
-		iter10=turningmap.erase(iter10);	
+		//iter10=turningmap.erase(iter10);	
 	}
-	for (vector <Vtype*>::iterator iter11=vehtypes.vtypes.begin();iter11<vehtypes.vtypes.end();)
+	turningmap.clear();
+	for (vector <Vtype*>::iterator iter11=vehtypes.vtypes.begin();iter11<vehtypes.vtypes.end();++iter11)
 	{			
 		if (NULL != *iter11) {
 		delete (*iter11); // calls automatically destructor
 		}
-		iter11=vehtypes.vtypes.erase(iter11);	
+		//iter11=vehtypes.vtypes.erase(iter11);	
 	}
-	for (vector <TurnPenalty*>::iterator iter12= turnpenalties.begin(); iter12 < turnpenalties.end();)
+	vehtypes.vtypes.clear();
+	for (vector <TurnPenalty*>::iterator iter12= turnpenalties.begin(); iter12 < turnpenalties.end();++iter12)
 	{
 		if (NULL != *iter12) {
 		delete (*iter12);
 		}
-		iter12=turnpenalties.erase(iter12);
+		//iter12=turnpenalties.erase(iter12);
 	}
+	turnpenalties.clear();
 }
 
 int Network::reset()
@@ -4465,7 +4478,7 @@ bool Network::init()
 				(*iter0)->get_destination()->get_id() << " does not have any route connecting them. deleting..." << endl;
 			odmatrix.remove_rate((*iter0)->odids()); // remove all rates from OD matrix
 			delete *iter0; // and delete ODpair itself
-			iter0=odpairs.erase(iter0);
+			odpairs.erase(iter0++);
 		}
 		else // otherwise initialise them
 		{
@@ -4965,7 +4978,7 @@ const bool ODSlice::remove_rate( const ODVal &  odid)
 	{
 		if (rate->odid == odid)
 		{
-			rate=rates.erase(rate);
+			rates.erase(rate++);
 			found = true;
 			break;
 		}
