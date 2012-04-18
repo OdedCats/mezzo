@@ -42,7 +42,7 @@ private slots:
 	void on_NodeThickness_valueChanged( int value);
 	void on_QueueThickness_valueChanged(int value);
 	void on_NodeRadius_valueChanged(int  value);
-	void on_ShowBgImage_toggled( bool value);
+	void on_ShowBgImage_toggled(bool value);
 
 signals:
 	void activateZoomFactor(int) const;

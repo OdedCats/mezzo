@@ -61,6 +61,7 @@ public:
 	bool is_active() {return active;}
 	bool is_blocked() { return blocked;}
 	bool giveway_can_pass(double time); // returns true if vehicle from minor turning can pass
+	const double giveway_gap(const double time) ; // gives the available gap
 	bool check_links( const int in,  const int out); 
 	bool check_controlling(double time); // checks all controlling turnings if vehicle can pass.
 	const bool get_hold_green() const { return hold_green;}
@@ -73,10 +74,12 @@ public:
 	double link_next_time(double time);
 	bool init(Eventlist* eventlist, double time);
 	bool execute(Eventlist* eventlist, double time);
-	double nexttime;
+
 	const int get_id() {return id;}
+	const double get_nexttime() const { return nexttime; }
 	void write(ostream& out);
 private:
+	double nexttime;
 	bool hold_green; // used to hold green in case a turning has green in multiple consecutive stages
 	//TurnAction* turnaction;    // performs the action of transferring vehicles at the right times
 	vector <TurnAction*> turnactions; // multiple turnactions per turning. One for each lane...
@@ -96,6 +99,7 @@ private:
 	bool active; // true if turning is active (has green light in signalised crossing), false if red light.
 	bool waiting; // true if vehicle waiting to pass.
 	double waiting_since; // how many seconds a vehicle is waiting for gap in opposing stream. 
+	double last_exit_time; // last time a vehicle made this turning.
 };
 
 

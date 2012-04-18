@@ -141,6 +141,7 @@ public:
 	const bool exit_ok() const {	return ok;}
 	const double next_action (const double time) const;
 	const bool veh_exiting(const double time, const Link* const nextlink, const int lookback) const; 
+	const double gap_to_next (const double time, const Link* const nextlink, const int lookback) const; 
 	void update_icon(const double time);
 
 	const double get_time_last_entry() const {return time_last_entry;}

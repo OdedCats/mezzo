@@ -20,6 +20,7 @@ Turning::Turning(int id_, Node* node_, Server* server_, Link* inlink_, Link* out
 		eout << server->get_id() << inlink->get_id() << outlink->get_id() << endl;
 #endif //_DEBUG_TURNING
 		waiting_since = 0.0;
+		last_exit_time= 0.0;
 		waiting = false;
 		blocked=false;
 		active = true; // turning is active by default
@@ -42,10 +43,14 @@ Turning::~Turning()
 
 void Turning::reset()
 {
+	waiting = false;
+	waiting_since = 0.0;
 	blocked = false;
 	active = true;
 	ok = false;
 	out_full = false;
+	hold_green=false;
+	last_exit_time= 0.0;
 }
 
 bool Turning::check_links( const int in,  const int out)
@@ -96,7 +101,10 @@ bool Turning::process_veh(double time)
 				{
 					ok=outlink->enter_veh(veh, time+delay);	
 				   if (ok)
+				   {
+					 last_exit_time=time;
 					 return true;
+				   }
 				   else
 				   {
 					 eout << " turning " << id << " dropped a vehicle, because outlink couldnt enter vehicle" << endl;
@@ -140,11 +148,18 @@ bool Turning::check_controlling(double time)
 		return true; // can pass
 	}
 	bool can_pass = true; // initialize at true
+	
 	// Check all controlling turnings if vehicle can pass
 	vector <Turning*>::iterator gv = controlling_turnings.begin();
+	vector <double> gaps;
+	double curgap = 0.0;
+
 	for (gv ; gv != controlling_turnings.end(); gv++)
 	{
 		can_pass = can_pass && (*gv)->giveway_can_pass(time); // if any of the controlling turnings gives false, can_pass is false
+		curgap = (*gv)->giveway_gap(time);
+		if (curgap >= 0.0)
+			gaps.push_back(curgap);
 	}
 	if (!can_pass)
 	{
@@ -156,10 +171,23 @@ bool Turning::check_controlling(double time)
 		return false; // cannot pass
 	}
 	else
-	{
-		waiting=false;
-		waiting_since = 0.0; //reset counter.
-		return true; // can pass
+	{	
+		if ( (gaps.size() == 0) || ( *min_element(gaps.begin(), gaps.end()) >= theParameters->critical_gap) )
+		{
+			waiting=false;
+			waiting_since = 0.0; //reset counter.
+			return true; // can pass, gap large enough
+		}
+		else
+		{
+			if (!waiting) // if not already waiting, set the counter 
+			{
+				waiting = true;
+				waiting_since=time;
+			}
+			return false; // cannot pass, min gap too small
+		}
+	
 	}
 }
 
@@ -174,6 +202,15 @@ bool Turning::giveway_can_pass(double time) // returns true if vehicle from mino
 		return !(inlink->veh_exiting(time,outlink,size));
 	}
 	return true;
+}
+
+const double Turning::giveway_gap(const double time) 
+{
+	if (!active)
+		return -1.0; // can pass, is not active
+	else
+		// ask inlink for gap
+		return inlink->gap_to_next(time, outlink, size);
 }
 
 
@@ -234,7 +271,7 @@ const bool TurnAction::execute (Eventlist* eventlist, const double time)
 			new_time=turning->next_time(time); // the action went fine, get time for next action
 	   else
 		{
-    		new_time=turning->nexttime; // otherwise the function process_veh has provided a next time.
+    		new_time=turning->get_nexttime(); // otherwise the function process_veh has provided a next time.
 			if (new_time < time)
 			{
 				eout << "trouble in the turning action:: exectute. newtime < current time : " << time << endl;

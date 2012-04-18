@@ -510,6 +510,8 @@ const bool Link::enter_veh(Vehicle* const veh, const double time)
 
 const bool Link::veh_exiting(const double time, const Link* const nextlink, const int lookback) const
 	{return queue->veh_exiting(time,nextlink,lookback);}
+const double Link::gap_to_next (const double time, const Link* const nextlink, const int lookback) const
+	{return queue->gap_to_next(time,nextlink, lookback);}
 
 Vehicle* const  Link::exit_veh(const double time, Link* const nextlink, const int lookback)
 {

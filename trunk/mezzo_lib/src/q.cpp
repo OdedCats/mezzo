@@ -143,11 +143,43 @@ const bool Q::veh_exiting (const double time, const Link* const nextlink, const 
 					return false;
 				else
 					return true;
-			}
-			
+			}			
 		}
 		return false;
 	}
+}
+
+const double Q::gap_to_next (const double time, const Link* const nextlink, const int lookback)
+{
+	int nextlinkid = 0;
+	double mingap=0.0;
+	if (empty())
+		return -1.0;
+	else
+	{
+	    int i=0;
+		list <Veh_in_Q>::iterator v_it = vehicles.begin();
+		for (v_it; (v_it != vehicles.end());v_it++,i++)
+		{
+			nextlinkid=v_it->second->nextlink()->get_id();
+			if (nextlink->get_id() == nextlinkid)
+			{
+				double mingap=v_it->first - time; // the time to stopline, provided no other vehicles are in the way
+				if (mingap > 0.0)
+					return mingap; // should increase with something * vehicles in queue ahead??
+				else // vehicle can potentially exit
+				{
+					if (i > lookback) // vehicle cannot exit, so does not hinder minor turn
+						return -1.0;
+					else
+						return 0.0; // vehicle has priority over minor turns
+				}
+			}			
+		}
+		return false;
+	}
+
+
 }
 
 Vehicle* const Q::exit_veh(const double time, const Link* const nextlink, const int lookback)

@@ -68,7 +68,7 @@ private slots:
 	void on_zoomin_activated();  //!< Zooms in on the network
 	void on_zoomout_activated();  //!< Zooms out on the network
 	void on_zoombywin_triggered(bool);  //!< Zooms in on the indicated rectangle
-	void on_showhandle_triggered(bool);  //!< Shows the Link handle icons, enables selecting them
+	void showhandle_triggered(bool);  //!< Shows the Link handle icons, enables selecting them
 	void on_inselectmode_triggered(bool);  //!< Triggers selection mode
 	void on_savescreenshot_activated();  //!< Saves screenshot of network
 	void on_loadbackground_activated();  //!< Opens a Load background dialog
@@ -77,9 +77,9 @@ private slots:
 	void on_batch_run_activated(); //!< Shows the Batch Run dialog
 	void on_parametersdialog_activated();  //!< Shows parameters dialog
 	void on_inspectdialog_activated();  //!< Shows Route inspect dialog
-	void on_simspeed_valueChanged(int value);  //!< changes the simspeed
-	void on_zoomfactor_valueChanged(int value);  //!< changes the zoom step for zooming in/out
-	void on_panfactor_valueChanged(int value );  //!< changes the pan step for panning the network
+	void simspeed_valueChanged(int value);  //!< changes the simspeed
+	void zoomfactor_valueChanged(int value);  //!< changes the zoom step for zooming in/out
+	void panfactor_valueChanged(int value );  //!< changes the pan step for panning the network
 	void on_saveresults_activated();  //!< Saves the results of the simulation 
 	void on_actionAnalyzeOutput_toggled(); //!< Turns on output analysis dialogue
 	void on_horizontalSlider_valueChanged(); // !< changes output view period

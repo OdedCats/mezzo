@@ -73,6 +73,7 @@ class Q
   Vehicle* const exit_veh(const double time, const Link* const nextlink, const int lookback);
   Vehicle* const exit_veh(const double time);
   const bool veh_exiting (const double time, const Link* const nextlink, const int lookback);
+  const double gap_to_next (const double time, const Link* const nextlink, const int lookback);
   void update_exit_times(const double t0, const Link* const nextlink, const int lookback, const double v_exit, const double v_shockwave);
   void broadcast_incident_start(const int lid, const vector <double> & parameters);
   void receive_broadcast(Vehicle*const  veh, const int lid, const vector <double> & parameters);

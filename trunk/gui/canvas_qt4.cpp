@@ -97,15 +97,15 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 					 SLOT(on_inselectmode_triggered(bool)));
 	// show link handles
 	QObject::connect(linkhandlemark, SIGNAL(toggled(bool)), this,
-					 SLOT(on_showhandle_triggered(bool)));
+					 SLOT(showhandle_triggered(bool)));
 
 	// connect the signals from parameter dialog
 	QObject::connect(pmdlg, SIGNAL(activateZoomFactor(int)), this,
-					 SLOT(on_zoomfactor_valueChanged(int)));
-	QObject::connect(zoombywin, SIGNAL(activatePanFactor(int)), this,
-					 SLOT(on_panfactor_valueChanged(int)));
-	QObject::connect(zoombywin, SIGNAL(activateSimSpeed(int)), this,
-					 SLOT(on_simspeed_valueChanged(int)));
+					 SLOT(zoomfactor_valueChanged(int)));
+	QObject::connect(pmdlg, SIGNAL(activatePanFactor(int)), this,
+					 SLOT(panfactor_valueChanged(int)));
+	QObject::connect(pmdlg, SIGNAL(activateSimSpeed(int)), this,
+					 SLOT(simspeed_valueChanged(int)));
 
 	// deactive the actions except the open masterfile
 	activateToolbars(false);
@@ -343,7 +343,7 @@ void MainForm::on_zoombywin_triggered(bool triggered)
 	zoombywin_triggered_=triggered;
 }
 
-void MainForm::on_showhandle_triggered(bool triggered)
+void MainForm::showhandle_triggered(bool triggered)
 {
 	//update all linkicons property on handle 
 	if(this->initialised){
@@ -397,13 +397,13 @@ void MainForm::on_run_activated()
 	loop();
 }
 
-void MainForm::on_zoomfactor_valueChanged( int value)
+void MainForm::zoomfactor_valueChanged( int value)
 {
 	scalefactor = value / 100.0;
 }
 
 
-void MainForm::on_panfactor_valueChanged( int value )
+void MainForm::panfactor_valueChanged( int value )
 {
    panpixels = value;
 }
@@ -528,7 +528,7 @@ void MainForm::on_horizontalSlider_valueChanged()
 		updateCanvas();
 }
 
-void MainForm::on_simspeed_valueChanged( int  value)
+void MainForm::simspeed_valueChanged( int  value)
 {
     theParameters->sim_speed_factor =(value/100);
 }

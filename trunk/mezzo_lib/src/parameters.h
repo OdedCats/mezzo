@@ -140,6 +140,7 @@ public:
    double turn_penalty_cost;  //!< added penalty in shortest path alg. if a turn is forbidden
    bool use_giveway; //!< if true, giveway logic is used
    double max_wait; //!< default max waiting time for give_way
+   double critical_gap; //
 
    //NEW
    double min_headway_inflow; //!< determines the max inflow on links
