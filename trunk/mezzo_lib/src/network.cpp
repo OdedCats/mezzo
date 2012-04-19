@@ -2762,7 +2762,7 @@ void Network::remove_orphan_nodes ()
 			 // remove from  nodes and junctions and delete object
 			nodemap.erase(node_id);
 			delete (j_iter->second);
-			j_iter=junctionmap.erase(j_iter);
+			junctionmap.erase(j_iter++);
 			// remove from id mapping constructs
 			//graphnode_to_node.erase(node_to_graphnode [node_id]);
 			node_to_graphnode.erase(node_id);
