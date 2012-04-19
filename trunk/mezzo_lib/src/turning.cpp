@@ -210,7 +210,7 @@ const double Turning::giveway_gap(const double time)
 		return -1.0; // can pass, is not active
 	else
 		// ask inlink for gap
-		return inlink->gap_to_next(time, outlink, size);
+		return (inlink->gap_to_next(time, outlink, size) + (time - last_exit_time));
 }
 
 
