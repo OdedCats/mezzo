@@ -35,6 +35,7 @@ class Node;
 
 class Turning;
 
+typedef pair <Turning*,double> Giveway;
 
 
 
@@ -66,7 +67,7 @@ public:
 	bool check_controlling(double time); // checks all controlling turnings if vehicle can pass.
 	const bool get_hold_green() const { return hold_green;}
 	void set_hold_green(const bool val) {hold_green=val;}
-	void register_controlling_turn(Turning* turn) {controlling_turnings.push_back(turn);}
+	void register_controlling_turn(/*Turning* turn*/ Giveway gv ) {controlling_turnings.push_back(gv);}
 	void block() {blocked=true;}
 	void unblock() {blocked=false;}
 	bool process_veh(double time);
@@ -83,7 +84,7 @@ private:
 	bool hold_green; // used to hold green in case a turning has green in multiple consecutive stages
 	//TurnAction* turnaction;    // performs the action of transferring vehicles at the right times
 	vector <TurnAction*> turnactions; // multiple turnactions per turning. One for each lane...
-	vector <Turning*> controlling_turnings; // turnings to give way to
+	vector </*Turning* */Giveway> controlling_turnings; // turnings to give way to
 	int id;
 	Node* node;
 	Server* server;

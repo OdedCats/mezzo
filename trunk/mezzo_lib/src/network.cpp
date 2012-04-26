@@ -1076,6 +1076,7 @@ bool Network::readgiveway(istream& in)
 {
 	char bracket;
 	int nid, tin, tcontr; // node id, turn in, controlling turning
+	double tcritical; // critical gap
 	in >> bracket;
 	if (bracket != '{')
 	{
@@ -1083,7 +1084,7 @@ bool Network::readgiveway(istream& in)
 		return false;
 	}
 
-	in  >>  nid >> tin >> tcontr;
+	in  >>  nid >> tin >> tcontr >> tcritical;
 	// check
 	assert (nodemap.count(nid));
 	Node* node = nodemap [nid];
@@ -1099,7 +1100,7 @@ bool Network::readgiveway(istream& in)
 		return false;
 	}
 
-	t_in->register_controlling_turn(t_contr);
+	t_in->register_controlling_turn(make_pair(t_contr,tcritical));
 	return true;
 }
 bool Network::readgiveways(istream& in)

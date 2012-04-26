@@ -150,16 +150,20 @@ bool Turning::check_controlling(double time)
 	bool can_pass = true; // initialize at true
 	
 	// Check all controlling turnings if vehicle can pass
-	vector <Turning*>::iterator gv = controlling_turnings.begin();
+	vector </*Turning* */Giveway>::iterator gv = controlling_turnings.begin();
 	vector <double> gaps;
 	double curgap = 0.0;
 
 	for (gv ; gv != controlling_turnings.end(); gv++)
 	{
-		can_pass = can_pass && (*gv)->giveway_can_pass(time); // if any of the controlling turnings gives false, can_pass is false
-		curgap = (*gv)->giveway_gap(time);
+		//can_pass = can_pass && (*gv).first->giveway_can_pass(time); // if any of the controlling turnings gives false, can_pass is false
+		curgap = (*gv).first->giveway_gap(time);
 		if (curgap >= 0.0)
+		{
 			gaps.push_back(curgap);
+			can_pass = can_pass && (curgap >= (*gv).second); // gap is large than tcritical defined for that giveway 
+		}
+
 	}
 	if (!can_pass)
 	{
@@ -172,7 +176,7 @@ bool Turning::check_controlling(double time)
 	}
 	else
 	{	
-		if ( (gaps.size() == 0) || ( *min_element(gaps.begin(), gaps.end()) >= theParameters->critical_gap) )
+		if ( /*(gaps.size() == 0) || ( *min_element(gaps.begin(), gaps.end()) >= theParameters->critical_gap)*/ true )
 		{
 			waiting=false;
 			waiting_since = 0.0; //reset counter.
