@@ -31,6 +31,7 @@
 #include <qcolor.h>
 #endif
 
+class Day;
 
 // DEFINES
 
@@ -45,6 +46,7 @@
 extern long int randseed; // random seed
 extern int vid;     // global vehicle id nr.
 extern int pid;     // global passenger id nr.
+extern int did;		// global day id nr.
 extern double time_alpha;
 
 // OLD Network.hh parameters
@@ -83,6 +85,8 @@ public:
 	Parameters () ;
 	bool read_parameters (istream & in);
 	void write_parameters(ostream & out);
+	void write_day_summary(ostream & out);
+	void new_day();
 
 // THE (PUBLIC) PARAMETERS
 	// Drawing parameters
@@ -194,6 +198,14 @@ public:
    double compliance_share; // share of drivers that comply with the holding control strategy
    double max_holding_time; // at stop
 
+// passenger memory parameters
+	int memory_strategy; //is to pre-set the kind of User/strategy to adopt for memory use
+	vector <Day*> calendar;
+
+//	Fuzzy travellers parameters
+	bool fuzzy;
+	double max_acceptable_IVT;
+
 // TODO: Implement the use of the following paramaters
    double vissim_step; //!< time step for the VISSIM micro model
    double sim_speed_factor; //!< REALTIME factor to keep the hybrid model running at a fixed speed
@@ -202,7 +214,33 @@ public:
 
 extern Parameters* theParameters ;
 
+class Day 
+{
+public:
+	Day();
+	~Day();
+	void init (int day_id);
+	void reset();
 
+	// Gets and sets:
+	int get_id () {return day_id;}
+	
+	//here we save all the useful/interesting parameters
+	double steady_state_meausure; //Steady state condition meausure
+	double running_time;
+	int day_nr_pass_completed;
+	int has_changed;
+	int has_not_changed;
+	double day_avg_total_travel_time;
+	double day_avg_tinvehicle;
+	double day_avg_twait;
+	double day_avg_twalk;
+
+protected:
+	//all the Passenger memory records will be refered to the DAY of storing
+	int day_id; //it is the day progressive number, NOT expressed as dd/mm/yyyy
+	
+};
 // Some fixes to deal with the way Microsoft VS deals with min and max. all occurrences of min and max should
 // be replaced by the macros _MIN and _MAX, which will be converted to the appropriate functions
 // given the compiler.

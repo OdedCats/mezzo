@@ -106,6 +106,17 @@ Parameters::Parameters ()
    holding_time_weight = 0.0;
    compliance_share = 1.0;
    max_holding_time = 120.0;
+   
+   memory_strategy = 1;
+
+   fuzzy = 0;
+   max_acceptable_IVT = 3600;
+}
+
+void Parameters::new_day()
+{
+	Day* today = new Day();
+	theParameters->calendar.push_back(today);
 }
 
 bool Parameters::read_parameters (istream & in )
@@ -702,6 +713,27 @@ bool Parameters::read_parameters (istream & in )
 		return false;
 	}
 	in >> max_holding_time;
+	in >> keyword;
+	if (keyword!= "memory_strategy=")
+	{
+		cout << "ERROR reading Parameters file, expecting: memory_strategy=, read: " << keyword << endl;
+		return false;
+	}
+	in >> memory_strategy;
+	in >> keyword;
+	if (keyword!= "fuzzy_travelers=")
+	{
+		cout << "ERROR reading Parameters file, expecting: fuzzy_travelers=, read: " << keyword << endl;
+		return false;
+	}
+	in >> fuzzy;
+	in >> keyword;
+	if (keyword!= "max_acceptable_IVT=")
+	{
+		cout << "ERROR reading Parameters file, expecting: max_acceptable_IVT=, read: " << keyword << endl;
+		return false;
+	}
+	in >> max_acceptable_IVT;
 	return true;
 }
 
@@ -757,6 +789,65 @@ void Parameters::write_parameters(ostream & out)
    out << "  sim_speed_factor= " << sim_speed_factor << endl;
 
 #endif
+}
+
+void Parameters::write_day_summary(ostream & out)
+{
+	double a=calendar.back()->running_time;
+	int b=calendar.back()->day_nr_pass_completed;
+	double c=(calendar.back()->has_changed)/(calendar.back()->has_changed+calendar.back()->has_not_changed);
+	double d=(calendar.back()->day_avg_total_travel_time)/b;
+	double e=(calendar.back()->day_avg_tinvehicle)/b;
+	double f=(calendar.back()->day_avg_twait)/b;
+	double g=(calendar.back()->day_avg_twalk)/b;
+	out << calendar.size() << '\t' << a << '\t' << b << '\t' << c << '\t' << d << '\t' << e << '\t'<< f << '\t'<< g << '\t'<< endl; 
+}
+
+// **** DAY functions ***
+
+Day::Day ()
+{   
+	day_id =did;
+	steady_state_meausure=0;
+	running_time=0;
+	day_nr_pass_completed=0;
+	has_changed=0;
+	has_not_changed=0;
+	day_avg_total_travel_time=0;
+	day_avg_tinvehicle=0;
+	day_avg_twait=0;
+	day_avg_twalk=0;
+}
+
+Day::~Day()
+{
+}
 
 
+void Day::reset()
+{   
+	steady_state_meausure=0;
+	running_time=0;
+	day_nr_pass_completed=0;
+	has_changed=0;
+	has_not_changed=0;
+	day_avg_total_travel_time=0;
+	day_avg_tinvehicle=0;
+	day_avg_twait=0;
+	day_avg_twalk=0;
+	
+}
+
+void Day::init (int id)
+{   day_id=id;
+	//day_id; ///FAB to redefine a bit the initialization
+	steady_state_meausure=0;
+	running_time=0;
+	day_nr_pass_completed=0;
+    has_changed=0;
+	has_not_changed=0;
+	day_avg_total_travel_time=0;
+	day_avg_tinvehicle=0;
+	day_avg_twait=0;
+	day_avg_twalk=0;
 }

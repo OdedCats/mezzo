@@ -11,6 +11,11 @@ class Busline;
 class Busstop;
 class ODstops;
 class ODzone;
+class Day;
+
+typedef pair<Busstop*,Busline*> StopLine; //new data type Stop+Line for the Memory.Stop recording
+typedef pair<ODstops*,Busline*> LegLine; //preliminary for the next one
+typedef pair<Busstop*,Day*> StopDay;  //new data type Stop+Day for the Memory.Stop recording
 
 class Passenger : public Action
 {
@@ -57,22 +62,46 @@ public:
 	double get_min_waiting_time_by_RTI (Busstop* stop, double time);
 	double get_min_waiting_time_by_headway (Busstop* stop, double time);
 
-
 	// Passenger decision processes
 	bool make_boarding_decision (Bustrip* arriving_bus, double time); // boarding decision making 
 	Busstop* make_alighting_decision (Bustrip* boarding_bus, double time); // alighting decision making 
 	Busstop* make_connection_decision (double time); // connection link decision (walking between stops)
 
 	// Demand in terms of zones
+	/*
 	map<Busstop*,double> sample_walking_distances (ODzone* zone);
 	Busstop* make_first_stop_decision (double time); // deciding at which stop to initiate the trip
 	double calc_boarding_probability_zone (Busline* arriving_bus, Busstop* o_stop, double time);
 	Busstop* make_alighting_decision_zone (Bustrip* boarding_bus, double time); 
 	Busstop* make_connection_decision_zone (double time);
 	bool stop_is_in_d_zone (Busstop* stop);
-	
+	*/
+
 	// output-related 
 	void write_selected_path(ostream& out);
+
+	//Day-to-Day---------------------------------------------------------------
+	void set_experienced_waiting_time (Busstop* stop, Busline* line, Day* day, double waiting_time); //Passenger memory-stops
+	void set_experienced_invehicle_time (ODstops* ODstop, Busline* line, Day* day, double leg_IVT); //Passenger memory-legs
+	void set_experienced_crowding_at_stop (Busstop* stop, Day* day, int nr_waiting); //Passenger memory-stops (passengers waiting)
+	void set_experienced_crowding_onboard (ODstops* ODstop, Busline* line, Day* day, double crowding_onboard); //Passenger memory-legs (experienced crowdedness weigthed on the leg's IVT)
+	void evening_cleaning();
+	//-------------------------------------------------------------------------
+	map <StopLine, map<Day*,double>> get_experienced_waiting_time(){return experienced_waiting_times;}//waiting time only for the specific line the passenger will take
+	map <LegLine, map<Day*,double>> get_experienced_invehicle_time(){return experienced_invehicle_times;}//IVT for each passenger on a leg
+	map <Busstop*, map<Day*,int>> get_experienced_crowding_at_stop (){return experienced_crowding_at_stop;}  //experienced crowdedness at the stop, no matter which line
+	map <LegLine, map<Day*,double>> get_experienced_crowding_onboard (){return experienced_crowding_onboard;}  //experienced crowdedness weigthed on the leg's IVT
+	//-------------------------------------------------------------------------
+	bool any_waiting_time(Busstop* stop, Busline* line);
+	double strategy_waiting_time(Busstop* stop, Busline* line);
+	bool any_invehicle_time(ODstops* ODstop, Busline* line);
+	double strategy_invehicle_time(ODstops* ODstop, Busline* line);
+	bool any_crowding_at_stop(Busstop* stop);
+	int strategy_crowding_at_stop(Busstop* stop);
+	bool any_crowding_onboard(ODstops* ODstop, Busline* line);
+	double strategy_crowding_onboard(ODstops* ODstop, Busline* line);
+
+	// fuzzy travellers
 
 protected:
 	int passenger_id;
@@ -95,6 +124,21 @@ protected:
 	int nr_boardings; // counts the number of times pass boarded a vehicle
 	vector <Busstop*> selected_path_stops;
 	bool has_network_rti;
+
+	// Day-to-Day
+	map <StopLine, map<Day*,double>> experienced_waiting_times;   //Passenger memory - Stops recording //for each combination stop-line we get the list of all the perceived waiting times in each day
+	map <LegLine, map<Day*,double>> experienced_invehicle_times;  //Passenger memory - Legs recording
+	map <Busstop*, map<Day*,int>> experienced_crowding_at_stop;   //Passenger memory - Stops recording
+	map <LegLine, map<Day*,double>> experienced_crowding_onboard; //Passenger memory - Legs recording
+	int crowding_at_stop;   //Passenger memory - Stops recording
+	int crowding_onboard;   //Passenger memory - Legs recording
+	double segments_load;   //numerator term to calculate leg load weigthed on the leg IVT
+	double leg_IVT;         //in-vehicle time for a single leg
+	int start_stop;
+	int end_stop;
+
+	// fuzzy travellers
+	vector <ODstops*> fuzzy_destination_set; // contains all destination choice-set
 
 	// relevant only for OD in terms od zones
 	ODzone* o_zone;

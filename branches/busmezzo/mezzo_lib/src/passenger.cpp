@@ -78,6 +78,23 @@ void Passenger::init (int pass_id, double start_time_, ODstops* OD_stop_)
 	has_network_rti = random->brandom(theParameters->ratio_network_information);
 }
 
+//this procedure is just to clean all the variables we do not need as they are the next day
+void Passenger::evening_cleaning()
+{ //passenger_id, start_time and OD_pair MUST be the same every day
+  //furthermore we do not change the initial setting of having_RTI, it will be always the same for this passenger
+  end_time=0;
+  walking_time=0;
+  waiting_time=0;
+  in_vehicle_time=0;
+  last_board_time=0;
+  last_arrival_time_at_stop=0;
+  boarding_decision=false;
+  at_stop=false;
+  changed_stop=false;
+  elapsed_overpassed_time=0;
+  nr_boardings=0;
+ }
+
 void Passenger::init_zone (int pass_id, double start_time_, ODzone* origin_, ODzone* destination_)
 {
 	passenger_id = pass_id;
@@ -323,10 +340,12 @@ bool Passenger:: make_boarding_decision (Bustrip* arriving_bus, double time)
 			boarding_decision = random ->brandom(boarding_prob);
 			OD_stop->record_passenger_boarding_decision (this, arriving_bus, time, boarding_prob, boarding_decision);
 			break;
+		/*
 		case 4:
 			boarding_prob = calc_boarding_probability_zone(arriving_bus->get_line(), curr_stop, time);
 			boarding_decision = random ->brandom(boarding_prob);
 			o_zone->record_passenger_boarding_decision_zone(this, arriving_bus, time, boarding_prob, boarding_decision);
+		*/
 	}
 	if (boarding_decision == true)
 	{
@@ -378,7 +397,7 @@ Busstop* Passenger::make_alighting_decision (Bustrip* boarding_bus, double time)
 						if ((*first_transfer_stops)->get_id() == OD_stop->get_destination()->get_id())
 						// in case it is the final destination for this passeneger
 						{
-							candidate_transfer_stops_u[(*first_transfer_stops)] = theParameters->in_vehicle_time_coefficient * ((boarding_bus->get_line()->calc_curr_line_ivt(OD_stop->get_origin(),OD_stop->get_destination(),level_of_rti))/60);
+							candidate_transfer_stops_u[(*first_transfer_stops)] = theParameters->in_vehicle_time_coefficient * ((boarding_bus->get_line()->calc_curr_line_ivt(this, OD_stop->get_origin(),OD_stop->get_destination(),level_of_rti))/60);
 							// the only utility component is the IVT till the destination
 						} 
 						else
@@ -529,6 +548,7 @@ Busstop* Passenger::make_connection_decision (double time)
 	return candidate_connection_stops_p.begin()->first; // arbitary choice in case something failed
 }
 
+/*
 Busstop* Passenger::make_first_stop_decision (double time)
 {
 	map <Busstop*, double> candidate_origin_stops_u; // the double value is the utility associated with the respective stop
@@ -611,6 +631,7 @@ map<Busstop*,double> Passenger::sample_walking_distances (ODzone* zone)
 	return walking_distances;
 }
 
+
 double Passenger::calc_boarding_probability_zone (Busline* arriving_bus, Busstop* o_stop, double time)
 {
 	// initialization
@@ -662,7 +683,7 @@ double Passenger::calc_boarding_probability_zone (Busline* arriving_bus, Busstop
 					{
 						if ((*iter_first_leg_lines)->get_id() == arriving_bus->get_id()) // if the arriving bus is a possible first leg for this path alternative
 						{
-							path_utility = (*iter_paths)->calc_arriving_utility(time, has_network_rti) + theParameters->waiting_time_coefficient * (destination_walking_distances[(*iter_d_stops).first] / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4));
+							path_utility = (*iter_paths)->calc_arriving_utility(this, time, has_network_rti) + theParameters->waiting_time_coefficient * (destination_walking_distances[(*iter_d_stops).first] / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4));
 							// including the walking time from the last stop till the final destination
 							boarding_utility += exp(path_utility); 
 							arriving_paths.push_back((*iter_paths));
@@ -880,6 +901,7 @@ bool Passenger::stop_is_in_d_zone (Busstop* stop)
 		return false;
 	}
 }
+*/
 
 void Passenger::write_selected_path(ostream& out)
 {
@@ -901,4 +923,127 @@ PassengerRecycler::	~PassengerRecycler()
 		iter=pass_recycled.erase(iter);	
 	}
 }
+
+//Day-to-Day PROCEDURES -----------------------------------------------------------
+
+//waiting-time specific for a combination stop-line of a single passenger in a certain day
+void Passenger::set_experienced_waiting_time (Busstop* stop, Busline* line, Day* day, double waiting_time)
+{
+	StopLine stopline;
+	stopline.first=stop;
+	stopline.second=line;
+	experienced_waiting_times[stopline].insert(make_pair(day,waiting_time));
+}
+
+//invehicle-time for a single leg of a single passenger
+void Passenger::set_experienced_invehicle_time (ODstops* ODstop, Busline* line, Day* day, double leg_IVT)
+{    
+	LegLine legline;
+	legline.first = ODstop; //define the start-end stop of the leg
+	legline.second = line;  //define the used line
+	experienced_invehicle_times[legline].insert(make_pair(day,leg_IVT));
+}
+
+//waiting passengers at a certain stop, for all the lines
+void Passenger::set_experienced_crowding_at_stop (Busstop* stop, Day* day, int nr_waiting)
+{
+	experienced_crowding_at_stop[stop].insert(make_pair(day,nr_waiting));
+}
+
+//is to save the experience crowding on a vehicle weighted on the IVT
+void Passenger::set_experienced_crowding_onboard (ODstops* ODstop, Busline* line, Day* day, double crowding_onboard)
+{
+	LegLine legline;
+	legline.first= ODstop; //define the start-end stop of the leg
+	legline.second = line;//define the used line
+	experienced_crowding_onboard[legline].insert(make_pair(day,crowding_onboard));
+}
+
+bool Passenger::any_waiting_time(Busstop* stop, Busline* line)//this procedure is to check whether or not the memory already stores a specific combination Stop-Line
+{	StopLine stopline;
+	stopline.first=stop; 	stopline.second=line;
+	map <Day*,double> experience=experienced_waiting_times[stopline];
+	return experience.empty();
+	//FALSE=there is already experience; TRUE=no_experience... be carefull when call the procedure - Negative_logic
+}
+
+//void Passenger::set_experienced_invehicle_time (ODstops* ODstop, Busline* line, Day* day, double leg_IVT)
+bool Passenger::any_invehicle_time(ODstops* ODstop, Busline* line)//this procedure is to check whether or not the memory already stores a specific combination Leg-Line
+{	LegLine legline;
+	legline.first=ODstop; 	legline.second=line;
+	map <Day*,double> experience=experienced_invehicle_times[legline];
+	return experience.empty();
+	//FALSE=there is already experience; TRUE=no_experience... be carefull when call the procedure - Negative_logic
+}
+
+bool Passenger::any_crowding_at_stop(Busstop* stop)//this procedure is to check whether or not the memory already stores a specific Stop
+{	map <Day*,int> experience=experienced_crowding_at_stop[stop];
+	return experience.empty();
+	//FALSE=there is already experience; TRUE=no_experience... be carefull when call the procedure - Negative_logic
+}
+
+bool Passenger::any_crowding_onboard(ODstops* ODstop, Busline* line)//this procedure is to check whether or not a the memory already store a specific combination ODstop-Line
+{	LegLine legline;
+	legline.first=ODstop; 	legline.second=line;
+	map <Day*,double> experience=experienced_crowding_onboard[legline];
+	return experience.empty();
+	//FALSE=there is already experience; TRUE=no_experience... be carefull when call the procedure - Negative_logic
+}
+
+double Passenger::strategy_waiting_time(Busstop* stop, Busline* line)
+{	StopLine stopline;
+	stopline.first=stop; 	stopline.second=line;
+	map <Day*,double> experience=experienced_waiting_times[stopline];
+	map <Day*,double>::iterator it;
+	switch(theParameters->memory_strategy)
+	{ case 1: it=experience.end(); //if we need of more days run a loop over *it
+			  it--;
+			  double waiting_time=(*it).second; //in the future waiting_time=f(day,experienced waiting time) ---tendency to forget according to the day..
+			  return waiting_time;
+	}
+}
+
+double Passenger::strategy_invehicle_time(ODstops* ODstop, Busline* line)
+{	LegLine legline;
+	legline.first=ODstop; 	legline.second=line;
+	map <Day*,double> experience=experienced_invehicle_times[legline];
+	map <Day*,double>::iterator it;
+	switch(theParameters->memory_strategy)
+	{ case 1: //invehicle_time=f(day,experienced invehicle time) ---different weight according to the day..
+			 it=experience.end();
+			 it--;
+			 double invehicle_time=(*it).second;
+			 return invehicle_time;			 
+	}
+}
+
+int Passenger::strategy_crowding_at_stop(Busstop* stop)
+{	map <Day*,int> experience=experienced_crowding_at_stop[stop];
+	map <Day*,int>::iterator it;	
+	switch(theParameters->memory_strategy)
+	{ case 1:  //crowding_at_stop=f(day,experienced crowding_at_stop) ---different weight according to the day..
+			 it=experience.end();
+			 it--;
+			 int crowding_at_stop=(*it).second;
+			 return crowding_at_stop;
+	}
+}
+
+double Passenger::strategy_crowding_onboard(ODstops* ODstop, Busline* line)
+{	LegLine legline;
+	legline.first=ODstop; 	legline.second=line;
+	map <Day*,double> experience=experienced_crowding_onboard[legline];
+	map <Day*,double>::iterator it;
+	switch(theParameters->memory_strategy)
+	{ case 1://crowding_onboard=f(day,experienced crowding_onboard) ---different weight according to the day..
+			 it=experience.end();
+			 it--;
+			 double crowding_onboard=(*it).second;
+			 return crowding_onboard;
+	}
+}
+
+
+
+
 

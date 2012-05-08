@@ -31,6 +31,8 @@ class Change_arrival_rate;
 class Bustrip_assign;
 class Dwell_time_function;
 class Pass_path;
+class Day;
+class Zone;
 
 typedef pair<Bustrip*,double> Start_trip;
 typedef vector <Passenger*> passengers;
@@ -135,7 +137,8 @@ public:
 	double calc_curr_line_headway ();
 	double calc_curr_line_headway_forward ();
 	double calc_max_headway ();
-	double calc_curr_line_ivt (Busstop* start_stop, Busstop* end_stop, int rti);
+	double calc_curr_line_ivt (Passenger* pass, Busstop* start_stop, Busstop* end_stop, int rti);
+	double calc_curr_line_ivt_CSGM (Busstop* start_stop, Busstop* end_stop, int rti);
 	
 	// output-related functions
 	void calculate_sum_output_line(); 
@@ -236,7 +239,8 @@ public:
 	vector <Start_trip*> driving_roster; //!< trips assignment for each bus vehicle.
 	map <Busstop*, passengers> passengers_on_board; // passenger on-board storaged by their alighting stop (format 3)
 	map <Busstop*, int> nr_expected_alighting; //!< number of passengers expected to alight at the busline's stops (format 2)
-	map <Busstop*, int> assign_segements; // contains the number of pass. travelling between trip segments
+	map <Busstop*, int> assign_segments; // contains the number of pass. travelling between trip segments
+	map <Busstop*, double> IVT_segments; // contains the time difference between arrival from last stop and this stop 
 	
 	bool comply;
 protected:
@@ -458,6 +462,25 @@ protected:
 	// output structures
 	list <Busstop_Visit> output_stop_visits; //!< list of output data for buses visiting stops
 	map<int,Output_Summary_Stop_Line> output_summary; //  int value is line_id
+};
+
+class Zone : public Action
+{
+public:
+	Zone (int zone_id);
+	~Zone ();
+	int get_id () {return id;}
+	void reset (); 
+
+	// initialize
+	void add_stop_distance (Busstop* stop, double distance);
+
+protected:
+	int id;
+	map <Busstop*, double> stops_distances; // the distance from the zone centroid to stops
+	double activity_density;
+	Random* random;
+	Eventlist* eventlist; //!< to book passenger generation events
 };
 
 typedef pair<Busline*,double> TD_single_pair;

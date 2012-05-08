@@ -82,6 +82,7 @@
 using namespace std;
 class TurnPenalty;
 class Incident;
+class Day;
 
 class ODRate
 {
@@ -146,6 +147,7 @@ public:
 	double executemaster(); //!< without GUI
 	int reset(); //!< resets the simulation to 0, clears all the state variables. returns runtime
 	void end_of_simulation(double time); //!< finalise all the temp values into containers (linktimes)
+	void end_of_day();
 	double step(double timestep); //!< executes one step of simulation, called by the gui, returns current value of time
 	bool writeall(unsigned int repl=0); //writes the output, appends replication number to output files
 	bool readnetwork(string name); //!< reads the network and creates the appropriate structures
@@ -238,7 +240,7 @@ public:
 
 	// Public transport
 	
-	bool write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10, string name11); //<! writes all the bus-related output 
+	bool write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10, string name11, string name12); //<! writes all the bus-related output 
 	bool write_path_set (string name1); //!< writes the path-set generated at the initialization process (aimed to be used as an input file for other runs with the same network)
 
 	bool readtransitroutes(string name); //!< reads the transit routes, similar to readroutes
@@ -296,6 +298,7 @@ public:
   const vector<Busstop*> & get_cons_stops (Busstop* stop) {return consecutive_stops[stop];}
   const vector<Busline*> & get_direct_lines (ODstops* odstops) {return od_direct_lines[odstops];}
   double calc_total_in_vechile_time (vector<vector<Busline*>> lines, vector<vector<Busstop*>> stops); // according to scheduled time
+  void construct_destination_choice_set (); // construct a matrix with the minimum IVT and 
 
 #ifndef _NO_GUI
 	double get_width_x() {return width_x;} //!< returns image width in original coordinate system
@@ -345,19 +348,21 @@ protected:
 	vector <Busline*> buslines; //!< the buslines that generate bus trips on busroutes, serving busstops
 	vector <Bustrip*> bustrips;  //!< the trips list of all buses
 	vector <Busstop*> busstops; //!< stops on the buslines
+	vector <Zone*> zones; 
 	vector <Busroute*> busroutes; //!< the routes that buses follow
 	vector <Dwell_time_function*> dt_functions;
     vector <Bustype*> bustypes; // types of bus vehicles
     vector <Bus*> busvehicles; // a list of the bus vehicles
-	//vector <ODstops*> v_odstops;
 	map <pair<Busstop*,Busstop*>,ODstops*> v_odstops;
-	vector <ODzone*> odzones; 
+	map <pair<Zone*,Zone*>,ODzone*> v_odzones;
+	map <pair<Zone*,Zone*>,ODzone*> odzones_demand; // contains only ODs with a non-zero demand
 	map <pair<Busstop*,Busstop*>,ODstops*> odstops_demand; // contains only ODs with a non-zero demand
 	vector<Busstop*> collect_im_stops; // compose the list of stops for a path
 	vector<double> collect_walking_distances; // compose the list of walking distances for a path
 	map <ODstops*, vector<Busline*>> od_direct_lines; // contains all direct lines between a pair of stops
 //	map<int,map<int, vector<Busline*>>> direct_lines; // contains all direct lines between a couple of stops
 	map<Busstop*,vector<Busstop*>> consecutive_stops; // contains all the stops that can be reached within no transfer per stop
+	map<Busstop*,vector<ODstops*>> fuzzy_destination_set; // contains all destination choice-set
 
 	//Shortest path graph
 #ifndef _USE_VAR_TIMES
@@ -514,6 +519,10 @@ public:
 	{
 		theNetwork->reset();
 	}
+	void end_of_day ()
+	{
+		theNetwork->end_of_day();
+	}
 	 ~NetworkThread () 
 	  {
 			delete theNetwork;
@@ -524,7 +533,6 @@ private:
     string masterfile_;
 	double runtime_;
 	int threadnr_;
-
 };
 
 
