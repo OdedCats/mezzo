@@ -13,24 +13,13 @@ const bool Action::execute(Eventlist*, const double)        // unused Eventlist*
 Eventlist::~Eventlist()
 
 {
-	/*** Obsolete
-	multimap <double, Action*> :: iterator iter = thelist.begin();
-	for (iter; iter != thelist.end(); iter)
-	{
-			iter = thelist.erase(iter);
-	}
-	**********/
+	// All actions clean themselves up. (CHECK and RECHECK!) Maybe start using auto's here?
 	thelist.clear();
 }
 
 void Eventlist::reset()
 {
-	//multimap <double, Action*> :: iterator iter = thelist.begin();
-	/*for (iter; iter != thelist.end(); iter)
-	{
-		// DO NOT delete the Actions, since they are simply reset (in Network), NOT re-created
-		iter = thelist.erase(iter);
-	}*/
+	
 	thelist.clear();
 	lastupdate=thelist.end();
 }

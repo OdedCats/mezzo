@@ -516,6 +516,7 @@ const double Link::gap_to_next (const double time, const Link* const nextlink, c
 Vehicle* const  Link::exit_veh(const double time, Link* const nextlink, const int lookback)
 {
 	ok=false;
+	
 	if (!empty())
 	{
 		Vehicle* veh=queue->exit_veh(time, nextlink, lookback);

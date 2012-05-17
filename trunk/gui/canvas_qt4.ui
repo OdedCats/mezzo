@@ -34,7 +34,7 @@
    <enum>Qt::StrongFocus</enum>
   </property>
   <property name="windowTitle">
-   <string comment="Prototype Mesomodel">Mezzo version 0.58</string>
+   <string comment="Prototype Mesomodel">Mezzo version 0.61</string>
   </property>
   <property name="windowIcon">
    <iconset resource="canvas_qt4.qrc">
@@ -746,6 +746,7 @@
     </property>
     <addaction name="linkhandlemark"/>
     <addaction name="inselectmode"/>
+    <addaction name="finddialog"/>
    </widget>
    <widget class="QMenu" name="menuSimulation">
     <property name="title">
@@ -1054,6 +1055,21 @@
    </property>
    <property name="toolTip">
     <string>Slow down simulation</string>
+   </property>
+  </action>
+  <action name="finddialog">
+   <property name="icon">
+    <iconset resource="canvas_qt4.qrc">
+     <normaloff>:/images/find.png</normaloff>:/images/find.png</iconset>
+   </property>
+   <property name="text">
+    <string>Find...</string>
+   </property>
+   <property name="toolTip">
+    <string>Find links or nodes by id</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
    </property>
   </action>
  </widget>

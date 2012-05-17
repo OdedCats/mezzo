@@ -75,6 +75,7 @@ nmake release</NMakeReBuildCommandLine>
     <ClCompile Include="src\batchrundlg.cpp" />
     <ClCompile Include="canvas_qt4.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\find.cpp" />
     <ClCompile Include="src\nodedlg.cpp" />
     <ClCompile Include="src\outputview.cpp" />
     <ClCompile Include="parametersdialog_qt4.cpp" />
@@ -83,6 +84,7 @@ nmake release</NMakeReBuildCommandLine>
   <ItemGroup>
     <ClInclude Include="src\batchrundlg.h" />
     <ClInclude Include="canvas_qt4.h" />
+    <ClInclude Include="src\find.h" />
     <ClInclude Include="src\nodedlg.h" />
     <ClInclude Include="src\outputview.h" />
     <ClInclude Include="parametersdialog_qt4.h" />

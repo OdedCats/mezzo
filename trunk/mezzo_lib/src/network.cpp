@@ -1804,7 +1804,7 @@ bool Network::register_links()
 bool Network::readods(istream& in)
 {
 	// create the first default OD matrix slice
-	//ODSlice* odslice=new ODSlice();
+	ODSlice* odslice=new ODSlice();
 
 	string keyword;
 	in >> keyword;
@@ -1839,9 +1839,19 @@ bool Network::readods(istream& in)
 	{
 		(*iter)->register_ods(&odpairs);
 	}
+	// should clean up readods and readrates, this is a fix for now: add all default OD rates to the first slice.
+	ODRate temprate;
+	vector <ODpair*>::iterator od_iter=odpairs.begin();
+	for (od_iter; od_iter != odpairs.end(); ++od_iter)
+	{
+		temprate.odid= (*od_iter)->odids();
+		temprate.rate= (*od_iter)->get_rate();
+		
+		odslice->rates.push_back (temprate);
+	}
 
 	// add the default OD slice to the OD matrix
-	//odmatrix.add_slice(0.0,odslice);
+	 odmatrix.add_slice(0.0,odslice);
 	return true;
 }
 

@@ -86,7 +86,6 @@ const bool ODaction::execute(Eventlist* eventlist, const double time)
 	  Route* route=odpair->select_route(time);
 	  Vtype* vehtype=(odpair->vehtypes() )->random_vtype();
 	  vid++;
-	   // 2002_12_18 recycling the vehicles
 	  Vehicle* veh=recycler.newVehicle(); // get a _normal_ vehicle
 	  veh->init(vid,vehtype->id, vehtype->length,route,odpair,time);  
 	  if ( (odpair->get_origin())->insert_veh(veh,time)) // insert vehicle in the input queue

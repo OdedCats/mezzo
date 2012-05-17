@@ -16,7 +16,9 @@ QT+= core gui
 QMAKE= $(QTDIR)/bin/qmake
 CONFIG += uic4 staticlib 
 #debug
-#QMAKE_LFLAGS += /LARGEADDRESSAWARE
+win32 {
+     QMAKE_LFLAGS += /LARGEADDRESSAWARE
+	 }
 
 # Input
 HEADERS += src/assist.h \

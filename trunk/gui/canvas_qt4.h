@@ -35,6 +35,7 @@
 #include "src/batchrundlg.h"
 #include "src/outputview.h"
 #include "src/positionbackground.h"
+#include "src/find.h"
 
 class MainForm : public QMainWindow, private Ui::MainForm
 {
@@ -77,6 +78,7 @@ private slots:
 	void on_batch_run_activated(); //!< Shows the Batch Run dialog
 	void on_parametersdialog_activated();  //!< Shows parameters dialog
 	void on_inspectdialog_activated();  //!< Shows Route inspect dialog
+	void on_finddialog_activated();  //!< Shows Route inspect dialog
 	void simspeed_valueChanged(int value);  //!< changes the simspeed
 	void zoomfactor_valueChanged(int value);  //!< changes the zoom step for zooming in/out
 	void panfactor_valueChanged(int value );  //!< changes the pan step for panning the network
@@ -167,6 +169,7 @@ private:
 	BatchrunDlg* brdlg;
 	OutputView* outputview;
 	PositionBackground* posbackground;
+	FindDialog* finddialog;
 
 };
 

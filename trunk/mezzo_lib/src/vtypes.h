@@ -59,9 +59,15 @@ public:
  Vtypes () ;
 
  Vtype* random_vtype () {
- 	double sum=0.0;
- 	double r = random->urandom();
- 	for (vector <Vtype*>::iterator iter=vtypes.begin();iter<vtypes.end();iter++)
+	 vector <Vtype*>::iterator iter=vtypes.begin();
+ 	
+	if (vtypes.size() == 1)
+		return (*iter);
+
+	double sum=0.0;
+	double r = random->urandom();
+
+ 	for (iter;iter!=vtypes.end();iter++)
     {
      	sum+=(*iter)->probability;
      	if (sum >= r)
@@ -74,6 +80,25 @@ public:
  
  Random* random;
  vector <Vtype*> vtypes;
+};
+
+class Vclass // contains the vehicle/user classes. This combines demand segments and user preferences.
+	// Each vehicle class contains its own list of types.
+{
+public:
+	Vclass (int id_, string label_, Vtypes* vtypes_) : id(id_), label(label_), vtypes(vtypes_) {}
+	virtual ~Vclass ();
+	Vtype* get_vtype() const {return vtypes->random_vtype();}
+	const int get_id() const {return id;}
+	const string get_label() const {return label;}
+
+private:
+	int id;
+	string label;
+
+	Vtypes* vtypes; // each vclass has its own vtype
+	
+	// other attributes for vehicles class.
 };
 
 #endif

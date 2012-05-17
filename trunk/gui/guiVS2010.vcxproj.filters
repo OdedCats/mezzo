@@ -45,6 +45,9 @@
     <ClCompile Include="src\positionbackground.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\find.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\batchrundlg.h">
@@ -76,6 +79,9 @@
     </ClInclude>
     <ClInclude Include="ui_parametersdialog_qt4.h">
       <Filter>Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="src\find.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

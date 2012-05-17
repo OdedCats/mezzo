@@ -79,9 +79,12 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 					 this, SLOT(copyPixmap()));
 	QObject::connect(brdlg, SIGNAL(activateAnalyzeOutput()), 
 					 this, SLOT( activate_AnalyzeOutput()   ));
+
 	outputview = new OutputView(this);
 	posbackground = new PositionBackground(this);
-	
+	finddialog = new FindDialog(this);
+	QObject::connect(finddialog, SIGNAL(paintRequest()), 
+					 this, SLOT(copyPixmap()));
 	// construction of the MezzoAnalyzer dialog 
 	od_analyser_=new ODCheckerDlg();
 	QObject::connect(od_analyser_, SIGNAL(paintRequest()), 
@@ -455,6 +458,15 @@ void MainForm::on_inspectdialog_activated()
 		// warn to load the network 
 		QMessageBox::warning(this, "Network not loaded", "Please load a network first!", 
 			QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
+	}
+
+}
+
+void MainForm::on_finddialog_activated()
+{
+	if (this->initialised){
+		finddialog->set_network(theNetwork);
+		finddialog->show();
 	}
 
 }

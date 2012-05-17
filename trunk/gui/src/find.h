@@ -1,6 +1,6 @@
 /*
 	Mezzo Mesoscopic Traffic Simulation 
-	Copyright (C) 2008  Wilco Burghout
+	Copyright (C) 2012  Wilco Burghout
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,36 +18,40 @@
 
 /*! positions the background image
 
-
-
-
 */
 
-#ifndef POSITIONBACKGROUND_
-#define POSITIONBACKGROUND_
+#ifndef FINDDIALOG_
+#define FINDDIALOG_
 
 #include <QDialog>
 // use the generated ui form header  
-#include "../ui_positionbackground.h"
+#include "../ui_find.h"
 // network definition
 #include "../../mezzo_lib/src/network.h" // also includes the parameters
 
-class PositionBackground : public QDialog, public Ui::PositionBackground
+class FindDialog : public QDialog, public Ui::Find
 {
 	Q_OBJECT
 public:
-	PositionBackground (QWidget* parent=0);
-	~PositionBackground() {}
+	FindDialog (QWidget* parent=0);
+	~FindDialog() {}
 	void set_network(Network* net_) ;
+	void show();
+	void unselect();
 private slots:
-	void on_xpos_valueChanged(int val);
-	void on_ypos_valueChanged(int val);
-	void on_scale_valueChanged(int val);
+	void on_findButton_clicked();
+	void on_cancelButton_clicked();
+	void closeEvent(QCloseEvent *event);
+	
+signals:
+    void paintRequest();
 
 private:
 	Network* theNetwork;
 	Parameters* theParameters;
 	QWidget* parent_;
+	Link* selected_link;
+	Node* selected_node;
 };
 
 

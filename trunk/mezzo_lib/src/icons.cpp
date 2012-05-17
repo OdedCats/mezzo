@@ -239,7 +239,7 @@ void LinkIcon::draw(QPixmap *const  pm,QMatrix * const wm)   // draw the stuff o
 			paint.drawLine(startx+sx,starty+sy, x_1+sx,y_1+sy ); // draw the running segment
 		}
 		// draw the link IDs (or any other text)
-		if (theParameters->draw_link_ids)
+		if (selected||theParameters->draw_link_ids)
 		{
 			paint.setFont(QFont ("Helvetica", theParameters->text_size));
 			QPen pen4 ( Qt::red , 1*scale_);
@@ -459,6 +459,11 @@ void NodeIcon::draw(QPixmap *const pm,QMatrix *const wm)
 		pen1 =QPen(selected_color, 8*(theParameters->node_thickness)*scale_); 
 		paint.setPen(pen1);
 		paint.drawEllipse (startx,starty, width,height );
+		// draw text
+		paint.setFont(QFont ("Helvetica", theParameters->text_size));
+		QPen pen4 ( Qt::red , 1*scale_);
+		paint.setPen(pen4);
+		paint.drawText (QPointF((startx+2*theParameters->text_size),(starty+2*theParameters->text_size)), text);
 	}
 	paint.end();	
 	// draw the stuff on pixmap
