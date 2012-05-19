@@ -72,6 +72,7 @@ public:
 
  signals:
     void paintRequest();
+	void center_image();
 	void activateAnalyzeOutput();
 	
 private:

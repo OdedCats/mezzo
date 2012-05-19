@@ -41,6 +41,7 @@ class Grid
 		Grid() {}
       Grid(const int nr_fields_, const vector<string> names_);
 	  Grid (const Grid & grid_): nr_fields(grid_.nr_fields), fnames(grid_.fnames), grid (grid_.grid) {}
+	  ~Grid () {}
 	  void reset(); // resets the values NOT the fieldnames!
       const bool insert_row(const list <double> & values); // reference to a list of values so theres no needless copying
       const bool write_empty(ostream& out);

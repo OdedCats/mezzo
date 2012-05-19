@@ -91,6 +91,16 @@ const double LinkTime::sum()
 
 }
 
+LinkTimeInfo::~LinkTimeInfo ()
+{/*
+	for(map <int, LinkTime*>::iterator iter= times.begin(); iter!=times.end(); ++iter)
+	{
+		if (NULL != (iter->second))
+			delete (iter->second);
+	}*/
+	times.clear();
+}
+
 const double LinkTimeInfo::sum()
 {
 	double totaltime = 0.0;

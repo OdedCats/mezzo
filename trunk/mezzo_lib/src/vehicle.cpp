@@ -116,15 +116,14 @@ void Vehicle::report(const double time)
 
 VehicleRecycler::	~VehicleRecycler()
 {
- 	for (list <Vehicle*>::iterator iter=recycled.begin();iter!=recycled.end();)
+ 	for (list <Vehicle*>::iterator iter=recycled.begin();iter!=recycled.end();++iter)
 	{			
 		delete (*iter); // calls automatically destructor
-		iter=recycled.erase(iter);	
 	}
-	for (list <Bus*>::iterator iter1=recycled_busses.begin();iter1!=recycled_busses.end();)
+	recycled.clear();
+	for (list <Bus*>::iterator iter1=recycled_busses.begin();iter1!=recycled_busses.end();++iter1)
 	{			
 		delete (*iter1); // calls automatically destructor
-		iter1=recycled_busses.erase(iter1);	
 	}
-
+	recycled_busses.clear();
 }

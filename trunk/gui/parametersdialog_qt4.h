@@ -48,6 +48,9 @@ signals:
 	void activateZoomFactor(int) const;
 	void activatePanFactor(int) const;
 	void activateSimSpeed(int) const;
+	
+	//void calc_shift();//!< recalculates the link coordinate shifts
+    void paintRequest();
 
 private:
 	

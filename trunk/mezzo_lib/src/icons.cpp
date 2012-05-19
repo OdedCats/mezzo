@@ -17,7 +17,13 @@ Drawing::Drawing() {bg_set=false;bpm=NULL;}
 
 Drawing::~Drawing()
 {
-  icons.empty();
+	for (list <Icon*>::iterator iter=icons.begin();iter!=icons.end();++iter)
+	{			
+		if (NULL != *iter) {
+		delete (*iter); // calls automatically destructor
+		}
+	}	
+	icons.clear();
 }
 
 void Drawing::add_icon(Icon* const icon)

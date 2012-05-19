@@ -166,7 +166,7 @@ class Graph
       Graph(const int n = 2, const int m = 1,
 			const T u = 0x7FFF / 3,
 			const T p = 0);
-      virtual ~Graph() {}
+      virtual ~Graph() ;
 
      const int nNodes() const { return nodes_.size(); }
      const int nLinks() const { return links_.size(); }

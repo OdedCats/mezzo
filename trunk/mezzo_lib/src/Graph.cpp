@@ -35,7 +35,13 @@ Graph<T, I>::Graph(const int n, const int m, const T u, const T p)
 #endif
 }
 
-
+template <class T, class I>
+Graph<T, I>::~Graph() 
+{
+	// delete the links
+	links_.clear(); // calls GraphLink <T,I> destructors
+	nodes_.clear();
+}
 
 //--------------------------------------------------------------------
 // Purpose : Add an link to the graph

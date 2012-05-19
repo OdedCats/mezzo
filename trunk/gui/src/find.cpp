@@ -59,9 +59,7 @@ void FindDialog::on_findButton_clicked()
 	}
 
 	// redraw
-	theNetwork->redraw();
-	parent_->repaint();
-	qApp->processEvents();
+	
 	emit paintRequest();
 }
 
@@ -84,8 +82,7 @@ void FindDialog::on_cancelButton_clicked()
 {
 	// clean up and return
 	unselect();
-	theNetwork->redraw();
-	parent_->repaint();
+	
 	emit paintRequest();
 	close();
 }

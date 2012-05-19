@@ -139,7 +139,18 @@ Network::~Network()
 	if(NULL != eventlist){
 		delete eventlist;
 	}
-	
+	if(NULL != graph){
+	delete graph; // Clean up the graph
+	}
+	link_to_graphlink.clear();
+	graphlink_to_link.clear();
+	node_to_graphnode.clear();
+	graphnode_to_node.clear();
+#ifndef _NO_GUI
+	if (NULL != drawing) {
+		delete drawing;
+	}
+#endif
 #ifdef _MIME
 	if (NULL != communicator) {
 		delete communicator;
@@ -150,7 +161,6 @@ Network::~Network()
 		if (NULL != iter->second) {
 			delete (iter->second); // calls automatically destructor
 		}
-		//iter=originmap.erase(iter);	
 	}
 	originmap.clear();
 	for (map <int, Destination*>::iterator iter1=destinationmap.begin();iter1!=destinationmap.end();++iter1)
@@ -158,7 +168,6 @@ Network::~Network()
 		if (NULL != iter1->second) {
 			delete (iter1->second); // calls automatically destructor
 		}
-		//iter1=destinationmap.erase(iter1);	
 	}
 	destinationmap.clear();
 	for (map <int, Junction*>::iterator iter2=junctionmap.begin();iter2!=junctionmap.end();++iter2)
@@ -166,21 +175,14 @@ Network::~Network()
 		if (NULL!=iter2->second) {
 			delete (iter2->second); // calls automatically destructor
 		}
-		//iter2=junctionmap.erase(iter2);	
 	}
 	junctionmap.clear();
-	/*
-	for (map <int,Node*>::iterator iter3=nodemap.begin();iter3!=nodemap.end();)
-	{			
-		iter3=nodemap.erase(iter3);	
-	}*/
 	nodemap.clear();
 	for (map <int,Link*>::iterator iter4=linkmap.begin();iter4!=linkmap.end();++iter4)
 	{			
 		if (NULL != iter4->second) {
 		delete (iter4->second); // calls automatically destructor
 		}
-		//iter4=linkmap.erase(iter4);	
 	}
 	linkmap.clear();
 	for (vector <Incident*>::iterator iter5=incidents.begin();iter5<incidents.end();++iter5)
@@ -188,7 +190,6 @@ Network::~Network()
 		if (NULL != *iter5) {
 		delete (*iter5); // calls automatically destructor
 		}
-		//iter5=incidents.erase(iter5);	
 	}	
 	incidents.clear();
 	// for now keep OD pairs in vector
@@ -197,7 +198,6 @@ Network::~Network()
 		if (NULL != *iter6) {
 		delete (*iter6);
 		}
-		//iter6=odpairs.erase(iter6);
 	}
 	odpairs.clear();
 	for (multimap <ODVal, Route*>::iterator iter7=routemap.begin();iter7!=routemap.end();++iter7)
@@ -205,7 +205,6 @@ Network::~Network()
 		if (NULL != iter7->second) {
 		delete (iter7->second); // calls automatically destructor
 		}
-		//iter7=routemap.erase(iter7);	
 	}
 	routemap.clear();
 	for (map <int, Sdfunc*>::iterator iter8=sdfuncmap.begin();iter8!=sdfuncmap.end();++iter8)
@@ -213,7 +212,6 @@ Network::~Network()
 		if (NULL != iter8->second) {
 		delete (iter8->second); // calls automatically destructor
 		}
-		//iter8=sdfuncmap.erase(iter8);	
 	}
 	sdfuncmap.clear();
 	for (map <int, Server*>::iterator iter9=servermap.begin();iter9!=servermap.end();++iter9)
@@ -221,15 +219,13 @@ Network::~Network()
 		if (NULL != iter9->second) {
 		delete (iter9->second); // calls automatically destructor
 		}
-		//iter9=servermap.erase(iter9);	
 	}
 	servermap.clear();
 	for (map <int, Turning*>::iterator iter10=turningmap.begin();iter10!=turningmap.end();++iter10)
 	{			
 		if (NULL != iter10->second) {
 		delete (iter10->second); // calls automatically destructor
-		}
-		//iter10=turningmap.erase(iter10);	
+		}	
 	}
 	turningmap.clear();
 	for (vector <Vtype*>::iterator iter11=vehtypes.vtypes.begin();iter11<vehtypes.vtypes.end();++iter11)
@@ -237,7 +233,6 @@ Network::~Network()
 		if (NULL != *iter11) {
 		delete (*iter11); // calls automatically destructor
 		}
-		//iter11=vehtypes.vtypes.erase(iter11);	
 	}
 	vehtypes.vtypes.clear();
 	for (vector <TurnPenalty*>::iterator iter12= turnpenalties.begin(); iter12 < turnpenalties.end();++iter12)
@@ -245,9 +240,35 @@ Network::~Network()
 		if (NULL != *iter12) {
 		delete (*iter12);
 		}
-		//iter12=turnpenalties.erase(iter12);
 	}
 	turnpenalties.clear();
+
+	for (vector <Stage*>::iterator iter13=stages.begin();iter13!=stages.end();++iter13)
+	{
+		if (NULL != *iter13) {
+		delete (*iter13);
+		}
+	}
+	stages.clear();
+
+	for (vector <SignalPlan*>::iterator iter14=signalplans.begin();iter14!=signalplans.end();++iter14)
+	{
+		if (NULL != *iter14) {
+		delete (*iter14);
+		}
+	}
+	signalplans.clear();
+
+	for (vector <SignalControl*>::iterator iter15=signalcontrols.begin();iter15!=signalcontrols.end();++iter15)
+	{
+		if (NULL != *iter15) {
+		delete (*iter15);
+		}
+	}
+	signalcontrols.clear();
+
+	// TODO: ALSO CLEAN UP BUSLINE STUFF; BUT DO AFTER MERGE WITH BUSMEZZO
+
 }
 
 int Network::reset()
@@ -295,12 +316,12 @@ int Network::reset()
 	{
 		(iter7->second)->reset();
 	}
-
+	// servers
 	for (map <int, Server*>::iterator sv_iter=servermap.begin(); sv_iter!=servermap.end(); sv_iter++)
 	{
 		(*sv_iter).second->reset();
 	}
-	
+	//changerateactions
 	for (vector <ChangeRateAction*>::iterator cr_iter=changerateactions.begin(); cr_iter != changerateactions.end(); cr_iter++)
 	{
 		(*cr_iter)->reset();

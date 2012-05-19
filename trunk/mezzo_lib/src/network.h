@@ -277,43 +277,31 @@ public:
 #endif // _NO_GUI 
 
 protected:
-	//vector <Node*> nodes;
+	
 	map <int, Node*> nodemap; //!< 
 	map <int,int> node_to_graphnode;
 	map <int,int> graphnode_to_node;
-	//vector <Origin*> origins;
 	map <int, Origin*> originmap; //!< 
-	//vector <Destination*> destinations;
 	map <int, Destination*> destinationmap; //!< 
-	//  vector <Junction*> junctions;
 	map <int, Junction*> junctionmap; //!< 
 	vector <BoundaryOut*> boundaryouts; // Remove Later...
 	map <int, BoundaryOut*> boundaryoutmap; //!< 
 	vector <BoundaryIn*> boundaryins; // Remove Later...
 	map <int, BoundaryIn*> boundaryinmap; //!< 
-	//  vector <Link*> links;
 	map <int, Link*> linkmap; //!< 
 	map <int,int> link_to_graphlink;
 	map <int,int> graphlink_to_link;
-	// vector <Sdfunc*> sdfuncs;
 	map <int, Sdfunc*> sdfuncmap; //!< 
-	//  vector <Turning*> turnings;
 	map <int, Turning*> turningmap; //!< 
-	// vector <Server*> servers;
 	map <int, Server*> servermap; //!< 
 	vector <ChangeRateAction*> changerateactions; //!<
-//	vector <Route*> routes;	
 	multimap <ODVal, Route*> routemap; //!< 
 	vector <ODpair*> odpairs; //!< keep using OD pair vector for now, as map is too much of a hassle with two indices.
-	// map <int, ODpair*> odpairmap; 
 	vector <Incident*> incidents;
 	vector <VirtualLink*> virtuallinks;
 	map <int, VirtualLink*> virtuallinkmap; //!< 
-	// Turning penalties
 	vector <TurnPenalty*> turnpenalties;
-	// Vehicle types
 	Vtypes vehtypes;
-
 	vector <double> incident_parameters; // yes this is very ugly, as is the web of functions added, but I'll take them out asap
 	vector <Stage*> stages;
 	vector <SignalPlan*> signalplans;

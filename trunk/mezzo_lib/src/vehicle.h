@@ -100,7 +100,7 @@ protected:
 class VehicleRecycler
 {
  public:
- 	~VehicleRecycler();
+ 	virtual ~VehicleRecycler();
 	Vehicle* const  newVehicle() {	 	if (recycled.empty())
      								return new Vehicle();
      							else

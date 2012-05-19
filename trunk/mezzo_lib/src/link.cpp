@@ -38,14 +38,14 @@ Link::Link(int id_, Node* in_, Node* out_, int length_, double nr_lanes_, Sdfunc
 	moe_outflow=new MOE(theParameters->moe_outflow_update, (3600.0/theParameters->moe_outflow_update),0.0);
 	moe_queue=new MOE(theParameters->moe_queue_update,0.0);
 	moe_density=new MOE(theParameters->moe_density_update, 0.0);
-  blocked_until=-1.0; // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
-  nr_exits_blocked=0; // set by the turning movements if they are blocked
-  freeflowtime=(length/(sdfunc->speed(0.0)));
-  if (freeflowtime < 1.0)
-      freeflowtime=1.0;
-  queue=new Q(maxcap, freeflowtime);    
-  use_ass_matrix = false;
-  selected = false;
+	blocked_until=-1.0; // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
+	nr_exits_blocked=0; // set by the turning movements if they are blocked
+	freeflowtime=(length/(sdfunc->speed(0.0)));
+	if (freeflowtime < 1.0)
+		freeflowtime=1.0;
+	queue=new Q(maxcap, freeflowtime);    
+	use_ass_matrix = false;
+	selected = false;
 }
 
 

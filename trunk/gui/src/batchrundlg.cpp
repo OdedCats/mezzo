@@ -158,7 +158,7 @@ void BatchrunDlg::on_runButton_clicked()
 	//}	
 	theNetwork->close_convergence_file();
 	activateAnalyzeOutput();
-	theNetwork->recenter_image();
+	//theNetwork->recenter_image();
 	repaint();
 	
 }
@@ -221,6 +221,7 @@ void BatchrunDlg::run_iterations()
 		{
 			theNetwork->copy_linktimes_out_in();
 			theNetwork->reset();
+			emit center_image();
 		}
 		curtime=0.0;
 		while ((curtime < runtime))
@@ -231,7 +232,7 @@ void BatchrunDlg::run_iterations()
 			update();
 			qApp->processEvents();
 			repaint();
-			theNetwork->redraw();
+			
 			emit paintRequest();
 		}
 		theNetwork->end_of_simulation(runtime);
@@ -274,6 +275,7 @@ void BatchrunDlg::run_route_iterations()
 				theNetwork->renum_routes();
 			theNetwork->add_od_routes();
 			theNetwork->reset();
+			emit center_image();
 		}
 		unsigned int new_nr_routes= theNetwork->get_nr_routes();
 		if (old_nr_routes==new_nr_routes)

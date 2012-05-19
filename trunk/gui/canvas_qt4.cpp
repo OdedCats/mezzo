@@ -74,17 +74,24 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 	
 	// dialogs
 	pmdlg = new ParametersDialog (this);
+	QObject::connect(pmdlg, SIGNAL(paintRequest()), 
+					 this, SLOT(updateCanvas()));
 	brdlg = new BatchrunDlg(this);
 	QObject::connect(brdlg, SIGNAL(paintRequest()), 
-					 this, SLOT(copyPixmap()));
+					 this, SLOT(updateCanvas()));
+	QObject::connect(brdlg, SIGNAL(center_image()), 
+					 this, SLOT(center_image()));
 	QObject::connect(brdlg, SIGNAL(activateAnalyzeOutput()), 
 					 this, SLOT( activate_AnalyzeOutput()   ));
 
 	outputview = new OutputView(this);
+	QObject::connect(outputview, SIGNAL(paintRequest()), 
+					 this, SLOT(updateCanvas()));
+
 	posbackground = new PositionBackground(this);
 	finddialog = new FindDialog(this);
 	QObject::connect(finddialog, SIGNAL(paintRequest()), 
-					 this, SLOT(copyPixmap()));
+					 this, SLOT(updateCanvas()));
 	// construction of the MezzoAnalyzer dialog 
 	od_analyser_=new ODCheckerDlg();
 	QObject::connect(od_analyser_, SIGNAL(paintRequest()), 
@@ -243,7 +250,8 @@ void MainForm::on_stop_activated()
 	actionAnalyzeOutput->setChecked(false);
 	actionAnalyzeOutput->setEnabled(false);
 
-	//updat the canvas
+	//update the canvas
+	center_image();
 	updateCanvas();
 
 
@@ -578,6 +586,7 @@ void MainForm::loop()
 		//breaknow=false;
 		breaknow=true;
 		actionAnalyzeOutput->setEnabled(true);
+		updateCanvas();
 	}
 }
 
@@ -603,6 +612,7 @@ void MainForm::displaytime(double time)
     QString string = s_hrs + ":" + s_mins + ":" + s_secs ;
     LCDNumber->display(string);
 }
+
 
 void MainForm::copyPixmap()
 {	
@@ -1017,3 +1027,10 @@ void MainForm::resizeEvent(QResizeEvent* event)
 }
 
 
+void MainForm::center_image()
+{
+	wm=mod2stdViewMat_;
+	viewMat_.reset();
+	scale=1;
+	panfactor=panpixels;
+}

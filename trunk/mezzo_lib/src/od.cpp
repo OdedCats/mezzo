@@ -358,6 +358,8 @@ ODpair::~ODpair()
 		delete odaction;
 	if (random)
 		delete random;	
+	delete grid;
+	delete oldgrid;
 }
 
 void ODpair::reset()

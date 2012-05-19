@@ -22,11 +22,11 @@ Q::~Q()
 		// delete the vehicles:
 	}
 	list  <Veh_in_Q>::iterator veh_iter=vehicles.begin();
-	for (veh_iter; veh_iter!=vehicles.end(); )
+	for (veh_iter; veh_iter!=vehicles.end();++veh_iter )
 	{
 		delete (*veh_iter).second;
-		veh_iter=vehicles.erase(veh_iter);
 	}
+	vehicles.clear();
 }
 
 void Q::reset()
@@ -35,11 +35,11 @@ void Q::reset()
 	next_action = 0.0;
 	// delete the vehicles:
 	list  <Veh_in_Q>::iterator veh_iter=vehicles.begin();
-	for (veh_iter; veh_iter!=vehicles.end(); )
+	for (veh_iter; veh_iter!=vehicles.end();++veh_iter )
 	{
 		delete (*veh_iter).second;
-		veh_iter=vehicles.erase(veh_iter);
 	}
+	vehicles.clear();
 	viter = vehicles.begin();
 	ttime=1.0;
 	vehicle = NULL;

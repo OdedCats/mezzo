@@ -62,6 +62,10 @@ public:
 		void on_showLinkNames_toggled(bool checked);
 		void on_showLinkIds_toggled (bool checked);
 		void on_showDataValues_toggled (bool checked);
+
+signals:
+    void paintRequest();
+
 private:
 	QWidget* parent_;
 	Network* theNetwork;

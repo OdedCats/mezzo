@@ -98,6 +98,7 @@ LinkTimeInfo contains the LinkTime for all links in the network. It is used by t
  class LinkTimeInfo
  {
  	public:
+		virtual ~LinkTimeInfo ();
  	const double cost (const int i, const double time=0.0);
 	const double graph_cost (const int i, const double time=0.0);
 	void set_graphlink_to_link (const map <int,int> & map) {graphlink_to_link = map;}

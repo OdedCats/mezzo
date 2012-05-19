@@ -100,14 +100,19 @@ private slots:
 	void paintEvent(QPaintEvent *event );
 	void activate_AnalyzeOutput() ;
 
-	void copyPixmap();  //!< redraws the network on the GUI
+	void updateCanvas(); //!< redraws the network then calls copyPixmap()
+	 
+	void copyPixmap();  //!< redraws the network image on the GUI canvas
+
+	void center_image(); //!< centers the image.
+
 
 private:
 //FUNCTIONS
 	void activateToolbars(bool activated);
 	void displaytime(double time);
 	void showCanvasinfo();
-	void updateCanvas();
+	
 	void selectNodes(QPoint pos);
 	void unselectNodes();
 	void selectLinks(QPoint pos);

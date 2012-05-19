@@ -32,6 +32,7 @@ class SignalControl : public Action
 {
 public:
 	SignalControl (int id_, int type_):id(id_),type(type_) {active = false;}
+	virtual ~SignalControl() {} //!< Destructor does nothing. All controls, plans and stages get cleaned up in Network::~Network
 	void reset() ;
 	void add_signal_plan (SignalPlan* signalplan_) { signalplans.push_back(signalplan_);}
 	virtual const bool execute(Eventlist* eventlist, const double time);
@@ -49,6 +50,7 @@ public:
 	SignalPlan (int id_, double start_, double stop_,  double offset_, double cycletime_)  :
 	  id(id_), cycletime(cycletime_), offset(offset_), start(start_), stop(stop_)
 			{active=false;}
+	virtual SignalPlan() {}
 	void reset() ;
 	virtual const bool execute(Eventlist* eventlist, const double time);
 	const double get_start() const {return start;}

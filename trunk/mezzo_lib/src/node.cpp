@@ -308,11 +308,11 @@ Destination::~Destination()
 {
   if (server->get_id()==-20000) // created locally
 		delete server;
-	for (vector <Daction*>::iterator iter=dactions.begin();iter<dactions.end();)
+	for (vector <Daction*>::iterator iter=dactions.begin();iter<dactions.end();++iter)
 	{	
 		delete (*iter);
-		iter=dactions.erase(iter);	
 	}
+	dactions.clear();
 }
 
 void Destination::register_links(const map <int,Link*> & linkmap)
