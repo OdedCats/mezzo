@@ -33,7 +33,7 @@
       <bool>true</bool>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="Widget8">
       <attribute name="title">
@@ -156,7 +156,7 @@
         <rect>
          <x>190</x>
          <y>70</y>
-         <width>82</width>
+         <width>91</width>
          <height>25</height>
         </rect>
        </property>
@@ -169,7 +169,7 @@
         <rect>
          <x>190</x>
          <y>100</y>
-         <width>82</width>
+         <width>91</width>
          <height>25</height>
         </rect>
        </property>
@@ -224,7 +224,7 @@
         <rect>
          <x>190</x>
          <y>40</y>
-         <width>82</width>
+         <width>91</width>
          <height>25</height>
         </rect>
        </property>

@@ -50,7 +50,7 @@ public:
 	SignalPlan (int id_, double start_, double stop_,  double offset_, double cycletime_)  :
 	  id(id_), cycletime(cycletime_), offset(offset_), start(start_), stop(stop_)
 			{active=false;}
-	virtual SignalPlan() {}
+	virtual ~SignalPlan() {}
 	void reset() ;
 	virtual const bool execute(Eventlist* eventlist, const double time);
 	const double get_start() const {return start;}
