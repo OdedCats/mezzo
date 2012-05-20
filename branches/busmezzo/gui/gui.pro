@@ -1,5 +1,6 @@
 # QMAKE file for GUI project. Make changes in this file, NOT in the MAKEFILE
 
+QMAKE_LFLAGS += /LARGEADDRESSAWARE
 TEMPLATE = app
 TARGET = mezzo_gui
 DEFINES += _BUSES

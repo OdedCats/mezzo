@@ -1,7 +1,7 @@
 
 # Makes standalone version of Mezzo
 TEMPLATE = app
-
+QMAKE_LFLAGS += /LARGEADDRESSAWARE
 CONFIG +=  console embed_manifest_exe
 #CONFIG -= qt
 TARGET = mezzo_s

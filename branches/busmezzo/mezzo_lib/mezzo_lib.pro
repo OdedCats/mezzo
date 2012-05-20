@@ -1,4 +1,4 @@
-
+QMAKE_LFLAGS += /LARGEADDRESSAWARE
 TEMPLATE = lib
 CONFIG += staticlib debug
 TARGET = mezzo_lib

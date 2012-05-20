@@ -89,8 +89,8 @@ bool ODstops::execute (Eventlist* eventlist, double curr_time) // generate passe
 		return true;
 	}
 // called only for generting pass.
-	//if(theParameters->calendar.size()==1)
-	//{
+	if(theParameters->calendar.size()==1)
+	{
 		if (active == true) // generate passenger from the second call, as first initialization call just set time to first passenger
 		{	
 			Passenger* pass = new Passenger;
@@ -136,8 +136,7 @@ bool ODstops::execute (Eventlist* eventlist, double curr_time) // generate passe
 		tracer_pass = passengers_during_simulation.begin(); //we initialize here the iterator as pointer to the first value
 		active = true;
 		return true;
-	//}
-	/*
+	}
 	else
 	{ 
 		if (active == true)
@@ -171,7 +170,6 @@ bool ODstops::execute (Eventlist* eventlist, double curr_time) // generate passe
 		  }
 		}
 	}
-	*/
 	active = true;
 	return true;
 }

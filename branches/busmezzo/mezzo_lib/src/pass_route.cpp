@@ -282,7 +282,9 @@ double Pass_path::calc_curr_leg_waiting_RTI (Passenger* pass, vector<Busline*> l
 { 
 	double min_waiting_time;
 	bool first_time = true;
+	min_waiting_time = leg_lines.front()->time_till_next_arrival_at_stop_after_time((*stop_iter).front(),arriving_time);
 	//map<Busline*, bool> worth_to_wait = check_maybe_worthwhile_to_wait(pass, leg_lines, stop_iter, 1, has_network_rti);
+	/*
 	for (vector<Busline*>::iterator iter_leg_lines = leg_lines.begin(); iter_leg_lines < leg_lines.end(); iter_leg_lines++)
 	{
 		//if (worth_to_wait[(*iter_leg_lines)] == true) 
@@ -293,12 +295,14 @@ double Pass_path::calc_curr_leg_waiting_RTI (Passenger* pass, vector<Busline*> l
 				first_time = false;
 				min_waiting_time = (*iter_leg_lines)->time_till_next_arrival_at_stop_after_time((*stop_iter).front(),arriving_time);
 			}
+			
 			else
 			{
 				min_waiting_time = min(min_waiting_time, (*iter_leg_lines)->time_till_next_arrival_at_stop_after_time((*stop_iter).front(),arriving_time));
 			}
 		//}
 	}
+	*/
 	return (min_waiting_time/60); // minutes
 }
 

@@ -4078,18 +4078,16 @@ bool Network::read_transit_path_sets(string name)
 	ifstream in(name.c_str()); // open input file
 	assert (in);
 	string keyword;
-	//in >> keyword;
+	in >> keyword;
 #ifdef _DEBUG_NETWORK
 	cout << keyword << endl;
 #endif //_DEBUG_NETWORK
-	/*
 	if (keyword!="transit_paths:")
 	{
 		cout << " read_transit_path_sets: no << transit_paths: >> keyword " << endl;
 		in.close();
 		return false;
 	}
-	*/
 	int nr= 0;
 	in >> nr;
 	int i=0;
@@ -4446,6 +4444,11 @@ bool Network::read_busvehicle(istream& in) // reads a bus vehicle
 	  }
 	  btr->set_bustype(bty); 
 	  Start_trip* st = new Start_trip (btr, btr->get_starttime());
+	  if (driving_roster.empty() == false && btr->get_starttime() < driving_roster.back()->first->get_starttime())
+	  {
+  			cout << "readfile::readsbusvehicle scanner jammed at " << bracket;
+  			return false;
+	  }  
 	  driving_roster.push_back(st); // save the driving roster at the vehicle level
   }
   for (vector<Start_trip*>::iterator trip = driving_roster.begin(); trip < driving_roster.end(); trip++)
@@ -6320,26 +6323,7 @@ double Network::executemaster(QPixmap * pm_,QMatrix * wm_)
 	this->readtransitdemand (workingdir + "transit_demand.dat");
 	if (theParameters->choice_set_indicator == 1)
 	{
-		this->read_transit_path_sets (workingdir +"path_set1.dat");
-		this->read_transit_path_sets (workingdir +"path_set2.dat");
-		this->read_transit_path_sets (workingdir +"path_set3.dat");
-		this->read_transit_path_sets (workingdir +"path_set4.dat");
-		this->read_transit_path_sets (workingdir +"path_set5.dat");
-		this->read_transit_path_sets (workingdir +"path_set6.dat");
-		this->read_transit_path_sets (workingdir +"path_set7.dat");
-		this->read_transit_path_sets (workingdir +"path_set8.dat");
-		this->read_transit_path_sets (workingdir +"path_set9.dat");
-		this->read_transit_path_sets (workingdir +"path_set10.dat");
-		this->read_transit_path_sets (workingdir +"path_set11.dat");
-		this->read_transit_path_sets (workingdir +"path_set12.dat");
-		this->read_transit_path_sets (workingdir +"path_set13.dat");
-		this->read_transit_path_sets (workingdir +"path_set14.dat");
-		this->read_transit_path_sets (workingdir +"path_set15.dat");
-		this->read_transit_path_sets (workingdir +"path_set16.dat");
-		this->read_transit_path_sets (workingdir +"path_set17.dat");
-		this->read_transit_path_sets (workingdir +"path_set18.dat");
-		this->read_transit_path_sets (workingdir +"path_set19.dat");
-		this->read_transit_path_sets (workingdir +"path_set20.dat");
+		this->read_transit_path_sets (workingdir +"path_set_generation.dat");
 	}
 #endif // _BUSES
 	if (!init())
@@ -6690,11 +6674,10 @@ bool Network::writeassmatrices(string name)
 
 
 bool Network::init()
-
 {
 	// initialise the turining events
 	double initvalue =0.1;
-	//theParameters->new_day();
+	theParameters->new_day();
 	for(map<int,Turning*>::iterator iter=turningmap.begin(); iter!=turningmap.end(); iter++)
 	{
 		(*iter).second->init(eventlist,initvalue);

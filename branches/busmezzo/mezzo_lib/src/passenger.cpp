@@ -360,6 +360,33 @@ Busstop* Passenger::make_alighting_decision (Bustrip* boarding_bus, double time)
 	map <Busstop*, double> candidate_transfer_stops_u; // the double value is the utility associated with the respective stop
 	map <Busstop*, double> candidate_transfer_stops_p; // the double value is the probability associated with the respective stop
 	vector<Pass_path*> path_set = OD_stop->get_path_set();
+	if (path_set.empty() == true) // if the set is empty, try traverse origin or destination
+	{
+		// try origin
+		map<Busstop*,double> distances = OD_stop->get_origin()->get_walking_distances();
+		for (map<Busstop*,double>::iterator stop_iter = distances.begin(); stop_iter != distances.end(); stop_iter++) 
+		{
+			if ((*stop_iter).first->get_stop_od_as_origin_per_stop(OD_stop->get_destination())->get_path_set().empty() == false)
+			{
+				set_ODstop ((*stop_iter).first->get_stop_od_as_origin_per_stop(OD_stop->get_destination()));
+				path_set = OD_stop->get_path_set();
+				break;
+			}
+		}
+		// try destination
+		distances.clear();
+		distances = OD_stop->get_destination()->get_walking_distances();
+		for (map<Busstop*,double>::iterator stop_iter = distances.begin(); stop_iter != distances.end(); stop_iter++)
+		{
+			vector <Pass_path*> possible_path_set = OD_stop->get_origin()->get_stop_od_as_origin_per_stop((*stop_iter).first)->get_path_set();
+			if (possible_path_set.empty() == false)
+			{
+				set_ODstop (OD_stop->get_origin()->get_stop_od_as_origin_per_stop((*stop_iter).first));
+				path_set = OD_stop->get_path_set();
+				break;
+			}
+		}
+	}
 	int level_of_rti = OD_stop->get_origin()->get_rti();
 	if (has_network_rti == 1)
 	{
