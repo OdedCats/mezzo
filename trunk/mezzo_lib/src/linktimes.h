@@ -19,7 +19,8 @@
 /***********************************************************************************************************
 LinkTime contains the time-variant travel time for a link.
 
-LinkTimeInfo contains the LinkTime for all links in the network. It is used by the shortest path algorithm.
+LinkCostInfo contains the Generalized link costs for all links in the network. It is used by the shortest path algorithm.
+
 
 ***********************************************************************************************************/
  #ifndef LINKTIMES
@@ -95,21 +96,40 @@ LinkTimeInfo contains the LinkTime for all links in the network. It is used by t
 
  } ;
 
- class LinkTimeInfo
+ class LinkCostInfo
+	 /* contains the time dependent generalized cost for all links 
+	 * For each user class, the attributes need to be set
+	 *
+	 *
+	 */
  {
  	public:
-		virtual ~LinkTimeInfo ();
- 	const double cost (const int i, const double time=0.0);
-	const double graph_cost (const int i, const double time=0.0);
-	void set_graphlink_to_link (const map <int,int> & map) {graphlink_to_link = map;}
-	void generate_disturbances ();
-	void zero_disturbances ();
-	const double mean ();
-	const double sum();
+		virtual ~LinkCostInfo ();
+ 	const double cost (const int i, const double time=0.0); //!< returns the generalized link cost for link i
+	const double graph_cost (const int i, const double time=0.0);//!< returns the generalized link cost for graph_link i (mapped to mezzo links)
+	void set_graphlink_to_link (const map <int,int> & map) {graphlink_to_link = map;}//!< sets the mapping for graph_links to links (graph links have to be numbered continuously from 0, links can have any numbering)
+	void generate_disturbances (); //!< generates the distrurbances for link travel times, which reflect small perception errors
+	void zero_disturbances (); //!< sets the disturbances to 0
+	const double mean (); //!< returns the mean of the travel times
+	const double sum();//!< returns the sum of the travel times.
+	map <int, LinkTime*>& times () {return times_;} // returns the travel times map
+	map <int, double>& distances () {return distances_;} //!< returns the link distances (m)
+	map <int, double>& tolls() {return tolls_;} //!< returns the link tolls (SEK)
 
- 	//vector <LinkTime*> times;
-	map <int, LinkTime*> times;
+	void set_link_distance(const int i, const double distance) {distances_ [i]=distance;}
+	const double get_link_distance(const int i)  {if (distances_.count(i)) return (distances_[i]); else return 0.0;}
+
+	void set_link_toll(const int i, const double toll) {tolls_[i]=toll;} //!< for now the toll is fixed, will make it time dependent (such as LinkTime) when we actually start using it
+	const double get_link_toll(const int i)  {if(tolls_.count(i)) return (tolls_ [i]); else return 0.0;}
+ private:
+ 	map <int, LinkTime*> times_; //!< contains the link times (s)
+	map <int, double> distances_; //!< contains the link distances (m)
+	map <int, double> tolls_; //!< contains the link tolls (SEK)
+
 	map <int, int>graphlink_to_link;
+
+	double value_of_time; // in SEK/s
+	double value_of_distance; // in SEK/m
  };
 	 	
 

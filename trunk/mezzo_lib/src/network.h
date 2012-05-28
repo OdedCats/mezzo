@@ -315,7 +315,7 @@ protected:
 #ifndef _USE_VAR_TIMES
 	Graph<double, GraphNoInfo<double> > * graph;
 #else
-	Graph<double, LinkTimeInfo > * graph;
+	Graph<double, LinkCostInfo > * graph;
 #endif
 	// Random stream
 	Random* random;
@@ -377,7 +377,7 @@ protected:
 	// Linktimes
 	int nrperiods; //!< number of linktime periods
 	double periodlength; //!< length of each period in seconds.
-	LinkTimeInfo* linkinfo;
+	LinkCostInfo* linkinfo;
 	ofstream convergence_out;
 	// PVM communicator
 #ifdef _PVM   

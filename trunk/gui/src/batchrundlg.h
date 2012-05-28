@@ -85,7 +85,7 @@ private:
 	int max_iter;
 	double max_relgap;
 	Network* theNetwork;
-	LinkTimeInfo* linktimes;
+	LinkCostInfo* linktimes;
 	bool stop_pressed;
 };
 

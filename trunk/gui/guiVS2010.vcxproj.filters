@@ -114,5 +114,8 @@
     <None Include="ui\positionbackground.ui">
       <Filter>Forms</Filter>
     </None>
+    <None Include="ui\find.ui">
+      <Filter>Forms</Filter>
+    </None>
   </ItemGroup>
 </Project>

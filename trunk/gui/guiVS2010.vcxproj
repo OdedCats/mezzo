@@ -102,6 +102,7 @@ nmake release</NMakeReBuildCommandLine>
     <None Include="Makefile" />
     <None Include="ui\batchrundlg.ui" />
     <None Include="canvas_qt4.ui" />
+    <None Include="ui\find.ui" />
     <None Include="ui\nodedlg.ui" />
     <None Include="ui\outputview.ui" />
     <None Include="parametersdialog_qt4.ui" />

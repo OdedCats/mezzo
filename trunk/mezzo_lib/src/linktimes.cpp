@@ -91,21 +91,17 @@ const double LinkTime::sum()
 
 }
 
-LinkTimeInfo::~LinkTimeInfo ()
-{/*
-	for(map <int, LinkTime*>::iterator iter= times.begin(); iter!=times.end(); ++iter)
-	{
-		if (NULL != (iter->second))
-			delete (iter->second);
-	}*/
-	times.clear();
+LinkCostInfo::~LinkCostInfo ()
+{
+	// Linktimes* get cleaned up elsewhere
+	times_.clear();
 }
 
-const double LinkTimeInfo::sum()
+const double LinkCostInfo::sum()
 {
 	double totaltime = 0.0;
-	map <int,LinkTime*>::iterator iter = times.begin();
-	for (iter;iter!=times.end();iter++)
+	map <int,LinkTime*>::iterator iter = times_.begin();
+	for (iter;iter!=times_.end();iter++)
 	{
 		totaltime+=(*iter).second->mean();
 	}
@@ -114,55 +110,55 @@ const double LinkTimeInfo::sum()
 
 }
 
-void LinkTimeInfo::generate_disturbances ()
+void LinkCostInfo::generate_disturbances ()
 {
-	map <int,LinkTime*>::iterator iter = times.begin();
-	for (iter; iter != times.end(); iter++)
+	map <int,LinkTime*>::iterator iter = times_.begin();
+	for (iter; iter != times_.end(); iter++)
 		iter->second->generate_disturbances();
 }
 
-void LinkTimeInfo::zero_disturbances ()
+void LinkCostInfo::zero_disturbances ()
 {
-	map <int,LinkTime*>::iterator iter = times.begin();
-	for (iter; iter != times.end(); iter++)
+	map <int,LinkTime*>::iterator iter = times_.begin();
+	for (iter; iter != times_.end(); iter++)
 		iter->second->zero_disturbances();
 }
 
 
 
-const double LinkTimeInfo::mean()
+const double LinkCostInfo::mean()
 {	
 
-	return sum()/ times.size(); // we can do this since all linktimes have same nr of periods
+	return sum()/ times_.size(); // we can do this since all linktimes have same nr of periods
 
 }
 
-const double LinkTimeInfo::cost (const int i, const double time)  
+const double LinkCostInfo::cost (const int i, const double time)  
 
 
 {
- 	map <int,LinkTime*>::iterator iter = times.find (i);
- 	if (iter!=times.end())
+ 	map <int,LinkTime*>::iterator iter = times_.find (i);
+ 	if (iter!=times_.end())
  		return (*iter).second->cost(time);
  	else
  	{	
- 		eout << "LinkTimeInfo:: cost  : Error, can't find the link i = " << i << endl;
+ 		eout << "LinkCostInfo:: cost  : Error, can't find the link i = " << i << endl;
  		return 0.1; // NEVER RETURN 0
    }
 }
 
 
-const double LinkTimeInfo::graph_cost (const int i, const double time)  
+const double LinkCostInfo::graph_cost (const int i, const double time)  
 
 
 {
 	int graph_i = graphlink_to_link [i];
- 	map <int,LinkTime*>::iterator iter = times.find (graph_i);
- 	if (iter!=times.end())
+ 	map <int,LinkTime*>::iterator iter = times_.find (graph_i);
+ 	if (iter!=times_.end())
  		return (*iter).second->cost(time);
  	else
  	{	
- 		eout << "LinkTimeInfo:: graph_cost  : Error, can't find the link i = " << i << endl;
+ 		eout << "LinkCostInfo:: graph_cost  : Error, can't find the link i = " << i << endl;
  		return 0.1; // NEVER RETURN 0
    }
 }

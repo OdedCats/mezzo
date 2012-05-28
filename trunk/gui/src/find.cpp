@@ -5,8 +5,8 @@ FindDialog::FindDialog(QWidget* parent):parent_(parent)
 {
 	theNetwork=NULL;
 	setupUi(this);
-	selected_link=NULL;
-	selected_node=NULL;
+	selected_links.clear();
+	selected_nodes.clear();
 }
 
 void FindDialog::set_network(Network* net_) 
@@ -24,7 +24,7 @@ void FindDialog::show()
 void FindDialog::on_findButton_clicked()
 {
 	// Find the link/node and set as selected
-	unselect();
+	// unselect();
 	if (linkRadio->isChecked()) // find link
 	{
 		int id = findId->text().toInt();
@@ -37,8 +37,8 @@ void FindDialog::on_findButton_clicked()
 		}
 		else // link id exists
 		{
-			selected_link= alllinks [id];
-			selected_link->set_selected(true);
+			alllinks [id]->set_selected(true);
+			selected_links.push_back(alllinks [id]);
 		}
 	}
 	else // find node
@@ -48,32 +48,45 @@ void FindDialog::on_findButton_clicked()
 		if (!allnodes.count(id)) // link id does not exist
 		{
 			response->setText("Cannot find that node!");
-			findId->clear();
+			
 		}
 		else // node id exists
 		{
-			selected_node= allnodes [id];
-			selected_node->get_icon()->set_selected(true);
+			allnodes [id]->get_icon()->set_selected(true);
+			selected_nodes.push_back(allnodes [id]);
 		}
 
 	}
 
 	// redraw
-	
+	findId->clear();
+	emit paintRequest();
+}
+
+void FindDialog::on_clearButton_clicked()
+{
+	unselect();
+	findId->clear();
 	emit paintRequest();
 }
 
 void FindDialog::unselect()
 {
-	if (selected_link)
+	if (selected_links.size()>0)
 	{
-		selected_link->set_selected(false);
-		selected_link=NULL;
+		for (list<Link*>::iterator l_iter=selected_links.begin(); l_iter != selected_links.end(); ++l_iter)
+		{
+			(*l_iter)->set_selected(false);
+		}
+		selected_links.clear();
 	}
-	if (selected_node)
+	if (selected_nodes.size()>0)
 	{
-		selected_node->get_icon()->set_selected(false);
-		selected_node=NULL;
+		for (list<Node*>::iterator n_iter=selected_nodes.begin(); n_iter != selected_nodes.end(); ++n_iter)
+		{
+			(*n_iter)->get_icon()->set_selected(false);
+		}
+		selected_nodes.clear();		
 	}
 	response->clear();
 }

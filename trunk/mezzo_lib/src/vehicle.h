@@ -35,7 +35,7 @@ class Vehicle
 {
   public:
    Vehicle();
-   Vehicle(const int id_, const int type_, const double length_,Route*const  route_, ODpair* const odpair_, const double time_);
+  // Vehicle(const int id_, const int type_, const double length_,Route*const  route_, ODpair* const odpair_, const double time_); // OLD now use vehicle() and init(...)
    void init (const int id_, const int type_, const double length_, Route* const route_, ODpair*const  odpair_, const double time_);
    const double get_length() const {return length;}
    const double get_exit_time() const {return exit_time;}
@@ -86,8 +86,8 @@ class Bus : public Vehicle
 {
 public:
 	Bus():Vehicle() {occupancy=0;}
-	Bus(const int id_, const int type_, const double length_,Route* const route_, ODpair* const odpair_, const double time_) :
-		Vehicle(id_, type_,length_,route_,odpair_,time_) {}
+	//Bus(const int id_, const int type_, const double length_,Route* const route_, ODpair* const odpair_, const double time_) :
+		//Vehicle(id_, type_,length_,route_,odpair_,time_) {} // Old, now use Vehicle() and init(...)
 	const int get_occupancy() const {return occupancy;}
 	void set_occupancy (const int occup) {occupancy=occup;}
 	
@@ -98,20 +98,13 @@ protected:
 
 
 class VehicleRecycler
+	//!< Vehicle Factory that returns new vehicles and recycles old ones (via addvehicle(Vehicle*))
 {
  public:
- 	virtual ~VehicleRecycler();
-	Vehicle* const  newVehicle() {	 	if (recycled.empty())
-     								return new Vehicle();
-     							else
-     							{
-     								Vehicle* veh=recycled.front();
-     								recycled.pop_front();
-     								return veh;
-     							}	
-     						}
-							
-     void addVehicle(Vehicle*const  veh){recycled.push_back( veh);}
+ 	virtual ~VehicleRecycler(); //!< deletes all vehicles in the container
+	Vehicle* const  newVehicle(Vclass* vclass=NULL) ; //!< returns a new vehicle
+	void addVehicle(Vehicle*const  veh){recycled.push_back( veh);}
+	 
 	 Bus* const newBus() {	 	if (recycled_busses.empty())
      								return new Bus();
      							else
@@ -124,9 +117,12 @@ class VehicleRecycler
 							
      void addBus(Bus*const  bus){recycled_busses.push_back( bus);}
 
+	 void register_vclass(Vclass* vclass_) { vehicleclasses.insert(pair<int,Vclass*>(vclass_->get_id(),vclass_));}
+
  private:
 	list <Vehicle*> recycled;
 	list <Bus*> recycled_busses;
+	map <int,Vclass*> vehicleclasses;
 };
 
 //static VehicleRecycler recycler;

@@ -15,7 +15,7 @@ Vehicle::Vehicle()
  //next_link_id = -1;
  }
 
-
+/*
 Vehicle::Vehicle(const int id_, const int type_, const double length_, Route*const  route_, ODpair* const odpair_, const double time_): id(id_), route(route_), odpair(odpair_), start_time(time_) , type(type_), length(length_), exit_time(0.0)
 {
 	entered=false;	
@@ -24,7 +24,7 @@ Vehicle::Vehicle(const int id_, const int type_, const double length_, Route*con
 	//next_link_id = -1;
 	next_link_iter=route->firstlink_iter();
 }
-
+*/
 void Vehicle::init (const int id_, const int type_, const double length_, Route* const route_, ODpair* const odpair_, const double time_)
 {
 	 id=id_;
@@ -126,4 +126,18 @@ VehicleRecycler::	~VehicleRecycler()
 		delete (*iter1); // calls automatically destructor
 	}
 	recycled_busses.clear();
+}
+
+Vehicle* const  VehicleRecycler::newVehicle(Vclass* vclass) 
+{	 	
+	Vehicle* veh=NULL;
+	if (recycled.empty())
+    	veh= new Vehicle();
+    else
+    {
+     	veh=recycled.front();
+     	recycled.pop_front();
+     	return veh;
+    }	
+	return veh;
 }

@@ -76,7 +76,7 @@
     <rect>
      <x>290</x>
      <y>20</y>
-     <width>93</width>
+     <width>101</width>
      <height>28</height>
     </rect>
    </property>
@@ -88,8 +88,8 @@
    <property name="geometry">
     <rect>
      <x>290</x>
-     <y>50</y>
-     <width>93</width>
+     <y>90</y>
+     <width>101</width>
      <height>28</height>
     </rect>
    </property>
@@ -113,6 +113,19 @@
    </property>
    <property name="text">
     <string/>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="clearButton">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>50</y>
+     <width>101</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Clear Selection</string>
    </property>
   </widget>
  </widget>

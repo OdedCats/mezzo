@@ -41,6 +41,7 @@ public:
 private slots:
 	void on_findButton_clicked();
 	void on_cancelButton_clicked();
+	void on_clearButton_clicked();
 	void closeEvent(QCloseEvent *event);
 	
 signals:
@@ -50,8 +51,8 @@ private:
 	Network* theNetwork;
 	Parameters* theParameters;
 	QWidget* parent_;
-	Link* selected_link;
-	Node* selected_node;
+	list <Link*> selected_links;
+	list <Node*> selected_nodes;
 };
 
 

@@ -120,7 +120,7 @@ Network::Network()
 #ifdef _VISSIMCOM
 	communicator= new VISSIMCOM("vissimconf.dat");
 #endif //_VISSIMCOM
-	linkinfo=new LinkTimeInfo();
+	linkinfo=new LinkCostInfo();
 	eventlist=new Eventlist;
 	no_ass_links=0;
 	routenr=0;
@@ -2406,7 +2406,7 @@ bool Network::readtimes(istream& in)
 				ltime->times() [i] = linktime;
 			(*iter).second->set_hist_time(linktime);
 			(*iter).second->set_histtimes(ltime);
-			linkinfo->times.insert(pair <int,LinkTime*> ((*iter).second->get_id(),ltime )); 
+			linkinfo->times().insert(pair <int,LinkTime*> ((*iter).second->get_id(),ltime )); 
 		}
 		
 	} 
@@ -2444,7 +2444,7 @@ bool Network::readtime(istream& in)
 		assert ( linktime >= 0.0 );
 		(*l_iter).second->set_hist_time(linktime);
 		(*l_iter).second->set_histtimes(ltime);
-		linkinfo->times.insert(pair<int,LinkTime*> (lid,ltime));
+		linkinfo->times().insert(pair<int,LinkTime*> (lid,ltime));
 	}
 	else // skip the linktimes for this link.
 	{
@@ -2477,7 +2477,7 @@ bool Network::copy_linktimes_out_in()
 		ok = ok  && ((*l_iter).second->copy_linktimes_out_in());
 		int index= (*l_iter).first;
 		
-		linkinfo->times [index]->set_times ( (*l_iter).second->get_histtimes()->get_times() );
+		linkinfo->times() [index]->set_times ( (*l_iter).second->get_histtimes()->get_times() );
 	}
 	//double after = this->calc_sumsq_input_output_linktimes();
 	//eout << "Network::copy_linktimes_out_in: ssq before " << before << " and after " << after << endl;
@@ -2840,7 +2840,7 @@ bool Network::init_shortest_path()
 #ifndef _USE_VAR_TIMES
 	graph=new Graph<double, GraphNoInfo<double> > (nodemap.size() /* 50000*/, linkmap.size(), 9999999.0);
 #else
-	graph=new Graph<double, LinkTimeInfo > (nodemap.size()+1, linkmap.size()+1, 9999999.0);
+	graph=new Graph<double, LinkCostInfo > (nodemap.size()+1, linkmap.size()+1, 9999999.0);
 #endif
 	// ADD THE LINKS AND NODES
 
@@ -4672,7 +4672,7 @@ const double Network::run_iterations ()
 		else if (i<(theParameters->max_iter -1))
 		{
 			ok=copy_linktimes_out_in();
-			//eout << linkinfo->mean() << " and size " << linkinfo->times.size()<< " after copying the out-in linktimes " << endl;
+			//eout << linkinfo->mean() << " and size " << linkinfo->times().size()<< " after copying the out-in linktimes " << endl;
 			reset();
 		}
 		else
