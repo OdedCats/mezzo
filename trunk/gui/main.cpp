@@ -20,5 +20,7 @@ int main(int argc, char *argv[])
 	}
 	else
 		window->show();
+	QObject::connect(window, SIGNAL(closing()), 
+					 &app, SLOT(closeAllWindows()));
 	return app.exec();
 }

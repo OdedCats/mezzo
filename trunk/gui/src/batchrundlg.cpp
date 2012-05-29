@@ -1,7 +1,7 @@
 #include <QtGui>
 #include "batchrundlg.h"
 
-BatchrunDlg::BatchrunDlg( QWidget* parent )
+BatchrunDlg::BatchrunDlg( QWidget* parent ):QDialog(parent)
 {
 	parent_=parent;
 	theNetwork=NULL;

@@ -1,7 +1,7 @@
 #include <QtGui>
 #include "outputview.h"
 
-OutputView::OutputView(QWidget* parent )
+OutputView::OutputView(QWidget* parent ):QDialog(parent)
 {
 	parent_=parent;
 	theNetwork=NULL;

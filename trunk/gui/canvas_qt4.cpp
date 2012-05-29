@@ -135,6 +135,25 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 	simprogress_widget->setVisible(false);
 }
 
+MainForm::~MainForm()
+
+{
+	if (NULL!=theNetwork)
+		delete theNetwork;
+	if (NULL!=od_analyser_)
+		delete od_analyser_;
+	if (NULL!=outputview)
+		delete outputview;
+	if (NULL!=brdlg)
+		delete brdlg;
+	if (NULL!=pmdlg)
+		delete pmdlg;
+	if (NULL!=finddialog)
+		delete finddialog;
+	if (NULL!=posbackground)
+		delete posbackground;
+}
+
 void MainForm::activateToolbars(bool activated)
 {
 	
@@ -253,18 +272,14 @@ void MainForm::on_stop_activated()
 	//update the canvas
 	center_image();
 	updateCanvas();
-
-
 }
 
+
+
 void MainForm::on_quit_activated()
-{
-	//theNetwork->~Network(); 
-	delete theNetwork;
-	od_analyser_->~ODCheckerDlg();
-	outputview->~OutputView();
-	brdlg->~BatchrunDlg();
-	close();
+{ 
+	
+	closing();
 }
 
 

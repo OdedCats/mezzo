@@ -43,6 +43,8 @@ class MainForm : public QMainWindow, private Ui::MainForm
 
 public:
 	MainForm(QWidget *parent = 0); //!< inits the main form
+	virtual ~MainForm(); //!< destroys and cleans up by calling cleanup()
+	
 	void seed(int sd ); //!< sets the seed
 	void set_filename(const QString fn_) {	
 			fn = QDir (fn_).path();
@@ -59,7 +61,8 @@ public:
 	Network* getMezzoNet(){return (theNetwork);}
 	void set_started_from_commandline(const bool value) { started_from_commandline=value;}
 	const bool get_started_from_commandline() {return started_from_commandline;}
-
+signals:
+	void closing();
 private slots: 
 	// Using the Auto-Connect feature with the on_<signal>_<event>() syntax
 	void on_closenetwork_activated(); //!< Closes the current network and resets to the initial state.
@@ -168,7 +171,7 @@ private:
     bool breaknow;
     //QStatusBar* statusbar;
 	
-	// sub dialogs
+	// child dialogs
 	ParametersDialog* pmdlg;
 	ODCheckerDlg* od_analyser_;
 	BatchrunDlg* brdlg;

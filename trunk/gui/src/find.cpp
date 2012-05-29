@@ -1,7 +1,7 @@
 #include <QtGui>
 #include "find.h"
 
-FindDialog::FindDialog(QWidget* parent):parent_(parent)
+FindDialog::FindDialog(QWidget* parent):QDialog(parent), parent_(parent)
 {
 	theNetwork=NULL;
 	setupUi(this);

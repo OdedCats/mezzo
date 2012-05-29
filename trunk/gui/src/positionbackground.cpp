@@ -1,7 +1,7 @@
 #include <QtGui>
 #include "positionbackground.h"
 
-PositionBackground::PositionBackground(QWidget* parent):parent_(parent)
+PositionBackground::PositionBackground(QWidget* parent):QDialog(parent), parent_(parent)
 {
 	theNetwork=NULL;
 	setupUi(this);
