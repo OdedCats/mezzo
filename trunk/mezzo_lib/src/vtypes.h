@@ -86,11 +86,16 @@ class Vclass // contains the vehicle/user classes. This combines demand segments
 	// Each vehicle class contains its own list of types.
 {
 public:
-	Vclass (int id_, string label_, Vtypes* vtypes_) : id(id_), label(label_), vtypes(vtypes_) {}
+	Vclass (int id_, string label_, Vtypes* vtypes_, double vot, double vod) : id(id_), label(label_), vtypes(vtypes_),
+				value_of_time(vot), value_of_distance(vod) {}
 	virtual ~Vclass ();
 	Vtype* get_vtype() const {return vtypes->random_vtype();}
 	const int get_id() const {return id;}
 	const string get_label() const {return label;}
+	const double get_vot() const {return value_of_time;}
+	void set_vot(const double val) {value_of_time=val;}
+	const double get_vod() const {return value_of_distance;}
+	void set_vod(const double val) {value_of_distance=val;}
 
 private:
 	int id;
@@ -99,6 +104,8 @@ private:
 	Vtypes* vtypes; // each vclass has its own vtype
 	
 	// other attributes for vehicles class.
+	double value_of_time; //!< value of time (in chosen currency)
+	double value_of_distance; //!< value of traveled distance (in chosen currency)
 };
 
 #endif

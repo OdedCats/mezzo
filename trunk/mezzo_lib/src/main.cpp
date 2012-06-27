@@ -38,6 +38,7 @@ int main ( int argc, char **argv)
    // NEW started using threads for future parallel runs. 
    // However, global vars (notably theParameters and vid) need to be moved local to run more than one thread at a time to avoid data conflicts.
   NetworkThread* net1 = new NetworkThread(argv[1],1,seed);
+  cout << "seed is " << seed << endl;
   net1->init(); // reads the input files
   
   /* Normal case, but now override, replications are disabled for now.
