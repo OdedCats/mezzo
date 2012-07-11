@@ -717,19 +717,31 @@ void Parameters::write_parameters(ostream & out)
 {
 #ifndef _NO_GUI
    out << "#drawing_parameters" << endl;
+   out << "#simulation_view" << endl;
    out << "  draw_link_ids= " << draw_link_ids << endl;
    out << "  link_thickness= " << link_thickness << endl;
    out << "  node_thickness= " << node_thickness << endl;
    out << "  node_radius= " << node_radius << endl;
    out << "  queue_thickness= " << queue_thickness << endl;	
    out << "  selected_thickness= " << selected_thickness << endl;
-   out << "  show_background_image= " << show_background << endl;
+   out << "  text_size= " << text_size << endl;
+   out << "  show_background= " << show_background << endl;
+   out << "  background_x= " << background_x << endl;
+   out << "  background_y= " << background_y << endl;
+   out << "  background_scale= " << background_scale << endl;
    out << "  linkcolor= " << qPrintable(linkcolor.name()) << endl;
    out << "  nodecolor= " << qPrintable(nodecolor.name()) << endl;
    out << "  queuecolor= " << qPrintable(queuecolor.name()) << endl;
    out << "  backgroundcolor= " << qPrintable(backgroundcolor.name()) << endl;
    out << "  selectedcolor= " << qPrintable(selectedcolor.name()) << endl;
    out << "  gui_update_step= " << gui_update_step << endl;
+   out << "  zerotime= " << zerotime << endl;
+   out << "#output_view" << endl;
+   out << "  thickness_width= " << thickness_width << endl;
+   out << "  cutoff= " << cutoff << endl;
+   out << "  show_link_names= " << show_link_names << endl;
+   out << "  show_link_ids= " << show_link_ids << endl;
+   out << "  show_data_values= " << show_data_values << endl;
    out << "#moe_parameters" << endl;
    out << "  moe_speed_update= " << moe_speed_update << endl;
    out << "  moe_inflow_update= " << moe_inflow_update << endl;
@@ -744,9 +756,13 @@ void Parameters::write_parameters(ostream & out)
    out << "#turning_parameters" << endl;
    out << "  default_lookback_size= " << default_lookback_size << endl;
    out << "  turn_penalty_cost= " << turn_penalty_cost << endl;
+   out << "  use_giveway= " << use_giveway << endl;
+   out << "  max_wait= " << max_wait << endl;
+   out << "  min_headway_inflow= " << min_headway_inflow << endl;
    out << "#server_parameters" << endl;
    out << "  od_servers_deterministic= " << od_servers_deterministic << endl;
    out << "  odserver_sigma= " << odserver_sigma << endl;
+   out << "  implicit_nr_servers= " << odserver_sigma << endl;
    out << "#vehicle_parameters" << endl;
    out << "  standard_veh_length= " << standard_veh_length << endl;
    out << "#route_parameters" << endl;
@@ -755,7 +771,13 @@ void Parameters::write_parameters(ostream & out)
    out << "  kirchoff_alpha= " << kirchoff_alpha << endl;
    out << "  delete_bad_routes= " << delete_bad_routes << endl;
    out << "  max_rel_route_cost= " << max_rel_route_cost << endl;
-   out << "  small_od_rate= " << small_od_rate << endl;
+   out << "  use_linktime_disturbances= " << use_linktime_disturbances << endl;
+   out << "  linktime_disturbance= " << linktime_disturbance << endl;
+   out << "  routesearch_random_draws= " << routesearch_random_draws << endl;
+   out << "  scale_demand= " << scale_demand << endl;
+   out << "  scale_demand_factor= " << scale_demand_factor << endl;
+   out << "  renum_routes= " << renum_routes << endl;
+   out << "  overwrite_histtimes= " << overwrite_histtimes << endl;
    out << "#mime_parameters" << endl;
    out << "  mime_comm_step= " << mime_comm_step << endl;
    out << "  mime_min_queue_length= " << mime_min_queue_length << endl;
@@ -765,7 +787,7 @@ void Parameters::write_parameters(ostream & out)
    out << "#iteration_control" << endl;
    out << "  max_iter= " << max_iter << endl;
    out << "  rel_gap_threshold= " << rel_gap_threshold << endl;
-    
+   out << "  max_route_iter= " << max_route_iter << endl; 
 
 #endif
 
