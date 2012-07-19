@@ -2826,7 +2826,7 @@ bool Network::init_shortest_path()
 
 	double cost, mu, sd;
 	//if (!random)
-		
+	
 
 	if (randseed != 0)
 		random->seed(randseed);
@@ -2849,9 +2849,8 @@ bool Network::init_shortest_path()
 		lid=(*iter).second->get_id();
 		in=(*iter).second->get_in_node_id();
 		out=(*iter).second->get_out_node_id();
-		mu=(*iter).second->get_hist_time();
-		sd=disturbance*mu;
-		cost=mu;
+		cost=(*iter).second->get_hist_time();
+		
 
 #ifdef _DEBUG_SP
 		eout << " graph->addlink: link " << lid << ", innode " << in << ", outnode " << out << ", cost " << cost << endl;
@@ -4474,7 +4473,7 @@ bool Network::writeassmatrices(string name)
 bool Network::init()
 
 {
-	random->seed(42);
+	//random->seed(42);
 	// initialise the turining events
 	double initvalue =0.1;
 	for(map<int,Turning*>::iterator iter=turningmap.begin(); iter!=turningmap.end(); iter++)

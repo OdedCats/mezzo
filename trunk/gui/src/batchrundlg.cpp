@@ -269,7 +269,7 @@ void BatchrunDlg::run_route_iterations()
 		if (i < (theParameters->max_route_iter-1)) // except for last iteration, then we keep the results.
 		{
 			if (!theParameters->shortest_paths_initialised)
-				theNetwork->init_shortest_path();
+					theNetwork->init_shortest_path();
 			theNetwork->shortest_paths_all();
 			if (theParameters->renum_routes)
 				theNetwork->renum_routes();
@@ -281,7 +281,7 @@ void BatchrunDlg::run_route_iterations()
 		if (old_nr_routes==new_nr_routes)
 		{
 			//eout << "INFO: Network::run_route_iterations: no new routes found in iteration " << i << " exiting. " << endl;
-			breaksim=true;
+			//breaksim=true;
 		}
 	 }
 	 theNetwork->writepathfile(""); // write back the routes to the standard route file

@@ -16,10 +16,7 @@ template <class T, class I>
 Graph<T, I>::Graph(const int n, const int m, const T u, const T p)
    :  infinity_(u), downGradePenalty_(p),  scope_(0x7FFF) ,root_(SP_UNSET)
 {
-#ifdef RogueWave
-   nodes_.resize(n);
-   links_.resize(m);
-#else
+
    nodes_.reserve(n);
    GraphNode<T, I> dummy_node;
    int i;
@@ -32,7 +29,7 @@ Graph<T, I>::Graph(const int n, const int m, const T u, const T p)
    for (i = 0; i < m; i ++) {
 	  links_.push_back(dummy_link);
    }
-#endif
+
 }
 
 template <class T, class I>
@@ -356,6 +353,12 @@ void Graph<T, I>::labelCorrecting(const int s, const double entry, I *info)
       label[i] = infinity_;
       queue[i] = SP_UNSET;
    }
+   // RESET the node costs
+   for (int j = 0; j <nodes_.size(); j++)
+   {
+	   nodes_[j].cost_=0;
+	   nodes_[j].predecessor_=SP_UNSET;
+   }
 
    // for the root link
 
@@ -385,8 +388,7 @@ void Graph<T, I>::labelCorrecting(const int s, const double entry, I *info)
 		 // disregard links pointing to the source node
 		 // in order to avoid generating cyclic paths
 		
-		 // Wilco Burghout 2001_12_13 I WANT to make paths with U-turns possible (in case of incident)
-		 // commented out:
+		 
 		   
 		  if( p_link->dnNode_ == rootnode )
 		   continue;

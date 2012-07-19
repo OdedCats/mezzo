@@ -54,14 +54,14 @@ void LinkTime::zero_disturbances()
 const double LinkTime::cost(const double time)
 {
 	unsigned int i = static_cast <int> (time/periodlength); // return the current period
-	if (times_.size()==0) 
+	if (times_.empty()) 
         return 0.1; // never return 0
     else
 	{
 		if (times_.count(i)) // if exists (should always be true, but still)
 		{
 			if (disturbances.count(i))
-				return times_[i] + disturbances [i];
+				return (times_[i] + disturbances [i]);
 			else
 				return times_[i];
 		}

@@ -47,10 +47,13 @@ LinkCostInfo contains the Generalized link costs for all links in the network. I
  
 	 void init_random()	 {
 										rand = new Random();
+										/*
 										if (randseed != 0)
 											rand->seed(randseed);
 										else
 											rand->randomize();
+										*/
+										rand->seed(randseed+id);
 									 }
 	 ~LinkTime() {delete rand;}
 

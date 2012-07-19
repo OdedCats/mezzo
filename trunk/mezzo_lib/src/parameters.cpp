@@ -762,7 +762,7 @@ void Parameters::write_parameters(ostream & out)
    out << "#server_parameters" << endl;
    out << "  od_servers_deterministic= " << od_servers_deterministic << endl;
    out << "  odserver_sigma= " << odserver_sigma << endl;
-   out << "  implicit_nr_servers= " << odserver_sigma << endl;
+   out << "  implicit_nr_servers= " << implicit_nr_servers << endl;
    out << "#vehicle_parameters" << endl;
    out << "  standard_veh_length= " << standard_veh_length << endl;
    out << "#route_parameters" << endl;
@@ -771,6 +771,7 @@ void Parameters::write_parameters(ostream & out)
    out << "  kirchoff_alpha= " << kirchoff_alpha << endl;
    out << "  delete_bad_routes= " << delete_bad_routes << endl;
    out << "  max_rel_route_cost= " << max_rel_route_cost << endl;
+   out << "  small_od_rate= " << small_od_rate << endl;
    out << "  use_linktime_disturbances= " << use_linktime_disturbances << endl;
    out << "  linktime_disturbance= " << linktime_disturbance << endl;
    out << "  routesearch_random_draws= " << routesearch_random_draws << endl;
