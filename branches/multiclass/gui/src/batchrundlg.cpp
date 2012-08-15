@@ -235,7 +235,7 @@ void BatchrunDlg::run_iterations()
 			
 			emit paintRequest();
 		}
-		theNetwork->end_of_simulation(runtime);
+		theNetwork->end_of_simulation();
 		relgap_ltt_= theNetwork->calc_rel_gap_linktimes();
 		if (i>1)
 			relgap_rf_= theNetwork->calc_rel_gap_routeflows();

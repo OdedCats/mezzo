@@ -351,7 +351,7 @@ int Network::reset()
 	return runtime;
 }
 
-void Network::end_of_simulation(double time) // why is time passed here but not used??
+void Network::end_of_simulation() // why is time passed here but not used??
 {
 	for (map<int,Link*>::iterator iter=linkmap.begin();iter != linkmap.end();iter++)
 	{
@@ -1108,7 +1108,7 @@ bool Network::readgiveway(istream& in)
 	in  >>  nid >> tin >> tcontr >> tcritical;
 	// check
 	assert (nodemap.count(nid));
-	Node* node = nodemap [nid];
+	//Node* node = nodemap [nid];
 	assert (turningmap.count(tin));
 	Turning * t_in = turningmap [tin];
 	assert (turningmap.count(tcontr));
@@ -2824,7 +2824,7 @@ bool Network::init_shortest_path()
 {
 	int lid,in,out;
 
-	double cost, mu, sd;
+	double cost;
 	//if (!random)
 	
 
@@ -3053,7 +3053,7 @@ bool Network::find_alternatives_all (int lid, double penalty, Incident* incident
 	// Find all the affected links
 	Link* incident_link=linkmap[lid];
 	multimap <int, Route*> i_routemap = incident_link->get_routes();// get all routes through incident link
-	unsigned int nr_affected_routes = i_routemap.size();
+	//unsigned int nr_affected_routes = i_routemap.size();
 	multimap <int, Route*>::iterator rmiter=i_routemap.begin();
 	// get all affected (links,destinations) from each route, and store the origins as well
 	for (rmiter;rmiter != i_routemap.end(); rmiter++)
@@ -4188,7 +4188,7 @@ bool Network::writeall(unsigned int repl)
 	replication=repl;
 	string rep="";
 	string cleantimes;
-	end_of_simulation(runtime);
+	end_of_simulation();
 	string histtimesfile=filenames[3];
 	string linktimesfile = filenames[10];
 	cleantimes=linktimesfile +".clean";
@@ -4653,7 +4653,7 @@ const double Network::run_iterations ()
 		//eout << "          INFO: Network::run_iterations: iteration " << i+1 << " with sum of link travel times: " << linkinfo->sum() << endl;
 		
 		curtime=step(runtime);
-		end_of_simulation(runtime);
+		end_of_simulation();
 		relgap_ltt=calc_rel_gap_linktimes();
 		if (i > 0)
 			relgap_rf=calc_rel_gap_routeflows();
@@ -4661,7 +4661,7 @@ const double Network::run_iterations ()
 			relgap_rf = 1.0;
 		// write results in convergence file
 		convergence_out << i+1 << '\t' << relgap_ltt << '\t' << relgap_rf << endl;
-		if (check_convergence(i, relgap_ltt, relgap_rf))
+		if (check_convergence(relgap_ltt, relgap_rf))
 		{
 			//close_convergence_file();
 			convergence_out << endl;
@@ -4683,7 +4683,7 @@ const double Network::run_iterations ()
 	// close_convergence_file();
 	return -1.0;
 }
-const bool Network::check_convergence(const int iter_, const double rel_gap_ltt_, const double rel_gap_rf_)
+const bool Network::check_convergence( const double rel_gap_ltt_, const double rel_gap_rf_)
 {
 	if ((rel_gap_ltt_ <= theParameters->rel_gap_threshold) && ( rel_gap_rf_ <= theParameters->rel_gap_threshold) )
 		return true;
@@ -4692,9 +4692,12 @@ const bool Network::check_convergence(const int iter_, const double rel_gap_ltt_
 }
 double Network::step(double timestep)
 // same as run, but more stripped down. Called every timestep by the GUI
+
+// In case of _NO_GUI (standalone), the timestep arg is ignored and the sim runs for the whole runtime.
 {
-	double t0=timestamp();
+	
 #ifndef _NO_GUI
+	double t0=timestamp();
 	double tc; // current time
 	double next_an_update=t0+timestep;   // when to exit
 #endif //_NO_GUI  

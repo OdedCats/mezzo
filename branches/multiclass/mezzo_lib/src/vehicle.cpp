@@ -50,12 +50,7 @@ void Vehicle::set_entered()
 	//next_link_id=(*next_link_iter)->get_id();
 }
 
-void Vehicle::advance_to_next_link(Link* const next)
-{
-	
 
-
-}
 
 
 void Vehicle::set_curr_link(Link* const  curr_link_)

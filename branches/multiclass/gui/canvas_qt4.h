@@ -95,12 +95,12 @@ private slots:
 	void keyPressEvent(QKeyEvent* e);  //!< handle for key presses
 	void keyReleaseEvent(QKeyEvent* kev);  //!< handle for key releases
 	void mousePressEvent(QMouseEvent* event);  //!< handle for mous presses
-	void mouseDoubleClickEvent(QMouseEvent* mev);  //!< handle for double clicks
+	void mouseDoubleClickEvent(QMouseEvent* );  //!< handle for double clicks
 	void mouseMoveEvent(QMouseEvent* mev);  //!< handle for mouse moves
-	void mouseReleaseEvent(QMouseEvent* mev);   //!< handle for mouse release
+	void mouseReleaseEvent(QMouseEvent* );   //!< handle for mouse release
 	
 	void loop();  //!< main simulation - display loop in which the Network->step() is called repeatedly and the GUI is refreshed in between
-	void paintEvent(QPaintEvent *event );
+	//void paintEvent(QPaintEvent *event );
 	void activate_AnalyzeOutput() ;
 
 	void updateCanvas(); //!< redraws the network then calls copyPixmap()

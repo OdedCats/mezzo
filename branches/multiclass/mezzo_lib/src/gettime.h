@@ -18,6 +18,7 @@
 #ifndef _TIME_HH
 #define _TIME_HH
 
+#define _CRT_SECURE_NO_WARNINGS
 #include <sys/timeb.h>
 #include <time.h>
 
@@ -52,6 +53,7 @@ const char* const timestring()
  time(tt);
  char* stri=new char [30];
  strftime (stri,30,"%Y-%m-%d\t%T",gmtime(tt));
+ delete tt;
  return stri;
 
 }

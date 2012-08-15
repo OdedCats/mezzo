@@ -636,11 +636,11 @@ void MainForm::copyPixmap()
 	Canvas->repaint();  
 }
 
-void MainForm::paintEvent(QPaintEvent *  event )
+/*void MainForm::paintEvent(QPaintEvent *  event )
 {
 		
 }
-
+*/
 void MainForm::seed(int sd )
 {
    theNetwork->seed(sd);
@@ -822,7 +822,7 @@ void MainForm::mouseMoveEvent(QMouseEvent* mev)
 /**
 * mouse release event
 */
-void MainForm::mouseReleaseEvent(QMouseEvent* mev) 
+void MainForm::mouseReleaseEvent(QMouseEvent* ) 
 {
 	if(lmouse_pressed_)
 	{
@@ -843,7 +843,7 @@ void MainForm::mouseReleaseEvent(QMouseEvent* mev)
 	lmouse_pressed_=false;
 }
 
-void MainForm::mouseDoubleClickEvent(QMouseEvent* mev)
+void MainForm::mouseDoubleClickEvent(QMouseEvent* )
 {
 }
 

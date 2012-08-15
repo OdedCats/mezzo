@@ -76,7 +76,7 @@ protected:
 	void loadOrigCombwithD(const QString& curtext);
 	void drawRoute(const QString& colortext, const int& index);
 	void drawAllRoutes();
-	void selectionHandle(const QItemSelection& sel, const QItemSelection& unsel);
+	void selectionHandle(const QItemSelection& /*sel*/, const QItemSelection& /*unsel*/);
 	//void keyPressEvent(QKeyEvent* kev);
 
  signals:

@@ -93,7 +93,37 @@ struct less_ODVal
 using namespace std;
 class Node;
 class Vehicle;
+class Vclass;
 
+
+class LinkType
+/* Defines the type of a link, in three main aspects:
+
+* 1. the Allowed Vehicle Classes on the link
+* 2. Link Toll and other link attributes general for links
+* 3. Default values for Speed/Density functions, number of lanes 
+
+The first aspect is the most important: link the allowed vehicle classes to the links in the network.
+
+*/
+{
+public:
+	LinkType();
+	LinkType(const int & id, const string & name, const map <int, Vclass*> & vclasses):id_(id), name_(name), allowed_vclasses_(vclasses) {}
+	virtual ~LinkType() {}
+	const int get_id() const {return id_;}
+	void set_id(const int& val ) {id_=val;}
+	const string get_name() const {return name_;}
+	void set_name(const string& val) {name_=val;}
+	const map <int,Vclass*> & get_allowed_vclasses() const {return allowed_vclasses_;}
+	void add_vclass(Vclass* const val) {allowed_vclasses_.insert(pair<int,Vclass*>(val->get_id(),val));}
+	const bool vclass_allowed(const int & val) const {return (allowed_vclasses_.find(val) != allowed_vclasses_.end()); }
+private:
+	int id_;
+	string name_;
+	map <int,Vclass*> allowed_vclasses_;
+
+};
 
 
 class Link

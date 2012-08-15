@@ -393,8 +393,8 @@ void ODCheckerDlg::checkOD(bool check_)
 /**
  * handle selection behavior in the table view
  */
-void ODCheckerDlg::selectionHandle(	const QItemSelection& sel, 
-								    const QItemSelection& unsel)
+void ODCheckerDlg::selectionHandle(	const QItemSelection& /*sel*/, 
+								    const QItemSelection& /*unsel*/)
 {
 	// initialize a row and column counter for the selection area
 	rowCnt_=itemmodel_->rowCount();

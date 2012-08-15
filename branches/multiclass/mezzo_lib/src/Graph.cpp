@@ -354,7 +354,8 @@ void Graph<T, I>::labelCorrecting(const int s, const double entry, I *info)
       queue[i] = SP_UNSET;
    }
    // RESET the node costs
-   for (int j = 0; j <nodes_.size(); j++)
+   int nnodes=nodes_.size();
+   for (int j = 0; j < nnodes; j++)
    {
 	   nodes_[j].cost_=0;
 	   nodes_[j].predecessor_=SP_UNSET;

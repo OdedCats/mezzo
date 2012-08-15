@@ -51,7 +51,7 @@ class Vehicle
    Route* const get_route() const {return route;}
    Link* const nextlink() const ;
 
-   void advance_to_next_link(Link* const next);
+   
    const int get_id() const {return id;}
    const int get_type() const {return type;}
    const  int get_oid() const ;

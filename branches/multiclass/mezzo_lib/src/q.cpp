@@ -152,7 +152,7 @@ const bool Q::veh_exiting (const double time, const Link* const nextlink, const 
 const double Q::gap_to_next (const double time, const Link* const nextlink, const int lookback)
 {
 	int nextlinkid = 0;
-	double mingap=0.0;
+//	double mingap=0.0;
 	if (empty())
 		return -1.0;
 	else

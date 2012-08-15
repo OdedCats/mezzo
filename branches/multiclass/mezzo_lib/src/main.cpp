@@ -22,7 +22,7 @@
 int main ( int argc, char **argv)
 {
   long int seed = 0;
-  unsigned int replications = 1;
+//  unsigned int replications = 1;
   if (argc < 2)
   {
 	cout << "at least one argument needed (*.mezzo filename) " << endl;
