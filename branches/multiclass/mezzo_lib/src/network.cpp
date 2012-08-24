@@ -2824,7 +2824,7 @@ bool Network::init_shortest_path()
 {
 	int lid,in,out;
 
-	double cost;
+	double cost,length;
 	//if (!random)
 	
 
@@ -2850,8 +2850,9 @@ bool Network::init_shortest_path()
 		in=(*iter).second->get_in_node_id();
 		out=(*iter).second->get_out_node_id();
 		cost=(*iter).second->get_hist_time();
-		
-
+		length=(*iter).second->get_length();
+		if (linkinfo)
+			linkinfo->set_link_distance(lid,length);
 #ifdef _DEBUG_SP
 		eout << " graph->addlink: link " << lid << ", innode " << in << ", outnode " << out << ", cost " << cost << endl;
 #endif //_DEBUG_SP
@@ -3041,6 +3042,73 @@ bool Network::shortest_paths_all()
 	return true;
 }
 
+bool Network::calc_LOS_skims()
+{
+	linkinfo->zero_disturbances(); // no disturbances in the LOS skims
+	double unlimited_cost=9999999999.0;
+	// for all vclasses
+	int vclass_id = 0;
+	//   TODO: set the linkinfo VOD, VOT and class Permissions
+	//   for all entry times
+	vector<double> ldtimes=odmatrix.get_loadtimes();
+	vector<double>::iterator loadtime = ldtimes.begin();
+	int period=0;
+	for (loadtime;loadtime != ldtimes.end(); ++loadtime,++period)
+	{
+	//     for all origins
+		map <int,Origin*>::iterator ori= originmap.begin();
+		for (ori= originmap.begin(); ori != originmap.end(); ++ori)
+		{
+			// for all links going out of the origin
+			vector<Link*> o_links=ori->second->get_links();
+			vector<Link*>::iterator orilink = o_links.begin();
+			for (orilink = o_links.begin(); orilink!=o_links.end(); ++orilink)
+			{
+	//			do a one-all labelcorrecting
+				
+				graph->labelCorrecting(link_to_graphlink[(*orilink)->get_id()],*loadtime,linkinfo);
+	//			add values to LOS_SKIM slice for all destinations
+				map <int,Destination*>::iterator dest=destinationmap.begin();
+				for (dest=destinationmap.begin(); dest!= destinationmap.end(); ++dest)
+				{   
+					double cost =graph->costToNode(node_to_graphnode[dest->first]);
+					LOS_skim_gencost [vclass_id] [ori->first] [dest->first] [period] = cost;
+				}
+			}
+		}
+	}
+	return true;
+}
+
+bool Network::write_LOS(string name)
+{
+	ofstream out(name.c_str());
+	assert(out);
+	int nr_classes=this->LOS_skim_gencost.size();
+	map <int, map <int, map <int, map <int,double> > > >::iterator vclass_it=LOS_skim_gencost.begin();
+	map <int, map <int, map <int,double> > >::iterator ori_it = vclass_it->second.begin();
+	map <int, map <int,double> >::iterator dest_it = ori_it->second.begin();
+	map <int,double>::iterator period_it=dest_it->second.begin();
+	for (vclass_it=LOS_skim_gencost.begin();vclass_it!=LOS_skim_gencost.end();++vclass_it)
+	{ 
+		out << "vclass= " << vclass_it->first << endl << endl;
+		for (ori_it=vclass_it->second.begin();ori_it!=vclass_it->second.end();++ori_it)
+		{
+			for (dest_it = ori_it->second.begin();dest_it != ori_it->second.end();++dest_it)
+			{
+				out << ori_it->first << '\t' << dest_it->first;
+				for (period_it=dest_it->second.begin();period_it!=dest_it->second.end();++period_it)
+				{
+					out << '\t' << period_it->second; // write value
+				}
+				out << endl;
+			}
+		}
+		out << endl;
+	}
+	out.close();
+	return true;
+}
 
 
 bool Network::find_alternatives_all (int lid, double penalty, Incident* incident)
@@ -4197,6 +4265,7 @@ bool Network::writeall(unsigned int repl)
 	string convergencefile=workingdir + "convergence.dat";
 	string routeflowsfile=workingdir+ "routeflows.dat";
 	string assignmentmatfile=workingdir + "assign.dat";
+	string LOSgencostfile=workingdir + "los_gencost.dat";
 	string vqueuesfile=workingdir + "v_queues.dat";
 	if (replication >0)
 	{
@@ -4224,6 +4293,10 @@ bool Network::writeall(unsigned int repl)
 	writerouteflows(routeflowsfile);
 	//writeheadways("timestamps.dat"); // commented out, since no-one uses them 
 	writeassmatrices(assignmentmatfile);
+
+	this->calc_LOS_skims();
+	this->write_LOS(LOSgencostfile);
+
 	write_v_queues(vqueuesfile);
 	return true;
 }
@@ -5059,7 +5132,7 @@ void ODMatrix::add_slice(const double time, ODSlice* slice)
 const vector <double> ODMatrix::get_loadtimes()
 {
 	vector <double> loadtimes;
-	loadtimes.push_back(0.0);
+	//loadtimes.push_back(0.0);
 	vector <pair <double, ODSlice*> >::iterator cur_slice=slices.begin();
 	for (cur_slice; cur_slice != slices.end(); cur_slice++)
 		loadtimes.push_back(cur_slice->first);

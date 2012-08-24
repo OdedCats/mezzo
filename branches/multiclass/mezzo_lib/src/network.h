@@ -199,6 +199,8 @@ public:
 	bool writeassmatrices(string name); //!< writes the assignment matrices
 	bool write_v_queues(string name); //!< writes the virtual queue lengths
 
+	bool write_LOS(string name);
+
 	bool readassignmentlinksfile(string name); //!< reads the file with the links for which the assignment matrix is collected
 
 	bool readvtypes (string name); //!< reads the vehicles types with their lentghs and percentages.
@@ -258,6 +260,8 @@ public:
 	const double calc_rms_input_output_odtimes();
 	const double calc_mean_input_odtimes();
 	const double calc_rmsn_input_output_odtimes();
+	// Level Of Service SKIMS
+	bool calc_LOS_skims();
 	// SET's
 	void set_workingdir (const string dir) {workingdir = dir;}
 	const string get_workingdir () {return workingdir;}
@@ -390,6 +394,7 @@ protected:
 #endif // _VISSIMCOM
 	// ODMATRIX
 	ODMatrix odmatrix;
+	map <int, map <int, map <int, map <int,double> > > > LOS_skim_gencost; //!< Provides LOS skims with the following indexing: [vclass_id] [oid] [did] [od_period]
 }; 
 //end of network definition
 

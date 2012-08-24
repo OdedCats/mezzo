@@ -69,7 +69,8 @@ class Vehicle
 	Route* route;
 	ODpair * odpair;
 	double start_time;
-	int type;
+	int type; // OLD; will replace with VClass*
+	Vclass* vclass; // Vehicle class
 	double length;
  	double entry_time;
 	double exit_time; 	

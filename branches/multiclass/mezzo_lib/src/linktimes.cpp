@@ -91,6 +91,15 @@ const double LinkTime::sum()
 
 }
 
+
+// LinkCostInfo methods
+
+LinkCostInfo::LinkCostInfo():value_of_time(1.0),value_of_distance(0.0)
+{
+
+
+}
+
 LinkCostInfo::~LinkCostInfo ()
 {
 	// Linktimes* get cleaned up elsewhere
@@ -136,7 +145,26 @@ const double LinkCostInfo::mean()
 const double LinkCostInfo::cost (const int i, const double time)  
 
 
-{
+{ 
+	double ltime=1.0, ltoll=0.0, ldistance=0.0;
+
+	map <int,LinkTime*>::iterator iter1 = times_.find (i);
+ 	if (iter1!=times_.end())
+ 		ltime=(*iter1).second->cost(time);
+ 	else
+ 	{	
+ 		eout << "LinkCostInfo:: cost  : Error, can't find the link i = " << i << endl;
+ 		ltime= 0.1; // NEVER RETURN 0
+   }
+	map <int,double>::iterator iter2 = distances_.find (i);
+	if (iter2!=distances_.end())
+		ldistance=(*iter2).second;
+	map <int,double>::iterator iter3 = tolls_.find (i);
+	if (iter3!=tolls_.end())
+		ltoll=(*iter3).second;
+	double cost=value_of_time*ltime+value_of_distance*ldistance+ltoll;
+	return cost;
+	/* 2012 - try new general structure
  	map <int,LinkTime*>::iterator iter = times_.find (i);
  	if (iter!=times_.end())
  		return (*iter).second->cost(time);
@@ -145,6 +173,7 @@ const double LinkCostInfo::cost (const int i, const double time)
  		eout << "LinkCostInfo:: cost  : Error, can't find the link i = " << i << endl;
  		return 0.1; // NEVER RETURN 0
    }
+   */
 }
 
 

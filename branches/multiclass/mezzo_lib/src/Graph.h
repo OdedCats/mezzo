@@ -78,7 +78,7 @@ class GraphNode
       inline  const int nDnLinks() const { return dnLinks_.size(); }
 
       inline const int predecessor() const { return predecessor_; }
-      inline const T& cost() { return cost_; }
+      inline const T& cost() const { return cost_; }
 
       // The caller is responsible for index boundaries
 

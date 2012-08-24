@@ -97,7 +97,7 @@ const bool ODaction::execute(Eventlist* eventlist, const double time)
   		{
   			ok=false; // if there's no room on the inputqueue (should never happen) we just drop the vehicle.
   			eout << "OD action:: dropped a vehicle " << veh->get_id() << endl;
-  			//delete veh; // so we're not creating memory leaks...
+  			
   			recycler.addVehicle(veh);
   		}	
 	  // get next time from now on

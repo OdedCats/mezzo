@@ -107,6 +107,7 @@ LinkCostInfo contains the Generalized link costs for all links in the network. I
 	 */
  {
  	public:
+		LinkCostInfo();
 		virtual ~LinkCostInfo ();
  	const double cost (const int i, const double time=0.0); //!< returns the generalized link cost for link i
 	const double graph_cost (const int i, const double time=0.0);//!< returns the generalized link cost for graph_link i (mapped to mezzo links)
@@ -124,6 +125,12 @@ LinkCostInfo contains the Generalized link costs for all links in the network. I
 
 	void set_link_toll(const int i, const double toll) {tolls_[i]=toll;} //!< for now the toll is fixed, will make it time dependent (such as LinkTime) when we actually start using it
 	const double get_link_toll(const int i)  {if(tolls_.count(i)) return (tolls_ [i]); else return 0.0;}
+
+	void set_vot(const double val) {value_of_time=val;}
+	const double get_vot() const {return value_of_time;}
+
+	void set_vod(const double val) {value_of_distance=val;}
+	const double get_vod() const {return value_of_distance;}
  private:
  	map <int, LinkTime*> times_; //!< contains the link times (s)
 	map <int, double> distances_; //!< contains the link distances (m)
