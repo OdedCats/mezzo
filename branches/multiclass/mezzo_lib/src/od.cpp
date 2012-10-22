@@ -30,7 +30,7 @@ bool compare_route_cost(Route* r1, Route* r2)
 }
 
 
-ODaction::ODaction(ODpair* odpair_):odpair(odpair_)
+ODaction::ODaction(ODpair* odpair_, Vclass* vclass_):odpair(odpair_), vclass(vclass_)
 {
 #ifdef _DEBUG_OD
 	eout << "ODaction::ODaction odpair->get_rate() : " << odpair->get_rate() << endl;
@@ -47,8 +47,10 @@ ODaction::ODaction(ODpair* odpair_):odpair(odpair_)
 		active = true;
 	}
 	server=new ODServer(1000, 2, mu, theParameters->odserver_sigma);
+	
+};
 
-}
+
 
 ODaction::~ODaction()
 {
@@ -84,10 +86,10 @@ const bool ODaction::execute(Eventlist* eventlist, const double time)
 	#endif //_DEBUG_OD
 	  // select route(origin, destination) and make a new vehicle
 	  Route* route=odpair->select_route(time);
-	  Vtype* vehtype=(odpair->vehtypes() )->random_vtype();
+	  Vtype* vehtype=vclass->random_vtype();
 	  vid++;
 	  Vehicle* veh=recycler.newVehicle(); // get a _normal_ vehicle
-	  veh->init(vid,vehtype->id, vehtype->length,route,odpair,time);  
+	  veh->init(vid,vclass, vehtype,route,odpair,time);  
 	  if ( (odpair->get_origin())->insert_veh(veh,time)) // insert vehicle in the input queue
 	  {
   		ok=true;

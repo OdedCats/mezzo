@@ -39,7 +39,7 @@ void Vtypes::initialize ()
 	else
 		random->seed(42);
 #endif
-
+/*
 
 	// normalize the probabilities
 	double sum = 0.0;
@@ -56,5 +56,6 @@ void Vtypes::initialize ()
 		}
 	}
 	// now sort according to probability
+	*/
 	sort(vtypes.begin(), vtypes.end());
  }

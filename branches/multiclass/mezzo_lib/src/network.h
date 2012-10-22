@@ -203,7 +203,8 @@ public:
 
 	bool readassignmentlinksfile(string name); //!< reads the file with the links for which the assignment matrix is collected
 
-	bool readvtypes (string name); //!< reads the vehicles types with their lentghs and percentages.
+	bool readvtypes (string name); //!< reads the vehicles types with their lentghs and percentages. NEW: now includes vehicle classes and link types as well
+	
 	bool readvirtuallinks(string name); //!< reads the virtual links that connect boundary out nodes to boundary in nodes.
 	bool readserverrates(string name); //!< reads in new rates for specified servers. This way server capacity can be variable over time for instance for exits.
 	bool readsignalcontrols(string name); //!< reads the signal control settings
@@ -305,7 +306,10 @@ protected:
 	vector <VirtualLink*> virtuallinks;
 	map <int, VirtualLink*> virtuallinkmap; //!< 
 	vector <TurnPenalty*> turnpenalties;
-	Vtypes vehtypes;
+	Vtypes vehtypes; // TODO: delete this member / class
+	map <int,Vtype*> vehtypemap;
+	map <int, Vclass*> vehclassmap;
+	// Link types
 	vector <double> incident_parameters; // yes this is very ugly, as is the web of functions added, but I'll take them out asap
 	vector <Stage*> stages;
 	vector <SignalPlan*> signalplans;
@@ -360,6 +364,7 @@ protected:
 	bool readods(istream& in);
 	bool readod(istream& in, double scale=1.0);
 	bool readvtype (istream & in);
+	bool readvclass (istream & in); //!< reads the vehicleclasses
 	bool readvirtuallink(istream & in);
 	bool readrates(istream & in);
 	ODRate readrate(istream& in, double scale);

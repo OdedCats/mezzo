@@ -35,8 +35,9 @@ class Vehicle
 {
   public:
    Vehicle();
-  // Vehicle(const int id_, const int type_, const double length_,Route*const  route_, ODpair* const odpair_, const double time_); // OLD now use vehicle() and init(...)
-   void init (const int id_, const int type_, const double length_, Route* const route_, ODpair*const  odpair_, const double time_);
+   //Vehicle(Vclass* vclass_):vclass(vclass_) {Vehicle();}
+   //void init (const int id_, const int type_, const double length_, Route* const route_, ODpair*const  odpair_, const double time_); // OLD
+   void init (const int id_, Vclass* const vclass_, Vtype* const type_, Route* const route_, ODpair*const  odpair_, const double time_); // NEW with vclass
    const double get_length() const {return length;}
    const double get_exit_time() const {return exit_time;}
    const double get_start_time() const {return start_time;}
@@ -53,7 +54,11 @@ class Vehicle
 
    
    const int get_id() const {return id;}
-   const int get_type() const {return type;}
+   const int get_type_id() const {return type->get_id();}
+   Vtype const * const get_type() const {return type;}
+
+   Vclass const * const get_vclass() const {return vclass;}
+
    const  int get_oid() const ;
    const int get_did() const ;
  //  const int get_nextlink_id() const {return next_link_id;}
@@ -69,7 +74,7 @@ class Vehicle
 	Route* route;
 	ODpair * odpair;
 	double start_time;
-	int type; // OLD; will replace with VClass*
+	Vtype* type; 
 	Vclass* vclass; // Vehicle class
 	double length;
  	double entry_time;
@@ -103,7 +108,7 @@ class VehicleRecycler
 {
  public:
  	virtual ~VehicleRecycler(); //!< deletes all vehicles in the container
-	Vehicle* const  newVehicle(Vclass* vclass=NULL) ; //!< returns a new vehicle
+	Vehicle* const  newVehicle() ; //!< returns a new vehicle
 	void addVehicle(Vehicle*const  veh){recycled.push_back( veh);}
 	 
 	 Bus* const newBus() {	 	if (recycled_busses.empty())

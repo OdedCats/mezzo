@@ -47,11 +47,13 @@ class ODpair;
 
 class ODaction: public Action
 	// ODactions generate the vehicles with the routes using OD servers.
+	// There is an OD action for each Vehicle class
 	//
 
 {
 public:
-	ODaction(ODpair* odpair_);
+	//ODaction(ODpair* odpair_); // old constructor without vclasses
+	ODaction::ODaction(ODpair* odpair_, Vclass* vclass_=NULL);
 	virtual ~ODaction();
 	void reset (double rate_);
 	const unsigned int get_total_nr_veh() const {return total_nr_veh;}  
@@ -72,6 +74,7 @@ private:
 	unsigned int total_nr_veh;
 	double booked_time; // currently booked time in the eventlist
 	double last_gen_time; // last time a vehicle was generated
+	Vclass* vclass; // the vehicle class for this ODaction
 };
 
 class ODpair
@@ -121,10 +124,13 @@ public:
 private:
 	int id;  // for later use
 	ODaction* odaction;
+	map <int, ODaction*> odactions;
 	Origin* origin;
 	Destination* destination;
 	double rate;
-	double start_rate; // original OD rate, to be used when OD pair is reset.
+	double start_rate; // original OD rate, to be used when OD pair is reset. // OLD
+	map <int,double> start_rates;// rates per vehicle class
+	map <int,double> rates; // rates per vehicle class
 	//double rate;
 	vector <Route*> routes;
 	vector <Route*> filtered_routes_;

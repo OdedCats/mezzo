@@ -153,6 +153,7 @@ public:
 
 // #vehicle_parameters
    int standard_veh_length; //!< used to calculate a-priori capacity of links
+   bool multiclass; //!< NEW: indicates whether new multiclass file formats (for vehicle types, classes, link types, demand etc) is to be used
 
 // #route_parameters
    double update_interval_routes; //!< interval for re-calculating route costs based on time-dependent travel times.
@@ -174,7 +175,6 @@ public:
 //#iteration_control
    int max_iter; //!< max number of iterations
    double rel_gap_threshold; //!< relative gap threshold. For the moment linktime rel_gap, will be route_flow_relgap
-// TODO: to be implemented:
    int max_route_iter; //!< max number of route_search_iterations, runs as outer loop around the 'equilibrium' iterations !! NOT yet in file.
    
 
@@ -182,7 +182,6 @@ public:
    double mime_comm_step; //!< Communication step for MICRO-MESO information exchange
    int mime_min_queue_length; //!< min queue length for stopping / starting shockwaves
    double mime_queue_dis_speed; //!< queue dissipation speed if not calculated from flow & density data
-// TODO: Implement the use of the following parameters
    double vissim_step; //!< time step for the VISSIM micro model
    double sim_speed_factor; //!< REALTIME factor to keep the hybrid model running at a fixed speed
 

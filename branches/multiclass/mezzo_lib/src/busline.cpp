@@ -81,7 +81,8 @@ bool Bustrip::activate (double time, Route* route, Vtype* vehtype, ODpair* odpai
 	vid++; // increment the veh id counter, buses are vehicles too
 	Bus* bus=recycler.newBus(); // get a bus vehicle
 	// !!! init should be modified to reflect the extra vars of the bus !!!
-	bus->init(vid,vehtype->id, vehtype->length,route,odpair,time);  // initialise the variables of the bus
+	// TODO: fix veh class for buses
+	bus->init(vid,NULL, vehtype,route,odpair,time);  // initialise the variables of the bus
 	if ( (odpair->get_origin())->insert_veh(bus,time)) // insert the bus at the origin.
   		ok=true;
 	else // if insert returned false

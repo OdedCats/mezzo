@@ -2196,26 +2196,72 @@ bool Network::readvtype (istream & in)
 	char bracket;
 	int id;
 	string label;
-	double prob, length;
+	double length;
 	in >> bracket;
 	if (bracket != '{')
 	{
 		eout << "ERROR: readfile::readvtypes scanner jammed at " << bracket;
 		return false;
 	}
-	in  >> id >> label >> prob >> length;
+	in  >> id >> label >> length;
 
-	assert ( (prob >= 0.0) && (prob<=1.0) && (length>0.0) ); // 0.0 means unused in the vehicle mix
+	assert (  (length>0.0) ); // 0.0 means unused in the vehicle mix
 	in >> bracket;
 	if (bracket != '}')
 	{
 		eout << "ERROR: readfile::readvtypes scanner jammed at " << bracket;
 		return false;
 	}
-	vehtypes.vtypes.insert(vehtypes.vtypes.end(), new Vtype (id,label,prob,length));
+	Vtype* vtype=new Vtype (id,label,length);
+	vehtypes.vtypes.insert(vehtypes.vtypes.end(),vtype );
+	vehtypemap [id] = vtype;
 	return true;
 }
 
+bool Network::readvclass (istream & in)
+{
+	char bracket;
+	int id, nrvtypes, vtype_id;
+	map <double,Vtype*> v_types;
+	string label;
+	double VoT,VoD,VoCT,proportion; // values of time, distance and congestion toll (in any monetary value, default SEK)
+	in >> bracket;
+	if (bracket != '{')
+	{
+		eout << "ERROR: readfile::readvclass scanner jammed at " << bracket;
+		return false;
+	}
+	in  >> id >> label >> VoT >> VoD >> VoCT >> nrvtypes;
+	assert (  (VoT>=0.0) && (VoD>=0.0) && (VoCT>=0.0) && (nrvtypes>0)); // 0.0 means unused in the vehicle mix
+	Vclass* vclass= new Vclass (id,label,VoT,VoD,VoCT);
+	for (int i=0; i<nrvtypes; ++i)// veh types and proportions
+	{
+		in >> bracket; 
+		if (bracket != '{')
+		{
+			eout << "ERROR: readfile::readclass scanner jammed at " << bracket;
+			return false;
+		}
+		in >> vtype_id >>proportion;
+		assert (vehtypemap.count(vtype_id));
+		
+		in >> bracket;
+		if (bracket != '}')
+		{
+			eout << "ERROR: readfile::readclass scanner jammed at " << bracket;
+			return false;
+		}
+	}
+	in >> bracket;
+	if (bracket != '}')
+	{
+		eout << "ERROR: readfile::readclass scanner jammed at " << bracket;
+		return false;
+	}
+	vehclasses.insert(vehclasses.end(), vclass);
+	// find each vehtype
+	return true;
+}
 
 bool Network::readvtypes (string name)
 {

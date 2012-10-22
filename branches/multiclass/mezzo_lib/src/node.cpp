@@ -377,7 +377,7 @@ bool BoundaryOut::process_veh(Vehicle* veh, double time)
 				if (clptr->size() < theParameters->mime_min_queue_length)
 					spd=clptr->speed(time);
 				Signature* sig=new Signature(veh->get_id(), static_cast<int>(spd), time,time,veh->get_start_time(), veh->get_meters(),
-					veh->get_oid(),veh->get_did(),veh->get_type(), veh->get_length(), (veh->get_route()->get_id()),tmppath, tmpori, tmpdest);
+					veh->get_oid(),veh->get_did(),veh->get_type_id(), veh->get_length(), (veh->get_route()->get_id()),tmppath, tmpori, tmpdest);
 #ifdef _VISSIMCOM
 				sig->v_parkinglot=lptr->parkinglot;
 				sig->v_exitparkinglot=lptr->exitparkinglot;

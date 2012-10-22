@@ -64,6 +64,7 @@ Parameters::Parameters ()
    implicit_nr_servers= false;
 // #vehicle_parameters
    standard_veh_length= 7;
+   multiclass = true;
 // #route_parameters
    update_interval_routes= 600.0;
    mnl_theta = -0.00417;
@@ -71,7 +72,6 @@ Parameters::Parameters ()
    delete_bad_routes= false;
    max_rel_route_cost = 2.0; // routes that are more expensive are pruned
    small_od_rate = 3.0;
-// NEW:
    use_linktime_disturbances= true;
    linktime_disturbance= 0.1; // adds an amount (factor) of disturbance to link times during route search
    routesearch_random_draws= 3;
@@ -90,8 +90,6 @@ Parameters::Parameters ()
  //#iteration_control
    max_iter=10;
    rel_gap_threshold=0.02;
-   // following are not yet implemented in file. testing their use first
-   //NEW:
    max_route_iter=3; 
  
    	//state vars

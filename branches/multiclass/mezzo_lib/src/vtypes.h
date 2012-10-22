@@ -27,6 +27,7 @@ according to the proportions given.
 #ifndef VTYPES
 #define VTYPES
 #include <vector>
+#include <map>
 #include "parameters.h"
 #include <string>
 using namespace std;
@@ -34,15 +35,15 @@ using namespace std;
 class Vtype
 {
 public:
-	Vtype (int id_, string label_, double prob_, double len_) : id(id_), label(label_), probability(prob_), length(len_) {}
+	Vtype (int id_, string label_, double len_) : id(id_), label(label_), length(len_) {}
 	
 	int get_id() {return id;}
 	int id;
 	string label;
-	double probability;
+	//double probability;
 	double length;
 };
-
+/*
 struct vtype_less
 {
  
@@ -52,7 +53,7 @@ struct vtype_less
  	 return (t1->probability < t2->probability);
  	}
 };
-
+*/
 class Vtypes
 {
 public:
@@ -60,7 +61,7 @@ public:
 
  Vtype* random_vtype () {
 	 vector <Vtype*>::iterator iter=vtypes.begin();
- 	
+ /*	
 	if (vtypes.size() == 1)
 		return (*iter);
 
@@ -73,7 +74,10 @@ public:
      	if (sum >= r)
      		return (*iter);     		
     }
-    return NULL;
+	*/
+	 return *(iter);
+
+    //return NULL;
  }
  void set_seed(long int seed_) {random->seed(seed_);}
  void initialize ();
@@ -86,26 +90,32 @@ class Vclass // contains the vehicle/user classes. This combines demand segments
 	// Each vehicle class contains its own list of types.
 {
 public:
-	Vclass (int id_, string label_, Vtypes* vtypes_, double vot, double vod) : id(id_), label(label_), vtypes(vtypes_),
-				value_of_time(vot), value_of_distance(vod) {}
+	Vclass (int id_, string label_, double vot, double vod, double voct) : id(id_), label(label_), 
+				value_of_time(vot), value_of_distance(vod), value_of_congestiontoll (voct){}
 	virtual ~Vclass ();
-	Vtype* get_vtype() const {return vtypes->random_vtype();}
+	Vtype* random_vtype() const {return vtypes_.begin()->second;} // TODO: randomly select
+	void add_vtype(Vtype* const val) {vtypes_[val->get_id()]=val;}
+	Vtype* get_vtype( int val)  {if (vtypes_.count(val)) return vtypes_[val]; else return NULL;}
+
 	const int get_id() const {return id;}
 	const string get_label() const {return label;}
 	const double get_vot() const {return value_of_time;}
 	void set_vot(const double val) {value_of_time=val;}
 	const double get_vod() const {return value_of_distance;}
 	void set_vod(const double val) {value_of_distance=val;}
+	const double get_voct() const {return value_of_congestiontoll;}
+	void set_voct(const double val) {value_of_congestiontoll=val;}
 
 private:
 	int id;
 	string label;
 
-	Vtypes* vtypes; // each vclass has its own vtype
-	
+	//Vtypes* vtypes_; // each vclass has its own vtypes
+	map <double, Vtype*> vtypes_; // v_types ordered by cumulative probability
 	// other attributes for vehicles class.
 	double value_of_time; //!< value of time (in chosen currency)
 	double value_of_distance; //!< value of traveled distance (in chosen currency)
+	double value_of_congestiontoll; //!< value of congestion tolls (in chosen currency)
 };
 
 #endif
