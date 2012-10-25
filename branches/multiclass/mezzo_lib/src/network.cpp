@@ -2244,7 +2244,7 @@ bool Network::readvclass (istream & in)
 		}
 		in >> vtype_id >>proportion;
 		assert (vehtypemap.count(vtype_id));
-		
+		vclass->add_vtype(vehtypemap [vtype_id], proportion);
 		in >> bracket;
 		if (bracket != '}')
 		{
@@ -2258,7 +2258,8 @@ bool Network::readvclass (istream & in)
 		eout << "ERROR: readfile::readclass scanner jammed at " << bracket;
 		return false;
 	}
-	vehclasses.insert(vehclasses.end(), vclass);
+	vclass->initialize(); // initialize the random seed.
+	vehclassmap [id] =  vclass;
 	// find each vehtype
 	return true;
 }

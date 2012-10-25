@@ -90,13 +90,13 @@ class Vclass // contains the vehicle/user classes. This combines demand segments
 	// Each vehicle class contains its own list of types.
 {
 public:
-	Vclass (int id_, string label_, double vot, double vod, double voct) : id(id_), label(label_), 
-				value_of_time(vot), value_of_distance(vod), value_of_congestiontoll (voct){}
+	Vclass (int id_, string label_, double vot, double vod, double voct) ;
+	void initialize(); // !< initializes the random generator
 	virtual ~Vclass ();
-	Vtype* random_vtype() const {return vtypes_.begin()->second;} // TODO: randomly select
-	void add_vtype(Vtype* const val) {vtypes_[val->get_id()]=val;}
-	Vtype* get_vtype( int val)  {if (vtypes_.count(val)) return vtypes_[val]; else return NULL;}
-
+	Vtype* random_vtype() const ; //!< returns a random vtype according to the cum probs in the vtypes_ map
+	void add_vtype(Vtype* const val, const double prob) ; //!< adds Vtype which has probability prob
+	Vtype* get_vtype( const int val)  ; //!< returns a specific vtype
+	// regular GETS and SETS
 	const int get_id() const {return id;}
 	const string get_label() const {return label;}
 	const double get_vot() const {return value_of_time;}
@@ -106,12 +106,16 @@ public:
 	const double get_voct() const {return value_of_congestiontoll;}
 	void set_voct(const double val) {value_of_congestiontoll=val;}
 
+	// helper functions
+	
 private:
 	int id;
 	string label;
+	double cum_prob;
 
 	//Vtypes* vtypes_; // each vclass has its own vtypes
 	map <double, Vtype*> vtypes_; // v_types ordered by cumulative probability
+	Random* random; // !< to draw random vtypes
 	// other attributes for vehicles class.
 	double value_of_time; //!< value of time (in chosen currency)
 	double value_of_distance; //!< value of traveled distance (in chosen currency)
