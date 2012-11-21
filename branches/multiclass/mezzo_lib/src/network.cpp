@@ -2234,25 +2234,27 @@ bool Network::readvclass (istream & in)
 	in  >> id >> label >> VoT >> VoD >> VoCT >> nrvtypes;
 	assert (  (VoT>=0.0) && (VoD>=0.0) && (VoCT>=0.0) && (nrvtypes>0)); // 0.0 means unused in the vehicle mix
 	Vclass* vclass= new Vclass (id,label,VoT,VoD,VoCT);
+	//vtypes
+	in >> bracket; 
+	if (bracket != '{')
+	{
+		eout << "ERROR: readfile::readclass scanner jammed at " << bracket;
+		return false;
+	}
 	for (int i=0; i<nrvtypes; ++i)// veh types and proportions
 	{
-		in >> bracket; 
-		if (bracket != '{')
-		{
-			eout << "ERROR: readfile::readclass scanner jammed at " << bracket;
-			return false;
-		}
+		
 		in >> vtype_id >>proportion;
 		assert (vehtypemap.count(vtype_id));
 		vclass->add_vtype(vehtypemap [vtype_id], proportion);
-		in >> bracket;
-		if (bracket != '}')
-		{
-			eout << "ERROR: readfile::readclass scanner jammed at " << bracket;
-			return false;
-		}
 	}
-	in >> bracket;
+	in >> bracket; // end of vtypes
+	if (bracket != '}')
+	{
+		eout << "ERROR: readfile::readclass scanner jammed at " << bracket;
+		return false;
+	}
+	in >> bracket; // end of vclass
 	if (bracket != '}')
 	{
 		eout << "ERROR: readfile::readclass scanner jammed at " << bracket;
@@ -2291,6 +2293,26 @@ bool Network::readvtypes (string name)
 		}
 	}
 	vehtypes.initialize();
+	in >> keyword;
+#ifdef _DEBUG_NETWORK
+	eout << keyword << endl;
+#endif //_DEBUG_NETWORK
+	if (keyword!="vclasses:")
+	{
+		in.close();
+		return false;
+	}
+	int nrvclasses;
+	in >> nrvclasses;
+	for (int i=0; i<nrvclasses;i++)
+	{
+		if (!readvclass(in))
+		{
+			in.close();
+			return false;
+		}
+	}
+
 	in.close();
 	return true;
 }
