@@ -18,6 +18,7 @@ CONFIG += uic4 staticlib
 #debug
 win32 {
      QMAKE_LFLAGS += /LARGEADDRESSAWARE
+	 QMAKE_CXXFLAGS += /MP
 	 }
 
 # Input

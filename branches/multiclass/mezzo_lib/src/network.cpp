@@ -1822,7 +1822,7 @@ bool Network::register_links()
 	return true;
 }
 
-bool Network::readods(istream& in)
+bool Network::old_readods(istream& in)
 {
 	// create the first default OD matrix slice
 	ODSlice* odslice=new ODSlice();
@@ -1834,7 +1834,7 @@ bool Network::readods(istream& in)
 #endif //_DEBUG_NETWORK
 	if (keyword!="od_pairs:")
 	{
-		eout << "ERROR: readods: stuck at " << keyword << " instead of : od_pairs: " << endl;
+		eout << "ERROR: old_readods: stuck at " << keyword << " instead of : od_pairs: " << endl;
 		return false;
 	}
 	int nr;
@@ -1842,7 +1842,7 @@ bool Network::readods(istream& in)
 	in >> keyword;
 	if (keyword!="scale:")
 	{
-		eout << "ERROR: readods: stuck at " << keyword << " instead of : scale: " << endl;
+		eout << "ERROR: old_readods: stuck at " << keyword << " instead of : scale: " << endl;
 		return false;
 	}
 	double scale;
@@ -1850,9 +1850,9 @@ bool Network::readods(istream& in)
 
 	for (int i=0; i<nr;i++)
 	{
-		if (!readod(in,scale))
+		if (!old_readod(in,scale))
 		{
-			eout << "ERROR: readods: stuck at od pair " << i << " of " << nr << endl;
+			eout << "ERROR: old_readods: stuck at od pair " << i << " of " << nr << endl;
 			return false;
 		}
 	}
@@ -1860,7 +1860,7 @@ bool Network::readods(istream& in)
 	{
 		(*iter)->register_ods(&odpairs);
 	}
-	// should clean up readods and readrates, this is a fix for now: add all default OD rates to the first slice.
+	// should clean up old_readods and old_old_readrates, this is a fix for now: add all default OD rates to the first slice.
 	ODRate temprate;
 	vector <ODpair*>::iterator od_iter=odpairs.begin();
 	for (od_iter; od_iter != odpairs.end(); ++od_iter)
@@ -1878,7 +1878,7 @@ bool Network::readods(istream& in)
 
 
 
-bool Network::readod(istream& in, double scale)
+bool Network::old_readod(istream& in, double scale)
 {
 	char bracket;
 	int oid, did;
@@ -1886,7 +1886,7 @@ bool Network::readod(istream& in, double scale)
 	in >> bracket;
 	if (bracket != '{')
 	{
-		eout << "ERROR: readdemandfile::readod scanner jammed at " << bracket;
+		eout << "ERROR: old_readdemandfile::old_readod scanner jammed at " << bracket;
 		return false;
 	}
 	in  >> oid >> did >> rate;
@@ -1897,7 +1897,7 @@ bool Network::readod(istream& in, double scale)
 	in >> bracket;
 	if (bracket != '}')
 	{
-		eout << "ERROR: readdemandfile::readod scanner jammed at " << bracket;
+		eout << "ERROR: old_readdemandfile::old_readod scanner jammed at " << bracket;
 		return false;
 	}
 	// find oid, did
@@ -1994,7 +1994,7 @@ bool Network::addroutes (int oid, int did, ODpair* odpair)
 }
 
 
-ODRate Network::readrate(istream& in, double scale)
+ODRate Network::old_readrate(istream& in, double scale)
 {
 #ifdef _DEBUG_NETWORK
 	eout << "read a rate" << endl;
@@ -2009,7 +2009,7 @@ ODRate Network::readrate(istream& in, double scale)
 
 	if (bracket != '{')
 	{
-		eout << "ERROR: readdemandfile::readrate scanner jammed at " << bracket;
+		eout << "ERROR: old_readdemandfile::old_readrate scanner jammed at " << bracket;
 		return odrate;
 	}
 	in  >> oid >> did >> rate;
@@ -2020,7 +2020,7 @@ ODRate Network::readrate(istream& in, double scale)
 	in >> bracket;
 	if (bracket != '}')
 	{
-		eout << "ERROR: readdemandfile::readrate scanner jammed at " << bracket;
+		eout << "ERROR: old_readdemandfile::old_readrate scanner jammed at " << bracket;
 		return odrate;
 	}
 	odrate.odid=ODVal(oid,did);
@@ -2030,7 +2030,7 @@ ODRate Network::readrate(istream& in, double scale)
 }
 
 
-bool Network::readrates(istream& in)
+bool Network::old_old_readrates(istream& in)
 {
 	ODSlice* odslice=new ODSlice();
 	string keyword;
@@ -2040,7 +2040,7 @@ bool Network::readrates(istream& in)
 #endif //_DEBUG_NETWORK
 	if (keyword!="od_pairs:")
 	{
-		eout << "ERROR: readrates: stuck at " << keyword << " instead of : od_pairs: " << endl;
+		eout << "ERROR: old_old_readrates: stuck at " << keyword << " instead of : od_pairs: " << endl;
 		return false;
 	}
 	int nr;
@@ -2051,7 +2051,7 @@ bool Network::readrates(istream& in)
 #endif //_DEBUG_NETWORK
 	if (keyword!="scale:")
 	{
-		eout << "ERROR: readrates: stuck at " << keyword << " instead of : scale: " << endl;
+		eout << "ERROR: old_old_readrates: stuck at " << keyword << " instead of : scale: " << endl;
 		return false;
 	}
 	double scale;
@@ -2062,17 +2062,17 @@ bool Network::readrates(istream& in)
 #endif //_DEBUG_NETWORK
 	if (keyword!="loadtime:")
 	{
-		eout << "ERROR: readrates: stuck at " << keyword << " instead of : loadtime: " << endl;
+		eout << "ERROR: old_old_readrates: stuck at " << keyword << " instead of : loadtime: " << endl;
 		return false;
 	}
 	double loadtime;
 	in >> loadtime;
 	for (int i=0; i<nr;i++)
 	{
-		ODRate odrate=readrate(in,scale);
+		ODRate odrate=old_readrate(in,scale);
 		if (odrate.rate==-1)
 		{
-			eout << "ERROR: readrates: stuck at od readrates. load time : "<< loadtime << " od nr " << i << " of " <<nr << endl;
+			eout << "ERROR: old_old_readrates: stuck at od old_old_readrates. load time : "<< loadtime << " od nr " << i << " of " <<nr << endl;
 
 			return false;
 		}
@@ -2155,10 +2155,104 @@ bool Network::readserverrate(istream& in)
 
 bool Network::readdemandfile(string name)
 {
+	int nr_odpairs, nr_periods, nr_vclasses =0;
+	string keyword="";
+	char bracket;
+
+	ifstream inputfile(name.c_str());
+	if (!inputfile)
+		eout << "ERROR: cannot open demand file: " << name << endl;
+	assert (inputfile);
+	// read number of OD pairs, classes periods, 
+	inputfile >> keyword;
+	if (keyword!="od_pairs:")
+	{
+		eout << "ERROR: Reading demand file, " << name << ", expected 'od_pairs:' instead of " << keyword << endl;
+		inputfile.close();
+		return false;
+	}
+	inputfile >> nr_odpairs;
+
+	inputfile >> keyword;
+	if (keyword!="nr_periods:")
+	{
+		eout << "ERROR: Reading demand file, " << name << ", expected 'nr_periods:' instead of " << keyword << endl;
+		inputfile.close();
+		return false;
+	}
+	inputfile >> nr_periods;
+	inputfile >> keyword;
+	if (keyword!="loadtimes:")
+	{
+		eout << "ERROR: Reading demand file, " << name << ", expected 'loadtimes:' instead of " << keyword << endl;
+		inputfile.close();
+		return false;
+	}
+	// read loadtimes and then each od matrix
+	inputfile >> bracket;
+	if (bracket!='{')
+	{
+		eout << "ERROR: Reading demand file, " << name << ", expected '{' instead of " << keyword << endl;
+		inputfile.close();
+		return false;
+	}
+	double ltime=-1.0;
+	for (int i=0; i<nr_periods; ++i)
+	{
+		inputfile >> ltime;
+		assert (ltime >= 0.0);
+		loadtimes.push_back(ltime);
+	}
+	inputfile >> bracket;
+	if (bracket!='}')
+	{
+		eout << "ERROR: Reading demand file, " << name << ", expected '}' instead of " << keyword << endl;
+		inputfile.close();
+		return false;
+	}
+	
+	inputfile >> keyword;
+	if (keyword!="nr_vclasses:")
+	{
+		eout << "ERROR: Reading demand file, " << name << ", expected 'nr_vclasses:' instead of " << keyword << endl;
+		inputfile.close();
+		return false;
+	}
+	inputfile >> nr_vclasses;
+	// for all vclasses
+	int vclass=-1;
+	for (int j=0; j<nr_vclasses; ++j)
+	{
+		inputfile >> keyword;
+		if (keyword!="vclass:")
+		{
+			eout << "ERROR: Reading demand file, " << name << ", expected 'vclass:' instead of " << keyword << endl;
+			inputfile.close();
+			return false;
+		}
+		inputfile >> vclass;
+		assert (vehclassmap.count(vclass));
+		// read OD matrix for vclass
+		
+
+	}
+	inputfile.close();
+	return true;
+}
+
+/*
+bool Network::readODmatrix(istream & in, int vclass)
+{
+
+
+}
+*/
+bool Network::old_readdemandfile(string name)
+{
 
 	ifstream inputfile(name.c_str());
 	assert (inputfile);
-	if (readods(inputfile))
+	if (old_readods(inputfile))
 	{		
 		string keyword;
 		inputfile >> keyword;
@@ -2174,7 +2268,7 @@ bool Network::readdemandfile(string name)
 		inputfile >> nr;
 		for (int i=0; i<nr; i++)
 		{
-			if (!readrates(inputfile))
+			if (!old_old_readrates(inputfile))
 			{
 				inputfile.close();
 				return false;			
@@ -4171,7 +4265,7 @@ double Network::executemaster(QPixmap * pm_,QMatrix * wm_)
 	}
 
 	// 2005-11-28 put the reading of OD matrix before the paths...
-	if (!readdemandfile(filenames[5]))
+	if (!old_readdemandfile(filenames[5]))
 		eout << "Problem reading OD matrix " << filenames [5] << endl; // generate the odpairs.
 	//Sort the ODpairs
 	sort (odpairs.begin(), odpairs.end(), od_less_than);
@@ -4255,7 +4349,7 @@ double Network::executemaster()
 		set_freeflow_linktimes();  //read the historical link times if exist, otherwise set them to freeflow link times.
 	}
 	// New 2005-11-28 put the reading of OD matrix before the paths...
-	if (!readdemandfile(filenames[5]))
+	if (!old_readdemandfile(filenames[5]))
 		eout << "ERROR: Problem reading OD matrix " << filenames [5] << endl; // generate the odpairs.
 	//Sort the ODpairs
 	sort (odpairs.begin(), odpairs.end(), od_less_than);
@@ -5144,96 +5238,3 @@ void Incident::broadcast_incident_stop(int lid)
 	}
 }
 
-// ODSlice methods
-
-const bool ODSlice::remove_rate( const ODVal &  odid)
-{	
-	bool found = false;
-	vector<ODRate>::iterator rate =  rates.begin();
-	for (rate; rate!=rates.end(); rate)
-	{
-		if (rate->odid == odid)
-		{
-			rates.erase(rate++);
-			found = true;
-			break;
-		}
-		else
-			rate++;		
-	}
-	
-	return found;
-}
-
-// ODMATRIX CLASS
-
-ODMatrix::ODMatrix ()
-{
-
-}
-
-void ODMatrix::reset(Eventlist* eventlist, vector <ODpair*> * odpairs)
-{
-	vector < pair <double,ODSlice*> >::iterator s_iter=slices.begin();
-	for (s_iter;s_iter != slices.end(); s_iter++)
-	{
-		//create and book the MatrixAction
-		double loadtime = (*s_iter).first;
-		ODSlice* odslice = (*s_iter).second;
-		MatrixAction* mptr=new MatrixAction(eventlist, loadtime, odslice, odpairs);
-		assert (mptr != NULL);
-
-	}
-}
-const bool ODMatrix::remove_rate(const ODVal& odid) // removes od_rates for given od_id for all slices
-{
-	vector <pair <double, ODSlice*> >::iterator cur_slice=slices.begin();
-	for (cur_slice; cur_slice != slices.end(); cur_slice++)
-		cur_slice->second->remove_rate(odid);
-	return true;
-}
-
-void ODMatrix::add_slice(const double time, ODSlice* slice)
-{
-	slices.insert(slices.end(), (pair <double,ODSlice*> (time,slice)) );
-}
-
-const vector <double> ODMatrix::get_loadtimes()
-{
-	vector <double> loadtimes;
-	//loadtimes.push_back(0.0);
-	vector <pair <double, ODSlice*> >::iterator cur_slice=slices.begin();
-	for (cur_slice; cur_slice != slices.end(); cur_slice++)
-		loadtimes.push_back(cur_slice->first);
-	return loadtimes;
-}
-
-// MATRIXACTION CLASSES
-
-MatrixAction::MatrixAction(Eventlist* eventlist, double time, ODSlice* slice_, vector<ODpair*> *ods_)
-{
-	slice=slice_;
-	ods=ods_;
-	eventlist->add_event(time, this);
-}
-
-const bool MatrixAction::execute(Eventlist* eventlist, const double time)
-{
-	assert (eventlist != NULL);
-	//eout << time << " : MATRIXACTION:: set new rates "<< endl;
-	// for all odpairs in slice
-
-	for (vector <ODRate>::iterator iter=slice->rates.begin();iter<slice->rates.end();iter++)
-	{
-		// find odpair
-		ODpair* odptr=(*(find_if (ods->begin(),ods->end(), compareod (iter->odid) )));
-		if (!odptr)
-			eout << "ERROR: MatrixAction::execute at t= " << time << " - cannot find odpair (" << iter->odid.first  << ',' << iter->odid.second << ')' << endl;
-		else
-		{
-		//init new rate
-			odptr->set_rate(iter->rate,time);
-		}
-	}
-	return true;
-}

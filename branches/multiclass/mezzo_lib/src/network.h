@@ -90,43 +90,7 @@ using namespace std;
 class TurnPenalty;
 class Incident;
 
-struct ODRate
-{
-public:
-	ODVal odid;
-	double rate;
-};
 
-
-struct ODSlice
-{
-public:
-	const bool remove_rate(const ODVal& odid); //!< removes od_rate for given od_id.
-	vector <ODRate> rates;	
-};
-
-
-class  ODMatrix
-{
-public:
-	ODMatrix ();
-	void add_slice(const double time, ODSlice* slice);
-	void reset(Eventlist* eventlist,vector <ODpair*> * odpairs); //!< rebooks all the MatrixActions
-	const vector <double> get_loadtimes(); //!< returns the loadtimes for each OD slice, slice 0 at t=0 has index [0], etc.
-	const bool remove_rate(const ODVal& odid); //!< removes od_rates for given od_id for all slices
-private:
-	vector < pair <double,ODSlice*> > slices;	
-};
-
-class MatrixAction: public Action
-{
-public:
-	MatrixAction(Eventlist* eventlist, double time, ODSlice* slice_, vector<ODpair*> *ods_);
-	const bool execute(Eventlist* eventlist, const double time);
-private:
-	ODSlice* slice;
-	vector <ODpair*> * ods;
-};
 
 /*! Network is the main simulation class, containing all the network objects 
  * such as Links, Nodes, ODpairs, etc. as well as all the main simulation, reading and writing functions
@@ -171,6 +135,7 @@ public:
 	bool addroutes (int oid, int did, ODpair* odpair); //!< adds routes to an ODpair
 	bool add_od_routes()	; //!< adds routes to all ODpairs
 	bool readdemandfile(string name);  //!< reads the OD matrix and creates the ODpairs
+	bool old_readdemandfile(string name);  //!< OLD format (single class) reads the OD matrix and creates the ODpairs
 	bool readlinktimes(string name); //!< reads historical link travel times
 	bool set_freeflow_linktimes();
 	bool copy_linktimes_out_in(); //!< copies output link travel times to input
@@ -361,13 +326,13 @@ protected:
 	bool readgiveways(istream& in);
 	bool readroutes(istream& in);
 	bool readroute(istream& in);
-	bool readods(istream& in);
-	bool readod(istream& in, double scale=1.0);
+	bool old_readods(istream& in);
+	bool old_readod(istream& in, double scale=1.0);
 	bool readvtype (istream & in);
 	bool readvclass (istream & in); //!< reads the vehicleclasses
 	bool readvirtuallink(istream & in);
-	bool readrates(istream & in);
-	ODRate readrate(istream& in, double scale);
+	bool old_old_readrates(istream & in);
+	ODRate old_readrate(istream& in, double scale);
 	bool readserverrate(istream& in);
 	bool readsignalcontrol(istream & in);
 	bool readsignalplan(istream& in, SignalControl* sc);
@@ -398,7 +363,9 @@ protected:
 	string vissimfile;
 #endif // _VISSIMCOM
 	// ODMATRIX
-	ODMatrix odmatrix;
+	ODMatrix odmatrix; //old to replace with multiple
+	map <int, ODMatrix> odmatrices;
+	vector <double> loadtimes;
 	map <int, map <int, map <int, map <int,double> > > > LOS_skim_gencost; //!< Provides LOS skims with the following indexing: [vclass_id] [oid] [did] [od_period]
 }; 
 //end of network definition

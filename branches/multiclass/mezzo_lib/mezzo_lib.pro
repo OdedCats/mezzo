@@ -15,6 +15,7 @@ QT+= core gui
 QMAKE= $(QTDIR)/bin/qmake
 win32 {
      QMAKE_LFLAGS += /LARGEADDRESSAWARE
+	 QMAKE_CXXFLAGS += /MP
 	 }
 
 # Input

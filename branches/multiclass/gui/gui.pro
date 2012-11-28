@@ -29,5 +29,6 @@ RESOURCES += canvas_qt4.qrc
 RC_FILE = mezzo.rc
 DEPENDPATH += . ./src ../mezzo_lib/src
 win32 {
-     QMAKE_LFLAGS += /LARGEADDRESSAWARE
+     QMAKE_LFLAGS += /LARGEADDRESSAWARE 
+	 QMAKE_CXXFLAGS += /MP
 	 }

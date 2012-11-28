@@ -29,6 +29,19 @@ bool compare_route_cost(Route* r1, Route* r2)
 	return (r1->cost(900.0) < r2->cost(900.0));
 }
 
+struct compareod
+{
+	compareod(ODVal val_):val(val_) {}
+	bool operator () (ODpair* thing)
+
+	{
+		return (thing->odids()==val);
+	}
+
+	ODVal val;
+};
+
+
 
 ODaction::ODaction(ODpair* odpair_, Vclass* vclass_):odpair(odpair_), vclass(vclass_)
 {
@@ -493,4 +506,98 @@ Route* ODpair::filteredRoute(int index)
 	filtered_routes_.push_back(theroute);
 	routes.erase(routes.begin()+index);
 	return theroute;
+}
+
+// ODSlice methods
+
+const bool ODSlice::remove_rate( const ODVal &  odid)
+{	
+	bool found = false;
+	vector<ODRate>::iterator rate =  rates.begin();
+	for (rate; rate!=rates.end(); rate)
+	{
+		if (rate->odid == odid)
+		{
+			rates.erase(rate++);
+			found = true;
+			break;
+		}
+		else
+			rate++;		
+	}
+	
+	return found;
+}
+
+// ODMATRIX CLASS
+
+ODMatrix::ODMatrix ()
+{
+
+}
+
+void ODMatrix::reset(Eventlist* eventlist, vector <ODpair*> * odpairs)
+{
+	vector < pair <double,ODSlice*> >::iterator s_iter=slices.begin();
+	for (s_iter;s_iter != slices.end(); s_iter++)
+	{
+		//create and book the MatrixAction
+		double loadtime = (*s_iter).first;
+		ODSlice* odslice = (*s_iter).second;
+		MatrixAction* mptr=new MatrixAction(eventlist, loadtime, odslice, odpairs);
+		assert (mptr != NULL);
+
+	}
+}
+const bool ODMatrix::remove_rate(const ODVal& odid) // removes od_rates for given od_id for all slices
+{
+	vector <pair <double, ODSlice*> >::iterator cur_slice=slices.begin();
+	for (cur_slice; cur_slice != slices.end(); cur_slice++)
+		cur_slice->second->remove_rate(odid);
+	return true;
+}
+
+void ODMatrix::add_slice(const double time, ODSlice* slice)
+{
+	slices.insert(slices.end(), (pair <double,ODSlice*> (time,slice)) );
+}
+
+const vector <double> ODMatrix::get_loadtimes()
+{
+	vector <double> loadtimes;
+	//loadtimes.push_back(0.0);
+	vector <pair <double, ODSlice*> >::iterator cur_slice=slices.begin();
+	for (cur_slice; cur_slice != slices.end(); cur_slice++)
+		loadtimes.push_back(cur_slice->first);
+	return loadtimes;
+}
+
+// MATRIXACTION CLASSES
+
+MatrixAction::MatrixAction(Eventlist* eventlist, double time, ODSlice* slice_, vector<ODpair*> *ods_)
+{
+	slice=slice_;
+	ods=ods_;
+	eventlist->add_event(time, this);
+}
+
+const bool MatrixAction::execute(Eventlist* eventlist, const double time)
+{
+	assert (eventlist != NULL);
+	//eout << time << " : MATRIXACTION:: set new rates "<< endl;
+	// for all odpairs in slice
+
+	for (vector <ODRate>::iterator iter=slice->rates.begin();iter<slice->rates.end();iter++)
+	{
+		// find odpair
+		ODpair* odptr=(*(find_if (ods->begin(),ods->end(), compareod (iter->odid) )));
+		if (!odptr)
+			eout << "ERROR: MatrixAction::execute at t= " << time << " - cannot find odpair (" << iter->odid.first  << ',' << iter->odid.second << ')' << endl;
+		else
+		{
+		//init new rate
+			odptr->set_rate(iter->rate,time);
+		}
+	}
+	return true;
 }

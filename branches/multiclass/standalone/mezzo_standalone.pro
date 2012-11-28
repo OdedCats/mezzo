@@ -12,6 +12,7 @@ DEFINES += _NO_GUI
 QMAKE= $(QTDIR)/bin/qmake
 win32 {
      QMAKE_LFLAGS += /LARGEADDRESSAWARE
+	 QMAKE_CXXFLAGS += /MP
 	 }
 
 # Input

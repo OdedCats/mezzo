@@ -145,5 +145,42 @@ private:
 	Eventlist* eventlist_; // to keep track of the eventlist pointer locally
 };
 
+struct ODRate
+{
+public:
+	ODVal odid;
+	double rate;
+};
+
+
+struct ODSlice
+{
+public:
+	const bool remove_rate(const ODVal& odid); //!< removes od_rate for given od_id.
+	vector <ODRate> rates;	
+};
+
+
+class  ODMatrix
+{
+public:
+	ODMatrix ();
+	void add_slice(const double time, ODSlice* slice);
+	void reset(Eventlist* eventlist,vector <ODpair*> * odpairs); //!< rebooks all the MatrixActions
+	const vector <double> get_loadtimes(); //!< returns the loadtimes for each OD slice, slice 0 at t=0 has index [0], etc.
+	const bool remove_rate(const ODVal& odid); //!< removes od_rates for given od_id for all slices
+private:
+	vector < pair <double,ODSlice*> > slices;	
+};
+
+class MatrixAction: public Action
+{
+public:
+	MatrixAction(Eventlist* eventlist, double time, ODSlice* slice_, vector<ODpair*> *ods_);
+	const bool execute(Eventlist* eventlist, const double time);
+private:
+	ODSlice* slice;
+	vector <ODpair*> * ods;
+};
 
 #endif
