@@ -141,15 +141,15 @@ public:
    bool use_giveway; //!< if true, giveway logic is used
    double max_wait; //!< default max waiting time for give_way
    double critical_gap; //
-
-   //NEW
    double min_headway_inflow; //!< determines the max inflow on links
 
 // #server_parameters
    bool od_servers_deterministic; //!< if true the time headways in OD servers are determiunistic, otherwise neg_exp
-   double odserver_sigma; //!< Obsolete since OD servers now have Mu=Sigma  (neg exp). Was for use with previous combined normal-neg_exp servers
- //TODO implement in file format  
+   double odserver_sigma; //!< Obsolete since OD servers now have Mu=Sigma  (neg exp). Was for use with previous combined normal-neg_exp servers  
    bool implicit_nr_servers; //!<if true the number of servers through a turning is calculated by MIN(nr incoming lanes , nr outgoing lanes), otherwise it is one per defined turning, but parallel turnings may be defined.
+   
+   //NEW TODO: implement in file format:
+   bool use_old_demand_format; //!< if true the old single-class format is used, otherwise the new file format is used
 
 // #vehicle_parameters
    int standard_veh_length; //!< used to calculate a-priori capacity of links

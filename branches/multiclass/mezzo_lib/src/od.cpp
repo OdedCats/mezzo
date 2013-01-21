@@ -1,5 +1,5 @@
 #include "od.h"
-//#include "network.h"
+#include "network.h"
 #include <math.h>
 #include "MMath.h"
 /*
@@ -340,7 +340,7 @@ ODVal ODpair::odids ()
 	return ODVal(origin->get_id(), destination->get_id());
 }
 
-ODpair::ODpair(Origin* origin_, Destination* destination_, double rate_, Vtypes* vtypes_)
+ODpair::ODpair(Origin* origin_, Destination* destination_, const double & rate_, Vtypes* vtypes_)
 	:origin(origin_), destination(destination_), rate(rate_), vtypes (vtypes_)
 {
  	odaction=new ODaction(this);
@@ -533,7 +533,62 @@ const bool ODSlice::remove_rate( const ODVal &  odid)
 
 ODMatrix::ODMatrix ()
 {
+	network=NULL;
 
+
+}
+
+ODMatrix::ODMatrix(const int vclass_, const map <int,double> & loadtimes_,const double scale_, Network* network_): vclass(vclass_),loadtimes(loadtimes_),network(network_),
+	scale(scale_)
+{
+
+}
+
+ODMatrix::~ODMatrix ()
+{
+	// clean the OD slices
+}
+bool ODMatrix::read_from_stream(istream& in, const int& nr_odpairs, bool create_odpairs)
+{
+	double rate=0.0;
+	int o, d;
+	char bracket;
+	ODpair* odpair;
+
+	// for each loadtime create one slice
+	for (map <int,double> ::iterator l_iter=loadtimes.begin(); l_iter != loadtimes.end(); ++l_iter)
+	{
+		slices.push_back(make_pair(l_iter->second,new ODSlice()));
+	}
+	int nr_periods=loadtimes.size();
+	// for each od pair, read in the rates and put in respective slices
+	for (int i=0; i!=nr_odpairs; ++i)
+	{
+		// read bracket
+		in >> bracket;
+		assert (bracket =='{');
+		// read o & d
+		in >> o >> d;
+		ODVal val(o,d);
+		if (create_odpairs)
+		{
+			odpair=network->create_ODpair(o,d,0.0);
+		}
+		else
+			odpair=network->find_ODpair(val);
+		assert (odpair != NULL);
+		// find in map
+		for (int j=0; j!=nr_periods; ++j)
+		{
+			in >> rate;
+			slices [j].second->rates.push_back(ODRate(val,odpair,scale*rate));
+		}
+		in >> bracket;
+		assert (bracket =='}');
+
+	}
+	// add the slices to the OD matrix
+	return true;
 }
 
 void ODMatrix::reset(Eventlist* eventlist, vector <ODpair*> * odpairs)
@@ -562,7 +617,7 @@ void ODMatrix::add_slice(const double time, ODSlice* slice)
 	slices.insert(slices.end(), (pair <double,ODSlice*> (time,slice)) );
 }
 
-const vector <double> ODMatrix::get_loadtimes()
+const vector <double> ODMatrix::old_get_loadtimes()
 {
 	vector <double> loadtimes;
 	//loadtimes.push_back(0.0);
@@ -590,7 +645,8 @@ const bool MatrixAction::execute(Eventlist* eventlist, const double time)
 	for (vector <ODRate>::iterator iter=slice->rates.begin();iter<slice->rates.end();iter++)
 	{
 		// find odpair
-		ODpair* odptr=(*(find_if (ods->begin(),ods->end(), compareod (iter->odid) )));
+		//ODpair* odptr=(*(find_if (ods->begin(),ods->end(), compareod (iter->odid) )));
+		ODpair* odptr=(*iter).odpair;
 		if (!odptr)
 			eout << "ERROR: MatrixAction::execute at t= " << time << " - cannot find odpair (" << iter->odid.first  << ',' << iter->odid.second << ')' << endl;
 		else

@@ -37,6 +37,7 @@
 class Route;
 class Origin;
 class Destination;
+class Network;
 
 
 typedef pair <int,int> ODVal;
@@ -82,7 +83,7 @@ class ODpair
 {
 public:
 	ODpair();
-	ODpair(Origin* origin_, Destination* destination_, double rate_, Vtypes* vtypes_);
+	ODpair(Origin* origin_, Destination* destination_, const double & rate_, Vtypes* vtypes_);
 	~ODpair();
 	void reset();
 // GETS
@@ -148,7 +149,10 @@ private:
 struct ODRate
 {
 public:
+	ODRate() {}
+	ODRate(const ODVal& odid_, ODpair* const  odpair_,const double rate_): odid(odid_),odpair(odpair_),rate(rate_) {} 
 	ODVal odid;
+	ODpair* odpair;
 	double rate;
 };
 
@@ -165,12 +169,19 @@ class  ODMatrix
 {
 public:
 	ODMatrix ();
+	ODMatrix (const int vclass_, const map <int,double> & loadtimes_,const double scale_, Network* network_);
+	~ODMatrix ();
+	bool read_from_stream(istream& in,const int& nr_odpairs,bool create_odpairs);
 	void add_slice(const double time, ODSlice* slice);
 	void reset(Eventlist* eventlist,vector <ODpair*> * odpairs); //!< rebooks all the MatrixActions
-	const vector <double> get_loadtimes(); //!< returns the loadtimes for each OD slice, slice 0 at t=0 has index [0], etc.
+	const vector <double> old_get_loadtimes(); //!< returns the loadtimes for each OD slice, slice 0 at t=0 has index [0], etc.
 	const bool remove_rate(const ODVal& odid); //!< removes od_rates for given od_id for all slices
 private:
+	int vclass;
+	double scale;
+	map <int, double> loadtimes;
 	vector < pair <double,ODSlice*> > slices;	
+	Network* network;
 };
 
 class MatrixAction: public Action

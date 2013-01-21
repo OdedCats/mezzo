@@ -53,15 +53,14 @@ Parameters::Parameters ()
    use_giveway= false;
    max_wait= 5.0;
    critical_gap= 4.1;
-
-   // NEW
    min_headway_inflow= 1.44;
 
 // #server_parameters
    od_servers_deterministic= 1;
    odserver_sigma= 0.2; // unused for the moment
-// NEW:
    implicit_nr_servers= false;
+   //NEW TO IMPLEMENT IN FORMAT
+   use_old_demand_format=false;
 // #vehicle_parameters
    standard_veh_length= 7;
    multiclass = true;

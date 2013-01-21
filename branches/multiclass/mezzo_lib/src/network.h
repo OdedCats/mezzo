@@ -135,6 +135,7 @@ public:
 	bool addroutes (int oid, int did, ODpair* odpair); //!< adds routes to an ODpair
 	bool add_od_routes()	; //!< adds routes to all ODpairs
 	bool readdemandfile(string name);  //!< reads the OD matrix and creates the ODpairs
+
 	bool old_readdemandfile(string name);  //!< OLD format (single class) reads the OD matrix and creates the ODpairs
 	bool readlinktimes(string name); //!< reads historical link travel times
 	bool set_freeflow_linktimes();
@@ -192,6 +193,8 @@ public:
 	const double get_currenttime(){return time;}
 	const double get_runtime(){return runtime;}
 	const bool get_calc_paths() const {return calc_paths;}
+	ODpair* create_ODpair(const int & oid, const int& did, const double & rate);
+	ODpair* find_ODpair(const ODVal& odval);
 
 	//const double get_time_alpha(){return time_alpha;}
 	Parameters* get_parameters () {return theParameters;} 
@@ -267,6 +270,7 @@ protected:
 	vector <ChangeRateAction*> changerateactions; //!<
 	multimap <ODVal, Route*> routemap; //!< 
 	vector <ODpair*> odpairs; //!< keep using OD pair vector for now, as map is too much of a hassle with two indices.
+	map <ODVal, ODpair*> odpairmap; // will replace the vector in the long run
 	vector <Incident*> incidents;
 	vector <VirtualLink*> virtuallinks;
 	map <int, VirtualLink*> virtuallinkmap; //!< 
@@ -326,12 +330,17 @@ protected:
 	bool readgiveways(istream& in);
 	bool readroutes(istream& in);
 	bool readroute(istream& in);
-	bool old_readods(istream& in);
-	bool old_readod(istream& in, double scale=1.0);
+
+	bool old_readods(istream& in); // Deprecated
+	bool old_readod(istream& in, double scale=1.0); // Deprecated
+
+	bool readODmatrix(istream & in, int vclass);
+	
+
 	bool readvtype (istream & in);
 	bool readvclass (istream & in); //!< reads the vehicleclasses
 	bool readvirtuallink(istream & in);
-	bool old_old_readrates(istream & in);
+	bool old_readrates(istream & in);
 	ODRate old_readrate(istream& in, double scale);
 	bool readserverrate(istream& in);
 	bool readsignalcontrol(istream & in);
@@ -364,8 +373,8 @@ protected:
 #endif // _VISSIMCOM
 	// ODMATRIX
 	ODMatrix odmatrix; //old to replace with multiple
-	map <int, ODMatrix> odmatrices;
-	vector <double> loadtimes;
+	map <int, ODMatrix*> odmatrices;
+	map <int,double> loadtimes;
 	map <int, map <int, map <int, map <int,double> > > > LOS_skim_gencost; //!< Provides LOS skims with the following indexing: [vclass_id] [oid] [did] [od_period]
 }; 
 //end of network definition
