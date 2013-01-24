@@ -309,8 +309,10 @@ int Network::reset()
 	{			
 		(*iter6)->reset();
 	}
-	// OD Matrix rates : re-book all MatrixActions
-	odmatrix.reset(eventlist,&odpairs);
+	// OD Matrix rates : re-book all MatrixActions for all OD matrices
+	for (map<int,ODMatrix*>::iterator odm=odmatrices.begin();odm!=odmatrices.end();++odm)
+		odm->second->reset(eventlist);
+	//odmatrix.reset(eventlist,&odpairs);
 	// turnings
 	for (map<int,Turning*>::iterator iter7=turningmap.begin(); iter7!=turningmap.end(); iter7++)
 	{

@@ -178,7 +178,7 @@ public:
 	bool read_from_stream(istream& in,const int& nr_odpairs,bool create_odpairs,Vclass* vclass_);
 	void ODMatrix::create_events(Eventlist* eventlist);
 	void add_slice(const double time, ODSlice* slice);
-	void reset(Eventlist* eventlist,vector <ODpair*> * odpairs); //!< rebooks all the MatrixActions
+	void reset(Eventlist* eventlist); //!< rebooks all the MatrixActions
 	const vector <double> old_get_loadtimes(); //!< TODO: replace !  OLD:returns the loadtimes for each OD slice, slice 0 at t=0 has index [0], etc.
 	map <int, double> get_loadtimes() {return loadtimes;}
 	const bool remove_rate(const ODVal& odid); //!< removes od_rates for given od_id for all slices

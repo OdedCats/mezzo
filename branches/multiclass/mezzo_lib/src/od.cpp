@@ -683,7 +683,7 @@ void ODMatrix::create_events(Eventlist* eventlist)
 
 }
 
-void ODMatrix::reset(Eventlist* eventlist, vector <ODpair*> * odpairs)
+void ODMatrix::reset(Eventlist* eventlist)
 {
 	vector < pair <double,ODSlice*> >::iterator s_iter=slices.begin();
 	for (s_iter;s_iter != slices.end(); s_iter++)
