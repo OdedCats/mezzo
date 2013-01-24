@@ -98,7 +98,7 @@ const bool ODaction::execute(Eventlist* eventlist, const double time)
   			eout << "ODaction @ " << time;
 	#endif //_DEBUG_OD
 	  // select route(origin, destination) and make a new vehicle
-	  Route* route=odpair->select_route(time);
+	  Route* route=odpair->select_route(time); // TODO: make vclass dependent
 	  Vtype* vehtype=vclass->random_vtype();
 	  vid++;
 	  Vehicle* veh=recycler.newVehicle(); // get a _normal_ vehicle
@@ -341,9 +341,11 @@ ODVal ODpair::odids ()
 }
 
 ODpair::ODpair(Origin* origin_, Destination* destination_, const double & rate_, Vtypes* vtypes_)
-	:origin(origin_), destination(destination_), rate(rate_), vtypes (vtypes_)
+	:origin(origin_), destination(destination_), rate(rate_), vtypes (vtypes_) // OLD TO BE REPLACED
+// TODO: remove after vclasses work.
 {
  	odaction=new ODaction(this);
+	
  	random=new Random();
 	start_rate=rate;
 #ifndef _DETERMINISTIC_ROUTE_CHOICE
@@ -354,8 +356,27 @@ ODpair::ODpair(Origin* origin_, Destination* destination_, const double & rate_,
 #else
 	random->seed(42);
 #endif // _DETERMINISTIC_ROUTE_CHOICE
- 	const int nr_fields=9;
+ 	const int nr_fields=9; // TODO: update fields & names also in reporting to grid
 	string names[nr_fields]={"origin_id","dest_id","veh_id","start_time","end_time","travel_time", "mileage","route_id","switched_route"};
+    vector <string> fields(names,names+nr_fields);
+	grid=new Grid(nr_fields,fields);	
+	oldgrid =new Grid(nr_fields,fields);
+}
+
+
+ODpair::ODpair(Origin* origin_, Destination* destination_):origin(origin_), destination(destination_)
+{
+	random=new Random();
+#ifndef _DETERMINISTIC_ROUTE_CHOICE
+ 	if (randseed != 0)
+	   random->seed(randseed);
+	else
+		random->randomize();	
+#else
+	random->seed(42);
+#endif // _DETERMINISTIC_ROUTE_CHOICE
+ 	const int nr_fields=10; // TODO: update fields & names also in reporting to grid
+	string names[nr_fields]={"origin_id","dest_id","veh_id","vclass_id","start_time","end_time","travel_time", "mileage","route_id","switched_route"};
     vector <string> fields(names,names+nr_fields);
 	grid=new Grid(nr_fields,fields);	
 	oldgrid =new Grid(nr_fields,fields);
@@ -365,6 +386,15 @@ ODpair::ODpair(): id (-1), odaction (NULL), origin (NULL), destination (NULL),
                   rate (-1), random (NULL), start_rate(-1), grid(NULL), oldgrid(NULL)
 {
 
+}
+
+void ODpair::init_vclass(Vclass* vclass_)
+
+{
+	rates[vclass_->get_id()] = 0.0;
+	ODaction* new_action=new ODaction(this,vclass_);
+
+	odactions[vclass_->get_id()]=new_action;
 }
 
 ODpair::~ODpair()
@@ -379,7 +409,8 @@ ODpair::~ODpair()
 
 void ODpair::reset()
 {
-	rate=start_rate;
+	//rate=start_rate; // OLD
+	rates=start_rates;
 #ifndef _DETERMINISTIC_ROUTE_CHOICE
  	if (randseed != 0)
 	   random->seed(randseed);
@@ -388,7 +419,11 @@ void ODpair::reset()
 #else
 	random->seed(42);
 #endif
-	odaction->reset(rate);
+	for (map <int,ODaction*>::iterator odact=odactions.begin(); odact != odactions.end(); ++odact)
+	{
+		odact->second->reset(rates[odact->first]);
+	}
+	//odaction->reset(rate); OLD
 	if (oldgrid)
 		*oldgrid = *grid;
 	grid->reset();
@@ -397,25 +432,28 @@ void ODpair::reset()
 bool ODpair::execute(Eventlist* eventlist, double time)
 {
 	eventlist_=eventlist; // store pointer locally, for easier manipulation of events.
-	if (rate > 0)
+	for (map<int,double>::iterator iter=rates.begin();iter!=rates.end(); ++iter)
+		if (iter->second > 0)
 	{
-		double temp = 3600 / (rate); // the optimal time to start generating.
+		double temp = 3600 / (iter->second); // the optimal time to start generating.
 		double delay =  (this->random->urandom(1.2, temp)); // check if this should be done here as well!
-		odaction->book_later (eventlist, time+delay);
+		odactions[iter->first]->book_later (eventlist, time+delay);
 		return true;
 	}
-	// TEST: do nothing for now
-	//else
-		//return odaction->execute(eventlist, time);
+
 	return true;
 }
 
 const double ODpair::get_rate()
 {
-	return rate;
+	return rates.begin()->second;
+}
+const double ODpair::get_rate(const int vclass)
+{
+	return (rates[vclass]);
 }
 
-void ODpair::set_rate(double newrate_, double time) 
+void ODpair::set_rate(double newrate_, double time)  // OLD
 {
 	if (rate==0) // if od pair currently inactive
 	{
@@ -451,6 +489,47 @@ void ODpair::set_rate(double newrate_, double time)
 		}
 	rate=newrate_; 
 }
+
+void ODpair::set_rate(const int vclass_, const double newrate_,const double time_)
+{
+	rate=rates[vclass_];
+	odaction=odactions[vclass_];
+	if (rates[vclass_]==0) // if od pair currently inactive for this vclass
+	{
+		if (newrate_!=0)  // od pair is about to become active for this vclass
+		{
+			odactions[vclass_]->set_active(true);
+			odactions[vclass_]->set_rate(newrate_);
+			double temp=random->urandom(1,50); // to space out generations
+			odactions[vclass_]->book_later(eventlist_,time_+temp); 
+		}
+			// if newrate_== 0 as well, nothing changes...
+	}
+	else // if rate!=0, OD pair is currently active
+		if (newrate_!=0) // so from non-zero to non-zero rate, od pair stays active
+		{
+			// re-adjust the generation event, by moving according to ratio of new_rate/rate;
+			double ratio    = rates[vclass_]/newrate_;
+			double last_gen = odactions[vclass_]->get_last_gen_time();
+			double next_gen = odactions[vclass_]->get_booked_time();
+			double headway  = next_gen-last_gen;
+			double new_time = last_gen+ratio*headway;
+			if (new_time < time_)
+				new_time=time_ + random->urandom(1,50);
+			//eout << "INFO: ODpair::set_rate(): at time "<< time << " moving ODaction from " << next_gen << " to " << new_time << endl;
+			odactions[vclass_]->set_rate(newrate_);
+			odactions[vclass_]->move_event(eventlist_,new_time); // move the next generation event for the action to current time
+		}
+		else // if newrate_ == 0 So the OD pair goes from active to inactive
+		{
+			odactions[vclass_]->set_rate(newrate_);
+			odactions[vclass_]->set_active(false);
+			odactions[vclass_]->move_event(eventlist_,-1.0);	//remove the generation event from the list!
+		}
+	rates[vclass_]=newrate_; 
+
+}
+
 
 void ODpair::report (list <double>   collector)
 {
@@ -548,7 +627,7 @@ ODMatrix::~ODMatrix ()
 {
 	// clean the OD slices
 }
-bool ODMatrix::read_from_stream(istream& in, const int& nr_odpairs, bool create_odpairs)
+bool ODMatrix::read_from_stream(istream& in, const int& nr_odpairs, bool create_odpairs, Vclass* vclass_)
 {
 	double rate=0.0;
 	int o, d;
@@ -572,11 +651,12 @@ bool ODMatrix::read_from_stream(istream& in, const int& nr_odpairs, bool create_
 		ODVal val(o,d);
 		if (create_odpairs)
 		{
-			odpair=network->create_ODpair(o,d,0.0);
+			odpair=network->create_ODpair(o,d);
 		}
 		else
 			odpair=network->find_ODpair(val);
 		assert (odpair != NULL);
+		odpair->init_vclass(vclass_); // creates an OD action for this class
 		// find in map
 		for (int j=0; j!=nr_periods; ++j)
 		{
@@ -587,8 +667,20 @@ bool ODMatrix::read_from_stream(istream& in, const int& nr_odpairs, bool create_
 		assert (bracket =='}');
 
 	}
-	// add the slices to the OD matrix
+	
+
 	return true;
+}
+
+void ODMatrix::create_events(Eventlist* eventlist)
+{
+	vector < pair <double,ODSlice*> >::iterator s_iter=slices.begin();
+	for (s_iter;s_iter!=slices.end(); ++s_iter)
+	{
+		MatrixAction* mptr=new MatrixAction(eventlist, s_iter->first, s_iter->second, vclass);
+		assert (mptr != NULL);
+	}
+
 }
 
 void ODMatrix::reset(Eventlist* eventlist, vector <ODpair*> * odpairs)
@@ -599,7 +691,7 @@ void ODMatrix::reset(Eventlist* eventlist, vector <ODpair*> * odpairs)
 		//create and book the MatrixAction
 		double loadtime = (*s_iter).first;
 		ODSlice* odslice = (*s_iter).second;
-		MatrixAction* mptr=new MatrixAction(eventlist, loadtime, odslice, odpairs);
+		MatrixAction* mptr=new MatrixAction(eventlist, loadtime, odslice,vclass);
 		assert (mptr != NULL);
 
 	}
@@ -629,11 +721,16 @@ const vector <double> ODMatrix::old_get_loadtimes()
 
 // MATRIXACTION CLASSES
 
-MatrixAction::MatrixAction(Eventlist* eventlist, double time, ODSlice* slice_, vector<ODpair*> *ods_)
+MatrixAction::MatrixAction(Eventlist* eventlist, double time, ODSlice* slice_, vector<ODpair*> *ods_) // OLD, to remove
 {
 	slice=slice_;
 	ods=ods_;
 	eventlist->add_event(time, this);
+}
+
+MatrixAction::MatrixAction(Eventlist* eventlist, double time, ODSlice* slice_, int vclass_id_):slice(slice_), vclass_id(vclass_id_)
+{
+	eventlist->add_event(time,this);
 }
 
 const bool MatrixAction::execute(Eventlist* eventlist, const double time)
@@ -641,7 +738,7 @@ const bool MatrixAction::execute(Eventlist* eventlist, const double time)
 	assert (eventlist != NULL);
 	//eout << time << " : MATRIXACTION:: set new rates "<< endl;
 	// for all odpairs in slice
-
+	
 	for (vector <ODRate>::iterator iter=slice->rates.begin();iter<slice->rates.end();iter++)
 	{
 		// find odpair
@@ -652,7 +749,7 @@ const bool MatrixAction::execute(Eventlist* eventlist, const double time)
 		else
 		{
 		//init new rate
-			odptr->set_rate(iter->rate,time);
+			odptr->set_rate(vclass_id,iter->rate,time);
 		}
 	}
 	return true;

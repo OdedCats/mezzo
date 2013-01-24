@@ -193,7 +193,7 @@ public:
 	const double get_currenttime(){return time;}
 	const double get_runtime(){return runtime;}
 	const bool get_calc_paths() const {return calc_paths;}
-	ODpair* create_ODpair(const int & oid, const int& did, const double & rate);
+	ODpair* create_ODpair(const int & oid, const int& did);
 	ODpair* find_ODpair(const ODVal& odval);
 
 	//const double get_time_alpha(){return time_alpha;}
@@ -230,7 +230,7 @@ public:
 	const double calc_mean_input_odtimes();
 	const double calc_rmsn_input_output_odtimes();
 	// Level Of Service SKIMS
-	bool calc_LOS_skims();
+	bool calc_LOS_skims(int vclass_id);
 	// SET's
 	void set_workingdir (const string dir) {workingdir = dir;}
 	const string get_workingdir () {return workingdir;}
@@ -334,7 +334,7 @@ protected:
 	bool old_readods(istream& in); // Deprecated
 	bool old_readod(istream& in, double scale=1.0); // Deprecated
 
-	bool readODmatrix(istream & in, int vclass);
+	
 	
 
 	bool readvtype (istream & in);

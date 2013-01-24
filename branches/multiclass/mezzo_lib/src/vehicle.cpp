@@ -120,6 +120,7 @@ void Vehicle::report(const double time)
   arrival_time=time;
   list <double> collector;
   collector.push_back(id);
+  collector.push_back(vclass->get_id());
   collector.push_back(start_time);
   collector.push_back(arrival_time);
   collector.push_back(arrival_time - start_time);

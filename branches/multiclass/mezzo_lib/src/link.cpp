@@ -468,6 +468,7 @@ const bool Link::enter_veh(Vehicle* const veh, const double time)
    veh->set_entry_time(time);
    update_icon(time);	
    time_last_entry=time;
+
 #ifdef _COLLECT_ALL	
 	list <double> collector;	
 	collector.push_back(time);

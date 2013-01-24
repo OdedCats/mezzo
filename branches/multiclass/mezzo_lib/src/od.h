@@ -83,7 +83,9 @@ class ODpair
 {
 public:
 	ODpair();
-	ODpair(Origin* origin_, Destination* destination_, const double & rate_, Vtypes* vtypes_);
+	ODpair(Origin* origin_, Destination* destination_, const double & rate_, Vtypes* vtypes_); // OLD
+	ODpair(Origin* origin_, Destination* destination_);
+	void init_vclass(Vclass* vclass_); // creates the ODaction for this Vclass
 	~ODpair();
 	void reset();
 // GETS
@@ -93,11 +95,12 @@ public:
 	Origin* get_origin();
 	Destination* get_destination();
 	const double get_rate();
-	vector <rateval> get_route_rates();
-	vector<Route*>& get_allroutes(){return routes;}
-	Vtypes* vehtypes() {return vtypes;}
-	Random* get_random(){return random;} 
-	Grid* get_grid() {return grid;}
+	const double get_rate(const int vclass);
+	vector <rateval> get_route_rates(); // UNUSED
+	vector<Route*>& get_allroutes(){return routes;} // TODO: routes per class
+	Vtypes* vehtypes() {return vtypes;} // TODO: still used here?
+	Random* get_random(){return random;}  // TODO: still used?
+	Grid* get_grid() {return grid;} // TODO add the vclass to the grid
 	Grid* get_oldgrid() {return grid;}
 	double get_diff_odtimes(){ return (grid->sum(6) - oldgrid->sum(6));}
 	double get_mean_odtimes() {return (grid->sum(6))/(grid->size());}
@@ -108,13 +111,14 @@ public:
 	double get_nr_arrived() {return grid->size();}
 	
 //SETS
-	void add_route(Route* route);
-	void set_rate(double newrate_, double time) ;
+	void add_route(Route* route); // TODO: per vclass
+	void set_rate(double newrate_, double time) ; // TODO: replace with class based one
+	void set_rate(const int vclass_, const double newrate_,const double time_); // TODO: implement
 	
 //OTHER	
-	bool execute(Eventlist* eventlist, double time);
-	Route* select_route(double time); // pretrip route choice
-	void report (list <double>   collector);
+	bool execute(Eventlist* eventlist, double time); // TODO: make vclass based
+	Route* select_route(double time); // pretrip route choice  TODO: move to recycler?
+	void report (list <double>   collector); // TODO: make vclass specific
 	bool write (ostream& out) {return grid->write_empty(out);}
 	bool writesummary(ostream& out);
 	bool writefieldnames(ostream& out);
@@ -171,10 +175,12 @@ public:
 	ODMatrix ();
 	ODMatrix (const int vclass_, const map <int,double> & loadtimes_,const double scale_, Network* network_);
 	~ODMatrix ();
-	bool read_from_stream(istream& in,const int& nr_odpairs,bool create_odpairs);
+	bool read_from_stream(istream& in,const int& nr_odpairs,bool create_odpairs,Vclass* vclass_);
+	void ODMatrix::create_events(Eventlist* eventlist);
 	void add_slice(const double time, ODSlice* slice);
 	void reset(Eventlist* eventlist,vector <ODpair*> * odpairs); //!< rebooks all the MatrixActions
-	const vector <double> old_get_loadtimes(); //!< returns the loadtimes for each OD slice, slice 0 at t=0 has index [0], etc.
+	const vector <double> old_get_loadtimes(); //!< TODO: replace !  OLD:returns the loadtimes for each OD slice, slice 0 at t=0 has index [0], etc.
+	map <int, double> get_loadtimes() {return loadtimes;}
 	const bool remove_rate(const ODVal& odid); //!< removes od_rates for given od_id for all slices
 private:
 	int vclass;
@@ -187,11 +193,13 @@ private:
 class MatrixAction: public Action
 {
 public:
-	MatrixAction(Eventlist* eventlist, double time, ODSlice* slice_, vector<ODpair*> *ods_);
+	MatrixAction(Eventlist* eventlist, double time, ODSlice* slice_, vector<ODpair*> *ods_); //OLD
+	MatrixAction(Eventlist* eventlist, double time, ODSlice* slice_,int vclass_id_);
 	const bool execute(Eventlist* eventlist, const double time);
 private:
 	ODSlice* slice;
 	vector <ODpair*> * ods;
+	int vclass_id;
 };
 
 #endif

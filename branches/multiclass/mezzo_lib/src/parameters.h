@@ -27,6 +27,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <map>
 #include "Random.h"
 
 #ifndef _NO_GUI
@@ -189,8 +190,8 @@ public:
    // State variables
    bool shortest_paths_initialised; //!< true if shortest paths have been initialised
    int veh_in_network; //!< nr of vehicles in network at any moment
-   vector <double> od_loadtimes; //!< contains the load times for all slices in the OD matrix
-
+   //vector <double> od_loadtimes; //!< contains the load times for all slices in the OD matrix
+   map <int,double> od_loadtimes;
    	// variables for Output View
 	unsigned int viewmode; //! Sets the view mode for the graphics: 0 = simulation run (standard), 1= show output data (such as flows etc)
 	double max_thickness_value; //!< max MOE value for showing link thickness in output view. Regulates scaling of values to thickness

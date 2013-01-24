@@ -2157,7 +2157,7 @@ bool Network::readserverrate(istream& in)
 	return true;
 }
 
-ODpair* Network::create_ODpair(const int & oid, const int& did, const double & rate)
+ODpair* Network::create_ODpair(const int & oid, const int& did)
 
 {
 	map <int, Origin*>::iterator o_iter; 
@@ -2168,7 +2168,7 @@ ODpair* Network::create_ODpair(const int & oid, const int& did, const double & r
 	d_iter = destinationmap.find(did);
 	assert (d_iter != destinationmap.end());
 
-	ODpair* odpair= new ODpair(o_iter->second, d_iter->second, rate, &vehtypes);
+	ODpair* odpair= new ODpair(o_iter->second, d_iter->second);
 	odpairs.push_back(odpair);
 	
 	odpairmap [ODVal(oid,did)]=odpair;
@@ -2241,6 +2241,7 @@ bool Network::readdemandfile(string name)
 		inputfile.close();
 		return false;
 	}
+	theParameters->od_loadtimes=loadtimes;
 	
 	inputfile >> keyword;
 	if (keyword!="nr_vclasses:")
@@ -2276,25 +2277,16 @@ bool Network::readdemandfile(string name)
 		assert (vehclassmap.count(vclass));
 		// read OD matrix for vclass
 		ODMatrix* odmat =new ODMatrix(vclass,loadtimes,scale, this);
-		odmat->read_from_stream(inputfile,nr_odpairs,j==0);
-		this->odmatrices [vclass] = odmat;
+		odmat->read_from_stream(inputfile,nr_odpairs,j==0,vehclassmap[vclass]);
+		odmatrices [vclass] = odmat;
+		odmat->create_events(eventlist); // create the MatrixAction events
 
 	}
 	inputfile.close();
-	return true;
-}
-
-
-bool Network::readODmatrix(istream & in, int vclass)
-{
-	// create OD matrix for vclass, add loadtimes
-
-	// for each OD pair (check if exists)
-	// for all periods in loadtimes 
-	// read rate into OD matrix
 
 	return true;
 }
+
 
 
 
@@ -2326,7 +2318,7 @@ bool Network::old_readdemandfile(string name)
 			}
 		}
 		inputfile.close();
-		theParameters->od_loadtimes = odmatrix.old_get_loadtimes();
+		theParameters->od_loadtimes = odmatrix.get_loadtimes();
 		return true;
 	}	
 	else
@@ -3134,7 +3126,7 @@ vector<Link*> Network::get_path(int destid)  // NOTE: destid in Original Node ID
 }	
 
 
-bool Network::shortest_paths_all()	
+bool Network::shortest_paths_all()	// TODO re-do for VCLASSES (See Gen_cost)
 //calculate the shortest paths for each link emanating from each origin to each destination;
 // and saving them if  there is a new path found (i.e. it's not in the routes vector already)
 {		
@@ -3165,7 +3157,7 @@ bool Network::shortest_paths_all()
 				bool exitloop = false;
 				while  (!exitloop)
 				{	
-					double od_rate= (*iter1)->get_rate();
+					double od_rate= (*iter1)->get_rate(); // TODO: Make for VCLASSES
 					double nr_routes= (*iter1)->get_nr_routes();
 					if ( ((od_rate > theParameters->small_od_rate) /* && ( (od_rate/theParameters->small_od_rate) < nr_routes)*/) || (nr_routes < 1) )
 						// if the od pair has not too many routes for its size
@@ -3256,18 +3248,19 @@ bool Network::shortest_paths_all()
 	return true;
 }
 
-bool Network::calc_LOS_skims()
+bool Network::calc_LOS_skims(int vclass_id)
 {
 	linkinfo->zero_disturbances(); // no disturbances in the LOS skims
 	double unlimited_cost=9999999999.0;
 	// for all vclasses
-	int vclass_id = 0;
+	//int vclass_id = 1;
 	//   TODO: set the linkinfo VOD, VOT and class Permissions
 	//   for all entry times
-	vector<double> ldtimes=odmatrix.old_get_loadtimes();
-	vector<double>::iterator loadtime = ldtimes.begin();
+	//vector<double> ldtimes=odmatrix.old_get_loadtimes();
+	map<int,double>::iterator loadtime=loadtimes.begin();
+	//vector<double>::iterator loadtime = ldtimes.begin();
 	int period=0;
-	for (loadtime;loadtime != ldtimes.end(); ++loadtime,++period)
+	for (loadtime;loadtime != loadtimes.end(); ++loadtime,++period)
 	{
 	//     for all origins
 		map <int,Origin*>::iterator ori= originmap.begin();
@@ -3280,7 +3273,7 @@ bool Network::calc_LOS_skims()
 			{
 	//			do a one-all labelcorrecting
 				
-				graph->labelCorrecting(link_to_graphlink[(*orilink)->get_id()],*loadtime,linkinfo);
+				graph->labelCorrecting(link_to_graphlink[(*orilink)->get_id()],loadtime->second,linkinfo);
 	//			add values to LOS_SKIM slice for all destinations
 				map <int,Destination*>::iterator dest=destinationmap.begin();
 				for (dest=destinationmap.begin(); dest!= destinationmap.end(); ++dest)
@@ -4515,10 +4508,12 @@ bool Network::writeall(unsigned int repl)
 	writerouteflows(routeflowsfile);
 	//writeheadways("timestamps.dat"); // commented out, since no-one uses them 
 	writeassmatrices(assignmentmatfile);
-
-	this->calc_LOS_skims();
-	this->write_LOS(LOSgencostfile);
-
+	// FOR ALL VEH CLASSES
+	for (map<int,ODMatrix*>::iterator odm=odmatrices.begin();odm!=odmatrices.end();++odm)
+	{
+		bool ok=calc_LOS_skims(odm->first);
+	}
+	write_LOS(LOSgencostfile);
 	write_v_queues(vqueuesfile);
 	return true;
 }
@@ -4765,7 +4760,7 @@ bool Network::writeassmatrices(string name)
 }
 
 
-bool Network::init()
+bool Network::init() // TODO: make it work for multiclass
 
 {
 	//random->seed(42);
@@ -4802,9 +4797,15 @@ bool Network::init()
 			
 			eout << "WARNING: init: OD pair " << (*iter0)->get_origin()->get_id() << " - " <<
 				(*iter0)->get_destination()->get_id() << " does not have any route connecting them. deleting..." << endl;
-			odmatrix.remove_rate((*iter0)->odids()); // remove all rates from OD matrix
+			//odmatrix.remove_rate((*iter0)->odids()); // remove all rates from OD matrix : for all OD matrices now
+			ODVal odval=(*iter0)->odids();
+			for (map <int,ODMatrix*>::iterator odm=odmatrices.begin();odm !=odmatrices.end();++odm)
+			{
+				odm->second->remove_rate(odval);
+			}
 			delete *iter0; // and delete ODpair itself
-			odpairs.erase(iter0++);
+			odpairs.erase(iter0++); 
+			odpairmap.erase(odval);
 		}
 		else // otherwise initialise them
 		{
@@ -4813,7 +4814,7 @@ bool Network::init()
 				mean_headway = 3600.0/(*iter0)->get_rate();
 			double startvalue = random->urandom(0,mean_headway);
 			//double startvalue = initvalue;
-			(*iter0)->execute(eventlist,startvalue);
+			(*iter0)->execute(eventlist,startvalue); // : make for each Class in OD matrices DONE
 			initvalue += 0.00001;
 			iter0++;
 		}
@@ -4857,43 +4858,6 @@ bool Network::init()
 }
 
 
-/* OBSOLETE 
-bool Network::run(int period)
-{
-	// This part will be transferred to the GUI
-
-	double t0=timestamp();
-	double tc;
-	double next_an_update=t0+an_step;
-#ifndef _NO_GUI
-	drawing->draw(pm,wm);
-#endif //_NO_GUI
-	//eventhandle->startup();
-	double time=0.0;
-	while ((time>-1.0) && (time<period))       // the big loop
-	{
-		time=eventlist->next();
-		if (time > (next_an_update-t0)*speedup)  // if the sim has come far enough
-		{
-			tc=timestamp();
-			while (tc < next_an_update)  // wait till the next animation update
-			{
-				tc=timestamp();
-			}
-			//	eventhandle->startup();     //update animation
-#ifndef _NO_GUI
-			drawing->draw(pm,wm);
-#endif // _NO_GUI
-			next_an_update+=an_step;    // update next step.
-		}
-	}
-	double tstop=timestamp();
-
-	//eout << "running time " << (tstop-t0) << endl;
-	return 0;
-
-}
-*/
 
  const void Network::run_route_iterations()
 
