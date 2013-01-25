@@ -127,7 +127,7 @@ MainForm::MainForm(QWidget *parent): QMainWindow(parent)
 
 	statusBar()->addWidget (status_label);
 	statusBar()->addWidget(simprogress_widget);
-	statusBar()->addWidget(this->TextLabel12,10);
+//	statusBar()->addWidget(this->TextLabel12,10);
 	statusBar()->addWidget(this->LCDNumber),10;
 	statusBar()->addWidget(this->progressbar),10;
 	statusBar()->addWidget(mouse_label),10;

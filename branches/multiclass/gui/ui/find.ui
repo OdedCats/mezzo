@@ -16,7 +16,7 @@
   <widget class="QLineEdit" name="findId">
    <property name="geometry">
     <rect>
-     <x>120</x>
+     <x>150</x>
      <y>30</y>
      <width>111</width>
      <height>22</height>
@@ -49,7 +49,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>40</y>
+     <y>50</y>
      <width>95</width>
      <height>20</height>
     </rect>
@@ -61,10 +61,10 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>100</x>
+     <x>110</x>
      <y>30</y>
-     <width>21</width>
-     <height>16</height>
+     <width>31</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
@@ -125,7 +125,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Clear Selection</string>
+    <string>Clear</string>
    </property>
   </widget>
  </widget>

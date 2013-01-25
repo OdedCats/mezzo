@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>815</width>
-    <height>674</height>
+    <width>994</width>
+    <height>708</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -55,7 +55,7 @@
      <rect>
       <x>5</x>
       <y>0</y>
-      <width>800</width>
+      <width>991</width>
       <height>581</height>
      </rect>
     </property>
@@ -474,7 +474,7 @@
      <rect>
       <x>10</x>
       <y>578</y>
-      <width>791</width>
+      <width>981</width>
       <height>31</height>
      </rect>
     </property>
@@ -518,10 +518,10 @@
        <widget class="QLCDNumber" name="LCDNumber">
         <property name="geometry">
          <rect>
-          <x>40</x>
+          <x>10</x>
           <y>3</y>
-          <width>81</width>
-          <height>16</height>
+          <width>111</width>
+          <height>21</height>
          </rect>
         </property>
         <property name="sizePolicy">
@@ -555,10 +555,10 @@
        <widget class="QProgressBar" name="progressbar">
         <property name="geometry">
          <rect>
-          <x>130</x>
-          <y>5</y>
-          <width>120</width>
-          <height>12</height>
+          <x>140</x>
+          <y>2</y>
+          <width>181</width>
+          <height>20</height>
          </rect>
         </property>
         <property name="sizePolicy">
@@ -578,34 +578,6 @@
           <family>Times New Roman</family>
           <pointsize>7</pointsize>
          </font>
-        </property>
-       </widget>
-       <widget class="QLabel" name="TextLabel12">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>0</y>
-          <width>41</width>
-          <height>22</height>
-         </rect>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="font">
-         <font>
-          <family>Times New Roman</family>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Time:</string>
-        </property>
-        <property name="wordWrap">
-         <bool>false</bool>
         </property>
        </widget>
       </widget>
@@ -645,7 +617,7 @@
      <rect>
       <x>20</x>
       <y>10</y>
-      <width>771</width>
+      <width>961</width>
       <height>20</height>
      </rect>
     </property>
@@ -724,8 +696,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>815</width>
-     <height>26</height>
+     <width>994</width>
+     <height>38</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">

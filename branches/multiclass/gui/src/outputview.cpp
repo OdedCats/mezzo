@@ -97,8 +97,9 @@ void OutputView::draw_colour_legend()
 {
 
 	QPixmap col (colour_legend->size());
+	
 	QPainter painter (&col);
-	QLinearGradient linearGrad(QPointF(0, 0), QPointF(160, 0));
+	QLinearGradient linearGrad(QPointF(0, 0), QPointF(colour_legend->width(), 0));
 	if (theParameters->inverse_colour_scale)
 	{
 		 linearGrad.setColorAt(1, Qt::green);
@@ -112,7 +113,7 @@ void OutputView::draw_colour_legend()
 		 linearGrad.setColorAt(1, Qt::red);
 	}
 	QBrush brush(linearGrad);
-	painter.fillRect(0,0,160,20,brush);
+	painter.fillRect(0,0,colour_legend->width(),colour_legend->height(),brush);
 	painter.end();
 	colour_legend->setPixmap(col);
 	this->repaint();
