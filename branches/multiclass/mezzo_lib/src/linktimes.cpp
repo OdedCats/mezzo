@@ -147,7 +147,7 @@ const double LinkCostInfo::cost (const int i, const double time)
 
 { 
 	double ltime=1.0, ltoll=0.0, ldistance=0.0;
-
+	
 	map <int,LinkTime*>::iterator iter1 = times_.find (i);
  	if (iter1!=times_.end())
  		ltime=(*iter1).second->cost(time);
@@ -162,7 +162,7 @@ const double LinkCostInfo::cost (const int i, const double time)
 	map <int,double>::iterator iter3 = tolls_.find (i);
 	if (iter3!=tolls_.end())
 		ltoll=(*iter3).second;
-	double cost=value_of_time*ltime+value_of_distance*ldistance+ltoll;
+	double cost=value_of_time*(ltime/3600)+value_of_distance*(ldistance/1000)+ltoll; // Cost is in SEK, with VoT in kr/hr and VoD in kr/km
 	return cost;
 	/* 2012 - try new general structure
  	map <int,LinkTime*>::iterator iter = times_.find (i);
@@ -181,7 +181,9 @@ const double LinkCostInfo::graph_cost (const int i, const double time)
 
 
 {
-	int graph_i = graphlink_to_link [i];
+	int l_i = graphlink_to_link [i];
+	return cost(l_i,time);
+	/*
  	map <int,LinkTime*>::iterator iter = times_.find (graph_i);
  	if (iter!=times_.end())
  		return (*iter).second->cost(time);
@@ -189,7 +191,7 @@ const double LinkCostInfo::graph_cost (const int i, const double time)
  	{	
  		eout << "LinkCostInfo:: graph_cost  : Error, can't find the link i = " << i << endl;
  		return 0.1; // NEVER RETURN 0
-   }
+   }*/
 }
 
 

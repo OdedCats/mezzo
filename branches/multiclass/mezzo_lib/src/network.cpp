@@ -3254,11 +3254,9 @@ bool Network::calc_LOS_skims(int vclass_id)
 {
 	linkinfo->zero_disturbances(); // no disturbances in the LOS skims
 	double unlimited_cost=9999999999.0;
-	// for all vclasses
-	//int vclass_id = 1;
-	//   TODO: set the linkinfo VOD, VOT and class Permissions
-	//   for all entry times
-	//vector<double> ldtimes=odmatrix.old_get_loadtimes();
+	linkinfo->set_vot(vehclassmap[vclass_id]->get_vot());
+	linkinfo->set_vod(vehclassmap[vclass_id]->get_vod());
+	
 	map<int,double>::iterator loadtime=loadtimes.begin();
 	//vector<double>::iterator loadtime = ldtimes.begin();
 	int period=0;

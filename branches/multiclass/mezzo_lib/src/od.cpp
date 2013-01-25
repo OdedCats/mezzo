@@ -401,6 +401,9 @@ ODpair::~ODpair()
 {
 	if (odaction)
 		delete odaction;
+	for (map<int,ODaction*>::iterator oda=odactions.begin();oda!=odactions.end(); ++oda)
+		if (oda->second)
+			delete oda->second;
 	if (random)
 		delete random;	
 	delete grid;
@@ -540,8 +543,11 @@ void ODpair::report (list <double>   collector)
 
 bool ODpair::writesummary(ostream& out)
 {
+	int nr_veh=0;
+	for (map<int,ODaction*>::iterator oda=odactions.begin();oda!=odactions.end();++oda)
+		nr_veh+=odaction->get_total_nr_veh();
 	out << origin->get_id() << "\t" << destination->get_id() << "\t" << routes.size() << "\t";
-	out << odaction->get_total_nr_veh() << '\t'  << grid->size() << "\t" << grid->sum(6) << "\t" << grid->sum(7) << endl;
+	out << nr_veh << '\t'  << grid->size() << "\t" << grid->sum(6) << "\t" << grid->sum(7) << endl;
   return true;
 }
 
