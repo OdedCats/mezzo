@@ -43,7 +43,8 @@ HEADERS += src/busline.h \
            src/vehicle.h \
            src/vissimcom.h \
            src/vtypes.h \
-           src/Graph.cpp
+		   src/emitmodel.h
+
 SOURCES += src/busline.cpp \
            src/eventlist.cpp \
            src/Graph.cpp \
@@ -66,4 +67,5 @@ SOURCES += src/busline.cpp \
            src/turning.cpp \
            src/vehicle.cpp \
            src/vissimcom.cpp \
-           src/vtypes.cpp
+           src/vtypes.cpp \
+		   src/emitmodel.cpp
