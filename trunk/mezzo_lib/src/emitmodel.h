@@ -21,10 +21,10 @@ class Emission
 		~Emission() {}
 		
 		const int get_time_stamp(){return time_stamp_;}
-		const double CO(){return CO_;}
-		const double FC(){return FC_;}
-		const double NOX(){return NOx_;}
-		const double PM10(){return PM10_;}
+		const double CO()const {return CO_;}
+		const double FC()const {return FC_;}
+		const double NOx()const {return NOx_;}
+		const double PM10()const {return PM10_;}
 
 		void set_timestamp(int t_stamp){time_stamp_=t_stamp;}
 		void set_CO(double co_val) {CO_=co_val;}
@@ -47,14 +47,14 @@ class EmissionModel
 {
     public:
 		EmissionModel(int n_inp, int t_update);
-		virtual ~EmissionModel();
+		virtual ~EmissionModel(){}
 
 		const int get_t_update(){return t_update_;}
 		void set_t_update(const int t_value){t_update_=t_value;}
 
 		// virtual functions
-		virtual const Emission* run_link(int linkid, int time, vector<double> inputs);
-		virtual const list<Emission*> run_net(int time, list<int> links, list<vector<double>> inputs);
+		virtual const Emission* run_link(int linkid, int time, vector<double> inputs){return 0;}
+		virtual const list<Emission*> run_net(int time, list<int> links, list<vector<double>> inputs){return list<Emission*>();}
 
 	protected:
 		int n_invars_; // the number of variables that the model depends on 

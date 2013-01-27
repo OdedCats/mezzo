@@ -1,4 +1,5 @@
 #include "grid.h"
+#include "link.h"
 
 
 Grid::Grid(const int nr_fields_,const vector<string> names_):nr_fields(nr_fields_),fnames(names_)
@@ -253,6 +254,43 @@ void MOE::write_value(ostream& out, const int index)
 	  out << (scale*(*iter)) << "\t" ;
 	else
 		out << "\t" ;
+
+}
+
+EMISSION_MOE::EMISSION_MOE(Link* link_, const double val_update, const double scale, const double default_val_):MOE(val_update,scale,default_val),link(link_)
+{
+	 emmodel_=new AvgVelocityModel(static_cast<int>(val_update));
+
+}
+	
+
+
+
+void EMISSION_MOE::calculate_values(int index)
+{
+	double counts_factor=1.0;
+	MOE* speedsmoe=link->get_speed_moe();
+	MOE* outflowsmoe=link->get_outflow_moe();
+	list <double> speedvalues=speedsmoe->get_values(); 
+	list <double> outflowvalues=outflowsmoe->get_values();
+
+	values.resize(speedvalues.size());
+
+
+	list<double>::iterator it=values.begin();
+	list<double>::iterator s_it=speedvalues.begin();
+	list<double>::iterator f_it=outflowvalues.begin();
+	for (it,s_it,f_it;it!=values.end();++it,++s_it,++f_it)
+	{
+		vector<double> inputs;
+		inputs.push_back(*s_it);
+		const Emission* em=emmodel_->run_link(link->get_id(),900,inputs);
+		double count=(*f_it)/counts_factor;
+		if (index==0)
+			*it=em->NOx()*count*(link->get_length()/1000.0);
+		else
+			*it=em->CO()*count*(link->get_length()/1000.0);
+	}
 
 }
 

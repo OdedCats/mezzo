@@ -90,6 +90,9 @@
     <ClCompile Include="src\vtypes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\emitmodel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\busline.h">
@@ -165,6 +168,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vtypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\emitmodel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

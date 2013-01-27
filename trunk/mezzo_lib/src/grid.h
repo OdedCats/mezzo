@@ -30,10 +30,13 @@
 #include <vector>
 #include "parameters.h"
 #include <iostream>
+#include "emitmodel.h"
 
 //#define INCLUDE_FIELD_NAMES  // to include the field names in the output file for the Grids
 //#define _DEBUG_MOE
 using namespace std;
+
+class Link;
 
 class Grid
 {
@@ -68,14 +71,16 @@ class MOE
 	void fill_missing (const int nr_periods,const double default_value); // fills out missing values for time periods without data
  	void report_value(const double value, const double time); // used to report values that are averaged
  	void report_value(const double time); // used to report counts such as flows
-	const double get_value(int index);
+	virtual const double get_value(int index);
+	virtual void calculate_values(int index=0) {}
 	const double get_last_value();
 	const double get_min();
 	const double get_max();
  	void write_values(ostream & out, const int nrperiods);
  	void write_value(ostream& out, const int index);
  	const int get_size() {return values.size();}
- private:
+	const list <double> & get_values() {return values;}
+ protected:
 	
    double value_update;
    double scale;
@@ -84,6 +89,18 @@ class MOE
    int value_period;
    list <double>::iterator value_iter;
    list <double> values;
+};
+
+class EMISSION_MOE:  public MOE
+{
+public:
+	EMISSION_MOE (Link* link_, const double val_update, const double scale_=1.0, const double default_val_=0.0);
+	~EMISSION_MOE() { delete emmodel_;}
+	void calculate_values(int index=0);
+
+protected:
+	EmissionModel* emmodel_;
+	Link* link;
 };
 
 #endif

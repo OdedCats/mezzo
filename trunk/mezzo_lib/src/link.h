@@ -112,6 +112,13 @@ public:
 	const double get_nr_lanes() const {return nr_lanes;}
 	const string get_name()const  {return name;}
 	void set_name(const string name_) {name=name_;}
+
+
+
+	MOE* get_speed_moe() {return moe_speed;}
+	MOE* get_outflow_moe() {return moe_outflow;}
+
+
 	const int size() const; 
 	const pair<double,double> set_output_moe_thickness(const unsigned int val); // sets the output MOE for the link icon returns min/max
 	const pair <double,double>  set_output_moe_colour(const unsigned int val); // sets the output MOE for the link icon returns min/max
@@ -257,6 +264,9 @@ protected:
 	MOE* moe_outflow;
 	MOE* moe_queue;
 	MOE* moe_density;
+
+	MOE* moe_nox; 
+	MOE* moe_co;
 	// Newly added for Assignment matrix
 	map < int , map <ODVal, map <int,int>,less_ODVal > > ass_matrix; // assignment matrix which is indexed as follows:
 	// ass_matrix [linkflow_period] [od_pair] [od_period]

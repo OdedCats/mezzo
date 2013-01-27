@@ -38,12 +38,13 @@ const Emission* AvgVelocityModel::run_link(int linkid, int time, vector<double> 
 	double NOx_fac=(0.2836-0.00869*avgvel+0.00011*avgvel*avgvel)/(1-0.0234*avgvel+0.00044*avgvel*avgvel);
 	double PM10_fac=0.0866-0.00142*avgvel+1.06e-5*avgvel*avgvel;
 	
-	double dist=avgvel*t_update_/1000;
+	double dist=1.0;
+	//avgvel*t_update_/1000;
 	Emission* cur_emit=new Emission(linkid, time, t_update_);
 	cur_emit->set_CO(CO_fac*dist);
-	cur_emit->set_CO(CO_fac*dist);
-	cur_emit->set_CO(CO_fac*dist);
-	cur_emit->set_CO(CO_fac*dist);
+	cur_emit->set_FC(FC_fac*dist);
+	cur_emit->set_NOx(NOx_fac*dist);
+	cur_emit->set_PM10(PM10_fac*dist);
 
 	return cur_emit;
 }

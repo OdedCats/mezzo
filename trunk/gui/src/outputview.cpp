@@ -13,12 +13,16 @@ OutputView::OutputView(QWidget* parent ):QDialog(parent)
 	ThicknessMOE->insertItem(3,"Speed");
 	ThicknessMOE->insertItem(4,"Density");
 	ThicknessMOE->insertItem(5,"Queue");
+	ThicknessMOE->insertItem(6,"NOx");
+	ThicknessMOE->insertItem(7,"CO");
 	ColourMOE->insertItem(0,"None");
 	ColourMOE->insertItem(1,"Outflow");
 	ColourMOE->insertItem(2,"Inflow");
 	ColourMOE->insertItem(3,"Speed");
 	ColourMOE->insertItem(4,"Density");
 	ColourMOE->insertItem(5,"Queue");
+	ColourMOE->insertItem(6,"NOx");
+	ColourMOE->insertItem(7,"CO");
 }
 
 void OutputView::show()
@@ -43,7 +47,7 @@ void OutputView::on_ThicknessMOE_currentIndexChanged(int index)
 	if (theNetwork != NULL)
 	{
 		unsigned int val;
-		if ((index < 0) || (index > 5))
+		if ((index < 0) || (index > 7))
 			val = 0;
 		else
 			val = index;
@@ -66,7 +70,7 @@ void OutputView::on_ColourMOE_currentIndexChanged(int index)
 	if (theNetwork!=NULL)
 	{
 		unsigned int val;
-		if ((index < 0) || (index > 5))
+		if ((index < 0) || (index > 7))
 			val = 0;
 		else
 			val = index;
@@ -168,6 +172,9 @@ void OutputView::set_thickness_unit(int val)
 	case 5:
 		text="veh";
 		break;
+	case 6:
+		text="g";
+		break;
 	}
 	thickness_unit->setText(text);
 }
@@ -193,6 +200,9 @@ void OutputView::set_colour_unit(int val)
 		break;
 	case 5:
 		text="veh";
+		break;
+	case 6:
+		text="g";
 		break;
 	}
 	colour_unit->setText(text);

@@ -38,6 +38,10 @@ Link::Link(int id_, Node* in_, Node* out_, int length_, double nr_lanes_, Sdfunc
 	moe_outflow=new MOE(theParameters->moe_outflow_update, (3600.0/theParameters->moe_outflow_update),0.0);
 	moe_queue=new MOE(theParameters->moe_queue_update,0.0);
 	moe_density=new MOE(theParameters->moe_density_update, 0.0);
+
+	moe_nox=new EMISSION_MOE(this, theParameters->moe_speed_update);
+	moe_co=new EMISSION_MOE(this, theParameters->moe_speed_update);
+
 	blocked_until=-1.0; // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
 	nr_exits_blocked=0; // set by the turning movements if they are blocked
 	freeflowtime=(length/(sdfunc->speed(0.0)));
@@ -57,6 +61,9 @@ Link::Link()
 	moe_outflow=new MOE(theParameters->moe_outflow_update, (3600.0/theParameters->moe_outflow_update),0.0);
 	moe_queue=new MOE(theParameters->moe_queue_update,0.0);
 	moe_density=new MOE(theParameters->moe_density_update, 0.0);
+
+	moe_nox=new EMISSION_MOE(this, theParameters->moe_speed_update);
+	moe_co=new EMISSION_MOE(this, theParameters->moe_speed_update);
 	/*
 	moe_speed=new MOE(theParameters->moe_speed_update);
 	moe_inflow=new MOE(theParameters->moe_inflow_update);
@@ -82,6 +89,10 @@ Link::~Link()
 	delete(moe_inflow);
 	delete(moe_queue);
 	delete(moe_density);
+
+	delete(moe_nox);
+	delete(moe_co);
+
 #ifdef _COLLECT_TRAVELTIMES
 	if (grid!=null )
 		delete(grid);
@@ -116,6 +127,10 @@ void Link::reset()
 	moe_outflow->reset();
 	moe_queue->reset();
 	moe_density->reset();
+
+	moe_nox->reset();
+	moe_co->reset();
+
 	blocked_until=-1.0; // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
 	nr_exits_blocked=0; // set by the turning movements if they are blocked
 	time_last_entry=0.0;
@@ -276,6 +291,26 @@ const pair<double,double> Link::set_output_moe_thickness(const unsigned int val)
 			moe_queue->fill_missing(nr_periods, 0.0);
 			return pair <double,double> ( moe_queue->get_min(), moe_queue->get_max());
 			break;
+		case (6):
+			icon->setMOE_thickness(moe_nox);
+			nr_periods= static_cast<int>(theParameters->moe_speed_update/theParameters->running_time);
+		
+			moe_nox->calculate_values(0);
+
+			return pair <double,double> ( moe_nox->get_min(), moe_nox->get_max());
+			break;
+		case (7):
+			icon->setMOE_thickness(moe_co);
+			nr_periods= static_cast<int>(theParameters->moe_speed_update/theParameters->running_time);
+		
+			moe_co->calculate_values(1);
+
+			return pair <double,double> ( moe_co->get_min(), moe_co->get_max());
+			break;
+
+
+
+
 		case (0):
 			icon->setMOE_thickness(NULL);
 
@@ -319,6 +354,24 @@ const pair <double,double> Link::set_output_moe_colour(const unsigned int val)//
 			nr_periods= static_cast<int>(theParameters->moe_queue_update/theParameters->running_time);
 			moe_queue->fill_missing(nr_periods, 0.0);
 			return pair <double,double> ( moe_queue->get_min(), moe_queue->get_max());
+			break;
+		case (6):
+			icon->setMOE_colour(moe_nox);
+			nr_periods= static_cast<int>(theParameters->moe_speed_update/theParameters->running_time);
+			//moe_nox->fill_missing(nr_periods, 0.0);
+
+			moe_nox->calculate_values(0);
+
+			return pair <double,double> ( moe_nox->get_min(), moe_nox->get_max());
+			break;
+		case (7):
+			icon->setMOE_colour(moe_co);
+			nr_periods= static_cast<int>(theParameters->moe_speed_update/theParameters->running_time);
+			//moe_nox->fill_missing(nr_periods, 0.0);
+
+			moe_co->calculate_values(1);
+
+			return pair <double,double> ( moe_co->get_min(), moe_co->get_max());
 			break;
 		case (0):
 			icon->setMOE_colour(NULL);
