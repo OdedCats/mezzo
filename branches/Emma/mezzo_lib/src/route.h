@@ -24,8 +24,8 @@
 #include <vector>
 #include "linktimes.h"
 
-//#include "e:\develop\emma\getp\codegen\lib\getP\getp.h"
-#include "getp.h" 
+#include "c:\develop\mezzo_Emma\getp\codegen\lib\getP\getp.h"
+//#include "getp.h" 
 
 #ifndef _NO_GUI
 	#include <QColor>
@@ -119,13 +119,16 @@ class EmmaRoute: public Route
 {
 public:
 	EmmaRoute(const int id_, Origin*const  origin_, Destination* const destination_, const vector <Link*> & links_) :
-		Route (id_, origin_, destination_, links_) {}
+		Route (id_, origin_, destination_, links_) {get_probs();}
 		
 	void get_probs () { 
 		getP_initialize();
-		real_T probs[196];
+		//real_T probs[196];
 		getP(probs);
 	}
+
+private:
+	real_T probs[196];
 };
 
 #endif

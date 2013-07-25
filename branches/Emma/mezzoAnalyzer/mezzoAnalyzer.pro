@@ -6,7 +6,7 @@ TEMPLATE = lib
 TARGET = mezzoAnalyzer
 DEPENDPATH += . src ui
 INCLUDEPATH += . $(QTDIR)/include $(QTDIR)/include/QtCore $(QTDIR)/include/QtGui $(QTDIR)/include/QtDesigner $(QTDIR)/include/QtNetwork $(QTDIR)/include/ActiveQt 
-#$(QTDIR)/include/Qt3Support ../getp/codegen/lib/getP
+#$(QTDIR)/include/Qt3Support ../mezzo_lib/getp/codegen/lib/getP
 LIBS+= $(SUBLIBS) -L../mezzo_lib/Debug -lmezzo_lib -L$(QTDIR)/lib -lQtCore -lQtGui 
 # -lQt3Support 
 #-lQtDesigner -lQtNetwork
