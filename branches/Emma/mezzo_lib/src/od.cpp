@@ -83,7 +83,13 @@ const bool ODaction::execute(Eventlist* eventlist, const double time)
   			eout << "ODaction @ " << time;
 	#endif //_DEBUG_OD
 	  // select route(origin, destination) and make a new vehicle
-	  Route* route=odpair->select_route(time);
+			
+			//EMMAROUTE
+	  // Route* route=odpair->select_route(time);
+			vector <Link*> * links=new vector <Link*>;
+			Route* route = new EmmaRoute(rid++, odpair->get_origin(),odpair->get_destination(),*links);
+			
+	 // End EMMAROUTE		
 	  Vtype* vehtype=(odpair->vehtypes() )->random_vtype();
 	  vid++;
 	   // 2002_12_18 recycling the vehicles

@@ -579,3 +579,55 @@ void Parameters::write_parameters(ostream & out)
 
 
 }
+
+// EMMAROUTE
+
+Probas::Probas()
+
+{
+	if (randseed!=0)
+		random.seed(randseed);
+	else
+		random.randomize();
+}
+int Probas::sample_nextlink(int cur_id)
+{
+	int result=-1;
+	double temp=0.0;
+	double draw= random.urandom();
+	for ( map<int,double>::iterator iter=probs [cur_id].begin(); iter!=probs [cur_id].end(); ++iter)
+	{
+		temp+=iter->second;
+		if (temp > draw)
+		{
+			result=iter->first;
+			return result;
+		}
+	}
+	return result;
+
+}
+
+ void Probas::read_probas() // EMMAROUTE
+
+	{
+		
+		double temp;
+		ifstream in("probas.txt");
+		assert (in);
+		for ( int i=1; i<=14; ++i)
+		{
+			for ( int j=1; j<=14; ++j)
+			{
+				in >> temp;
+				if (temp != 0.0)
+					probs [i] [j] = temp;
+			}
+		}
+
+
+		// read the probas.txt into structure
+
+		in.close ();
+
+ }

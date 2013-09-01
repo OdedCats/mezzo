@@ -25,15 +25,17 @@
 */
 #include <string>
 #include <vector>
+#include <map>
 #include <iostream>
 #include <fstream>
 #include "Random.h"
+#include <assert.h>
 
 #ifndef _NO_GUI
 #include <qcolor>
 #endif
 
-
+class Link;
 // DEFINES
 
 
@@ -46,7 +48,9 @@
 // GLOBAL VARIABLES
 
 extern long int randseed; // random seed
-extern int vid;     // global vehicle id nr.
+extern long int vid;     // global vehicle id nr.
+extern long int rid; // global route ID EMMAROUTE
+
 //extern double time_alpha;
 extern std::ofstream eout; // for all debugging output
 
@@ -228,6 +232,21 @@ public:
 };
 
 
+//EMMAROUTE
+class Probas
+{
+public:
+  Probas();
+  void read_probas(); // EMMAROUTE
+  int sample_nextlink(int cur_id);
+
+  //vars
+  map <int, map <int, double> > probs;
+  map <int, Link*> linkmap;
+  Random random;
+};
+
+extern Probas probas;
 extern Parameters* theParameters ;
 
 

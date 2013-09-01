@@ -18,7 +18,13 @@
 VehicleRecycler recycler;    // Global vehicle recycler
 
 long int randseed=0;
-int vid=0;
+long int vid=0;
+long int rid=0; // EMMAROUTE
+Probas probas; // EMMAROUTE
+
+
+
+
 //!!!!!!!!! parameters->linktime_alpha replaces this:
 //double time_alpha=0.2; // smoothing factor for the output link times (uses hist_time & avg_time),
 										// 1 = only new times, 0= only old times. 
@@ -241,6 +247,7 @@ int Network::reset()
 {	
 	time=0.0;
 	vid = 0;
+	rid = 0; // EMMAROUTE
 	// reset eventlist
 	eventlist->reset();
 
@@ -4434,6 +4441,7 @@ bool Network::init()
 	// initialise the od pairs and their events
 	for(vector<ODpair*>::iterator iter0=odpairs.begin(); iter0<odpairs.end();)
 	{
+		/********** EMMAROUTE
 		if ((*iter0)->get_nr_routes() == 0) //chuck out the OD pairs without paths
 		{
 			
@@ -4443,7 +4451,7 @@ bool Network::init()
 			delete *iter0; // and delete ODpair itself
 			iter0=odpairs.erase(iter0);
 		}
-		else // otherwise initialise them
+		else // otherwise initialise them *******************/
 		{
 			double mean_headway=300.0;
 			if ((*iter0)->get_rate() > 0.0 ) 
@@ -4455,7 +4463,9 @@ bool Network::init()
 			iter0++;
 		}
 	}
-
+	// EMMAROUTE
+	  probas.read_probas();
+	  probas.linkmap=linkmap;
 #ifdef _DEBUG_NETWORK	
 	eout << "odpairs initialised" << endl;
 	eout << "number of destinations " <<destinations.size() <<endl;

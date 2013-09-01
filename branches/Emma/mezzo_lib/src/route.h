@@ -43,11 +43,14 @@ typedef pair <int,int> ODVal;
 class Route
 {
   public:
-	Route(const int id_, Origin* const origin_, Destination* const destination_,  const vector <Link*> & links_ );//!< Standard constructor, requires Origin*, Destination* and Link* vector.
+	Route(const int id_, Origin* const origin_, Destination* const destination_,  vector <Link*> & links_ );//!< Standard constructor, requires Origin*, Destination* and Link* vector.
 	Route(const int id, Route* const route, const vector<Link*> & links_); //!< copy constructor that copies route and overwrites remaining part starting from links_.front()
 	void reset(); //!< resets all variables to initial state
-	Link* const nextlink(Link* const currentlink) const; //!< returns next_link for a vehicle, given currentlink.
-	vector <Link*>::const_iterator nextlink_iter(Link* const currentlink) ; //!< returns const_iterator to the next link of the route, given currentlink.
+	//EMMAROUTE
+	virtual Link* const nextlink(Link* const currentlink) const; //!< returns next_link for a vehicle, given currentlink.
+	virtual vector <Link*>::const_iterator nextlink_iter(Link* const currentlink) ; //!< returns const_iterator to the next link of the route, given currentlink.
+	virtual void generate_nextlink(Link* const currentlink); //!< for the EmmaRoute
+
 	Link* const firstlink() const {	return (links.front());} //!< returns the first link of the route.
 	vector <Link*>::const_iterator firstlink_iter() {return links.begin();} //!< returns const_iterator to the first link of the route
 	vector <Link*>::const_iterator lastlink_iter() {return --(links.end());} //!< returns const_iterator to the last link of the route
@@ -110,7 +113,7 @@ private:
 class Busroute: public Route
 {
 public:
-	Busroute(const int id_, Origin*const  origin_, Destination* const destination_, const vector <Link*> & links_) :
+	Busroute(const int id_, Origin*const  origin_, Destination* const destination_,  vector <Link*> & links_) :
 		Route (id_, origin_, destination_, links_) {}
 
 };
@@ -118,9 +121,18 @@ public:
 class EmmaRoute: public Route
 {
 public:
-	EmmaRoute(const int id_, Origin*const  origin_, Destination* const destination_, const vector <Link*> & links_) :
-		Route (id_, origin_, destination_, links_) {get_probs();}
+	EmmaRoute(const int id_, Origin*const  origin_, Destination* const destination_, vector <Link*> & links_) ;
 		
+
+		//reimplement
+		Link* const nextlink(Link* const currentlink) const; //!< returns next_link for a vehicle, given currentlink.
+		vector <Link*>::const_iterator nextlink_iter(Link* const currentlink) ; //!< returns const_iterator to the next link of the route, given currentlink.
+
+		void generate_nextlink(Link* const currentlink);
+private:
+	//Link* firstlink;
+
+		/*************** OLD stuff *****************
 	void get_probs () { 
 		getP_initialize();
 		//real_T probs[196];
@@ -129,6 +141,9 @@ public:
 
 private:
 	real_T probs[196];
+
+	**********************************************/
 };
+
 
 #endif

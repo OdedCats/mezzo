@@ -63,6 +63,7 @@ void Vehicle::set_curr_link(Link* const  curr_link_)
 	curr_link=curr_link_;
 	if (entered)
 	{
+		route->generate_nextlink(curr_link); // EMMAROUTE
 		next_link_iter++;
 		//next_link_id=(*next_link_iter)->get_id();
 	}

@@ -16,7 +16,7 @@ struct compare
  int id;
 };
 
-Route::Route(const int id_, Origin* const origin_, Destination* const destination_, const vector <Link*> & links_):	id(id_), origin(origin_), destination(destination_),sumcost(0.0)
+Route::Route(const int id_, Origin* const origin_, Destination* const destination_, vector <Link*> & links_):	id(id_), origin(origin_), destination(destination_),sumcost(0.0)
 {
  	last_calc_time=0.0;
 	links=links_;
@@ -308,3 +308,34 @@ void Route::write_routeflows(ostream &out) const
 
 
 }
+
+// EmmaRoute
+
+	EmmaRoute::EmmaRoute(const int id_, Origin*const  origin_, Destination* const destination_, vector <Link*> & links_) :
+	  Route (id_, origin_, destination_, links_) {links.push_back(origin_->get_links().front());} // EMMAROUTE !!! TO FIX FOR OTHER NETWORKS!!!
+		
+	Link* const EmmaRoute::nextlink(Link* const currentlink) const
+	{
+
+		return NULL;
+	
+	}
+
+	vector <Link*>::const_iterator EmmaRoute::nextlink_iter(Link* const currentlink)  //!< returns const_iterator to the next link of the route, given currentlink.
+
+	{
+		vector<Link*>::const_iterator iter=find(links.begin(), links.end(), currentlink);
+		return ++iter;
+	}
+
+	void EmmaRoute::generate_nextlink(Link* const currentlink)
+	{
+
+		vector<Link*>::const_iterator iter=find(links.begin(), links.end(), currentlink);
+		int cur_id=currentlink->get_id();
+		int nextlinkid= probas.sample_nextlink(cur_id);
+		links.push_back(probas.linkmap [nextlinkid]);
+	}
+
+	void Route::generate_nextlink(Link* const currentlink) // Dummy
+	{}
