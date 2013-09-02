@@ -595,12 +595,16 @@ int Probas::sample_nextlink(int cur_id)
 	int result=-1;
 	double temp=0.0;
 	double draw= random.urandom();
+	eout << "draw next link from " << cur_id << ". draw: " << draw << ", cum probs: " ;
 	for ( map<int,double>::iterator iter=probs [cur_id].begin(); iter!=probs [cur_id].end(); ++iter)
 	{
+		
 		temp+=iter->second;
+		eout << temp << ", ";
 		if (temp > draw)
 		{
 			result=iter->first;
+			eout << " selected link: " << iter->first << " with probability " << iter->second << endl; 
 			return result;
 		}
 	}

@@ -86,7 +86,7 @@ const bool ODaction::execute(Eventlist* eventlist, const double time)
 			
 			//EMMAROUTE
 	  // Route* route=odpair->select_route(time);
-			vector <Link*> * links=new vector <Link*>;
+			vector <Link*> * links=new vector <Link*>; // DANGLING, temp fix
 			Route* route = new EmmaRoute(rid++, odpair->get_origin(),odpair->get_destination(),*links);
 			
 	 // End EMMAROUTE		

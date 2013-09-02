@@ -4164,6 +4164,8 @@ bool Network::writeall(unsigned int repl)
 	//writeheadways("timestamps.dat"); // commented out, since no-one uses them 
 	writeassmatrices(assignmentmatfile);
 	write_v_queues(vqueuesfile);
+	//EMMAROUTE
+	this->writepathfile("realised_routes.dat");
 	return true;
 }
 

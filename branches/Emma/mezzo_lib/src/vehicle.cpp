@@ -46,7 +46,7 @@ void Vehicle::set_entered()
 {
 	entered=true;
 	theParameters->veh_in_network++;
-	next_link_iter++;
+	//next_link_iter++; // EMMAROUTE commented out
 	//next_link_id=(*next_link_iter)->get_id();
 }
 
@@ -61,10 +61,12 @@ void Vehicle::advance_to_next_link(Link* const next)
 void Vehicle::set_curr_link(Link* const  curr_link_)
 {
 	curr_link=curr_link_;
+	route->generate_nextlink(curr_link); // EMMAROUTE
+	next_link_iter=route->nextlink_iter(curr_link);
 	if (entered)
 	{
-		route->generate_nextlink(curr_link); // EMMAROUTE
-		next_link_iter++;
+		
+		//next_link_iter++;
 		//next_link_id=(*next_link_iter)->get_id();
 	}
 }

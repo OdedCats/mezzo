@@ -47,8 +47,8 @@ class Route
 	Route(const int id, Route* const route, const vector<Link*> & links_); //!< copy constructor that copies route and overwrites remaining part starting from links_.front()
 	void reset(); //!< resets all variables to initial state
 	//EMMAROUTE
-	virtual Link* const nextlink(Link* const currentlink) const; //!< returns next_link for a vehicle, given currentlink.
-	virtual vector <Link*>::const_iterator nextlink_iter(Link* const currentlink) ; //!< returns const_iterator to the next link of the route, given currentlink.
+	 Link* const nextlink(Link* const currentlink) const; //!< returns next_link for a vehicle, given currentlink.
+	 vector <Link*>::const_iterator nextlink_iter(Link* const currentlink) ; //!< returns const_iterator to the next link of the route, given currentlink.
 	virtual void generate_nextlink(Link* const currentlink); //!< for the EmmaRoute
 
 	Link* const firstlink() const {	return (links.front());} //!< returns the first link of the route.
@@ -125,8 +125,8 @@ public:
 		
 
 		//reimplement
-		Link* const nextlink(Link* const currentlink) const; //!< returns next_link for a vehicle, given currentlink.
-		vector <Link*>::const_iterator nextlink_iter(Link* const currentlink) ; //!< returns const_iterator to the next link of the route, given currentlink.
+		//Link* const nextlink(Link* const currentlink) const; //!< returns next_link for a vehicle, given currentlink.
+		//vector <Link*>::const_iterator nextlink_iter(Link* const currentlink) ; //!< returns const_iterator to the next link of the route, given currentlink.
 
 		void generate_nextlink(Link* const currentlink);
 private:
