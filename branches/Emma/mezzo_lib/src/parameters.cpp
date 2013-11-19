@@ -1,6 +1,6 @@
 #include "parameters.h"
 #include <iostream>
-
+#include "link.h"
 
 
 
@@ -635,3 +635,27 @@ int Probas::sample_nextlink(int cur_id)
 		in.close ();
 
  }
+
+ void Probas::write_traveltimes() // EMMAROUTE
+ {
+	 ofstream out("tt.txt");
+	 assert (out);
+		for ( int i=1; i<=14; ++i)
+		{
+			for ( int j=1; j<=14; ++j)
+			{
+				
+				if ( probs [i].count(j) != 0)
+				{
+					double ttime=0.0;
+					if (linkmap.count(j))
+						ttime= linkmap [j]->get_cost(0.0);
+					out << ttime << "   ";
+				}
+				else
+					out << "0.0000000e+00" << "   ";
+			}
+			out << endl;
+		}
+ }
+

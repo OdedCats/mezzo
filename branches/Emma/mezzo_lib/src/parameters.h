@@ -239,6 +239,7 @@ public:
   Probas();
   void read_probas(); // EMMAROUTE
   int sample_nextlink(int cur_id);
+  void write_traveltimes();
 
   //vars
   map <int, map <int, double> > probs;
