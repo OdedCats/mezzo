@@ -106,7 +106,7 @@ const bool ODaction::execute(Eventlist* eventlist, const double time)
 	  if ( (odpair->get_origin())->insert_veh(veh,time)) // insert vehicle in the input queue
 	  {
   		ok=true;
-		total_nr_veh ++;
+		total_nr_veh++;
 	  }
 	  else
   		{
@@ -547,7 +547,7 @@ bool ODpair::writesummary(ostream& out)
 	for (map<int,ODaction*>::iterator oda=odactions.begin();oda!=odactions.end();++oda)
 		nr_veh+=odaction->get_total_nr_veh();
 	out << origin->get_id() << "\t" << destination->get_id() << "\t" << routes.size() << "\t";
-	out << nr_veh << '\t'  << grid->size() << "\t" << grid->sum(6) << "\t" << grid->sum(7) << endl;
+	out << nr_veh << '\t'  << grid->size() << "\t" << grid->sum(7) << "\t" << grid->sum(8) << endl;
   return true;
 }
 
