@@ -50,7 +50,7 @@ extern int vid;     // global vehicle id nr.
 //extern double time_alpha;
 extern std::ofstream eout; // for all debugging output
 
-const string version = "Mezzo 0.62.0";
+const string version = "Mezzo 0.62.1-singleclass";
 
 // OLD Network.hh parameters
 
