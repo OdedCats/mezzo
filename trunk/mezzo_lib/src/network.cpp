@@ -26,6 +26,8 @@ int vid=0;
 
 Parameters* theParameters = new Parameters();
 std::ofstream eout("debug_log.txt"); // for all debugging output
+// TEMPORARY:
+std::ofstream linkout("link_log.txt"); // for all link passage output
 
 
 
