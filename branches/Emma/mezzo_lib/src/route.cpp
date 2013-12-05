@@ -3,6 +3,11 @@
 #include <math.h>
 #include "parameters.h"
 
+
+// TEMPORARY EMMAROUTES
+
+std::ofstream rroutes("realized_routes.txt"); // for all route debugging output
+
 template<class T>
 struct compare
 {
@@ -330,7 +335,11 @@ void Route::write_routeflows(ostream &out) const
 
 	void EmmaRoute::generate_nextlink(Link* const currentlink)
 	{
-
+		if (currentlink->get_out_node_id() == get_destination()->get_id())
+		{
+			this->write(rroutes);
+			return;
+		}
 		vector<Link*>::const_iterator iter=find(links.begin(), links.end(), currentlink);
 		int cur_id=currentlink->get_id();
 		int nextlinkid= probas.sample_nextlink(cur_id);

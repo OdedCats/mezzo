@@ -4165,6 +4165,7 @@ bool Network::writeall(unsigned int repl)
 	writeassmatrices(assignmentmatfile);
 	write_v_queues(vqueuesfile);
 	probas.write_traveltimes();
+
 	return true;
 }
 
