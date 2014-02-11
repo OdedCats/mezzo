@@ -61,8 +61,11 @@ void Vehicle::advance_to_next_link(Link* const next)
 void Vehicle::set_curr_link(Link* const  curr_link_)
 {
 	curr_link=curr_link_;
-	route->generate_nextlink(curr_link); // EMMAROUTE
-	next_link_iter=route->nextlink_iter(curr_link);
+	if (curr_link->get_out_node_id() != get_did())
+	{
+		route->generate_nextlink(curr_link); // EMMAROUTE
+		next_link_iter=route->nextlink_iter(curr_link);
+	}
 	if (entered)
 	{
 		
@@ -79,7 +82,14 @@ Link* const  Vehicle::get_curr_link() const
 Link* const  Vehicle::nextlink() const 
 {
 	if (entered)
-		return (*next_link_iter);
+		
+		if (*next_link_iter)
+			return (*next_link_iter); // NOT SAFE! TODO: Change for range safe version
+		else
+		{
+			eout << "Vehicle::nextlink No next link available VehId: " << id << ", CurLink: " << curr_link->get_id() << endl;
+			
+		}
 		//return route->nextlink(curr_link);
 	else
 		return route->firstlink();

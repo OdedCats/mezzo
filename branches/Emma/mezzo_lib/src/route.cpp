@@ -209,7 +209,7 @@ Link* const Route::nextlink(Link* const currentlink) const
  {
  	return *iter;
  }
- eout << "Route::nextlink: error! there is no next link! " << endl;
+ eout << "Route::nextlink: error! there is no next link! Current link " << currentlink->get_id() << endl;
  return NULL;
 }
 
@@ -218,7 +218,7 @@ vector <Link*>::const_iterator Route::nextlink_iter(Link* const currentlink)
 	vector<Link*>::const_iterator iter=find(links.begin(), links.end(), currentlink);
 	iter++;
 	if (iter==links.end())
-		eout << "Route::nextlink_iter: error! there is no next link! route id "<< id << endl;
+		eout << "Route::nextlink_iter: error! there is no next link! route id "<< id << ", current link " << currentlink->get_id() <<  endl;
 	return iter;
 }
 	
@@ -343,7 +343,10 @@ void Route::write_routeflows(ostream &out) const
 		vector<Link*>::const_iterator iter=find(links.begin(), links.end(), currentlink);
 		int cur_id=currentlink->get_id();
 		int nextlinkid= probas.sample_nextlink(cur_id);
-		links.push_back(probas.linkmap [nextlinkid]);
+		if (probas.linkmap.count(nextlinkid))
+			links.push_back(probas.linkmap [nextlinkid]);
+		else
+			eout << "EmmaRoute::generate_nextlink Error: no link with id " << nextlinkid << " found from current link " << cur_id << endl;
 	}
 
 	void Route::generate_nextlink(Link* const currentlink) // Dummy
