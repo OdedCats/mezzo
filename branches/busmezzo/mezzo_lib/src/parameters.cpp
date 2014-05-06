@@ -82,6 +82,7 @@ Parameters::Parameters ()
    demand_format = 1;
    demand_scale = 1.0;
    choice_set_indicator = 0;
+   pass_day_to_day_indicator = 0;
    transfer_coefficient = 0.0; 
    in_vehicle_time_coefficient = 0.0;
    waiting_time_coefficient = 0.0;
@@ -93,30 +94,20 @@ Parameters::Parameters ()
    max_walking_distance = 2500;
    max_waiting_time = 1800.0;
    dominancy_perception_threshold = 0;
-   expectations_diff = 0.0;
    choice_model = 0;
    real_time_info = 0;
-   ratio_network_information = 0;
+   share_RTI_network = 0;
    start_pass_generation = 0;
+   od_pairs_for_generation = 0;
 
 // transit control parameters
    riding_time_weight = 0.0;
    dwell_time_weight = 0.0;
    waiting_time_weight = 0.0;
    holding_time_weight = 0.0;
-   compliance_share = 1.0;
-   max_holding_time = 120.0;
-   
-   memory_strategy = 1;
 
-   fuzzy = 0;
-   max_acceptable_IVT = 3600;
-}
-
-void Parameters::new_day()
-{
-	Day* today = new Day();
-	theParameters->calendar.push_back(today);
+// day2day assignment
+   default_alpha_RTI = 0.5;
 }
 
 bool Parameters::read_parameters (istream & in )
@@ -546,6 +537,13 @@ bool Parameters::read_parameters (istream & in )
 		}
 		in >> choice_set_indicator;
 		in >> keyword;
+		if (keyword!= "pass_day_to_day_indicator=")
+		{
+			cout << "ERROR reading Parameters file, expecting: pass_day_to_day_indicator=, read: " << keyword << endl;
+			return false;
+		}
+		in >> pass_day_to_day_indicator;
+		in >> keyword;
 		if (keyword!= "transfer_coefficient=")
 		{
 			cout << "ERROR reading Parameters file, expecting: transfer_coefficient=, read: " << keyword << endl;
@@ -623,13 +621,6 @@ bool Parameters::read_parameters (istream & in )
 		}
 		in >> dominancy_perception_threshold;
 		in >> keyword;
-		if (keyword!= "expectations_diff=")
-		{
-			cout << "ERROR reading Parameters file, expecting: expectations_diff=, read: " << keyword << endl;
-			return false;
-		}
-		in >> expectations_diff;
-		in >> keyword;
 		if (keyword!= "choice_model=")
 		{
 			cout << "ERROR reading Parameters file, expecting: choice_model=, read: " << keyword << endl;
@@ -644,12 +635,12 @@ bool Parameters::read_parameters (istream & in )
 		}
 		in >> real_time_info;
 		in >> keyword;
-		if (keyword!= "ratio_network_information=")
+		if (keyword!= "share_RTI_network=")
 		{
-			cout << "ERROR reading Parameters file, expecting: ratio_network_information=, read: " << keyword << endl;
+			cout << "ERROR reading Parameters file, expecting: share_RTI_network=, read: " << keyword << endl;
 			return false;
 		}
-		in >> ratio_network_information;
+		in >> share_RTI_network;
 		in >> keyword;
 		if (keyword!= "start_pass_generation=")
 		{
@@ -664,11 +655,18 @@ bool Parameters::read_parameters (istream & in )
 			return false;
 		}
 		in >> stop_pass_generation;
+		in >> keyword;
+		if (keyword!= "od_pairs_for_generation=")
+		{
+			cout << "ERROR reading Parameters file, expecting: od_pairs_for_generation=, read: " << keyword << endl;
+			return false;
+		}
+		in >> od_pairs_for_generation;
 	}
 	in >> keyword;
 	if (keyword!= "#transit_control_parameters")
 	{
-		cout << "ERROR reading Parameters file, expecting: #demand_parameters, read: " << keyword << endl;
+		cout << "ERROR reading Parameters file, expecting: #transit_control_parameters, read: " << keyword << endl;
 		return false;
 	}
 	in >> keyword;
@@ -700,40 +698,19 @@ bool Parameters::read_parameters (istream & in )
 	}
 	in >> holding_time_weight;
 	in >> keyword;
-	if (keyword!= "compliance_share=")
+	if (keyword!= "#day2day_assignment")
 	{
-		cout << "ERROR reading Parameters file, expecting: compliance_share=, read: " << keyword << endl;
+		cout << "ERROR reading Parameters file, expecting: #day2day_assignment, read: " << keyword << endl;
 		return false;
 	}
-	in >> compliance_share;
+	// read alphas
 	in >> keyword;
-	if (keyword!= "max_holding_time=")
+	if (keyword!= "default_alpha_RTI=")
 	{
-		cout << "ERROR reading Parameters file, expecting: max_holding_time=, read: " << keyword << endl;
+		cout << "ERROR reading Parameters file, expecting: default_alpha_RTI=, read: " << keyword << endl;
 		return false;
 	}
-	in >> max_holding_time;
-	in >> keyword;
-	if (keyword!= "memory_strategy=")
-	{
-		cout << "ERROR reading Parameters file, expecting: memory_strategy=, read: " << keyword << endl;
-		return false;
-	}
-	in >> memory_strategy;
-	in >> keyword;
-	if (keyword!= "fuzzy_travelers=")
-	{
-		cout << "ERROR reading Parameters file, expecting: fuzzy_travelers=, read: " << keyword << endl;
-		return false;
-	}
-	in >> fuzzy;
-	in >> keyword;
-	if (keyword!= "max_acceptable_IVT=")
-	{
-		cout << "ERROR reading Parameters file, expecting: max_acceptable_IVT=, read: " << keyword << endl;
-		return false;
-	}
-	in >> max_acceptable_IVT;
+	in >> default_alpha_RTI;
 	return true;
 }
 
@@ -789,65 +766,6 @@ void Parameters::write_parameters(ostream & out)
    out << "  sim_speed_factor= " << sim_speed_factor << endl;
 
 #endif
-}
-
-void Parameters::write_day_summary(ostream & out)
-{
-	double a=calendar.back()->running_time;
-	int b=calendar.back()->day_nr_pass_completed;
-	double c=(calendar.back()->has_changed)/(calendar.back()->has_changed+calendar.back()->has_not_changed);
-	double d=(calendar.back()->day_avg_total_travel_time)/b;
-	double e=(calendar.back()->day_avg_tinvehicle)/b;
-	double f=(calendar.back()->day_avg_twait)/b;
-	double g=(calendar.back()->day_avg_twalk)/b;
-	out << calendar.size() << '\t' << a << '\t' << b << '\t' << c << '\t' << d << '\t' << e << '\t'<< f << '\t'<< g << '\t'<< endl; 
-}
-
-// **** DAY functions ***
-
-Day::Day ()
-{   
-	day_id =did;
-	steady_state_meausure=0;
-	running_time=0;
-	day_nr_pass_completed=0;
-	has_changed=0;
-	has_not_changed=0;
-	day_avg_total_travel_time=0;
-	day_avg_tinvehicle=0;
-	day_avg_twait=0;
-	day_avg_twalk=0;
-}
-
-Day::~Day()
-{
-}
 
 
-void Day::reset()
-{   
-	steady_state_meausure=0;
-	running_time=0;
-	day_nr_pass_completed=0;
-	has_changed=0;
-	has_not_changed=0;
-	day_avg_total_travel_time=0;
-	day_avg_tinvehicle=0;
-	day_avg_twait=0;
-	day_avg_twalk=0;
-	
-}
-
-void Day::init (int id)
-{   day_id=id;
-	//day_id; ///FAB to redefine a bit the initialization
-	steady_state_meausure=0;
-	running_time=0;
-	day_nr_pass_completed=0;
-    has_changed=0;
-	has_not_changed=0;
-	day_avg_total_travel_time=0;
-	day_avg_tinvehicle=0;
-	day_avg_twait=0;
-	day_avg_twalk=0;
 }

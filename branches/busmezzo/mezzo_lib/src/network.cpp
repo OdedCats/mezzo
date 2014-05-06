@@ -19,8 +19,7 @@
 long int randseed=0;
 int vid=0;
 int pid=0;
-int pathid=0;
-int did=0;
+long pathid=0;
 VehicleRecycler recycler;    // Global vehicle recycler
 double time_alpha=0.2; // smoothing factor for the output link times (uses hist_time & avg_time),
 // 1 = only new times, 0= only old times.
@@ -200,14 +199,11 @@ Network::~Network()
 
 int Network::reset()
 {	
-	time = 0.0;
+	time=0.0;
 	vid = 0;
-	pid = 0;
-	did = 0;
-	Day* today = new Day();
-	theParameters->calendar.push_back(today);
 	// reset eventlist
 	eventlist->reset();
+
 	// reset all the network objects
 	//Origins
 	for (map <int, Origin*>::iterator iter1=originmap.begin();iter1!=originmap.end();iter1++)
@@ -263,7 +259,7 @@ int Network::reset()
 
 	// vehicle types
 	vehtypes.initialize();
-	
+
 	// buslines
 	for (vector<Busline*>::iterator lines_iter = buslines.begin(); lines_iter < buslines.end(); lines_iter++)
 	{
@@ -289,9 +285,9 @@ int Network::reset()
 	}
 
 	// ODstops, passengers, paths
-	for (map<pair<Busstop*,Busstop*>,ODstops*>::iterator odstops_iter = v_odstops.begin(); odstops_iter != v_odstops.end(); odstops_iter++)
+	for (vector<ODstops*>::iterator odstops_iter = odstops.begin(); odstops_iter < odstops.end(); odstops_iter++)
 	{		
-		(*odstops_iter).second->reset();
+		(*odstops_iter)->reset();
 	}
 
 	// busvechiles
@@ -311,109 +307,6 @@ int Network::reset()
 
 	return runtime;
 }
-
-void Network::end_of_day()
-{
-		//if day_rep is TRUE we clean only some of the informations for the passengers (they are still alive) the supply side does not change at all
-	time = 0.0;
-	vid = 0;
-	Day* today = new Day();
-	theParameters->calendar.push_back(today);
-	// reset eventlist
-	eventlist->reset();
-	// reset all the network objects
-	//Origins
-	for (map <int, Origin*>::iterator iter1=originmap.begin();iter1!=originmap.end();iter1++)
-	{			
-		(iter1->second)->reset();	
-	}
-	//Destinations
-	for (map <int, Destination*>::iterator iter2=destinationmap.begin();iter2!=destinationmap.end();iter2++)
-	{			
-		(iter2->second)->reset();
-	}
-	//Junctions
-	for (map <int,Junction*>::iterator iter3=junctionmap.begin();iter3!=junctionmap.end();iter3++)
-	{			
-		(iter3->second)->reset();
-	}
-	//Links
-	for (map <int, Link*>::iterator iter4=linkmap.begin();iter4!=linkmap.end();iter4++)
-	{			
-		(iter4->second)->reset();
-	}
-	//Routes
-	for (multimap <odval, Route*>::iterator iter5=routemap.begin();iter5!=routemap.end();iter5++)
-	{			
-		(iter5->second)->reset();
-	}
-	//OD pairs
-	for (vector <ODpair*>::iterator iter6=odpairs.begin();iter6!=odpairs.end();iter6++)
-	{			
-		(*iter6)->reset();
-	}
-	// OD Matrix rates : re-book all MatrixActions
-	odmatrix.reset(eventlist,&odpairs);
-	// turnings
-	for (map<int,Turning*>::iterator iter7=turningmap.begin(); iter7!=turningmap.end(); iter7++)
-	{
-		(iter7->second)->reset();
-	}
-
-	for (map <int, Server*>::iterator sv_iter=servermap.begin(); sv_iter!=servermap.end(); sv_iter++)
-	{
-		(*sv_iter).second->reset();
-	}
-	for (vector <ChangeRateAction*>::iterator cr_iter=changerateactions.begin(); cr_iter != changerateactions.end(); cr_iter++)
-	{
-		(*cr_iter)->reset();
-	}	
-	//traffic signals
-	for (vector <SignalControl*>::iterator sc_iter = signalcontrols.begin(); sc_iter != signalcontrols.end(); sc_iter++)
-	{
-		(*sc_iter)->reset();
-	}
-
-	// vehicle types
-	vehtypes.initialize();
-
-	// buslines
-	for (vector<Busline*>::iterator lines_iter = buslines.begin(); lines_iter < buslines.end(); lines_iter++)
-	{
-		(*lines_iter)->reset();
-	}
-
-	// bustrips
-	for (vector<Bustrip*>::iterator trips_iter = bustrips.begin(); trips_iter < bustrips.end(); trips_iter++)
-	{
-		(*trips_iter)->reset();
-	}
-
-	// busstops
-	for (vector<Busstop*>::iterator stops_iter = busstops.begin(); stops_iter < busstops.end(); stops_iter++)
-	{
-		(*stops_iter)->reset();
-	}
-
-	// busroutes
-	for (vector<Busroute*>::iterator route_iter = busroutes.begin(); route_iter < busroutes.end(); route_iter++)
-	{
-		(*route_iter)->reset();
-	}
-
-	// ODstops, passengers, paths
-	for (map<pair<Busstop*,Busstop*>,ODstops*>::iterator odstops_iter = v_odstops.begin(); odstops_iter != v_odstops.end(); odstops_iter++)
-	{		
-		(*odstops_iter).second->end_of_day();
-	}
-
-	// busvechiles
-	for (vector<Bus*>::iterator bus_iter = busvehicles.begin(); bus_iter < busvehicles.end(); bus_iter++)
-	{
-		(*bus_iter)->reset();
-	}
-}
-
 
 void Network::end_of_simulation(double time)
 {
@@ -717,7 +610,7 @@ bool Network::readlinks(istream& in)
 bool Network::readlink(istream& in)
 {
 	char bracket;
-	int lid, innode, outnode, length,nrlanes,sdid;
+	int innode, outnode, length, nrlanes, sdid, lid;
 	string name;
 	in >> bracket;
 	if (bracket != '{')
@@ -1027,7 +920,7 @@ bool Network::readturning(istream& in)
 {
 
 	char bracket;
-	int tid, nid, sid, inlink, outlink,size;
+	int tid, nid, sid, size, inlink, outlink;
 	in >> bracket;
 	if (bracket != '{')
 	{
@@ -1459,14 +1352,33 @@ bool Network::readtransitnetwork(string name) //!< reads the stops, distances be
 		}
 		in >> nr;
 		limit = i + nr;
+		in >> keyword;
+		if (keyword!="format:")
+		{
+			cout << " readbusstops_distances: no << format: >> keyword " << endl;
+			return false;
+		}
+		in >> format; // Give an indication for time-table format
 		for (i; i<limit;i++)
 		{
-			if (!readbusstops_distances(in))
+			if (format == 1 )
 			{
-				cout << " readbuslines: readbusstops_distances returned false for line nr " << (i+1) << endl;
-				in.close();
-				return false;
-			}	 
+				if (!readbusstops_distances_format1(in))
+				{
+					cout << " readbuslines: readbusstops_distances returned false for line nr " << (i+1) << endl;
+					in.close();
+					return false;
+				}
+			}
+			if (format == 2 )
+			{
+				if (!readbusstops_distances_format2(in))
+				{
+					cout << " readbuslines: readbusstops_distances returned false for line nr " << (i+1) << endl;
+					in.close();
+					return false;
+				}
+			}
 			// set distnaces between busstops to stops
 		}
 	}
@@ -1574,39 +1486,19 @@ return true;
 bool Network::readbusstop (istream& in) // reads a busstop
 {
   char bracket;
-  int stop_id, link_id, rti;
-  double position, length;
+  int stop_id, link_id, can_disregard, RTI_stop;
+  double position, length, min_DT;
   string name;
-  bool is_centroid, has_bay, can_overtake;
-  bool ok= true;
-  in >> bracket;
-  if (bracket != '{')
-  {
-	cout << "readfile::readsbusstop scanner jammed at " << bracket;
-	return false;
-  }
-  Busstop* st;
-  in >> stop_id >> name;
-  if (theParameters->demand_format == 3)
-  {
-	in >> is_centroid;
-  }
-  if (theParameters->demand_format == 3 && is_centroid == true)
-  {
-	  st= new Busstop (stop_id, name, true);
-  }
-  else
-  {
-	in >> link_id >>  position >> length >> has_bay >> can_overtake >> rti;
-	if (theParameters->real_time_info == 4)
+	bool has_bay, can_overtake;
+	bool ok= true;
+	in >> bracket;
+	if (bracket != '{')
 	{
-		st= new Busstop (stop_id, name, is_centroid, link_id, position, length, has_bay, can_overtake, rti);
+		cout << "readfile::readsbusstop scanner jammed at " << bracket;
+		return false;
 	}
-	else
-	{
-		st= new Busstop (stop_id, name, is_centroid, link_id, position, length, has_bay, can_overtake, theParameters->real_time_info);
-	}
-  }
+  in >> stop_id >> name >> link_id >> position >> length >> has_bay >> can_overtake >> min_DT >> RTI_stop;
+  Busstop* st= new Busstop (stop_id, name, link_id, position, length, has_bay, can_overtake, min_DT, RTI_stop);
   st->add_distance_between_stops(st,0.0);
 	in >> bracket;
 	if (bracket != '}')
@@ -1627,16 +1519,16 @@ bool Network::readtransitzones(istream &in) // reads a transit travel zone
   char bracket;
   Busstop* stop;
   int zone_id, nr_stops, stop_id;
-  double distance, density;
-  bool ok= true;
-  in >> bracket;
-  if (bracket != '{')
-  {
-	cout << "readfile::readsbusstop scanner jammed at " << bracket;
-	return false;
-  }
+  double mean_distance, sd_distance;
+	bool ok= true;
+	in >> bracket;
+	if (bracket != '{')
+	{
+		cout << "readfile::readsbusstop scanner jammed at " << bracket;
+		return false;
+	}
   in >> zone_id >> nr_stops;
-  Zone* zone = new Zone(zone_id); 
+  ODzone* od_zone = new ODzone(zone_id); 
   for (int i=0; i< nr_stops; i++)
   {
 		in >> bracket;
@@ -1645,9 +1537,9 @@ bool Network::readtransitzones(istream &in) // reads a transit travel zone
 			cout << "readfile::readsbusstop scanner jammed at " << bracket;
 			return false;
 		}
-		in >> stop_id >> distance;
+		in >> stop_id >> mean_distance >> sd_distance;
 		stop = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (stop_id) ))); // find the stop 
-		zone->add_stop_distance(stop, distance);
+		od_zone->add_stop_distance(stop, mean_distance, sd_distance);
 		in >> bracket;
 		if (bracket != '}')
 		{
@@ -1655,7 +1547,7 @@ bool Network::readtransitzones(istream &in) // reads a transit travel zone
 			return false;
 		}
   }
-  zones.push_back(zone);
+  odzones.push_back(od_zone);
   in >> bracket;
   if (bracket != '}')
    {
@@ -1667,13 +1559,10 @@ bool Network::readtransitzones(istream &in) // reads a transit travel zone
 
 bool Network::readbusline(istream& in) // reads a busline
 {
-	//  buslines: nr_buslines
-	//{	id	name	origin	destination	route_id	vehtype mean_total_driving_time(ex. dwell time) ratio_headway_holding holding_strategy 	
-	//	nr_stops	{	stop_id1  stop_id2  stop_id3  ...	stop_idn	} nr_time_points { stop_id1 ... stop_idn }
-	//}
   char bracket;
-  int busline_id, opposite_busline_id, ori_id, dest_id, route_id, vehtype, holding_strategy, init_occup, nr_stops, stop_id, nr_tp, tp_id;
+  int busline_id, opposite_busline_id, ori_id, dest_id, route_id, vehtype, holding_strategy, nr_stops, stop_id, nr_tp, tp_id, nr_stops_init_occup;
   float ratio_headway_holding;
+  double init_occup_per_stop;
   string name;
   vector <Busstop*> stops, line_timepoint;
   Busstop* stop;
@@ -1685,7 +1574,7 @@ bool Network::readbusline(istream& in) // reads a busline
 		cout << "readfile::readsbusline scanner jammed at " << bracket;
 		return false;
 	}
-	in >> busline_id >> opposite_busline_id >> name >> ori_id >> dest_id >> route_id >> vehtype >> holding_strategy >> ratio_headway_holding >> init_occup >> nr_stops;
+	in >> busline_id >> opposite_busline_id >> name >> ori_id >> dest_id >> route_id >> vehtype >> holding_strategy >> ratio_headway_holding >> nr_stops_init_occup >>  init_occup_per_stop >> nr_stops;
 	in >> bracket;
 	if (bracket != '{')
 	{
@@ -1711,7 +1600,7 @@ bool Network::readbusline(istream& in) // reads a busline
 	ODpair* odptr=(*(find_if (odpairs.begin(),odpairs.end(), compareod (odid) )));
 	Busroute* br=(*(find_if(busroutes.begin(), busroutes.end(), compare <Route> (route_id) )));
 	Vtype* vt= (*(find_if(vehtypes.vtypes.begin(), vehtypes.vtypes.end(), compare <Vtype> (vehtype) )));
-	Busline* bl= new Busline (busline_id,opposite_busline_id,name,br,stops,vt,odptr,holding_strategy,ratio_headway_holding,init_occup);
+	Busline* bl= new Busline (busline_id,opposite_busline_id,name,br,stops,vt,odptr,holding_strategy,ratio_headway_holding,nr_stops_init_occup,init_occup_per_stop);
 	
 	for (vector<Busstop*>::iterator stop_iter = bl->stops.begin(); stop_iter < bl->stops.end(); stop_iter++)
 	{
@@ -1720,7 +1609,7 @@ bool Network::readbusline(istream& in) // reads a busline
 		(*stop_iter)->add_line_nr_boarding(bl, 0);
 		(*stop_iter)->add_line_nr_alighting(bl, 0);
 		(*stop_iter)->set_had_been_visited(bl, false);
-		if ((*stop_iter)->get_rti() == 0)
+		if (theParameters->real_time_info == 0)
 		{
 			(*stop_iter)->add_real_time_info(bl,0);
 		}
@@ -1954,6 +1843,7 @@ bool Network::readbustrip_format3(istream& in) // reads a trip
 		bl->add_trip(trip,curr_trip.front()->second);
 		bl->reset_curr_trip();
 		trip->convert_stops_vector_to_map();
+		trip->set_last_stop_visited(trip->stops.front()->first);
 		bustrips.push_back (trip); // add to bustrips vector
 		initial_dispatching_time = initial_dispatching_time + headway;
 	}
@@ -1993,6 +1883,12 @@ in >> keyword;
 		return false;
 	}
 	in >> format; // Give an indication for demand matrix format
+	/*
+	if (format == 3)
+	{
+		generate_stop_ods();
+	}
+	*/
 	for (i; i<limit;i++)
 	{
  		if (format == 1) 
@@ -2044,19 +1940,49 @@ in >> keyword;
 	}
 	if (format == 3 || format == 4)
 	{
-		generate_stop_ods();
+		//generate_stop_ods();
 		if (theParameters->choice_set_indicator == 0)
 		{
-			find_all_paths ();
+			generate_consecutive_stops();
+			if (theParameters->od_pairs_for_generation == true)
+			{
+				read_od_pairs_for_generation (workingdir + "ODpairs_pathset.dat");
+				find_all_paths_with_OD_for_generation();
+			}
+			else
+			{
+				find_all_paths();
+			}
 		}
 	}
-	
-	// fuzzy traveller related operations
-	if (theParameters->fuzzy == 1) // only in case of fuzzy travellers
-	{
-		construct_destination_choice_set ();
-	}
+	return true;
+}
 
+bool Network::read_od_pairs_for_generation (string name)
+{
+	ifstream in(name.c_str()); // open input file
+	assert (in);
+	string keyword;
+	int format, limit;
+	int nr= 0;
+	in >> keyword;
+	if (keyword!="ODpairs:")
+	{
+		cout << " readbuslines: no << ODpairs: >> keyword " << endl;
+		return false;
+	}
+	in >> nr;
+	for (int i=0; i<nr; i++)
+	{
+		int origin_id, destination_id;
+		in >> origin_id >> destination_id; 
+		Busstop* bs_o=(*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (origin_id) ))); 
+		Busstop* bs_d=(*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (destination_id) ))); 
+		pair<Busstop*,Busstop*> odpair;
+		odpair.first = bs_o;
+		odpair.second = bs_d;
+		od_pairs_for_generation.push_back(odpair);
+	}
 	return true;
 }
 
@@ -2117,7 +2043,7 @@ bool Network::read_passenger_rates_format1_TD_basic (istream& in, int nr_rates) 
 		in >> origin_stop_id >> busline_id >> arrival_rate >> alighting_fraction;
 		Busstop* bs_o=(*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (origin_stop_id) ))); 
 		Busline* bl=(*(find_if(buslines.begin(), buslines.end(), compare <Busline> (busline_id) )));
-		bs_o->add_line_nr_boarding (bl, arrival_rate * scale);
+		bs_o->add_line_nr_boarding (bl, arrival_rate * theParameters->demand_scale);
 		bs_o->add_line_nr_alighting (bl, alighting_fraction);
 		in >> bracket;
 		if (bracket != '}')
@@ -2183,7 +2109,7 @@ bool Network::read_passenger_rates_format1_TD_slices (istream& in) // reads the 
 		in >> origin_stop_id >> busline_id >> arrival_rate >> alighting_fraction;
 		Busstop* bs_o=(*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (origin_stop_id) ))); 
 		Busline* bl=(*(find_if(buslines.begin(), buslines.end(), compare <Busline> (busline_id) )));
-		car->add_line_nr_boarding_TD (bs_o, bl, arrival_rate * scale);
+		car->add_line_nr_boarding_TD (bs_o, bl, arrival_rate * theParameters->demand_scale);
 		car->add_line_nr_alighting_TD (bs_o, bl, alighting_fraction);
 		bs_o->add_line_update_rate_time(bl, loadtime);
 		in >> bracket;
@@ -2238,7 +2164,7 @@ bool Network::read_passenger_rates_format2 (istream& in) // reads the passenger 
 			in >> destination_stop_id >> arrival_rate;
 			Busstop* bs_d =(*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (destination_stop_id) )));
 			stop_rate_d.first = bs_d;
-			stop_rate_d.second = arrival_rate;
+			stop_rate_d.second = arrival_rate* theParameters->demand_scale;
 			stops_rate_d.insert(stop_rate_d);
 			multi_rate_d.first = bl;
 			multi_rate_d.second = stops_rate_d;
@@ -2282,27 +2208,15 @@ bool Network::read_passenger_rates_format3 (istream& in) // reads the passenger 
   	cout << "readfile::readsbusstop scanner jammed at " << bracket;
   	return false;
   }
-  in >> origin_stop_id >> destination_stop_id >> arrival_rate; 
-  /*
-  if (origin_stop_id == 0 || destination_stop_id == 0 || arrival_rate == 0 || origin_stop_id == destination_stop_id)
-  {
-    in >> bracket;
-	if (bracket != '}')
-	{
-		cout << "readfile::readbusstop scanner jammed at " << bracket;
-		return false;
-	}
-	return ok;
-  }
-  */
+  in >> origin_stop_id >> destination_stop_id >> arrival_rate; // 
   Busstop* bs_o=(*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (origin_stop_id) ))); 
   Busstop* bs_d=(*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (destination_stop_id) ))); 
+  
   ODstops* od_stop = new ODstops (bs_o, bs_d, arrival_rate);
-  pair<Busstop*,Busstop*> stops;
-  stops.first = bs_o;
-  stops.second = bs_d;
-  v_odstops[stops] = od_stop;
-  odstops_demand[stops] = od_stop;
+  //ODstops* od_stop = bs_o->get_stop_od_as_origin_per_stop(bs_d);
+  od_stop->set_arrival_rate(arrival_rate* theParameters->demand_scale);
+  //odstops.push_back(od_stop);
+  odstops_demand.push_back(od_stop);
   bs_o->add_odstops_as_origin(bs_d, od_stop);
   bs_d->add_odstops_as_destination(bs_o, od_stop);
   in >> bracket;
@@ -2330,22 +2244,24 @@ bool Network::read_passenger_rates_format4 (istream& in)
   	return false;
   }
   in >> origin_taz_id >> destination_taz_id >> arrival_rate; 
-  Zone* taz_o=(*(find_if(zones.begin(), zones.end(), compare <Zone> (origin_taz_id) ))); 
-  Zone* taz_d=(*(find_if(zones.begin(), zones.end(), compare <Zone> (destination_taz_id) ))); 
-  ODzone* od_zone = new ODzone (taz_o, taz_d, arrival_rate);
-  pair<Zone*,Zone*> zones;
-  zones.first = taz_o;
-  zones.second = taz_d;
-  v_odzones[zones] = od_zone;
-  odzones_demand[zones] = od_zone;
-  //bs_o->add_odstops_as_origin(bs_d, od_stop);
-  //bs_d->add_odstops_as_destination(bs_o, od_stop);
-  in >> bracket;
-  if (bracket != '}')
+  ODzone* taz_o=(*(find_if(odzones.begin(), odzones.end(), compare <ODzone> (origin_taz_id) ))); 
+  ODzone* taz_d=(*(find_if(odzones.begin(), odzones.end(), compare <ODzone> (destination_taz_id) ))); 
+  taz_o->add_arrival_rates(taz_d,arrival_rate); 
+  map<Busstop*,pair<double,double>> o_walk_dis = taz_o->get_stop_distances();
+  map<Busstop*,pair<double,double>> d_walk_dis = taz_d->get_stop_distances();
+  for (map<Busstop*,pair<double,double>>::iterator o_stops_iter = o_walk_dis.begin(); o_stops_iter != o_walk_dis.end(); o_stops_iter++)
   {
-    cout << "readfile::readbusstop scanner jammed at " << bracket;
-    return false;
-  }
+	  for (map <Busstop*,pair<double,double>>::iterator d_stops_iter = d_walk_dis.begin(); d_stops_iter != d_walk_dis.end(); d_stops_iter++)
+	  {
+		Busstop* bs_o = (*o_stops_iter).first;
+		Busstop* bs_d = (*d_stops_iter).first;
+		ODstops* od_stop = new ODstops (bs_o, bs_d);
+		odstops.push_back(od_stop);
+		odstops_demand.push_back(od_stop);
+		bs_o->add_odstops_as_origin(bs_d, od_stop);
+		bs_d->add_odstops_as_destination(bs_o, od_stop);
+	  }
+   }
   in >> bracket;
   if (bracket != '}')
   {
@@ -2355,7 +2271,7 @@ bool Network::read_passenger_rates_format4 (istream& in)
   return ok;
 }
 
-bool Network::readbusstops_distances (istream& in)
+bool Network::readbusstops_distances_format1 (istream& in)
 {
 	char bracket;
 	int from_stop_id, to_stop_id, nr_stops;
@@ -2398,22 +2314,85 @@ bool Network::readbusstops_distances (istream& in)
 	return true;
 }
 
-bool Network::read_travel_time_disruptions (istream& in)
+bool Network::readbusstops_distances_format2 (istream& in)
 {
 	char bracket;
-	int line, from_stop, to_stop;
-	double travel_time;
+	int from_stop_id, to_stop_id, nr_stops;
+	double distance;
+	string name;
 	in >> bracket;
 	if (bracket != '{')
 	{
 		cout << "readfile::readsbusstop_distances scanner jammed at " << bracket;
 		return false;
 	}
-	in >> line >> from_stop >> to_stop >> travel_time;
+	in >> name >> nr_stops;
+	in >> bracket;
+	if (bracket != '{')
+	{
+		cout << "readfile::readsbusstop_distances scanner jammed at " << bracket;
+		return false;
+	}
+	vector <Busstop*> stops;
+	for (int i=0; i < nr_stops; i++)
+	{
+		in >> from_stop_id;
+		Busstop* from_bs = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (from_stop_id) )));
+		stops.push_back(from_bs);
+	}
+	in >> bracket;
+	if (bracket != '}')
+	{
+		cout << "readfile::readsbusstop_distances scanner jammed at " << bracket;
+		return false;
+	}
+	in >> bracket;
+	if (bracket != '{')
+	{
+		cout << "readfile::readsbusstop_distances scanner jammed at " << bracket;
+		return false;
+	}
+	for (vector <Busstop*>::iterator from_stop_iter = stops.begin(); from_stop_iter < stops.end(); from_stop_iter++)
+	{
+		
+		for (vector <Busstop*>::iterator to_stop_iter = stops.begin(); to_stop_iter < stops.end(); to_stop_iter++)
+		{
+			in >> distance;
+			(*from_stop_iter)->add_distance_between_stops((*to_stop_iter),distance);
+			(*to_stop_iter)->add_distance_between_stops((*from_stop_iter),distance);
+		}
+	}
+	in >> bracket;
+	if (bracket != '}')
+	{
+		cout << "readfile::readsbusstop_distances scanner jammed at " << bracket;
+		return false;
+	}
+	in >> bracket;
+	if (bracket != '}')
+	{
+		cout << "readfile::readsbusstop_distances scanner jammed at " << bracket;
+		return false;
+	}
+	return true;
+}
+
+bool Network::read_travel_time_disruptions (istream& in)
+{
+	char bracket;
+	int line, from_stop, to_stop;
+	double start_time, end_time;
+	in >> bracket;
+	if (bracket != '{')
+	{
+		cout << "readfile::readsbusstop_distances scanner jammed at " << bracket;
+		return false;
+	}
+	in >> line >> from_stop >> to_stop >> start_time >> end_time;
 	Busline* d_line = (*(find_if(buslines.begin(), buslines.end(), compare <Busline> (line) )));
 	Busstop* from_bs = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (from_stop) )));
 	Busstop* to_bs = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (to_stop) )));
-	d_line->add_disruptions(from_bs, to_bs, travel_time);
+	d_line->add_disruptions(from_bs, to_bs, start_time, end_time);
 	in >> bracket;
 	if (bracket != '}')
 	{
@@ -2427,7 +2406,6 @@ bool Network::read_travel_time_disruptions (istream& in)
 
 void Network::generate_consecutive_stops()
 {
-	// by travelling
 	for (vector<Busstop*>::iterator iter_stop = busstops.begin(); iter_stop < busstops.end(); iter_stop++)
 	{
 		vector<Busline*> lines = (*iter_stop)->get_lines();
@@ -2450,15 +2428,6 @@ void Network::generate_consecutive_stops()
 					prior_this_stop = false;
 				}
 			}
-		}
-	}
-	// by walking
-	for (vector<Busstop*>::iterator iter_stop = busstops.begin(); iter_stop < busstops.end(); iter_stop++)
-	{
-		map<Busstop*,double> connected_stops = (*iter_stop)->get_walking_distances();
-		for (map <Busstop*, double>::iterator connected_stops_iter = connected_stops.begin(); connected_stops_iter != connected_stops.end(); connected_stops_iter++)
-		{
-			consecutive_stops[(*iter_stop)].push_back((*connected_stops_iter).first);
 		}
 	}
 	// omitting all repetitions (caused by several direct lines connecting two stops)
@@ -2536,9 +2505,10 @@ bool Network::find_direct_paths (Busstop* bs_origin, Busstop* bs_destination)
 						walking_distances_sequence.push_back(0);
 						Pass_path* direct_path = new Pass_path(pathid, lines_sequence, stops_sequence, walking_distances_sequence);
 						pathid++;
-						// check if this path was already generated
-						ODstops* odstop = bs_origin->get_stop_od_as_origin_per_stop(bs_destination);
-						vector <Pass_path*> current_path_set = odstop->get_path_set();
+						ODstops* od_stop = new ODstops (bs_origin,bs_destination); 
+						bs_origin->add_odstops_as_origin(bs_destination, od_stop);
+						bs_destination->add_odstops_as_destination(bs_origin, od_stop);
+						vector <Pass_path*> current_path_set = od_stop->get_path_set();
 						for (vector <Pass_path*>::iterator iter = current_path_set.begin(); iter != current_path_set.end(); iter++)
 						{
 							if (compare_same_lines_paths(direct_path,(*iter)) == true)
@@ -2557,6 +2527,11 @@ bool Network::find_direct_paths (Busstop* bs_origin, Busstop* bs_destination)
 								bs_origin->get_stop_od_as_origin_per_stop(bs_destination)->set_min_transfers(direct_path->get_number_of_transfers());
 							}
 						}
+						else
+						{
+							bs_origin->clear_odstops_as_origin(bs_destination);
+							bs_destination->clear_odstops_as_destination(bs_origin);
+						}
 
 				}
 				if ((*stop) == bs_destination) // if this condition is met first - it means that this is not a possible path (destination preceeds origin)
@@ -2567,50 +2542,11 @@ bool Network::find_direct_paths (Busstop* bs_origin, Busstop* bs_destination)
 		}
 	}
   }
-  vector<Busline*> dir_lines = get_direct_lines(bs_origin->get_stop_od_as_origin_per_stop(bs_destination));
-  if  (dir_lines.size() != 0)
-  {
-	return true;
-  }
-  // in case this is an synthetic stop with no lines
-  if (bs_origin->get_walking_distances().count(bs_destination) > 0) // if it is within walking distance
-  {
-	vector<vector<Busline*>> lines_sequence;
-	lines_sequence.clear();
-	vector<vector<Busstop*>> stops_sequence;
-	vector<Busstop*> o_stop;
-	o_stop.push_back(bs_origin);
-	vector<Busstop*> d_stop;
-	d_stop.push_back(bs_destination);
-	stops_sequence.push_back(o_stop);
-	stops_sequence.push_back(d_stop);
-	vector<double> walking_distances_sequence;
-	walking_distances_sequence.push_back(bs_origin->get_walking_distance_stop(bs_destination));
-	Pass_path* direct_path = new Pass_path(pathid, lines_sequence, stops_sequence, walking_distances_sequence);
-	pathid++;
-	// check if this path was already generated
-	bool original_path = true;
-	ODstops* odstop = bs_origin->get_stop_od_as_origin_per_stop(bs_destination);
-	vector <Pass_path*> current_path_set = odstop->get_path_set();
-	for (vector <Pass_path*>::iterator iter = current_path_set.begin(); iter != current_path_set.end(); iter++)
-	{
-		if ((*iter)->get_walking_distances().front() == walking_distances_sequence.front())
-		{
-			original_path = false;
-		}
-	}
-	// add the direct path if it is an original one 
-	if (original_path == true)
-	{
-		bs_origin->get_stop_od_as_origin_per_stop(bs_destination)->add_paths(direct_path);
-		if (direct_path->get_number_of_transfers() < bs_origin->get_stop_od_as_origin_per_stop(bs_destination)->get_min_transfers())
-		// update the no. of min transfers required if decreased
-		{
-			bs_origin->get_stop_od_as_origin_per_stop(bs_destination)->set_min_transfers(direct_path->get_number_of_transfers());
-		}
-	}
-	return true;
-  }
+  //vector<Busline*> dir_lines = get_direct_lines(bs_origin->get_stop_od_as_origin_per_stop(bs_destination));
+  //if  (dir_lines.size() != 0)
+  //{
+  //	return true;
+  //}
 #ifdef _DEBUG_NETWORK
 #endif //_DEBUG_NETWORK
 return false;
@@ -2695,6 +2631,7 @@ void Network::generate_indirect_paths()
 		{
 			if (compare_same_lines_paths((*paths_iter),(*iter)) == true && compare_same_stops_paths((*paths_iter),(*iter)) == true)
 			{
+				delete *paths_iter;
 				original_path = false;
 				break;
 			}
@@ -2707,11 +2644,6 @@ void Network::generate_indirect_paths()
 			// update the no. of min transfers required if decreased
 			{
 				collect_im_stops.front()->get_stop_od_as_origin_per_stop(collect_im_stops.back())->set_min_transfers((*paths_iter)->get_number_of_transfers());
-			}
-			(*paths_iter)->set_scheduled_in_vehicle_time((*paths_iter)->calc_total_scheduled_in_vehicle_time_CSGM());
-			if ((*paths_iter)->get_scheduled_in_vehicle_time() < od->get_min_IVT())
-			{
-				od->set_min_IVT((*paths_iter)->get_scheduled_in_vehicle_time());
 			}
 		}
 	}
@@ -2787,19 +2719,28 @@ void Network::generate_stop_ods()
 	{
 		for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
 		{
-			pair<Busstop*,Busstop*> stop_pair;
-			stop_pair.first = (*basic_origin);
-			stop_pair.second = (*basic_destination);
-			if (odstops_demand.count(stop_pair) == 0)
-			{	
+			/*
+			bool od_with_demand = false;
+			for (vector <ODstops*>::iterator od = odstops_demand.begin(); od< odstops_demand.end(); od++)
+			{
+				if ((*od)->get_origin()->get_id() == (*basic_origin)->get_id() && (*od)->get_destination()->get_id() == (*basic_destination)->get_id())
+				{
+					od_with_demand = true;
+					break;
+				}
+			}
+			*/
+			//if (od_with_demand == false) // if it is not an od with a non-zero demand
+			//{
 			//	if (check_stops_opposing_directions((*basic_origin),(*basic_destination)) == false)
 			//	{
-					ODstops* od_stop = new ODstops ((*basic_origin),(*basic_destination),0.0);
-					v_odstops[stop_pair] = od_stop;
+					ODstops* od_stop = new ODstops ((*basic_origin),(*basic_destination));
+					//odstops_map [(*basic_origin)].push_back(od_stop);
+					//odstops.push_back(od_stop);
 					(*basic_origin)->add_odstops_as_origin((*basic_destination), od_stop);
 					(*basic_destination)->add_odstops_as_destination((*basic_origin), od_stop);
 			//	}
-			}
+			//}
 		}
 	}
 }
@@ -2830,50 +2771,118 @@ bool Network::check_stops_opposing_directions (Busstop* origin, Busstop* destina
 }
 
 void Network::find_all_paths () 
-// goes over all OD stop pairs to generate their path choice set
+// goes over all OD pairs for a given origin to generate their path choice set
 {
 	generate_consecutive_stops();
-
 	// first - generate all direct paths
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{
-		map <Busstop*, ODstops*> od_as_origin = (*basic_origin)->get_stop_as_origin();
-		for (map<Busstop*, ODstops*>::iterator iter = od_as_origin.begin(); iter != od_as_origin.end(); iter++)
+		for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
 		{
-			Busstop* basic_destination = (*iter).first;
-			find_direct_paths ((*basic_origin), basic_destination);
-		}
-	}
-	write_path_set (workingdir + "path_set_generation_test.dat");
-	// second - generate indirect paths with walking distances
-	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
-	{
-		if ((*basic_origin)->get_id() >= 601000 && (*basic_origin)->get_id() <= 603000)
-		{
-			for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
+			if ((*basic_origin)->get_id() != (*basic_destination)->get_id())
 			{
-					if ((*basic_origin)->get_id() != (*basic_destination)->get_id() && (*basic_origin)->check_destination_stop(*basic_destination) == true)
-					{
-						collect_im_stops.push_back(*basic_origin);
-						find_recursive_connection_with_walking ((*basic_origin), (*basic_destination));
-						collect_im_stops.clear();
-						collect_walking_distances.clear();
-					}
+				find_direct_paths ((*basic_origin), (*basic_destination));
 			}
 		}
 	}
-	write_path_set (workingdir + "path_set_generation_BM.dat");
-	// merge alternative paths
-	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
-	{
-		merge_paths_by_stops(*basic_origin);
-	}
-	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
-	{
-		merge_paths_by_common_lines(*basic_origin);
-	}
-	write_path_set (workingdir + "path_set_generationAM.dat");
+
+	// second - generate indirect paths with walking distances
+	//cout << "Generating indirect paths:" << endl;
+	//for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
+	//{
+	//	for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
+	//	{
+	//		cout << (*basic_origin)->get_name() << " - " << (*basic_destination)->get_name() << endl;
+	//		if ((*basic_origin)->check_destination_stop(*basic_destination) == false)
+	//		{
+	//			ODstops* od_stop = new ODstops ((*basic_origin),(*basic_destination)); 
+	//			(*basic_origin)->add_odstops_as_origin((*basic_destination), od_stop);
+	//			(*basic_destination)->add_odstops_as_destination((*basic_origin), od_stop);
+	//		}
+	//		if ((*basic_origin)->get_id() != (*basic_destination)->get_id() && (*basic_origin)->check_destination_stop(*basic_destination) == true)
+	//		{
+	//			collect_im_stops.push_back((*basic_origin));
+	//			find_recursive_connection_with_walking (((*basic_origin)), (*basic_destination));
+	//			collect_im_stops.clear();
+	//			collect_walking_distances.clear();
+	//		}
+	//		merge_paths_by_stops((*basic_origin),(*basic_destination));
+	//		merge_paths_by_common_lines((*basic_origin),(*basic_destination));
+	//	}
+	//	//write_path_set_per_stop (workingdir + "path_set_generation.dat", (*basic_origin));
+	//}
 	// apply static filtering rules
+	//cout << "Filtering paths..." << endl;
+	//for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
+	//{
+	//	static_filtering_rules(*basic_origin);
+	//}
+	//// apply dominancy rules
+	//for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
+	//{	
+	//	dominancy_rules(*basic_origin);
+	//}
+	
+	// report generated choice-sets 
+	cout << "Saving paths..." << endl;
+	
+	write_path_set (workingdir + "path_set_generation.dat");
+	cout << "Path generation finished!" << endl;
+}
+
+void Network::find_all_paths_with_OD_for_generation () 
+// goes over all OD pairs for a given origin to generate their path choice set
+{
+	generate_consecutive_stops();
+	// first - generate all direct paths
+	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
+	{
+		for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
+		{
+			if ((*basic_origin)->get_id() != (*basic_destination)->get_id())
+			{
+				find_direct_paths ((*basic_origin), (*basic_destination));
+			}
+		}
+	}
+
+	// second - generate indirect paths with walking distances
+	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
+	{
+		for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
+		{
+			bool relevant_od = false;
+			for (vector<pair<Busstop*,Busstop*>>::iterator iter = od_pairs_for_generation.begin(); iter < od_pairs_for_generation.end(); iter ++)
+			{
+				if ((*basic_origin)->get_id() == (*iter).first->get_id() && (*basic_destination)->get_id() == (*iter).second->get_id())
+				{
+					relevant_od = true;
+					break;
+				}
+			}
+			if (relevant_od == true)
+			{
+			if ((*basic_origin)->check_destination_stop(*basic_destination) == false)
+			{
+				ODstops* od_stop = new ODstops ((*basic_origin),(*basic_destination)); 
+				(*basic_origin)->add_odstops_as_origin((*basic_destination), od_stop);
+				(*basic_destination)->add_odstops_as_destination((*basic_origin), od_stop);
+			}
+			if ((*basic_origin)->get_id() != (*basic_destination)->get_id() && (*basic_origin)->check_destination_stop(*basic_destination) == true)
+			{
+				collect_im_stops.push_back((*basic_origin));
+				find_recursive_connection_with_walking (((*basic_origin)), (*basic_destination));
+				collect_im_stops.clear();
+				collect_walking_distances.clear();
+			}
+			merge_paths_by_stops((*basic_origin),(*basic_destination));
+			merge_paths_by_common_lines((*basic_origin),(*basic_destination));
+			}
+		}
+		write_path_set_per_stop (workingdir + "path_set_generation.dat", (*basic_origin));
+	}
+	// apply static filtering rules
+	/*
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{
 		static_filtering_rules(*basic_origin);
@@ -2883,8 +2892,9 @@ void Network::find_all_paths ()
 	{	
 		dominancy_rules(*basic_origin);
 	}
-	// report generated choice-sets
-	write_path_set (workingdir + "path_set_generation.dat");
+	*/
+	// report generated choice-sets 
+	//write_path_set (workingdir + "path_set_generation.dat");
 }
 
 /*
@@ -2936,8 +2946,8 @@ void Network:: find_recursive_connection_with_walking (Busstop* origin, Busstop*
 {
 	map <Busstop*, double> possible_origins = origin->get_walking_distances();
 	vector <Busstop*> cons_stops = get_cons_stops(origin);
-	if (cons_stops.size() > 0)
-	{
+//	if (cons_stops.size() > 0)
+//	{
 		// find the number of expected transfers in this path search	
 		int nr_im_stop_elements = 0;
 		for (vector<Busstop*>::iterator iter_count = collect_im_stops.begin(); iter_count < collect_im_stops.end(); iter_count++)
@@ -2950,6 +2960,8 @@ void Network:: find_recursive_connection_with_walking (Busstop* origin, Busstop*
 		{
 			for (map <Busstop*, double>::iterator poss_origin = possible_origins.begin(); poss_origin != possible_origins.end(); poss_origin++)
 			{
+				if ((*poss_origin).second < 10000)
+				{
 				collect_walking_distances.push_back((*poss_origin).second);
 				collect_im_stops.push_back((*poss_origin).first);
 				bool already_visited = false;
@@ -3011,9 +3023,10 @@ void Network:: find_recursive_connection_with_walking (Busstop* origin, Busstop*
 				collect_im_stops.pop_back();
 				collect_walking_distances.pop_back();
 			}
+			}
 		}
 		}
-	}
+//	}
 }
 
 bool Network::check_path_constraints(Busstop* destination)
@@ -3040,16 +3053,14 @@ bool Network::check_path_constraints(Busstop* destination)
 	return false;
 }
 
-void Network::merge_paths_by_stops (Busstop* stop) // merge paths with same lines for all legs (only different transfer stops) 
+void Network::merge_paths_by_stops (Busstop* origin_stop, Busstop* destination_stop) // merge paths with same lines for all legs (only different transfer stops) 
 	// only if the route between this set of possible transfer stops is identical for the two leg sets
 {
 	//map <Busstop*, ODstops*> od_as_origin = stop->get_stop_as_origin();
 	//for (map <Busstop*, ODstops*>::iterator odpairs = od_as_origin.begin(); odpairs != od_as_origin.end(); odpairs++)
-	for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
-	{
-		if (stop->get_id() != (*basic_destination)->get_id() && stop->check_destination_stop(*basic_destination) == true)
+		if (origin_stop->get_id() != destination_stop->get_id() && origin_stop->check_destination_stop(destination_stop) == true)
 		{
-			ODstops* odpairs = stop->get_stop_od_as_origin_per_stop(*basic_destination);
+			ODstops* odpairs = origin_stop->get_stop_od_as_origin_per_stop(destination_stop);
 			vector <Pass_path*> path_set = odpairs->get_path_set();
 			// go over all the OD pairs of stops that have more than a single alternative
 			if (path_set.size() > 1)
@@ -3155,6 +3166,7 @@ void Network::merge_paths_by_stops (Busstop* stop) // merge paths with same line
 					}
 					if ((*delete_iter).second == true)
 					{
+						delete *path_to_delete;
 						path_set.erase(path_to_delete);
 					}
 				}
@@ -3166,16 +3178,13 @@ void Network::merge_paths_by_stops (Busstop* stop) // merge paths with same line
 			}
 			odpairs->set_path_set(path_set);
 		}
-	}
 }
 
-void Network::merge_paths_by_common_lines (Busstop* stop)  // merge paths with lines that have identical route between consecutive stops
+void Network::merge_paths_by_common_lines (Busstop* origin_stop, Busstop* destination_stop)  // merge paths with lines that have identical route between consecutive stops
 {
-	for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
+	if (origin_stop->get_id() != destination_stop->get_id() && origin_stop->check_destination_stop(destination_stop) == true)
 	{
-		if (stop->get_id() != (*basic_destination)->get_id() && stop->check_destination_stop(*basic_destination) == true)
-		{
-		ODstops* odpairs = stop->get_stop_od_as_origin_per_stop(*basic_destination);
+		ODstops* odpairs = origin_stop->get_stop_od_as_origin_per_stop(destination_stop);
 		vector <Pass_path*> path_set = odpairs->get_path_set();
 		if (path_set.size() > 1)
 		{
@@ -3317,6 +3326,7 @@ void Network::merge_paths_by_common_lines (Busstop* stop)  // merge paths with l
 				}
 				if ((*delete_iter).second == true)
 				{
+					delete *path_to_delete;
 					path_set.erase(path_to_delete);
 				}
 			}
@@ -3328,7 +3338,6 @@ void Network::merge_paths_by_common_lines (Busstop* stop)  // merge paths with l
 		}
 		odpairs->set_path_set(path_set);
 		}
-	}
 }
 
 void Network::static_filtering_rules (Busstop* stop)
@@ -3344,10 +3353,10 @@ void Network::static_filtering_rules (Busstop* stop)
 		{
 			map <Pass_path*,bool> paths_to_be_deleted;
 			// calculate the minimum total IVT for this OD pair
-			double min_total_scheduled_in_vehicle_time = path_set.front()->calc_total_scheduled_in_vehicle_time_CSGM();
+			double min_total_scheduled_in_vehicle_time = path_set.front()->calc_total_scheduled_in_vehicle_time(0.0);
 			for (vector <Pass_path*>::iterator path_iter = path_set.begin(); path_iter < path_set.end(); path_iter++)
 			{
-				min_total_scheduled_in_vehicle_time = min (min_total_scheduled_in_vehicle_time, (*path_iter)->calc_total_scheduled_in_vehicle_time_CSGM());
+				min_total_scheduled_in_vehicle_time = min (min_total_scheduled_in_vehicle_time, (*path_iter)->calc_total_scheduled_in_vehicle_time(0.0));
 				paths_to_be_deleted[(*path_iter)] = false;
 			}
 			for (vector <Pass_path*>::iterator path = path_set.begin(); path < path_set.end(); path++)
@@ -3363,7 +3372,7 @@ void Network::static_filtering_rules (Busstop* stop)
 					paths_to_be_deleted[(*path)] = true;
 				}
 				// max IVT ratio
-				else if ((*path)->calc_total_scheduled_in_vehicle_time_CSGM() > min_total_scheduled_in_vehicle_time * theParameters->max_in_vehicle_time_ratio)
+				else if ((*path)->calc_total_scheduled_in_vehicle_time(0.0) > min_total_scheduled_in_vehicle_time * theParameters->max_in_vehicle_time_ratio)
 				{
 					paths_to_be_deleted[(*path)] = true;
 				}
@@ -3379,7 +3388,7 @@ void Network::static_filtering_rules (Busstop* stop)
 						lines_to_be_deleted[(*line_iter)] = false;
 					}
 					vector<vector<Busstop*>> alt_stops = (*path)->get_alt_transfer_stops();
-					map<Busline*, bool> lines_to_include = (*path)->check_maybe_worthwhile_to_wait_CSGM((*path)->get_alt_lines().front(), alt_stops.begin(), 0, 0);
+					map<Busline*, bool> lines_to_include = (*path)->check_maybe_worthwhile_to_wait((*path)->get_alt_lines().front(), alt_stops.begin(), 0);
 					for (map<Busline*, bool>::iterator lines_to_include_iter = lines_to_include.begin(); lines_to_include_iter != lines_to_include.end(); lines_to_include_iter++)
 					{
 						if ((*lines_to_include_iter).second == false)
@@ -3466,6 +3475,7 @@ void Network::static_filtering_rules (Busstop* stop)
 				}
 				if ((*delete_iter).second == true)
 				{
+					delete *path_to_delete;
 					path_set.erase(path_to_delete);
 				}
 			}
@@ -3498,34 +3508,34 @@ void Network::dominancy_rules (Busstop* stop)
 				for (vector <Pass_path*>::iterator path2 = path1 + 1; path2 < path_set.end(); path2++)
 				{
 					// check if path1 dominates path2
-					if ((*path1)->find_number_of_transfers() < (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time_CSGM() <= (*path2)->calc_total_scheduled_in_vehicle_time_CSGM() && (*path1)->calc_total_walking_distance() <= (*path2)->calc_total_walking_distance())
+					if ((*path1)->find_number_of_transfers() < (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(0.0) <= (*path2)->calc_total_scheduled_in_vehicle_time(0.0) && (*path1)->calc_total_walking_distance() <= (*path2)->calc_total_walking_distance())
 					{
 						paths_to_be_deleted[(*path2)] = true;
 						break;
 					}
-					if ((*path1)->find_number_of_transfers() <= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time_CSGM() * (1 + theParameters->dominancy_perception_threshold) < (*path2)->calc_total_scheduled_in_vehicle_time_CSGM() && (*path1)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold) <= (*path2)->calc_total_walking_distance())
+					if ((*path1)->find_number_of_transfers() <= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(0.0) * (1 + theParameters->dominancy_perception_threshold) < (*path2)->calc_total_scheduled_in_vehicle_time(0.0) && (*path1)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold) <= (*path2)->calc_total_walking_distance())
 					{
 						paths_to_be_deleted[(*path2)] = true;
 						break;
 					}
-					if ((*path1)->find_number_of_transfers() <= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time_CSGM() * (1 + theParameters->dominancy_perception_threshold) <= (*path2)->calc_total_scheduled_in_vehicle_time_CSGM()&& (*path1)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold) < (*path2)->calc_total_walking_distance())
+					if ((*path1)->find_number_of_transfers() <= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(0.0) * (1 + theParameters->dominancy_perception_threshold) <= (*path2)->calc_total_scheduled_in_vehicle_time(0.0)&& (*path1)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold) < (*path2)->calc_total_walking_distance())
 					{
 						paths_to_be_deleted[(*path2)] = true;
 						break;
 					}
 					// check if path2 dominates path1
-					if ((*path1)->find_number_of_transfers() > (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time_CSGM() >= (*path2)->calc_total_scheduled_in_vehicle_time_CSGM() && (*path1)->calc_total_walking_distance() >= (*path2)->calc_total_walking_distance()) 
+					if ((*path1)->find_number_of_transfers() > (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(0.0) >= (*path2)->calc_total_scheduled_in_vehicle_time(0.0) && (*path1)->calc_total_walking_distance() >= (*path2)->calc_total_walking_distance()) 
 					{
 						paths_to_be_deleted[(*path1)] = true;
 						break;
 					}
-					if ((*path1)->find_number_of_transfers() >= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time_CSGM() > (*path2)->calc_total_scheduled_in_vehicle_time_CSGM() * (1+ theParameters->dominancy_perception_threshold)&& (*path1)->calc_total_walking_distance() >= (*path2)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold)) 
+					if ((*path1)->find_number_of_transfers() >= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(0.0) > (*path2)->calc_total_scheduled_in_vehicle_time(0.0) * (1+ theParameters->dominancy_perception_threshold)&& (*path1)->calc_total_walking_distance() >= (*path2)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold)) 
 					{ 
 					
 						paths_to_be_deleted[(*path1)] = true;
 						break;
 					}
-					if ((*path1)->find_number_of_transfers() >= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time_CSGM() >= (*path2)->calc_total_scheduled_in_vehicle_time_CSGM() * (1+ theParameters->dominancy_perception_threshold)&& (*path1)->calc_total_walking_distance() > (*path2)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold)) 
+					if ((*path1)->find_number_of_transfers() >= (*path2)->find_number_of_transfers() && (*path1)->calc_total_scheduled_in_vehicle_time(0.0) >= (*path2)->calc_total_scheduled_in_vehicle_time(0.0) * (1+ theParameters->dominancy_perception_threshold)&& (*path1)->calc_total_walking_distance() > (*path2)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold)) 
 					{
 						paths_to_be_deleted[(*path1)] = true;
 						break;
@@ -3546,6 +3556,7 @@ void Network::dominancy_rules (Busstop* stop)
 				}
 				if ((*delete_iter).second == true)
 				{
+					delete *path_to_delete;
 					path_set.erase(path_to_delete);
 				}
 			}
@@ -3576,7 +3587,7 @@ bool Network::totaly_dominancy_rule (ODstops* odstops, vector<vector<Busline*>> 
 		{
 			total_walk += (*walk_iter);
 		}
-		if ((*path_iter)->get_scheduled_in_vehicle_time() * (1 + theParameters->dominancy_perception_threshold) < calc_total_in_vechile_time(lines,stops))
+		if (calc_total_in_vechile_time(lines1, stops1) * (1 + theParameters->dominancy_perception_threshold) < calc_total_in_vechile_time(lines,stops))
 		{
 			if ((*path_iter)->calc_total_walking_distance() <= total_walk)
 			{
@@ -3589,7 +3600,7 @@ bool Network::totaly_dominancy_rule (ODstops* odstops, vector<vector<Busline*>> 
 		}
 		if (lines1.size() < lines.size())
 		{
-			if ((*path_iter)->get_scheduled_in_vehicle_time() <= calc_total_in_vechile_time(lines,stops))
+			if (calc_total_in_vechile_time(lines1, stops1) <= calc_total_in_vechile_time(lines,stops))
 			{
 				if ((*path_iter)->calc_total_walking_distance() <= total_walk )
 				{
@@ -3610,7 +3621,7 @@ bool Network::totaly_dominancy_rule (ODstops* odstops, vector<vector<Busline*>> 
 		}
 		if (lines.size() < lines1.size())
 		{
-			if (calc_total_in_vechile_time(lines, stops) <= (*path_iter)->get_scheduled_in_vehicle_time())
+			if (calc_total_in_vechile_time(lines, stops) <= calc_total_in_vechile_time(lines1,stops1))
 			{
 				if (total_walk  <= (*path_iter)->calc_total_walking_distance())
 				{
@@ -3647,7 +3658,7 @@ double Network::calc_total_in_vechile_time (vector<vector<Busline*>> lines, vect
 	iter_stops++; // starting from the second stop
 	for (vector<vector <Busline*>>::iterator iter_lines = lines.begin(); iter_lines < lines.end(); iter_lines++)
 	{
-		sum_in_vehicle_time += (*iter_lines).front()->calc_curr_line_ivt_CSGM((*iter_stops).front(),(*(iter_stops+1)).front(), stops.front().front()->get_rti());
+		sum_in_vehicle_time += (*iter_lines).front()->calc_curr_line_ivt((*iter_stops).front(),(*(iter_stops+1)).front(), stops.front().front()->get_rti(), 0.0);
 		iter_stops++;
 		iter_stops++; 
 	}
@@ -3876,10 +3887,6 @@ bool Network::check_constraints_paths (Pass_path* path) // checks if the path me
 	{
 		return false;
 	}
-	if (totaly_dominancy_rule(path->get_alt_transfer_stops().front().front()->get_stop_od_as_origin_per_stop(path->get_alt_transfer_stops().back().front()),path->get_alt_lines(),path->get_alt_transfer_stops()) == true)
-	{
-		return false;
-	}
 return true;
 }
 
@@ -4027,19 +4034,17 @@ bool Network::write_path_set (string name1)
 	out1 << "transit_paths:" << '\t' ;
 	for (vector<Busstop*>::iterator stop_iter = busstops.begin(); stop_iter < busstops.end(); stop_iter++)
 	{
-			for (vector <Busstop*>::iterator basic_destination = busstops.begin(); basic_destination < busstops.end(); basic_destination++)
-			{
-			if ((*stop_iter)->get_id() != (*basic_destination)->get_id() && (*stop_iter)->check_destination_stop(*basic_destination) == true)
-			{	
-			ODstops* odpairs = (*stop_iter)->get_stop_od_as_origin_per_stop(*basic_destination);
-			vector <Pass_path*> path_set = odpairs->get_path_set();
+		ODs_for_stop odstops = (*stop_iter)->get_stop_as_origin();
+		for (ODs_for_stop::iterator basic_destination = odstops.begin(); basic_destination != odstops.end(); basic_destination++)
+		{
+			vector <Pass_path*> path_set = (*basic_destination).second->get_path_set();
 			for (vector<Pass_path*>::iterator path_iter = path_set.begin(); path_iter < path_set.end(); path_iter++)
 			{
 				pathcounter++;
 				vector<vector<Busstop*>> stops = (*path_iter)->get_alt_transfer_stops();
 				vector<vector<Busline*>> lines = (*path_iter)->get_alt_lines();
 				vector<double> walking = (*path_iter)->get_walking_distances();
-				out1 << odpairs->get_origin()->get_id() << '\t'<< odpairs->get_destination()->get_id() << '\t' << (*path_iter)->get_id()  << '\t' << stops.size() << '\t' << '{' << '\t';
+				out1 << (*basic_destination).second->get_origin()->get_id() << '\t'<< (*basic_destination).second->get_destination()->get_id() << '\t' << (*path_iter)->get_id()  << '\t' << stops.size() << '\t' << '{' << '\t';
 				for (vector<vector <Busstop*>>::iterator stop_leg = stops.begin(); stop_leg < stops.end(); stop_leg++)
 				{
 					out1 << (*stop_leg).size() << '\t' << '{' << '\t';
@@ -4066,10 +4071,94 @@ bool Network::write_path_set (string name1)
 				}
 				out1 << '}' << endl;	
 			}
-			}
 		}
 	}
-	out1 << "nr_paths:" << '\t' << pathcounter << '\t' ;
+	out1 << "nr_paths:" << '\t' << pathcounter << '\t' <<  endl;
+	return true;
+}
+
+bool Network::write_path_set_per_stop (string name1, Busstop* stop)
+{
+	ofstream out1(name1.c_str(),ios_base::app);
+	assert (out1);
+	ODs_for_stop odstops = stop->get_stop_as_origin();
+	for (ODs_for_stop::iterator basic_destination = odstops.begin(); basic_destination != odstops.end(); basic_destination++)
+	{
+		vector <Pass_path*> path_set = (*basic_destination).second->get_path_set();
+		for (vector<Pass_path*>::iterator path_iter = path_set.begin(); path_iter < path_set.end(); path_iter++)
+		{
+			vector<vector<Busstop*>> stops = (*path_iter)->get_alt_transfer_stops();
+			vector<vector<Busline*>> lines = (*path_iter)->get_alt_lines();
+			vector<double> walking = (*path_iter)->get_walking_distances();
+			out1 << (*basic_destination).second->get_origin()->get_id() << '\t'<< (*basic_destination).second->get_destination()->get_id() << '\t' << (*path_iter)->get_id()  << '\t' << stops.size() << '\t' << '{' << '\t';
+			for (vector<vector <Busstop*>>::iterator stop_leg = stops.begin(); stop_leg < stops.end(); stop_leg++)
+			{
+				out1 << (*stop_leg).size() << '\t' << '{' << '\t';
+				for (vector<Busstop*>::iterator stop_iter = (*stop_leg).begin(); stop_iter < (*stop_leg).end(); stop_iter++)
+				{
+					out1 << (*stop_iter)->get_id() << '\t';
+				}
+				out1 << '}' << '\t' ;
+			}	
+			out1 << '}' << '\t' << lines.size() << '\t' << '{';
+			for (vector<vector <Busline*>>::iterator line_leg = lines.begin(); line_leg < lines.end(); line_leg++)
+			{
+				out1 << (*line_leg).size() << '{' << '\t';
+				for (vector<Busline*>::iterator line_iter = (*line_leg).begin(); line_iter < (*line_leg).end(); line_iter++)
+				{
+					out1 << (*line_iter)->get_id() << '\t';
+				}
+				out1 << '}' << '\t' ;
+			}
+			out1 << '}' << '\t' << walking.size() << '\t' << '{';
+			for (vector <double>::iterator walk_iter = walking.begin(); walk_iter < walking.end(); walk_iter++)
+			{
+				out1 << (*walk_iter) << '\t';
+			}
+			out1 << '}' << endl;	
+		}
+	}
+	return true;
+}
+
+bool Network::write_path_set_per_od (string name1, Busstop* origin_stop, Busstop* destination_stop)
+{
+	ofstream out1(name1.c_str(),ios_base::app);
+	assert (out1);
+	ODstops* od = origin_stop->get_stop_od_as_origin_per_stop(destination_stop);
+	vector<Pass_path*> path_set = od->get_path_set();
+	for (vector<Pass_path*>::iterator path_iter = path_set.begin(); path_iter < path_set.end(); path_iter++)
+	{
+		vector<vector<Busstop*>> stops = (*path_iter)->get_alt_transfer_stops();
+		vector<vector<Busline*>> lines = (*path_iter)->get_alt_lines();
+		vector<double> walking = (*path_iter)->get_walking_distances();
+		out1 << od->get_origin()->get_id() << '\t'<< od->get_destination()->get_id() << '\t' << (*path_iter)->get_id()  << '\t' << stops.size() << '\t' << '{' << '\t';
+		for (vector<vector <Busstop*>>::iterator stop_leg = stops.begin(); stop_leg < stops.end(); stop_leg++)
+		{
+			out1 << (*stop_leg).size() << '\t' << '{' << '\t';
+			for (vector<Busstop*>::iterator stop_iter = (*stop_leg).begin(); stop_iter < (*stop_leg).end(); stop_iter++)
+			{
+				out1 << (*stop_iter)->get_id() << '\t';
+			}
+			out1 << '}' << '\t' ;
+		}	
+		out1 << '}' << '\t' << lines.size() << '\t' << '{';
+		for (vector<vector <Busline*>>::iterator line_leg = lines.begin(); line_leg < lines.end(); line_leg++)
+		{
+			out1 << (*line_leg).size() << '{' << '\t';
+			for (vector<Busline*>::iterator line_iter = (*line_leg).begin(); line_iter < (*line_leg).end(); line_iter++)
+			{
+				out1 << (*line_iter)->get_id() << '\t';
+			}
+			out1 << '}' << '\t' ;
+		}
+		out1 << '}' << '\t' << walking.size() << '\t' << '{';
+		for (vector <double>::iterator walk_iter = walking.begin(); walk_iter < walking.end(); walk_iter++)
+		{
+			out1 << (*walk_iter) << '\t';
+		}
+		out1 << '}' << endl;	
+	}
 	return true;
 }
 
@@ -4100,21 +4189,21 @@ bool Network::read_transit_path_sets(string name)
 			return false;
 		} 
 	}
+	cout << "Reading path set completed" << endl;
 	return true;
 }
 
 bool Network::read_transit_path(istream& in)
 {
 	char bracket;
-	int origin_id, destination_id, path_id, nr_stop_legs, nr_line_legs, nr_stops, nr_lines, nr_walks, stop_id, line_id;
+	int origin_id, destination_id, nr_stop_legs, nr_line_legs, nr_stops, nr_lines, nr_walks, stop_id, line_id;
 	double walk_dis;
+	string path_id;
 	vector<vector<Busstop*>> alt_stops;
 	vector<vector<Busline*>> alt_lines;
 	vector<double> alt_walking;
-	alt_stops.clear();
-	alt_lines.clear();
-	alt_walking.clear();
 	in >> origin_id >> destination_id >> path_id >> nr_stop_legs;
+
 	Busstop* bs_o = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (origin_id) )));	
 	Busstop* bs_d = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (destination_id) )));
 	// reading all the stops that compose the path
@@ -4216,49 +4305,80 @@ bool Network::read_transit_path(istream& in)
 		cout << "readfile::read_transit_path scanner jammed at " << bracket;
 		return false;
 	}
-	vector<vector<Busline*>>::iterator alt_lines_iter;
-	alt_lines_iter = alt_lines.begin();
+
 	Pass_path* path = new Pass_path(pathid, alt_lines , alt_stops, alt_walking); 
 	pathid++;
-	pair<Busstop*,Busstop*> stops;
-	stops.first = bs_o;
-	stops.second = bs_d;
-	v_odstops[stops]->add_paths(path);
+	if (bs_o->check_stop_od_as_origin_per_stop(bs_d) == false)
+	{
+		ODstops* od_stop = new ODstops (bs_o,bs_d); 
+		bs_o->add_odstops_as_origin(bs_d, od_stop);
+		bs_d->add_odstops_as_destination(bs_o, od_stop);
+	}
+	ODstops* od_pair = bs_o->get_stop_od_as_origin_per_stop(bs_d);
+	od_pair->add_paths(path);
 	return true;
 }
 
 /////////////// Transit path-set generation functions: end
 
-// Fuzzy traveler related functions: begin
-
-void Network::construct_destination_choice_set ()
+bool Network::read_transitday2day(string name)
 {
-	// based on satisfying a max IVT criterion
-	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
+	ifstream in(name.c_str()); // open input file
+	assert (in);
+	string keyword;
+	in >> keyword;
+#ifdef _DEBUG_NETWORK
+	cout << keyword << endl;
+#endif //_DEBUG_NETWORK
+	if (keyword!="ODS:")
 	{
-		map <Busstop*, ODstops*> od_as_origin = (*basic_origin)->get_stop_as_origin();
-		for (map<Busstop*, ODstops*>::iterator iter = od_as_origin.begin(); iter != od_as_origin.end(); iter++)
-		{
-			if ((*iter).second->get_min_IVT() < theParameters->max_acceptable_IVT)
-			{
-				fuzzy_destination_set[(*basic_origin)].push_back((*iter).second);
-			}
-		}
+		cout << " read_ODs: no << ODs: >> keyword " << endl;
+		in.close();
+		return false;
 	}
-	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
+	int nr= 0;
+	in >> nr;
+	int i=0;
+	for (i; i<nr;i++)
 	{
-		vector<ODstops*> destination_set = fuzzy_destination_set[(*basic_origin)];
-		for (vector<ODstops*>::iterator od_stop = destination_set.begin(); od_stop < destination_set.end(); od_stop++)
+		if (!read_OD_day2day(in))
 		{
-			for (vector<ODstops*>::iterator od_stop1 = destination_set.begin(); od_stop1 < destination_set.end(); od_stop1++)
-			{
-				(*od_stop)->add_possible_destination(*od_stop1);
-			}
-		}
+			cout << " read_OD_day2day: read_OD_day2day returned false for line nr " << (i+1) << endl;
+			in.close();
+			return false;
+		} 
 	}
+	return true;
 }
 
-// Fuzzy traveler related functions: end
+bool Network::read_OD_day2day (istream& in) 
+{
+	char bracket;
+    int origin_stop_id, destination_stop_id, stop_id, line_id;
+	double anticipated_waiting_time, alpha_RTI, alpha_exp;
+	in >> bracket;
+	if (bracket != '{')
+	{
+		cout << "readfile::read_transit_path scanner jammed at " << bracket;
+		return false;
+	}
+	in >> origin_stop_id >> destination_stop_id >> stop_id >> line_id >> anticipated_waiting_time >> alpha_RTI >> alpha_exp;
+	Busstop* bs_o = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (origin_stop_id) )));	
+	Busstop* bs_d = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (destination_stop_id) )));
+	Busstop* bs_s = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (stop_id) )));
+	Busline* bl = (*(find_if(buslines.begin(), buslines.end(), compare <Busline> (line_id) )));
+	ODstops* od_stop = bs_o->get_stop_od_as_origin_per_stop(bs_d);
+	od_stop->set_anticipated_waiting_time(bs_s, bl, anticipated_waiting_time);
+	od_stop->set_alpha_RTI(bs_s, bl, alpha_RTI);
+	od_stop->set_alpha_exp(bs_s, bl, alpha_exp);
+	in >> bracket;
+	if (bracket != '}')
+	{
+		cout << "readfile::read_transit_path scanner jammed at " << bracket;
+		return false;
+	}
+	return true;
+}
 
 bool Network::readtransitfleet (string name) // !< reads transit vehicle types, vehicle scheduling and dwell time functions
 {
@@ -4330,10 +4450,11 @@ bool Network::read_dwell_time_function (istream& in)
    char bracket;
 	int func_id;
 // dwell time parameters
-   int dwell_time_function_form, nr_alighting_doors; 
+   int dwell_time_function_form; 
 	// 11 - Linear function of boarding and alighting
     // 12 - Linear function of boarding and alighting + non-linear crowding effect (Weidmann) 
     // 13 - Max (boarding, alighting) + non-linear crowding effect (Weidmann) 
+    // 20 - TCRP(max doors with crowding, boarding from x doors, alighting from y doors) + bay + stop capacity
     // 21 - TCRP(max doors with crowding, boarding from front door, alighting from both doors) + bay + stop capacity
    double dwell_constant;
    double boarding_coefficient;
@@ -4343,6 +4464,7 @@ bool Network::read_dwell_time_function (istream& in)
    // in case of TCRP function form
    double share_alighting_front_door;
    double crowdedness_binary_factor;
+   double number_boarding_doors, number_alighting_doors;
 
    // extra delays
    double bay_coefficient;
@@ -4353,16 +4475,25 @@ bool Network::read_dwell_time_function (istream& in)
   	cout << "readfile::readsbusstop scanner jammed at " << bracket;
   	return false;
   }
-	in >> func_id >> dwell_time_function_form >> dwell_constant >> nr_alighting_doors >> boarding_coefficient >> alighting_cofficient >> dwell_std_error >> bay_coefficient >> over_stop_capacity_coefficient;
+	in >> func_id >> dwell_time_function_form >> dwell_constant >> boarding_coefficient >> alighting_cofficient >> dwell_std_error >> bay_coefficient >> over_stop_capacity_coefficient;
+	if (dwell_time_function_form == 20)
+	{
+		in >> number_boarding_doors >> number_alighting_doors >> share_alighting_front_door >> crowdedness_binary_factor;
+	}
 	if (dwell_time_function_form == 21)
 	{
 		in >> share_alighting_front_door >> crowdedness_binary_factor;
-		Dwell_time_function* dt= new Dwell_time_function (func_id,dwell_time_function_form,dwell_constant, nr_alighting_doors, boarding_coefficient,alighting_cofficient,dwell_std_error,share_alighting_front_door,crowdedness_binary_factor,bay_coefficient,over_stop_capacity_coefficient);
+		Dwell_time_function* dt= new Dwell_time_function (func_id,dwell_time_function_form,dwell_constant,boarding_coefficient,alighting_cofficient,dwell_std_error,share_alighting_front_door,crowdedness_binary_factor,bay_coefficient,over_stop_capacity_coefficient);
 		dt_functions.push_back (dt);
 	}
+	if (dwell_time_function_form == 22)
+	{
+		Dwell_time_function* dt= new Dwell_time_function (func_id,dwell_time_function_form,dwell_constant,boarding_coefficient,alighting_cofficient,dwell_std_error,share_alighting_front_door,number_boarding_doors,number_alighting_doors,crowdedness_binary_factor,bay_coefficient,over_stop_capacity_coefficient);
+		dt_functions.push_back (dt);
+	}	
 	else
 	{
-		Dwell_time_function* dt= new Dwell_time_function (func_id,dwell_time_function_form,dwell_constant,nr_alighting_doors,boarding_coefficient,alighting_cofficient,dwell_std_error,bay_coefficient,over_stop_capacity_coefficient);
+		Dwell_time_function* dt= new Dwell_time_function (func_id,dwell_time_function_form,dwell_constant,boarding_coefficient,alighting_cofficient,dwell_std_error,bay_coefficient,over_stop_capacity_coefficient);
 		dt_functions.push_back (dt);
 	}
   in >> bracket;
@@ -4444,11 +4575,6 @@ bool Network::read_busvehicle(istream& in) // reads a bus vehicle
 	  }
 	  btr->set_bustype(bty); 
 	  Start_trip* st = new Start_trip (btr, btr->get_starttime());
-	  if (driving_roster.empty() == false && btr->get_starttime() < driving_roster.back()->first->get_starttime())
-	  {
-  			cout << "readfile::readsbusvehicle scanner jammed at " << bracket;
-  			return false;
-	  }  
 	  driving_roster.push_back(st); // save the driving roster at the vehicle level
   }
   for (vector<Start_trip*>::iterator trip = driving_roster.begin(); trip < driving_roster.end(); trip++)
@@ -5141,7 +5267,7 @@ bool Network::writeheadways(string name)
 
 }
 
-bool Network::write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10, string name11, string name12)
+bool Network::write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10, string name11, string name12, string name13)
 {
 	ofstream out1(name1.c_str(),ios_base::app);
 	ofstream out2(name2.c_str(),ios_base::app);
@@ -5155,6 +5281,8 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 	ofstream out10(name10.c_str(),ios_base::app);
 	ofstream out11(name11.c_str(),ios_base::app);
 	ofstream out12(name12.c_str(),ios_base::app);
+	ofstream out13(name13.c_str(),ios_base::app);
+	/*
 	assert(out1);
 	assert(out2);
 	assert(out3);
@@ -5167,6 +5295,8 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 	assert(out10);
 	assert(out11);
 	assert(out12);
+	assert(out13);
+	*/
 	// writing the crude data and summary outputs for each bus stop
 	for (vector<Busstop*>::iterator iter = busstops.begin();iter != busstops.end();iter++)
 	{	
@@ -5179,57 +5309,83 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 			// this summary file contains for each stop a record for each line thats use it
 		}
 	}
-	out1.close();
-	out2.close();
-	// writing the aggregate summary output for each bus line
-	for (vector<Busline*>::iterator iter = buslines.begin();iter!= buslines.end(); iter++)
-	{	
-		(*iter)->calculate_sum_output_line();
-		(*iter)->get_output_summary().write(out3,(*iter)->get_id());
-		(*iter)->calc_line_assignment();
-		(*iter)->write_assign_output(out9);
-		(*iter)->write_ttt_output(out11);
+	// writing the assignment results in terms of each segment on individual trips
+	for (vector<Bustrip*>::iterator iter = bustrips.begin(); iter!= bustrips.end(); iter++)
+	{
+		(*iter)->write_assign_segments_output(out7);
 	}
-	out3.close();
-	out9.close();
-	out11.close();
 	// writing the trajectory output for each bus vehicle (by stops)
 	for (vector<Bus*>::iterator iter = busvehicles.begin(); iter!= busvehicles.end(); iter++)
 	{
 		(*iter)->write_output(out4);
 	}
-	out4.close();
+	// writing the aggregate summary output for each bus line
+	for (vector<Busline*>::iterator iter = buslines.begin();iter!= buslines.end(); iter++)
+	{	
+		(*iter)->calculate_sum_output_line();
+		(*iter)->get_output_summary().write(out3,(*iter)->get_id());
+		if (theParameters->demand_format == 3)
+		{
+			//(*iter)->calc_line_assignment();
+			(*iter)->write_assign_output(out9);
+		}
+		(*iter)->write_ttt_output(out11);
+	}
 	// writing the decisions of passenger and summary per OD pair
-	for (map <pair<Busstop*,Busstop*>,ODstops*>::iterator od_iter = v_odstops.begin(); od_iter != v_odstops.end(); od_iter++)
+	if (theParameters->demand_format == 3)
 	{
-		if ((*od_iter).second->get_passengers_during_simulation().size() > 0)
+		for (vector<ODstops*>::iterator od_iter = odstops_demand.begin(); od_iter < odstops_demand.end(); od_iter++)
 		{
-			(*od_iter).second->write_od_summary(out10);
-		}
-		map <Passenger*,list<Pass_boarding_decision>> boarding_decisions = (*od_iter).second->get_boarding_output();
-		for (map<Passenger*,list<Pass_boarding_decision>>::iterator pass_iter1 = boarding_decisions.begin(); pass_iter1 != boarding_decisions.end(); pass_iter1++)
-		{
-		(	*od_iter).second->write_boarding_output(out5, (*pass_iter1).first);
-		}
-		vector<Passenger*> pass_vec = (*od_iter).second->get_passengers_during_simulation();
-		for (vector<Passenger*>::iterator pass_iter = pass_vec.begin(); pass_iter < pass_vec.end(); pass_iter++) 
-		{
-			(*pass_iter)->write_selected_path(out8);
-		}
-		
-		map <Passenger*,list<Pass_alighting_decision>> alighting_decisions = (*od_iter).second->get_alighting_output();
-		for (map<Passenger*,list<Pass_alighting_decision>>::iterator pass_iter2 = alighting_decisions.begin(); pass_iter2 != alighting_decisions.end(); pass_iter2++)
-		{
-			switch (theParameters->demand_format)
+			if ((*od_iter)->get_passengers_during_simulation().size() > 0)
 			{
-				case 3:
-					(*od_iter).second->write_alighting_output(out6, (*pass_iter2).first);
-					break;
-				case 4:
-					break;
+				(*od_iter)->write_od_summary(out10);
+				(*od_iter)->write_od_summary_without_paths(out12);
+			}
+			/*
+			map <Passenger*,list<Pass_boarding_decision>> boarding_decisions = (*od_iter)->get_boarding_output();
+			for (map<Passenger*,list<Pass_boarding_decision>>::iterator pass_iter1 = boarding_decisions.begin(); pass_iter1 != boarding_decisions.end(); pass_iter1++)
+			{
+				(*od_iter)->write_boarding_output(out5, (*pass_iter1).first);
+			}
+			map <Passenger*,list<Pass_alighting_decision>> alighting_decisions = (*od_iter)->get_alighting_output();
+			for (map<Passenger*,list<Pass_alighting_decision>>::iterator pass_iter2 = alighting_decisions.begin(); pass_iter2 != alighting_decisions.end(); pass_iter2++)
+			{
+				switch (theParameters->demand_format)
+				{
+					case 3:
+						(*od_iter)->write_alighting_output(out6, (*pass_iter2).first);
+						break;
+					case 4:
+						break;
+				}
+			}
+			*/
+			map <Passenger*,list<Pass_waiting_experience>> waiting_experience = (*od_iter)->get_waiting_output();
+			for (map<Passenger*,list<Pass_waiting_experience>>::iterator pass_iter1 = waiting_experience.begin(); pass_iter1 != waiting_experience.end(); pass_iter1++)
+			{
+				(*od_iter)->write_waiting_exp_output(out13, (*pass_iter1).first);
+			}
+			vector<Passenger*> pass_vec = (*od_iter)->get_passengers_during_simulation();
+			for (vector<Passenger*>::iterator pass_iter = pass_vec.begin(); pass_iter < pass_vec.end(); pass_iter++) 
+			{
+				(*pass_iter)->write_selected_path(out8);
 			}
 		}
 	}
+	/*
+	out1.close();
+	out2.close();
+	out3.close();
+	out4.close();
+	out5.close();
+	out6.close();
+	out7.close();
+	out8.close();
+	out9.close();
+	out10.close();
+	out11.close();
+	out12.close();
+	out13.close();
 /*
 	if (theParameters->demand_format == 4)
 	{
@@ -5247,20 +5403,6 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 			}
 		}
 */
-	out5.close();
-	out6.close();
-	out8.close();
-	out10.close();
-	// writing the assignment results in terms of each segment on individual trips
-	for (vector<Bustrip*>::iterator iter = bustrips.begin(); iter!= bustrips.end(); iter++)
-	{
-		(*iter)->write_assign_segments_output(out7);
-	}
-	out7.close();
-	
-	//writing the day summary after all the other files
-	//theParameters->write_day_summary(out12);
-	out12.close();
 	return true;
 }
 
@@ -6325,6 +6467,10 @@ double Network::executemaster(QPixmap * pm_,QMatrix * wm_)
 	{
 		this->read_transit_path_sets (workingdir +"path_set_generation.dat");
 	}
+	if (theParameters->pass_day_to_day_indicator ==1)
+	{
+		this->read_transitday2day (workingdir +"transit_day2day.dat");
+	}
 #endif // _BUSES
 	if (!init())
 		cout << "Problem initialising " << endl;
@@ -6412,6 +6558,10 @@ double Network::executemaster()
 	{
 		this->read_transit_path_sets (workingdir +"path_set_generation.dat");
 	}
+	if (theParameters->pass_day_to_day_indicator ==1)
+	{
+		this->read_transitday2day (workingdir +"transit_day2day.dat");
+	}
 #endif //_BUSES
 
 	if (!init())
@@ -6466,7 +6616,7 @@ bool Network::writeall(unsigned int repl)
 	//writeheadways("timestamps.dat"); // commented out, since no-one uses them 
 	writeassmatrices(assignmentmatfile);
 	write_v_queues(vqueuesfile);
-	this->write_busstop_output(workingdir + "buslog_out.dat", workingdir + "busstop_sum.dat", workingdir + "busline_sum.dat", workingdir + "bus_trajectory.dat", workingdir + "passenger_boarding.dat", workingdir + "passenger_alighting.dat", workingdir + "segments_trip_loads.dat", workingdir + "selected_paths.dat", workingdir + "segments_line_loads.dat", workingdir + "od_stops_summary.dat", workingdir + "trip_total_travel_time.dat", workingdir + "day_summary");
+	this->write_busstop_output(workingdir + "o_buslog_out.dat", workingdir + "o_busstop_sum.dat", workingdir + "o_busline_sum.dat", workingdir + "o_bus_trajectory.dat", workingdir + "o_passenger_boarding.dat", workingdir + "o_passenger_alighting.dat", workingdir + "o_segments_trip_loads.dat", workingdir + "o_selected_paths.dat", workingdir + "o_segments_line_loads.dat", workingdir + "o_od_stops_summary.dat", workingdir + "o_trip_total_travel_time.dat", workingdir + "o_od_stop_summary_without_paths.dat", workingdir + "o_passenger_waiting_experience.dat");
 	return true;
 }
 
@@ -6674,10 +6824,10 @@ bool Network::writeassmatrices(string name)
 
 
 bool Network::init()
+
 {
 	// initialise the turining events
 	double initvalue =0.1;
-	theParameters->new_day();
 	for(map<int,Turning*>::iterator iter=turningmap.begin(); iter!=turningmap.end(); iter++)
 	{
 		(*iter).second->init(eventlist,initvalue);
@@ -6700,16 +6850,18 @@ bool Network::init()
 	switch (theParameters->demand_format)
 	{
 		case 3:
-			for (map <pair<Busstop*,Busstop*>,ODstops*>::iterator iter_odstops = odstops_demand.begin(); iter_odstops != odstops_demand.end(); iter_odstops++ )
+			for (vector<ODstops*>::iterator iter_odstops = odstops_demand.begin(); iter_odstops < odstops_demand.end(); iter_odstops++ )
 			{
-				if ((*iter_odstops).second->get_arrivalrate() != 0.0 )
+				if ((*iter_odstops)->get_arrivalrate() != 0.0 )
 				{
-					(*iter_odstops).second->execute(eventlist,initvalue); // adds an event for the generation time of the first passenger per OD in terms of stops
+					if ((*iter_odstops)->check_path_set() == true)
+					{
+						(*iter_odstops)->execute(eventlist,initvalue); // adds an event for the generation time of the first passenger per OD in terms of stops
+					}
 					initvalue+=0.00001;
 				}
 			}
 			break;
-		/*
 		case 4:
 			for (vector<ODzone*>::iterator iter_odzones = odzones.begin(); iter_odzones < odzones.end(); iter_odzones++ )
 			{
@@ -6717,7 +6869,6 @@ bool Network::init()
 				initvalue+=0.00001;
 			}
 			break;
-		*/
 	}
 #endif //_BUSES
 #ifdef _DEBUG_NETWORK	
@@ -6829,12 +6980,15 @@ double Network::step(double timestep)
 	{
 		time=eventlist->next();
 #ifndef _NO_GUI
+		
 		tc=timestamp();
+		
 		if (tc > next_an_update)  // the time has come for the next animation update
 		{
 			drawing->draw(pm,wm);
 			return time;
-		} 	
+		} 
+		
 #endif //_NO_GUI  
 
 
