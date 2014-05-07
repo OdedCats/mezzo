@@ -1,4 +1,4 @@
-QMAKE_LFLAGS += /LARGEADDRESSAWARE
+
 TEMPLATE = lib
 CONFIG += staticlib debug
 TARGET = mezzo_lib
@@ -11,6 +11,7 @@ QT+= core gui
 #qt3support 
 QMAKE= $(QTDIR)/bin/qmake
 DEFINES += _BUSES
+QMAKE_LFLAGS += /LARGEADDRESSAWARE
 
 # Input
 HEADERS += src/busline.h \

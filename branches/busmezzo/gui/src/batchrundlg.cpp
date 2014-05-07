@@ -48,9 +48,10 @@ void BatchrunDlg::show()
 }
 void BatchrunDlg::on_saveButton_clicked()
 {
-	if (theNetwork->writeall())
-		QMessageBox::information(this, "Saved", 
-					          "Results saved.");
+	theNetwork->writeall();
+	//if (theNetwork->writeall())
+	//	QMessageBox::information(this, "Saved", 
+	//				          "Results saved.");
 }
 
 void BatchrunDlg::on_runButton_clicked()

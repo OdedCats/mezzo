@@ -1,6 +1,5 @@
 # QMAKE file for GUI project. Make changes in this file, NOT in the MAKEFILE
 
-QMAKE_LFLAGS += /LARGEADDRESSAWARE
 TEMPLATE = app
 TARGET = mezzo_gui
 DEFINES += _BUSES
@@ -29,3 +28,4 @@ SOURCES += canvas_qt4.cpp main.cpp parametersdialog_qt4.cpp src/nodedlg.cpp src/
 RESOURCES += canvas_qt4.qrc 
 RC_FILE = mezzo.rc
 DEPENDPATH += . ./src ../mezzo_lib/src
+QMAKE_LFLAGS += /LARGEADDRESSAWARE
