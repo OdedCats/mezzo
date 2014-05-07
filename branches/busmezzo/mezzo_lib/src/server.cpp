@@ -121,18 +121,11 @@ double OServer::next(const double time)
 
 double LogNormalDelayServer::next (const double time)
 {
-	double result = mu + random->lnrandom(delay, sd);
+	double result = delay + random->lnrandom(mu, sd);
 	//double delay_std1 = theParameters->sd_server_scale * sqrt(delay_std) * sqrt (mu + delay); // This is specifically for the Tel-Aviv case study use - delay_std = total driving time for this busline
 	return time + result ;
 }
 
-void LogNormalDelayServer::reset()
-{
-	if (randseed != 0)
-	   random->seed(randseed);
-	else
-		random->randomize();
-}
 
 double LogLogisticDelayServer::next (const double time)
 {

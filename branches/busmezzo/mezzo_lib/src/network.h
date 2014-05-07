@@ -82,7 +82,6 @@
 using namespace std;
 class TurnPenalty;
 class Incident;
-class Day;
 
 class ODRate
 {
@@ -147,7 +146,6 @@ public:
 	double executemaster(); //!< without GUI
 	int reset(); //!< resets the simulation to 0, clears all the state variables. returns runtime
 	void end_of_simulation(double time); //!< finalise all the temp values into containers (linktimes)
-	void end_of_day();
 	double step(double timestep); //!< executes one step of simulation, called by the gui, returns current value of time
 	bool writeall(unsigned int repl=0); //writes the output, appends replication number to output files
 	bool readnetwork(string name); //!< reads the network and creates the appropriate structures
@@ -240,14 +238,17 @@ public:
 
 	// Public transport
 	
-	bool write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10, string name11, string name12); //<! writes all the bus-related output 
+	bool write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10, string name11, string name12, string name13); //<! writes all the bus-related output 
 	bool write_path_set (string name1); //!< writes the path-set generated at the initialization process (aimed to be used as an input file for other runs with the same network)
+	bool write_path_set_per_stop (string name1, Busstop* stop);
+	bool write_path_set_per_od (string name1, Busstop* origin_stop, Busstop* detination_stop);
 
 	bool readtransitroutes(string name); //!< reads the transit routes, similar to readroutes
 	bool readtransitnetwork(string name); //!< reads the stops, distances between stops, lines, trips and travel disruptions
 	bool readtransitdemand (string name); //!< reads passenger demand for transit services
 	bool readtransitfleet (string name); // !< reads transit vehicle types, vehicle scheduling and dwell time functions
-	
+	bool read_transitday2day (string name); // !< reads info on transit pass. day-to-day memory
+	bool read_OD_day2day (istream& in); //!< reads day-to-dat info for a particular OD
 	bool readbusroute(istream& in); //!< reads a transit route
 	bool readbusstop (istream& in); //!< reads a busstop
 	bool readtransitzones (istream& in); //!< reads a transit travel zone
@@ -261,7 +262,8 @@ public:
   bool read_passenger_rates_format2 (istream& in); // reads the passenger rates in the format of arrival rate per line, origin stop and destination stop combination
   bool read_passenger_rates_format3 (istream& in); // reads the passenger rates in the format of arrival rate per OD in terms of stops (no path is pre-determined)
   bool read_passenger_rates_format4 (istream& in); // reads the passenger rates in the format of arrival rate per OD in terms of travel zones (no path is pre-determined)
-  bool readbusstops_distances (istream& in); // !< reads a busstop distance matrix (to other busstops) - relevant only for demand format 3
+  bool readbusstops_distances_format1 (istream& in); // !< reads distances between stops through vectors at the stop level - relevant only for demand format 3
+  bool readbusstops_distances_format2 (istream& in); // !< reads distances between stops through matrices between sets of stops - relevant only for demand format 3
   bool read_travel_time_disruptions (istream& in); // reads the expected travel time between stops due to disruptions - does not affect the actual travel time, just passengers expectations in case of information provision
   bool read_dwell_time_function (istream& in); // reads the dwell time function structure and coefficients
   bool read_bustype (istream& in); // reads a bus type
@@ -274,11 +276,12 @@ public:
   void generate_indirect_paths (); // generates new indirect paths
   vector<vector<Busline*>> compose_line_sequence (Busstop* destination);  // compose the list of direct lines between each pair of intermediate stops
   vector<vector<Busstop*>> compose_stop_sequence ();  // compose the list of stops in path definiton structure
-  void find_all_paths (); // goes over all OD stop pairs to generate their path choice set
+ void find_all_paths (); // goes over all OD pairs to generate their path choice set
+ void find_all_paths_with_OD_for_generation ();
 //  void find_recursive_connection (Busstop* origin, Busstop* destination); // search recursively for a path (forward - from origin to destination) WITHOUT walking links
   void find_recursive_connection_with_walking (Busstop* origin, Busstop* destination); // search recursively for a path (forward - from origin to destination) WITH walking links
-  void merge_paths_by_stops (Busstop* stop);  // merge paths with same lines for all legs (only different transfer stops)
-  void merge_paths_by_common_lines (Busstop* stop);  // merge paths with lines that have identical route between consecutive stops
+  void merge_paths_by_stops (Busstop* origin_stop, Busstop* destination_stop);  // merge paths with same lines for all legs (only different transfer stops)
+  void merge_paths_by_common_lines (Busstop* origin_stop, Busstop* destination_stop);  // merge paths with lines that have identical route between consecutive stops
   bool compare_same_lines_paths (Pass_path* path1, Pass_path* path2); // checks if two paths are identical in terms of lines
   bool compare_same_stops_paths (Pass_path* path1, Pass_path* path2); // checks if two paths are identical in terms of stops
   bool compare_common_partial_routes (Busline* line1, Busline* line2, Busstop* start_section, Busstop* end_section); // checks if two lines have the same route between two given stops
@@ -298,7 +301,7 @@ public:
   const vector<Busstop*> & get_cons_stops (Busstop* stop) {return consecutive_stops[stop];}
   const vector<Busline*> & get_direct_lines (ODstops* odstops) {return od_direct_lines[odstops];}
   double calc_total_in_vechile_time (vector<vector<Busline*>> lines, vector<vector<Busstop*>> stops); // according to scheduled time
-  void construct_destination_choice_set (); // construct a matrix with the minimum IVT and 
+  bool read_od_pairs_for_generation (string name);
 
 #ifndef _NO_GUI
 	double get_width_x() {return width_x;} //!< returns image width in original coordinate system
@@ -348,21 +351,20 @@ protected:
 	vector <Busline*> buslines; //!< the buslines that generate bus trips on busroutes, serving busstops
 	vector <Bustrip*> bustrips;  //!< the trips list of all buses
 	vector <Busstop*> busstops; //!< stops on the buslines
-	vector <Zone*> zones; 
 	vector <Busroute*> busroutes; //!< the routes that buses follow
 	vector <Dwell_time_function*> dt_functions;
     vector <Bustype*> bustypes; // types of bus vehicles
     vector <Bus*> busvehicles; // a list of the bus vehicles
-	map <pair<Busstop*,Busstop*>,ODstops*> v_odstops;
-	map <pair<Zone*,Zone*>,ODzone*> v_odzones;
-	map <pair<Zone*,Zone*>,ODzone*> odzones_demand; // contains only ODs with a non-zero demand
-	map <pair<Busstop*,Busstop*>,ODstops*> odstops_demand; // contains only ODs with a non-zero demand
+	vector <ODstops*> odstops;
+	map <Busstop*,vector<ODstops*>> odstops_map;
+	vector <ODzone*> odzones; 
+	vector <ODstops*> odstops_demand; // contains only ODs with a non-zero demand
+	vector<pair<Busstop*,Busstop*>> od_pairs_for_generation;
 	vector<Busstop*> collect_im_stops; // compose the list of stops for a path
 	vector<double> collect_walking_distances; // compose the list of walking distances for a path
 	map <ODstops*, vector<Busline*>> od_direct_lines; // contains all direct lines between a pair of stops
 //	map<int,map<int, vector<Busline*>>> direct_lines; // contains all direct lines between a couple of stops
 	map<Busstop*,vector<Busstop*>> consecutive_stops; // contains all the stops that can be reached within no transfer per stop
-	map<Busstop*,vector<ODstops*>> fuzzy_destination_set; // contains all destination choice-set
 
 	//Shortest path graph
 #ifndef _USE_VAR_TIMES
@@ -519,10 +521,6 @@ public:
 	{
 		theNetwork->reset();
 	}
-	void end_of_day ()
-	{
-		theNetwork->end_of_day();
-	}
 	 ~NetworkThread () 
 	  {
 			delete theNetwork;
@@ -533,6 +531,7 @@ private:
     string masterfile_;
 	double runtime_;
 	int threadnr_;
+
 };
 
 

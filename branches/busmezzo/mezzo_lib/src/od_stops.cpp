@@ -7,13 +7,14 @@ ODstops::ODstops ()
 {
 }
 
-ODstops::ODstops (Busstop* origin_stop_, Busstop* destination_stop_)
+ODstops::ODstops (Busstop* origin_stop_, Busstop* destination_stop_):
+origin_stop(origin_stop_), destination_stop(destination_stop_)
 {
-	origin_stop = origin_stop_;
-	destination_stop = destination_stop_;
 	min_transfers = 100;
+	arrival_rate = 0.0;
 	active = false;
 	random = new (Random);
+	path_set.clear();
 	if (randseed != 0)
 		{
 		random->seed(randseed);
@@ -30,6 +31,7 @@ ODstops::ODstops (Busstop* origin_stop_, Busstop* destination_stop_, double arri
 	destination_stop = destination_stop_;
 	arrival_rate = arrival_rate_;
 	min_transfers = 100;
+	path_set.clear();
 	active = false;
 	random = new (Random);
 	if (randseed != 0)
@@ -47,41 +49,72 @@ ODstops::~ODstops()
 	delete random;
 }
 
+Pass_boarding_decision::~Pass_boarding_decision()
+{}
+
+Pass_alighting_decision::~Pass_alighting_decision()
+{}
+
+Pass_waiting_experience::~Pass_waiting_experience()
+{}
+
+void ODstops::set_anticipated_waiting_time (Busstop* stop, Busline* line, double anticipated_WT)
+{
+	pair<Busstop*, Busline*> stopline;
+	stopline.first = stop;
+	stopline.second = line;
+	anticipated_waiting_time[stopline] = anticipated_WT;
+}
+
+void ODstops::set_alpha_RTI (Busstop* stop, Busline* line, double alpha)
+{
+	pair<Busstop*, Busline*> stopline;
+	stopline.first = stop;
+	stopline.second = line;
+	alpha_RTI[stopline] = alpha;
+}
+
+void ODstops::set_alpha_exp (Busstop* stop, Busline* line, double alpha)
+{
+	pair<Busstop*, Busline*> stopline;
+	stopline.first = stop;
+	stopline.second = line;
+	alpha_exp[stopline] = alpha;
+}
+
 void ODstops::reset()
 {
 	min_transfers = 100;
-	min_IVT = 100000;
 	active = false;
-	boarding_utility = 0;
-	staying_utility = 0;
-	waiting_passengers.clear();
-	output_pass_boarding_decision.clear();
-	output_pass_alighting_decision.clear();
-	passengers_during_simulation.clear(); //we completely erase the passengers from the memory
-}
-
-void ODstops::end_of_day()
-{
-	min_transfers = 100;
-	min_IVT = 100000;
-	active = false;
-	boarding_utility = 0;
-	staying_utility = 0;
-	waiting_passengers.clear();
-	output_pass_boarding_decision.clear();
-	output_pass_alighting_decision.clear();
-	for (vector <Passenger*>::iterator iter_pass = passengers_during_simulation.begin(); iter_pass < passengers_during_simulation.end(); iter_pass++)
+	/*
+	for (vector <Passenger*>::iterator iter_pass = waiting_passengers.begin(); iter_pass < waiting_passengers.end();)
 	{
-		(*iter_pass)->evening_cleaning();
+		pass_recycler.addPassenger(*iter_pass);
 	}
-		
+	*/
+	boarding_utility = 0;
+	staying_utility = 0;
+	waiting_passengers.clear();
+	output_pass_boarding_decision.clear();
+	output_pass_alighting_decision.clear();
+	output_pass_waiting_experience.clear();
+	passengers_during_simulation.clear();
 }
 
 bool ODstops::execute (Eventlist* eventlist, double curr_time) // generate passengers with this OD and books an event for next passenger generation
 {
+	double headway_to_next_pass;
 	if (curr_time < theParameters->start_pass_generation)
 	{
-		eventlist->add_event(theParameters->start_pass_generation, this);
+		if (check_path_set() == true)
+		{
+			headway_to_next_pass = random -> erandom (arrival_rate / 3600.0); // passenger arrival is assumed to be a poission process (exp headways)
+			if (theParameters->start_pass_generation + headway_to_next_pass < theParameters->stop_pass_generation)
+			{
+				eventlist->add_event(theParameters->start_pass_generation + headway_to_next_pass, this);
+				active = true;
+			}
+		}
 		return true;
 	}
 	if (curr_time >= theParameters->stop_pass_generation)
@@ -89,92 +122,75 @@ bool ODstops::execute (Eventlist* eventlist, double curr_time) // generate passe
 		return true;
 	}
 // called only for generting pass.
-	if(theParameters->calendar.size()==1)
-	{
-		if (active == true) // generate passenger from the second call, as first initialization call just set time to first passenger
-		{	
-			Passenger* pass = new Passenger;
-			passengers_during_simulation.push_back(pass);
-			pid++; 
-			pass->init (pid, curr_time, this);
-			pass->add_to_selected_path_stop(origin_stop);
-			Busstop* connection_stop = pass->make_connection_decision(curr_time);
-			pass->add_to_selected_path_stop(connection_stop);
-			if (connection_stop->get_id() != origin_stop->get_id()) // if the pass. walks to another stop
-			{
-				// set connected_stop as the new origin
-				pass->set_ODstop(connection_stop->get_stop_od_as_origin_per_stop(destination_stop)); // set this stop as his new origin (new OD)
-				map<Busstop*,double> walk_dis = origin_stop->get_walking_distances();
-				double walking_time = 60 * (walk_dis[connection_stop] / random->nrandom (theParameters->average_walking_speed, theParameters->average_walking_speed/4));
-				pass->add_to_walking_time (walking_time);
-				pass->set_last_arrival_time_at_stop(curr_time + walking_time);
-				pass->add_event_to_pass (eventlist, curr_time + walking_time);
-			}
-			else // if the pass. stays at the same stop
-			{
-				waiting_passengers.push_back (pass); // storage the new passenger at the list of waiting passengers with this OD
-			}
-		}
-		for (vector <Passenger*>::iterator wait_pass = waiting_passengers.begin(); wait_pass < waiting_passengers.end(); wait_pass++)
+	if (active == true) // generate passenger from the second call, as first initialization call just set time to first passenger
+	{	
+		//Passenger* pass = pass_recycler.newPassenger();
+		Passenger* pass = new Passenger;
+		passengers_during_simulation.push_back(pass);
+		pid++; 
+		pass->init (pid, curr_time, this);
+		pair<Busstop*,double> stop_time;
+		stop_time.first = origin_stop;
+		stop_time.second = curr_time;
+		pass->add_to_selected_path_stop(stop_time);
+		Busstop* connection_stop = pass->make_connection_decision(curr_time);
+		stop_time.first = connection_stop;
+		if (connection_stop->get_id() != origin_stop->get_id()) // if the pass. walks to another stop
 		{
-			if ((*wait_pass)->get_OD_stop()->get_origin() != this->get_origin() || (*wait_pass)->get_OD_stop()->get_destination() != this->get_destination())
-			{
-				break;
-			}
-		}
-		random = new (Random);
-		if (randseed != 0)
-		{
-			random->seed(randseed);
-		}
-		else
-		{
-			random->randomize();
-		}
-		double headway_to_next_pass = random->erandom(arrival_rate/3600.0); // passenger arrival is assumed to be a poission process (exp headways)
-		eventlist->add_event (curr_time + headway_to_next_pass, this);
-		tracer_pass = passengers_during_simulation.begin(); //we initialize here the iterator as pointer to the first value
-		active = true;
-		return true;
-	}
-	else
-	{ 
-		if (active == true)
-	    {	
-		  (*tracer_pass)->add_to_selected_path_stop(origin_stop);
-		  Busstop* connection_stop = (*tracer_pass)->make_connection_decision(curr_time);
-	      (*tracer_pass)->add_to_selected_path_stop(connection_stop);
-		  if (connection_stop->get_id() != origin_stop->get_id()) // if the pass. walks to another stop
-	      {
 			// set connected_stop as the new origin
-			(*tracer_pass)->set_ODstop(connection_stop->get_stop_od_as_origin_per_stop(destination_stop)); // set this stop as his new origin (new OD)
+			if (connection_stop->check_stop_od_as_origin_per_stop(destination_stop) == false)
+			{
+				ODstops* od_stop = new ODstops (connection_stop,destination_stop);
+				connection_stop->add_odstops_as_origin(destination_stop, od_stop);
+				destination_stop->add_odstops_as_destination(connection_stop, od_stop);
+			}
+			pass->set_ODstop(connection_stop->get_stop_od_as_origin_per_stop(destination_stop)); // set this stop as his new origin (new OD)
 			map<Busstop*,double> walk_dis = origin_stop->get_walking_distances();
-			double walking_time = 60 * (walk_dis[connection_stop] / random->nrandom (theParameters->average_walking_speed, theParameters->average_walking_speed/4));
-			(*tracer_pass)->add_to_walking_time (walking_time);
-			(*tracer_pass)->set_last_arrival_time_at_stop(curr_time + walking_time);
-			(*tracer_pass)->add_event_to_pass (eventlist, curr_time + walking_time);
-		  }
-		  else // if the pass. stays at the same stop
-		  {
-			waiting_passengers.push_back ((*tracer_pass)); // storage the new passenger at the list of waiting passengers with this OD
-		  }
-		  
-		  if(tracer_pass<passengers_during_simulation.end())
-		  { //this instruction is to progress to the next passenger in the vector of passengers at this stop
-			(*tracer_pass)++;  
-			eventlist->add_event ((*tracer_pass)->get_start_time(), this);
-		  }
-		  else
-		  {
-			  tracer_pass=passengers_during_simulation.begin();
-		  }
+			double arrival_time_to_connected_stop = curr_time + walk_dis[connection_stop] / random->nrandom (theParameters->average_walking_speed, theParameters->average_walking_speed/4);
+			pass->execute(eventlist, arrival_time_to_connected_stop);
+			pair<Busstop*,double> stop_time;
+			stop_time.first = connection_stop;
+			stop_time.second = arrival_time_to_connected_stop;
+			pass->add_to_selected_path_stop(stop_time);
+		}
+		else // if the pass. stays at the same stop
+		{
+			waiting_passengers.push_back (pass); // storage the new passenger at the list of waiting passengers with this OD
+			pass->set_arrival_time_at_stop(curr_time);
+			pass->add_to_selected_path_stop(stop_time);
+			if (pass->get_pass_RTI_network_level() == true || this->get_origin()->get_rti() > 0)
+			{
+				vector<Busline*> lines_at_stop = this->get_origin()->get_lines();
+				for (vector <Busline*>::iterator line_iter = lines_at_stop.begin(); line_iter < lines_at_stop.end(); line_iter++)
+				{
+					pair<Busstop*, Busline*> stopline;
+					stopline.first = this->get_origin();
+					stopline.second = (*line_iter);
+					//pass->set_memory_projected_RTI(this->get_origin(),(*line_iter),(*line_iter)->time_till_next_arrival_at_stop_after_time(this->get_origin(),curr_time));
+					//pass->set_AWT_first_leg_boarding();
+				}
+			}
 		}
 	}
-	active = true;
+	/*
+	for (vector <Passenger*>::iterator wait_pass = waiting_passengers.begin(); wait_pass < waiting_passengers.end(); wait_pass++)
+	{
+		if ((*wait_pass)->get_OD_stop()->get_origin() != this->get_origin() || (*wait_pass)->get_OD_stop()->get_destination() != this->get_destination())
+		{
+			break;
+		}
+	}
+	*/
+	if (check_path_set() == true)
+	{
+		headway_to_next_pass = random -> erandom (arrival_rate / 3600.0); // passenger arrival is assumed to be a poission process (exp headways)
+		eventlist->add_event (curr_time + headway_to_next_pass, this);
+		active = true;
+	}
 	return true;
 }
 
-double ODstops::calc_boarding_probability (Passenger* pass, Busline* arriving_bus, double time, bool has_network_rti)
+double ODstops::calc_boarding_probability (Busline* arriving_bus, double time, Passenger* pass)
 {
 	// initialization
 	boarding_utility = 0.0;
@@ -206,7 +222,7 @@ double ODstops::calc_boarding_probability (Passenger* pass, Busline* arriving_bu
 	}
 	if (in_alt == true)
 	{
-		if (path_set.size() == 1) // if the choice-set includes only a single alternative of the arriving bus - then there is no choice left
+		if (path_set.size() < 2) // if the choice-set includes only a single alternative of the arriving bus - then there is no choice left
 		{
 			boarding_utility = 2.0;
 			staying_utility = -2.0;
@@ -223,11 +239,10 @@ double ODstops::calc_boarding_probability (Passenger* pass, Busline* arriving_bu
 				{
 					if ((*iter_first_leg_lines)->get_id() == arriving_bus->get_id()) // if the arriving bus is a possible first leg for this path alternative
 					{
-						path_utility = (*iter_paths)->calc_arriving_utility(pass, time, has_network_rti);
+						path_utility = (*iter_paths)->calc_arriving_utility(time, pass);
 						set_utilities[(*iter_paths)].first = true;
 						set_utilities[(*iter_paths)].second = path_utility;
 						boarding_utility += exp(path_utility); 
-						/*FAB*/ //boarding_utility = 0.5*exp(path_utility)+0.5*exp((*iter_paths)->calc_arriving_utility(pass, exp_waiting_time, false)); 
 						arriving_paths.push_back((*iter_paths));
 						(*iter_paths)->set_arriving_bus_rellevant(true);
 						break;
@@ -241,9 +256,9 @@ double ODstops::calc_boarding_probability (Passenger* pass, Busline* arriving_bu
 			if ((*iter_paths)->get_arriving_bus_rellevant() == false)
 			{
 				// logsum calculation
-				if (check_if_path_is_dominated(pass,(*iter_paths), arriving_paths) == false)
+				if (check_if_path_is_dominated((*iter_paths), arriving_paths) == false)
 				{
-					path_utility = (*iter_paths)->calc_waiting_utility(this, pass,(*iter_paths)->get_alt_transfer_stops().begin(), time, false, has_network_rti, false);
+					path_utility = (*iter_paths)->calc_waiting_utility((*iter_paths)->get_alt_transfer_stops().begin(), time, false, pass);
 					set_utilities[(*iter_paths)].first = false;
 					set_utilities[(*iter_paths)].second = path_utility;
 					staying_utility += exp(path_utility);
@@ -279,7 +294,7 @@ double ODstops::calc_boarding_probability (Passenger* pass, Busline* arriving_bu
 	}
 }
 
-bool ODstops::check_if_path_is_dominated (Passenger* pass, Pass_path* considered_path, vector<Pass_path*> arriving_paths)
+bool ODstops::check_if_path_is_dominated (Pass_path* considered_path, vector<Pass_path*> arriving_paths)
 {
 	if (path_set.size() < 2)
 	{	
@@ -288,15 +303,15 @@ bool ODstops::check_if_path_is_dominated (Passenger* pass, Pass_path* considered
 	for (vector <Pass_path*>::iterator path2 = arriving_paths.begin(); path2 < arriving_paths.end(); path2++)
 	{
 		// check if one of the arriving paths dominates the considered path
-		if (considered_path->find_number_of_transfers() > (*path2)->find_number_of_transfers() && considered_path->calc_total_scheduled_in_vehicle_time(pass) >= (*path2)->calc_total_scheduled_in_vehicle_time(pass) && considered_path->calc_total_walking_distance() >= (*path2)->calc_total_walking_distance()) 
+		if (considered_path->find_number_of_transfers() > (*path2)->find_number_of_transfers() && considered_path->calc_total_scheduled_in_vehicle_time(0.0) >= (*path2)->calc_total_scheduled_in_vehicle_time(0.0) && considered_path->calc_total_walking_distance() >= (*path2)->calc_total_walking_distance()) 
 		{
 			return true;
 		}
-		if (considered_path->find_number_of_transfers() >= (*path2)->find_number_of_transfers() && considered_path->calc_total_scheduled_in_vehicle_time(pass) > (*path2)->calc_total_scheduled_in_vehicle_time(pass) * (1+ theParameters->dominancy_perception_threshold)&& considered_path->calc_total_walking_distance() >= (*path2)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold)) 
+		if (considered_path->find_number_of_transfers() >= (*path2)->find_number_of_transfers() && considered_path->calc_total_scheduled_in_vehicle_time(0.0) > (*path2)->calc_total_scheduled_in_vehicle_time(0.0) * (1+ theParameters->dominancy_perception_threshold)&& considered_path->calc_total_walking_distance() >= (*path2)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold)) 
 		{ 		
 			return true;
 		}
-		if (considered_path->find_number_of_transfers() >= (*path2)->find_number_of_transfers() && considered_path->calc_total_scheduled_in_vehicle_time(pass) >= (*path2)->calc_total_scheduled_in_vehicle_time(pass) * (1+ theParameters->dominancy_perception_threshold)&& considered_path->calc_total_walking_distance() > (*path2)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold)) 
+		if (considered_path->find_number_of_transfers() >= (*path2)->find_number_of_transfers() && considered_path->calc_total_scheduled_in_vehicle_time(0.0) >= (*path2)->calc_total_scheduled_in_vehicle_time(0.0) * (1+ theParameters->dominancy_perception_threshold)&& considered_path->calc_total_walking_distance() > (*path2)->calc_total_walking_distance() * (1 + theParameters->dominancy_perception_threshold)) 
 		{
 			return true;
 		}
@@ -308,6 +323,19 @@ double ODstops::calc_binary_logit (double utility_i, double utility_j)
 {
 	return ((exp(utility_i)) / (exp(utility_i) + exp (utility_j)));
 }
+
+bool ODstops::check_path_set ()
+{
+	if (path_set.empty()==true) 
+	{
+		return false;
+	}
+	else 
+	{
+		return true;
+	}
+} 
+
 
 double ODstops::calc_multinomial_logit (double utility_i, double utility_sum)
 {
@@ -462,40 +490,33 @@ double ODstops::calc_combined_set_utility_for_alighting (Passenger* pass, Bustri
 {
 	// calc logsum over all the paths from this origin stop
 	staying_utility = 0.0;
-	int level_of_rti = pass->get_OD_stop()->get_origin()->get_rti();
-	if (pass->get_has_network_rti() == 1)
+	if (check_path_set() == false)
 	{
-		level_of_rti = 3;
+		return -10000;
 	}
 	for (vector <Pass_path*>::iterator paths = path_set.begin(); paths < path_set.end(); paths++)
 	{
-		double time_till_transfer = bus_on_board->get_line()->calc_curr_line_ivt(pass, pass->get_OD_stop()->get_origin(),origin_stop,level_of_rti); // in seconds
-		staying_utility += exp(random->nrandom(theParameters->in_vehicle_time_coefficient, theParameters->in_vehicle_time_coefficient / 4 ) * (time_till_transfer/60) + random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4 )  +  (*paths)->calc_waiting_utility(this, pass, (*paths)->get_alt_transfer_stops().begin(), time + time_till_transfer, true, level_of_rti, false));
+		double time_till_transfer = bus_on_board->get_line()->calc_curr_line_ivt(pass->get_OD_stop()->get_origin(),origin_stop,pass->get_OD_stop()->get_origin()->get_rti(), time); // in seconds
+		staying_utility += exp(random->nrandom(theParameters->in_vehicle_time_coefficient, theParameters->in_vehicle_time_coefficient / 4 ) * (time_till_transfer/60) + random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4 )  +  (*paths)->calc_waiting_utility((*paths)->get_alt_transfer_stops().begin(), time + time_till_transfer, true, pass));
 		// taking into account IVT till this intermediate stop, transfer penalty and the utility of the path from this transfer stop till the final destination
 	}
 	return log(staying_utility);
 }
 
-/*
 double ODstops::calc_combined_set_utility_for_alighting_zone (Passenger* pass, Bustrip* bus_on_board, double time)
 {
 	// calc logsum over all the paths from this origin stop
 	staying_utility = 0.0;
-	int level_of_rti = pass->get_OD_stop()->get_origin()->get_rti();
-	if (pass->get_has_network_rti() == 1)
-	{
-		level_of_rti = 3;
-	}
 	for (vector <Pass_path*>::iterator paths = path_set.begin(); paths < path_set.end(); paths++)
 	{
-		double time_till_transfer = bus_on_board->get_line()->calc_curr_line_ivt(pass, pass->get_OD_stop()->get_origin(),origin_stop,level_of_rti); // in seconds
-		staying_utility += exp(random->nrandom(theParameters->in_vehicle_time_coefficient, theParameters->in_vehicle_time_coefficient / 4 ) * (time_till_transfer/60) + random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4 )  +  (*paths)->calc_waiting_utility(this, pass, (*paths)->get_alt_transfer_stops().begin(), time + time_till_transfer, true, level_of_rti, false)) + theParameters->walking_time_coefficient * (pass->get_destination_walking_distance(destination_stop) / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4));
+		double time_till_transfer = bus_on_board->get_line()->calc_curr_line_ivt(pass->get_OD_stop()->get_origin(),origin_stop,pass->get_OD_stop()->get_origin()->get_rti(), time); // in seconds
+		staying_utility += exp(random->nrandom(theParameters->in_vehicle_time_coefficient, theParameters->in_vehicle_time_coefficient / 4 ) * (time_till_transfer/60) + random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4 )  +  (*paths)->calc_waiting_utility((*paths)->get_alt_transfer_stops().begin(), time + time_till_transfer, true, pass)) + theParameters->walking_time_coefficient * (pass->get_destination_walking_distance(destination_stop) / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4));
 		// taking into account IVT till this intermediate stop, transfer penalty and the utility of the path from this transfer stop till the final destination (incl. final walking link)
 	}
 	// in case it is walkable from the alighting stop till the final destination
 	if (pass->stop_is_in_d_zone(origin_stop) && pass->get_destination_walking_distance(origin_stop) < theParameters->max_walking_distance)
 	{
-		staying_utility += exp(theParameters->in_vehicle_time_coefficient * ((bus_on_board->get_line()->calc_curr_line_ivt(pass, origin_stop,destination_stop,level_of_rti))/60) + theParameters->walking_time_coefficient * (pass->get_destination_walking_distance(destination_stop) / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4)));
+		staying_utility += exp(theParameters->in_vehicle_time_coefficient * ((bus_on_board->get_line()->calc_curr_line_ivt(origin_stop,destination_stop,origin_stop->get_rti(), time))/60) + theParameters->walking_time_coefficient * (pass->get_destination_walking_distance(destination_stop) / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4)));
 	}
 	else
 	{
@@ -507,12 +528,15 @@ double ODstops::calc_combined_set_utility_for_alighting_zone (Passenger* pass, B
 	}
 	return log(staying_utility);
 }
-*/
 
-double ODstops::calc_combined_set_utility_for_connection (Passenger* pass, double walking_distance, double time, bool has_network_rti)
+double ODstops::calc_combined_set_utility_for_connection (double walking_distance, double time,Passenger* pass)
 {
 	// calc logsum over all the paths from this origin stop
 	double connection_utility = 0.0;
+	if (check_path_set() == false)
+	{
+		return -10000;
+	}
 	for (vector <Pass_path*>::iterator paths = path_set.begin(); paths < path_set.end(); paths++)
 	{
 		bool without_walking_first = false;
@@ -531,14 +555,13 @@ double ODstops::calc_combined_set_utility_for_connection (Passenger* pass, doubl
 		if (without_walking_first == true) // considering only no multi-walking alternatives
 		{
 			double time_till_connected_stop = walking_distance / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed / 4); // in minutes
-			connection_utility += exp(random->nrandom(theParameters->walking_time_coefficient, theParameters->walking_time_coefficient/4) * time_till_connected_stop + (*paths)->calc_waiting_utility(this, pass, alt_stops_iter, time + (time_till_connected_stop * 60), false, has_network_rti, false));
+			connection_utility += exp(random->nrandom(theParameters->walking_time_coefficient, theParameters->walking_time_coefficient/4) * time_till_connected_stop + (*paths)->calc_waiting_utility(alt_stops_iter, time + (time_till_connected_stop * 60), false, pass));
 			// taking into account CT (walking time) till this connected stop and the utility of the path from this connected stop till the final destination
 		}
 	}
 	return log(connection_utility);
 }
 
-/*
 double ODstops::calc_combined_set_utility_for_connection_zone (Passenger* pass, double walking_distance, double time)
 {
 	// calc logsum over all the paths from this origin stop
@@ -561,7 +584,7 @@ double ODstops::calc_combined_set_utility_for_connection_zone (Passenger* pass, 
 		if (without_walking_first == true) // considering only no multi-walking alternatives
 		{
 			double time_till_connected_stop = walking_distance / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed / 4); // in minutes
-			connection_utility += exp(random->nrandom(theParameters->walking_time_coefficient, theParameters->walking_time_coefficient/4) * time_till_connected_stop + (*paths)->calc_waiting_utility(this, pass, alt_stops_iter, time + (time_till_connected_stop * 60), false,pass->get_has_network_rti(),false )) + theParameters->walking_time_coefficient * (pass->get_destination_walking_distance(destination_stop) / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4));
+			connection_utility += exp(random->nrandom(theParameters->walking_time_coefficient, theParameters->walking_time_coefficient/4) * time_till_connected_stop + (*paths)->calc_waiting_utility(alt_stops_iter, time + (time_till_connected_stop * 60), false, pass)) + theParameters->walking_time_coefficient * (pass->get_destination_walking_distance(destination_stop) / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4));
 			// taking into account CT (walking time) till this connected stop and the final destination and the utility of the path from this connected stop till the final destination (incl. final walking link)
 		}
 	}
@@ -572,7 +595,6 @@ double ODstops::calc_combined_set_utility_for_connection_zone (Passenger* pass, 
 	}
 	return log(connection_utility);
 }
-*/
 
 void ODstops::record_passenger_boarding_decision (Passenger* pass, Bustrip* trip, double time, double boarding_probability, bool boarding_decision)  // add to output structure boarding decision info
 {
@@ -584,9 +606,24 @@ void ODstops::record_passenger_alighting_decision (Passenger* pass, Bustrip* tri
 	output_pass_alighting_decision[pass].push_back(Pass_alighting_decision(pass->get_id(), pass->get_original_origin()->get_id(), pass->get_OD_stop()->get_destination()->get_id(), trip->get_line()->get_id(), trip->get_id() , pass->get_OD_stop()->get_origin()->get_id() , time, pass->get_start_time(), chosen_alighting_stop->get_id(), alighting_MNL)); 
 }
 
+void ODstops::record_waiting_experience(Passenger* pass, Bustrip* trip, double time, int level_of_rti_upon_decision, double projected_RTI, double AWT)  //  add to output structure action info
+{
+	double expected_WT_PK = (trip->get_line()->calc_curr_line_headway())/2; // in seconds
+	double experienced_WT = time - pass->get_arrival_time_at_stop();
+	output_pass_waiting_experience[pass].push_back(Pass_waiting_experience(pass->get_id(), pass->get_original_origin()->get_id(), pass->get_OD_stop()->get_destination()->get_id(), trip->get_line()->get_id(), trip->get_id() , pass->get_OD_stop()->get_origin()->get_id() , time, pass->get_start_time(), expected_WT_PK, level_of_rti_upon_decision, projected_RTI ,experienced_WT, AWT)); 
+}
+
 void ODstops::write_boarding_output(ostream & out, Passenger* pass)
 {
 	for (list <Pass_boarding_decision>::iterator iter = output_pass_boarding_decision[pass].begin(); iter!=output_pass_boarding_decision[pass].end();iter++)
+	{
+		iter->write(out);
+	}
+}
+
+void ODstops::write_waiting_exp_output(ostream & out, Passenger* pass)
+{
+	for (list <Pass_waiting_experience>::iterator iter = output_pass_waiting_experience[pass].begin(); iter!=output_pass_waiting_experience[pass].end();iter++)
 	{
 		iter->write(out);
 	}
@@ -603,15 +640,7 @@ void ODstops::write_alighting_output(ostream & out, Passenger* pass)
 void ODstops::write_od_summary(ostream & out)
 {
 	calc_pass_measures();
-	
-	//we save here the performance measures of the current day
-	theParameters->calendar.back()->day_nr_pass_completed+=nr_pass_completed;
-	theParameters->calendar.back()->day_avg_total_travel_time+=avg_tinvehicle + avg_twait + avg_twalk;
-	theParameters->calendar.back()->day_avg_tinvehicle+=avg_tinvehicle;
-	theParameters->calendar.back()->day_avg_twait+=avg_twait;
-	theParameters->calendar.back()->day_avg_twalk+=avg_twalk;
-
-	out << origin_stop->get_id() << '\t' << destination_stop->get_id() << '\t' << nr_pass_completed << '\t' << avg_tinvehicle + avg_twait + avg_twalk << '\t' << avg_tinvehicle << '\t' << avg_twait << '\t'<< avg_twalk << '\t' << avg_nr_boardings << '\t' << paths_tt.size()<< '\t'<< endl; 
+	out << origin_stop->get_id() << '\t' << destination_stop->get_id() << '\t' << nr_pass_completed << '\t' << avg_tt << '\t' << avg_nr_boardings << '\t' << endl; 
 	for (vector <pair<vector<Busstop*>, pair <int,double>>>::iterator path_iter = paths_tt.begin(); path_iter < paths_tt.end(); path_iter++)
 	{
 		for (vector<Busstop*>::iterator stop_iter = (*path_iter).first.begin(); stop_iter < (*path_iter).first.end(); stop_iter++)
@@ -622,13 +651,15 @@ void ODstops::write_od_summary(ostream & out)
 	}
 }
 
+void ODstops::write_od_summary_without_paths(ostream & out)
+{
+	out << origin_stop->get_id() << '\t' << destination_stop->get_id() << '\t' << nr_pass_completed << '\t' << avg_tt << '\t' << avg_nr_boardings << '\t' << endl; 
+}
+
 void ODstops::calc_pass_measures ()
 {
 	nr_pass_completed = 0;
 	avg_tt = 0.0;
-	avg_tinvehicle = 0.0;
-	avg_twalk = 0.0;
-	avg_twait = 0.0;
 	avg_nr_boardings = 0.0; 
 	for (vector <Passenger*>::iterator pass_iter = passengers_during_simulation.begin(); pass_iter < passengers_during_simulation.end(); pass_iter++)
 	{
@@ -636,24 +667,21 @@ void ODstops::calc_pass_measures ()
 		{
 			nr_pass_completed++;
 			avg_tt += (*pass_iter)->get_end_time() - (*pass_iter)->get_start_time();
-			avg_twalk += (*pass_iter)->get_walking_time();
-			avg_twait += (*pass_iter)->get_waiting_time();
-			avg_tinvehicle += (*pass_iter)->get_in_vehicle_time();
 			avg_nr_boardings += (*pass_iter)->get_nr_boardings();
-			vector<Busstop*> chosen_stops = (*pass_iter)->get_chosen_path_stops();
+			vector<Busstop*> chosen_stops;
+			vector <pair<Busstop*,double>> stops_time = (*pass_iter)->get_selected_path_stops();
+			for (vector <pair<Busstop*,double>>::iterator stops = stops_time.begin(); stops < stops_time.end(); stops++)
+			{
+				chosen_stops.push_back((*stops).first);
+			}
 			bool existing_path = false;
 			for (vector<pair<vector<Busstop*>, pair <int,double>>>::iterator iter_path = paths_tt.begin(); iter_path < paths_tt.end(); iter_path++)
 			{
 				bool same_path = true;
-				vector<Busstop*>::iterator checked_path_stops_iter = chosen_stops.begin();
+				vector <pair<Busstop*,double>>::iterator checked_path_stops_iter = stops_time.begin();
 				for (vector<Busstop*>::iterator stops_iter = (*iter_path).first.begin(); stops_iter < (*iter_path).first.end(); stops_iter++)
 				{
-					if (checked_path_stops_iter == chosen_stops.end())
-					{
-						same_path = false;
-						break;
-					}
-					if ((*stops_iter)->get_id() != (*checked_path_stops_iter)->get_id() || checked_path_stops_iter == chosen_stops.end())
+					if ((*stops_iter)->get_id() != (*checked_path_stops_iter).first->get_id() || checked_path_stops_iter == stops_time.end())
 					{
 						same_path = false;
 						break;
@@ -683,9 +711,6 @@ void ODstops::calc_pass_measures ()
 		(*paths_tt_iter).second.second = (*paths_tt_iter).second.second / (*paths_tt_iter).second.first ;
 	}
 	avg_tt = avg_tt / nr_pass_completed;
-	avg_tinvehicle = avg_tinvehicle / nr_pass_completed;
-	avg_twalk = avg_twalk / nr_pass_completed;
-	avg_twait = avg_twait / nr_pass_completed;
 	avg_nr_boardings = avg_nr_boardings / nr_pass_completed;
 }
 
@@ -701,11 +726,9 @@ void Pass_alighting_decision::write (ostream& out)
 	out << endl; 
 }
 
-ODzone::ODzone (Zone* origin_zone_, Zone* destination_zone_, double arrival_rate_)
+ODzone::ODzone (int zone_id)
 {
-	origin_zone = origin_zone_;
-	destination_zone = destination_zone_;
-	arrival_rate = arrival_rate_;
+	id = zone_id;
 	random = new (Random);
 	if (randseed != 0)
 		{
@@ -722,7 +745,17 @@ ODzone::~ODzone()
 	delete random;
 }
 
-/*
+void ODzone::add_stop_distance (Busstop* stop, double mean_distance, double sd_distance)
+{
+	stops_distances[stop].first = mean_distance; 
+	stops_distances[stop].second = sd_distance;
+}
+
+void ODzone::add_arrival_rates (ODzone* d_zone, double arrival_rate)
+{
+	arrival_rates[d_zone] = arrival_rate;
+}
+
 bool ODzone::execute (Eventlist* eventlist, double curr_time)
 {
 	if (curr_time < theParameters->start_pass_generation)
@@ -747,15 +780,18 @@ bool ODzone::execute (Eventlist* eventlist, double curr_time)
 			pass->set_origin_walking_distances(pass->sample_walking_distances(this));
 			pass->set_destination_walking_distances(pass->sample_walking_distances((*dzones_iter).first));
 			Busstop* origin_stop = pass->make_first_stop_decision(curr_time);
-			pass->add_to_selected_path_stop(origin_stop);
-			pass->add_to_selected_path_stop(origin_stop); // twice - to maintain the same path structure
+			pair<Busstop*,double> stop_time;
+			stop_time.first = origin_stop;
+			stop_time.second = curr_time;
+			pass->add_to_selected_path_stop(stop_time);
+			pass->add_to_selected_path_stop(stop_time); // twice - to maintain the same path structure
 			passengers_during_simulation.push_back(pass);
 			map <Busstop*,pair<double,double>> d_stops = (*dzones_iter).first->get_stop_distances();
 			pass->set_ODstop(origin_stop->get_stop_od_as_origin_per_stop(d_stops.begin()->first)); // set the origin stop as pass's origin and an arbitary destination stop
 			pass->execute(eventlist, curr_time + pass->get_origin_walking_distance(origin_stop) / random->nrandom (theParameters->average_walking_speed, theParameters->average_walking_speed/4));
 			pass->get_OD_stop()->get_waiting_passengers().push_back(pass);
 			// book next pass. generation
-			double headway_to_next_pass = random->erandom((*dzones_iter).second / 3600.0); // passenger arrival is assumed to be a poission process (exp headways)
+			double headway_to_next_pass = random -> erandom ((*dzones_iter).second / 3600.0); // passenger arrival is assumed to be a poission process (exp headways)
 			eventlist->add_event (curr_time + headway_to_next_pass, this);
 		}
 	}
@@ -789,6 +825,11 @@ void ODzone::write_alighting_output_zone(ostream & out, Passenger* pass)
 	}
 }
 
+Pass_boarding_decision_zone::~Pass_boarding_decision_zone()
+{}
+
+Pass_alighting_decision_zone::~Pass_alighting_decision_zone()
+{}
 
 void ODzone::reset()
 {
@@ -804,7 +845,6 @@ void ODzone::reset()
 	paths_tt.clear(); 
 }
 
-*/
 void Pass_alighting_decision_zone::write (ostream& out) 
 { 
 	out << pass_id << '\t' << origin_zone << '\t' << destination_zone << '\t' << line_id << '\t'<< trip_id << '\t'<< stop_id<< '\t'<< time << '\t'<< generation_time << '\t' << chosen_alighting_stop << '\t' ;

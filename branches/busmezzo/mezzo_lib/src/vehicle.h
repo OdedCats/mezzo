@@ -41,6 +41,7 @@ class Vehicle
 {
   public:
    Vehicle();
+   virtual ~Vehicle(); //!< destructor
    Vehicle(int id_, int type_, double length_,Route* route_, ODpair* odpair_, double time_);
    void init (int id_, int type_, double length_, Route* route_, ODpair* odpair_, double time_);
    const double get_length(){return length;}
@@ -160,6 +161,7 @@ public:
 				random->randomize();
 		}		
 	};
+	virtual ~Bus(); //!< destructor
 	void reset ();
 // GETS and SETS
 	int get_bus_id () {return bus_id;}
@@ -199,6 +201,7 @@ class Busvehicle_location // container object holding output data for stop visit
 public:
 	Busvehicle_location (int line_id_,	int trip_id_,	int vehicle_id_, int stop_id_, int link_id_, bool entering_stop_, double time_):
 							line_id(line_id_),trip_id(trip_id_),vehicle_id(vehicle_id_), stop_id(stop_id_), link_id(link_id_), entering_stop(entering_stop_), time (time_){}
+	virtual ~Busvehicle_location(); //!< destructor
 	void write (ostream& out) { out << line_id << '\t'<< trip_id << '\t'<< vehicle_id << '\t'<< stop_id<< '\t'<<link_id << '\t'<< entering_stop << '\t'
 		<< time  << '\t'	<< endl; }
 	void reset () {line_id = 0 ; trip_id = 0; vehicle_id = 0; stop_id = 0; link_id = 0; entering_stop = 0; time = 0; }

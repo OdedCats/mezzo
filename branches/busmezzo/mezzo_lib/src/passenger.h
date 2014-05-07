@@ -11,11 +11,6 @@ class Busline;
 class Busstop;
 class ODstops;
 class ODzone;
-class Day;
-
-typedef pair<Busstop*,Busline*> StopLine; //new data type Stop+Line for the Memory.Stop recording
-typedef pair<ODstops*,Busline*> LegLine; //preliminary for the next one
-typedef pair<Busstop*,Day*> StopDay;  //new data type Stop+Day for the Memory.Stop recording
 
 class Passenger : public Action
 {
@@ -40,27 +35,22 @@ public:
 	double get_destination_walking_distance (Busstop* stop) {return destination_walking_distances[stop];}
 	Busstop* get_original_origin () {return original_origin;}
 	int get_nr_boardings () {return nr_boardings;}
-	vector <Busstop*> get_chosen_path_stops () {return selected_path_stops;}
+	vector <pair<Busstop*,double>> get_chosen_path_stops () {return selected_path_stops;}
 	void set_ODstop (ODstops* ODstop_) {OD_stop = ODstop_;}
-	void add_to_selected_path_stop (Busstop* stop) {selected_path_stops.push_back(stop);}
+	// bool get_already_walked () {return already_walked;}
+	// void set_already_walked (bool already_walked_) {already_walked = already_walked_;}
 	bool get_this_is_the_last_stop () {return this_is_the_last_stop;}
-	bool get_has_network_rti () {return has_network_rti;}
-	void add_to_travel_time (double time) {in_vehicle_time += time;}
-	void add_to_waiting_time (double time) {waiting_time += time;}
-	double get_walking_time () {return walking_time;}
-	void add_to_walking_time (double walking_time_) {walking_time += walking_time_;}
-	double get_waiting_time () {return waiting_time;}
-	double get_in_vehicle_time () {return in_vehicle_time;}
-	void set_expected_waiting_time (Busstop* stop, double expected_waiting_time_) {expected_waiting_times[stop] = expected_waiting_time_;}
-	void set_at_stop_indicator (bool at_stop_) { at_stop = at_stop_;}
-	void set_last_board_time (double last_board_time_) {last_board_time = last_board_time_;}
-	void set_last_arrival_time_at_stop (double last_arrival_time_at_stop_) {last_arrival_time_at_stop = last_arrival_time_at_stop_;}
-	double get_last_board_time () {return last_board_time;}
-	double get_last_arrival_time_at_stop () {return last_arrival_time_at_stop;}
-	void add_event_to_pass (Eventlist *eventlist, double time) {eventlist->add_event(time,this);}
+	bool get_pass_RTI_network_level () {return RTI_network_level;}
+	void set_arrival_time_at_stop (double arrival_time) {arrival_time_at_stop = arrival_time;}
+	double get_arrival_time_at_stop () {return arrival_time_at_stop;}
+	void set_memory_projected_RTI (Busstop* stop, Busline* line, double projected_RTI);
+	double get_memory_projected_RTI (Busstop* stop, Busline* line);
+	void set_pass_sitting (bool sits) {sitting = sits;}
+	bool get_pass_sitting () {return sitting;}
+	double get_latest_boarding_time () {return (selected_path_trips.back().second);}
+	vector <pair<Busstop*,double>> get_selected_path_stops() {return selected_path_stops;}
+
 	bool execute(Eventlist* eventlist, double time); // called every time passengers choose to walk to another stop (origin/transfer), puts the passenger at the waiting list at the right timing
-	double get_min_waiting_time_by_RTI (Busstop* stop, double time);
-	double get_min_waiting_time_by_headway (Busstop* stop, double time);
 
 	// Passenger decision processes
 	bool make_boarding_decision (Bustrip* arriving_bus, double time); // boarding decision making 
@@ -68,77 +58,69 @@ public:
 	Busstop* make_connection_decision (double time); // connection link decision (walking between stops)
 
 	// Demand in terms of zones
-	/*
 	map<Busstop*,double> sample_walking_distances (ODzone* zone);
 	Busstop* make_first_stop_decision (double time); // deciding at which stop to initiate the trip
 	double calc_boarding_probability_zone (Busline* arriving_bus, Busstop* o_stop, double time);
 	Busstop* make_alighting_decision_zone (Bustrip* boarding_bus, double time); 
 	Busstop* make_connection_decision_zone (double time);
 	bool stop_is_in_d_zone (Busstop* stop);
-	*/
-
+	
 	// output-related 
 	void write_selected_path(ostream& out);
+	void add_to_selected_path_trips (pair<Bustrip*,double> trip_time) {selected_path_trips.push_back(trip_time);}
+	void add_to_selected_path_stop (pair<Busstop*,double> stop_time) {selected_path_stops.push_back(stop_time);}
+	void add_to_experienced_crowding_levels(pair<double,double> riding_coeff) {experienced_crowding_levels.push_back(riding_coeff);};
+	void add_to_denied_boarding (pair<Busstop*,double> denied_time) {waiting_time_due_denied_boarding.push_back(denied_time);}
+	bool check_selected_path_trips_empty () {return selected_path_trips.empty();}
+	int get_selected_path_last_line_id ();
+	int get_last_denied_boarding_stop_id ();
+	bool empty_denied_boarding ();
+	void remove_last_trip_selected_path_trips () {selected_path_trips.pop_back();}
 
-	//Day-to-Day---------------------------------------------------------------
-	void set_experienced_waiting_time (Busstop* stop, Busline* line, Day* day, double waiting_time); //Passenger memory-stops
-	void set_experienced_invehicle_time (ODstops* ODstop, Busline* line, Day* day, double leg_IVT); //Passenger memory-legs
-	void set_experienced_crowding_at_stop (Busstop* stop, Day* day, int nr_waiting); //Passenger memory-stops (passengers waiting)
-	void set_experienced_crowding_onboard (ODstops* ODstop, Busline* line, Day* day, double crowding_onboard); //Passenger memory-legs (experienced crowdedness weigthed on the leg's IVT)
-	void evening_cleaning();
-	//-------------------------------------------------------------------------
-	map <StopLine, map<Day*,double>> get_experienced_waiting_time(){return experienced_waiting_times;}//waiting time only for the specific line the passenger will take
-	map <LegLine, map<Day*,double>> get_experienced_invehicle_time(){return experienced_invehicle_times;}//IVT for each passenger on a leg
-	map <Busstop*, map<Day*,int>> get_experienced_crowding_at_stop (){return experienced_crowding_at_stop;}  //experienced crowdedness at the stop, no matter which line
-	map <LegLine, map<Day*,double>> get_experienced_crowding_onboard (){return experienced_crowding_onboard;}  //experienced crowdedness weigthed on the leg's IVT
-	//-------------------------------------------------------------------------
-	bool any_waiting_time(Busstop* stop, Busline* line);
-	double strategy_waiting_time(Busstop* stop, Busline* line);
-	bool any_invehicle_time(ODstops* ODstop, Busline* line);
-	double strategy_invehicle_time(ODstops* ODstop, Busline* line);
-	bool any_crowding_at_stop(Busstop* stop);
-	int strategy_crowding_at_stop(Busstop* stop);
-	bool any_crowding_onboard(ODstops* ODstop, Busline* line);
-	double strategy_crowding_onboard(ODstops* ODstop, Busline* line);
+	//Day2Day
+	void set_anticipated_waiting_time (Busstop* stop, Busline* line, double anticipated_WT);
+	void set_alpha_RTI (Busstop* stop, Busline* line, double alpha); 
+	void set_alpha_exp (Busstop* stop, Busline* line, double alpha); 
+	double get_anticipated_waiting_time (Busstop* stop, Busline* line);
+	double get_alpha_RTI (Busstop* stop, Busline* line);
+	double get_alpha_exp (Busstop* stop, Busline* line);
+	bool any_previous_exp_ODSL (Busstop* stop, Busline* line);
+	void set_AWT_first_leg_boarding(Busstop* stop, Busline* line);
 
-	// fuzzy travellers
+	double calc_total_waiting_time();
+	double calc_total_IVT();
+	double calc_total_walking_time();
+	double calc_IVT_crowding();
+	double calc_total_waiting_time_due_to_denied_boarding();
 
 protected:
 	int passenger_id;
 	double start_time;
 	double end_time;
-	double walking_time;
-	double waiting_time;
-	double in_vehicle_time;
-	double last_board_time;
-	double last_arrival_time_at_stop;
+	double total_waiting_time;
+	double toal_IVT;
+	double total_IVT_crowding;
+	double total_walking_time;
 	Busstop* original_origin;
 	ODstops* OD_stop;
 	bool boarding_decision;
-	bool at_stop; // true- indicates that passenger is waiting at a stop; flase- passenger is on-board
-	bool changed_stop;
 	Random* random;
-	double elapsed_overpassed_time;
-	Busstop* elapsed_waiting;
-	map<Busstop*, double> expected_waiting_times;
+	bool already_walked;
+	bool sitting; // 0- sits; 1 - stands
 	int nr_boardings; // counts the number of times pass boarded a vehicle
-	vector <Busstop*> selected_path_stops;
-	bool has_network_rti;
-
-	// Day-to-Day
-	map <StopLine, map<Day*,double>> experienced_waiting_times;   //Passenger memory - Stops recording //for each combination stop-line we get the list of all the perceived waiting times in each day
-	map <LegLine, map<Day*,double>> experienced_invehicle_times;  //Passenger memory - Legs recording
-	map <Busstop*, map<Day*,int>> experienced_crowding_at_stop;   //Passenger memory - Stops recording
-	map <LegLine, map<Day*,double>> experienced_crowding_onboard; //Passenger memory - Legs recording
-	int crowding_at_stop;   //Passenger memory - Stops recording
-	int crowding_onboard;   //Passenger memory - Legs recording
-	double segments_load;   //numerator term to calculate leg load weigthed on the leg IVT
-	double leg_IVT;         //in-vehicle time for a single leg
-	int start_stop;
-	int end_stop;
-
-	// fuzzy travellers
-	vector <ODstops*> fuzzy_destination_set; // contains all destination choice-set
+	vector <pair<Busstop*,double>> selected_path_stops; // stops and corresponding arrival times
+	vector <pair<Bustrip*,double>> selected_path_trips; // trips and corresponding boarding times
+	vector <pair<double,double>> experienced_crowding_levels; // IVT and corresponding crowding levels (route segment level)
+	vector <pair<Busstop*,double>> waiting_time_due_denied_boarding; // stops at which the pass. experienced denied boarding and the corresponding time at which it was experienced
+	bool RTI_network_level;
+	double arrival_time_at_stop;
+	map<pair<Busstop*, Busline*>,double> memory_projected_RTI; 
+	double AWT_first_leg_boarding;
+	
+	// relevant only in case of day2day procedures
+	map<pair<Busstop*, Busline*>,double> anticipated_waiting_time;
+	map<pair<Busstop*, Busline*>,double> alpha_RTI;
+	map<pair<Busstop*, Busline*>,double> alpha_exp;
 
 	// relevant only for OD in terms od zones
 	ODzone* o_zone;

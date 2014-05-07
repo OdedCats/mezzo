@@ -110,6 +110,8 @@ public:
   int poisson (double relative_lambda); // using a cdf inverse. The duration is externally calculated into relative_lambda.
   int poisson1 (double lambda, double duration); // using calls to erandom() according to a given duration
 
+  int inverse_gamma (double k_shape, int theta_scale); // k_shape is the number of replications and theta_scale is the lambda parameter
+
   // randomly permute an array
 
   void permute(int n, int* perm);

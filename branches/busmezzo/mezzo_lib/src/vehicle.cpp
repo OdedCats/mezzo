@@ -15,6 +15,8 @@ Vehicle::Vehicle()
  meters=0;
 }
 
+Vehicle::~Vehicle()
+{}
 
 Vehicle::Vehicle(int id_, int type_, double length_, Route* route_, ODpair* odpair_, double time_): id(id_), route(route_), odpair(odpair_), start_time(time_) , type(type_), length(length_), exit_time(0.0)
 {
@@ -92,7 +94,8 @@ void Vehicle::report(double time)
 
 VehicleRecycler::	~VehicleRecycler()
 {
- 	for (list <Vehicle*>::iterator iter=recycled.begin();iter!=recycled.end();)
+ 	/*
+	for (list <Vehicle*>::iterator iter=recycled.begin();iter!=recycled.end();)
 	{			
 		delete (*iter); // calls automatically destructor
 		iter=recycled.erase(iter);	
@@ -102,6 +105,7 @@ VehicleRecycler::	~VehicleRecycler()
 		delete (*iter1); // calls automatically destructor
 		iter1=recycled_busses.erase(iter1);	
 	}
+	*/
 
 }
 
@@ -113,6 +117,12 @@ void Bus::reset ()
 	type = 4;
 	output_vehicle.clear();
 }
+
+Bus::~Bus()
+{}
+
+Busvehicle_location::~Busvehicle_location()
+{}
 
 void Bus::set_bustype_attributes (Bustype* bty) 
 // change the fields that are determined by the bustype

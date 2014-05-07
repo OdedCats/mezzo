@@ -353,6 +353,15 @@ Random::poisson1 (double lambda, double duration) // using calls to erandom() ac
 	return (counter);
 }
 
+int Random::inverse_gamma (double k_shape, int theta_scale)
+{
+	int random_number = 0;
+	for (int i=0; i < k_shape; i++)
+	{
+		random_number += poisson(theta_scale); 
+	}
+	return random_number;
+}
 
 // Given as input the numbers: 0..N-1 it returns a random permutation
 // of those numbers This is achieved in a single pass
