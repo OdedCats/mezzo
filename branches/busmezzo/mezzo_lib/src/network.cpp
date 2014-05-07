@@ -4351,6 +4351,36 @@ bool Network::read_transitday2day(string name)
 	return true;
 }
 
+bool Network::read_IVTT_day2day(string name)
+{
+	ifstream in(name.c_str()); // open input file
+	assert (in);
+	string keyword;
+	in >> keyword;
+#ifdef _DEBUG_NETWORK
+	cout << keyword << endl;
+#endif //_DEBUG_NETWORK
+	if (keyword!="ODS:")
+	{
+		cout << " read_ODs: no << ODs: >> keyword " << endl;
+		in.close();
+		return false;
+	}
+	int nr= 0;
+	in >> nr;
+	int i=0;
+	for (i; i<nr;i++)
+	{
+		if (!read_OD_IVTT(in))
+		{
+			cout << " read_OD_day2day: read_OD_day2day returned false for line nr " << (i+1) << endl;
+			in.close();
+			return false;
+		} 
+	}
+	return true;
+}
+
 bool Network::read_OD_day2day (istream& in) 
 {
 	char bracket;
@@ -4371,6 +4401,35 @@ bool Network::read_OD_day2day (istream& in)
 	od_stop->set_anticipated_waiting_time(bs_s, bl, anticipated_waiting_time);
 	od_stop->set_alpha_RTI(bs_s, bl, alpha_RTI);
 	od_stop->set_alpha_exp(bs_s, bl, alpha_exp);
+	in >> bracket;
+	if (bracket != '}')
+	{
+		cout << "readfile::read_transit_path scanner jammed at " << bracket;
+		return false;
+	}
+	return true;
+}
+
+bool Network::read_OD_IVTT (istream& in) 
+{
+	char bracket;
+    int origin_stop_id, destination_stop_id, stop_id, line_id, leg_id;
+	double anticipated_in_vehicle_time, alpha_exp;
+	in >> bracket;
+	if (bracket != '{')
+	{
+		cout << "readfile::read_transit_path scanner jammed at " << bracket;
+		return false;
+	}
+	in >> origin_stop_id >> destination_stop_id >> stop_id >> line_id >> leg_id >> anticipated_in_vehicle_time >> alpha_exp;
+	Busstop* bs_o = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (origin_stop_id) )));	
+	Busstop* bs_d = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (destination_stop_id) )));
+	Busstop* bs_s = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (stop_id) )));
+	Busline* bl = (*(find_if(buslines.begin(), buslines.end(), compare <Busline> (line_id) )));
+	Busstop* bs_l = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (leg_id) )));
+	ODstops* od_stop = bs_o->get_stop_od_as_origin_per_stop(bs_d);
+	od_stop->set_anticipated_ivtt(bs_s, bl, bs_l, anticipated_in_vehicle_time);
+	od_stop->set_ivtt_alpha_exp(bs_s, bl, bs_l, alpha_exp);
 	in >> bracket;
 	if (bracket != '}')
 	{
@@ -5267,7 +5326,7 @@ bool Network::writeheadways(string name)
 
 }
 
-bool Network::write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10, string name11, string name12, string name13)
+bool Network::write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10, string name11, string name12, string name13, string name14)
 {
 	ofstream out1(name1.c_str(),ios_base::app);
 	ofstream out2(name2.c_str(),ios_base::app);
@@ -5282,6 +5341,7 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 	ofstream out11(name11.c_str(),ios_base::app);
 	ofstream out12(name12.c_str(),ios_base::app);
 	ofstream out13(name13.c_str(),ios_base::app);
+	ofstream out14(name14.c_str(),ios_base::app);
 	/*
 	assert(out1);
 	assert(out2);
@@ -5364,6 +5424,11 @@ bool Network::write_busstop_output(string name1, string name2, string name3, str
 			for (map<Passenger*,list<Pass_waiting_experience>>::iterator pass_iter1 = waiting_experience.begin(); pass_iter1 != waiting_experience.end(); pass_iter1++)
 			{
 				(*od_iter)->write_waiting_exp_output(out13, (*pass_iter1).first);
+			}
+			map <Passenger*,list<Pass_onboard_experience>> onboard_experience = (*od_iter)->get_onboard_output();
+			for (map<Passenger*,list<Pass_onboard_experience>>::iterator pass_iter1 = onboard_experience.begin(); pass_iter1 != onboard_experience.end(); pass_iter1++)
+			{
+				(*od_iter)->write_onboard_exp_output(out14, (*pass_iter1).first);
 			}
 			vector<Passenger*> pass_vec = (*od_iter)->get_passengers_during_simulation();
 			for (vector<Passenger*>::iterator pass_iter = pass_vec.begin(); pass_iter < pass_vec.end(); pass_iter++) 
@@ -6471,6 +6536,10 @@ double Network::executemaster(QPixmap * pm_,QMatrix * wm_)
 	{
 		this->read_transitday2day (workingdir +"transit_day2day.dat");
 	}
+	if (theParameters->in_vehicle_d2d_indicator ==1)
+	{
+		this->read_IVTT_day2day (workingdir +"transit_day2day_onboard.dat");
+	}
 #endif // _BUSES
 	if (!init())
 		cout << "Problem initialising " << endl;
@@ -6562,6 +6631,10 @@ double Network::executemaster()
 	{
 		this->read_transitday2day (workingdir +"transit_day2day.dat");
 	}
+	if (theParameters->in_vehicle_d2d_indicator ==1)
+	{
+		this->read_IVTT_day2day (workingdir +"transit_day2day_onboard.dat");
+	}
 #endif //_BUSES
 
 	if (!init())
@@ -6616,7 +6689,7 @@ bool Network::writeall(unsigned int repl)
 	//writeheadways("timestamps.dat"); // commented out, since no-one uses them 
 	writeassmatrices(assignmentmatfile);
 	write_v_queues(vqueuesfile);
-	this->write_busstop_output(workingdir + "o_buslog_out.dat", workingdir + "o_busstop_sum.dat", workingdir + "o_busline_sum.dat", workingdir + "o_bus_trajectory.dat", workingdir + "o_passenger_boarding.dat", workingdir + "o_passenger_alighting.dat", workingdir + "o_segments_trip_loads.dat", workingdir + "o_selected_paths.dat", workingdir + "o_segments_line_loads.dat", workingdir + "o_od_stops_summary.dat", workingdir + "o_trip_total_travel_time.dat", workingdir + "o_od_stop_summary_without_paths.dat", workingdir + "o_passenger_waiting_experience.dat");
+	this->write_busstop_output(workingdir + "o_buslog_out.dat", workingdir + "o_busstop_sum.dat", workingdir + "o_busline_sum.dat", workingdir + "o_bus_trajectory.dat", workingdir + "o_passenger_boarding.dat", workingdir + "o_passenger_alighting.dat", workingdir + "o_segments_trip_loads.dat", workingdir + "o_selected_paths.dat", workingdir + "o_segments_line_loads.dat", workingdir + "o_od_stops_summary.dat", workingdir + "o_trip_total_travel_time.dat", workingdir + "o_od_stop_summary_without_paths.dat", workingdir + "o_passenger_waiting_experience.dat", workingdir + "o_passenger_onboard_experience.dat");
 	return true;
 }
 

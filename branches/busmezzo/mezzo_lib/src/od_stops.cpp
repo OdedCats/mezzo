@@ -66,6 +66,15 @@ void ODstops::set_anticipated_waiting_time (Busstop* stop, Busline* line, double
 	anticipated_waiting_time[stopline] = anticipated_WT;
 }
 
+void ODstops::set_anticipated_ivtt (Busstop* stop, Busline* line, Busstop* leg, double anticipated_IVTT)
+{
+	SLL stoplineleg;
+	stoplineleg.stop = stop;
+	stoplineleg.line = line;
+	stoplineleg.leg = leg;
+	anticipated_ivtt[stoplineleg] = anticipated_IVTT;
+}
+
 void ODstops::set_alpha_RTI (Busstop* stop, Busline* line, double alpha)
 {
 	pair<Busstop*, Busline*> stopline;
@@ -80,6 +89,15 @@ void ODstops::set_alpha_exp (Busstop* stop, Busline* line, double alpha)
 	stopline.first = stop;
 	stopline.second = line;
 	alpha_exp[stopline] = alpha;
+}
+
+void ODstops::set_ivtt_alpha_exp (Busstop* stop, Busline* line, Busstop* leg, double alpha)
+{
+	SLL stoplineleg;
+	stoplineleg.stop = stop;
+	stoplineleg.line = line;
+	stoplineleg.leg = leg;
+	ivtt_alpha_exp[stoplineleg] = alpha;
 }
 
 void ODstops::reset()
@@ -613,6 +631,25 @@ void ODstops::record_waiting_experience(Passenger* pass, Bustrip* trip, double t
 	output_pass_waiting_experience[pass].push_back(Pass_waiting_experience(pass->get_id(), pass->get_original_origin()->get_id(), pass->get_OD_stop()->get_destination()->get_id(), trip->get_line()->get_id(), trip->get_id() , pass->get_OD_stop()->get_origin()->get_id() , time, pass->get_start_time(), expected_WT_PK, level_of_rti_upon_decision, projected_RTI ,experienced_WT, AWT)); 
 }
 
+void ODstops::record_onboard_experience(Passenger* pass, Bustrip* trip, double time, Busstop* stop, pair<double,double> riding_coeff)
+{
+	double expected_ivt;
+	double first_stop_time;
+	double second_stop_time;
+	for (vector<Visit_stop*>::iterator stop_v = trip->stops.begin(); stop_v < trip->stops.end(); stop_v++)
+	{
+			if ((*stop_v)->first->get_id() == stop->get_id())
+			{
+				second_stop_time = (*stop_v)->second;
+				expected_ivt = second_stop_time - first_stop_time; //when the right stop is found, the visit time is substracted by the visit time of the previous stop
+				break;
+			}
+			first_stop_time = (*stop_v)->second;
+	}
+	double experienced_ivt = riding_coeff.first*riding_coeff.second;
+	output_pass_onboard_experience[pass].push_back(Pass_onboard_experience(pass->get_id(), pass->get_original_origin()->get_id(), pass->get_OD_stop()->get_destination()->get_id(), trip->get_line()->get_id(), trip->get_id() , pass->get_OD_stop()->get_origin()->get_id(), stop->get_id(), expected_ivt, experienced_ivt));
+}
+
 void ODstops::write_boarding_output(ostream & out, Passenger* pass)
 {
 	for (list <Pass_boarding_decision>::iterator iter = output_pass_boarding_decision[pass].begin(); iter!=output_pass_boarding_decision[pass].end();iter++)
@@ -624,6 +661,14 @@ void ODstops::write_boarding_output(ostream & out, Passenger* pass)
 void ODstops::write_waiting_exp_output(ostream & out, Passenger* pass)
 {
 	for (list <Pass_waiting_experience>::iterator iter = output_pass_waiting_experience[pass].begin(); iter!=output_pass_waiting_experience[pass].end();iter++)
+	{
+		iter->write(out);
+	}
+}
+
+void ODstops::write_onboard_exp_output(ostream & out, Passenger* pass)
+{
+	for (list <Pass_onboard_experience>::iterator iter = output_pass_onboard_experience[pass].begin(); iter!=output_pass_onboard_experience[pass].end();iter++)
 	{
 		iter->write(out);
 	}

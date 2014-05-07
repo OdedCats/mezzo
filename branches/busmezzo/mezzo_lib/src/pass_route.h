@@ -35,6 +35,7 @@ class Pass_path
 	// Attributes of path alternative
 	int find_number_of_transfers ();
 	double calc_total_scheduled_in_vehicle_time (double time);
+	double calc_total_in_vehicle_time (double time, Passenger* pass);
 	double calc_total_walking_distance ();
 	double calc_total_waiting_time (double time, bool without_first_waiting, bool alighting_decision, double avg_walking_speed, Passenger* pass);
 //	double calc_total_scheduled_waiting_time (double time, bool without_first_waiting);

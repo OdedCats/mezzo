@@ -67,6 +67,19 @@ void Passenger::init (int pass_id, double start_time_, ODstops* OD_stop_)
 			alpha_exp[stopline] = (*stopline_iter).second;
 		}
 	}
+	if (theParameters->in_vehicle_d2d_indicator == true)
+	{
+		for (map<SLL, double>::iterator sll_iter = OD_stop_->get_anticipated_ivtt().begin(); sll_iter != OD_stop_->get_anticipated_ivtt().end(); sll_iter++)
+		{
+			SLL stoplineleg = (*sll_iter).first;
+			anticipated_ivtt[stoplineleg] = (*sll_iter).second;
+		}
+		for (map<SLL, double>::iterator sll_iter = OD_stop_->get_ivtt_alpha_exp().begin(); sll_iter != OD_stop_->get_ivtt_alpha_exp().end(); sll_iter++)
+		{
+			SLL stoplineleg = (*sll_iter).first;
+			ivtt_alpha_exp[stoplineleg] = (*sll_iter).second;
+		}
+	}
 }
 
 void Passenger::init_zone (int pass_id, double start_time_, ODzone* origin_, ODzone* destination_)
@@ -149,6 +162,33 @@ bool Passenger::any_previous_exp_ODSL (Busstop* stop, Busline* line)
 	stopline.first = stop;
 	stopline.second = line;
 	return alpha_exp.count(stopline);
+}
+
+double Passenger::get_anticipated_ivtt (Busstop* stop, Busline* line, Busstop* leg)
+{
+	SLL stoplineleg;
+	stoplineleg.stop = stop;
+	stoplineleg.line = line;
+	stoplineleg.leg = leg;
+	return anticipated_ivtt[stoplineleg];
+}
+
+double Passenger::get_ivtt_alpha_exp (Busstop* stop, Busline* line, Busstop* leg)
+{
+	SLL stoplineleg;
+	stoplineleg.stop = stop;
+	stoplineleg.line = line;
+	stoplineleg.leg = leg;
+	return ivtt_alpha_exp[stoplineleg];
+}
+
+bool Passenger::any_previous_exp_ivtt (Busstop* stop, Busline* line, Busstop* leg)
+{
+	SLL stoplineleg;
+	stoplineleg.stop = stop;
+	stoplineleg.line = line;
+	stoplineleg.leg = leg;
+	return ivtt_alpha_exp.count(stoplineleg);
 }
 
 bool Passenger::execute(Eventlist *eventlist, double time)

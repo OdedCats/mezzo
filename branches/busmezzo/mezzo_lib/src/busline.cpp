@@ -1533,6 +1533,8 @@ double Busstop::passenger_activity_at_stop (Eventlist* eventlist, Bustrip* trip,
 			riding_coeff.first = time - trip->get_enter_time(); // refers to difference between departures
 			riding_coeff.second = trip->find_crowding_coeff((*alighting_passenger));
 			(*alighting_passenger)->add_to_experienced_crowding_levels(riding_coeff);
+			ODstops* od_stop = (*alighting_passenger)->get_OD_stop();
+			od_stop->record_onboard_experience(*alighting_passenger, trip, time, this, riding_coeff);
 			Busstop* next_stop;	
 			bool final_stop = false;
 			// if this stop is not passenger's final destination then make a connection decision
@@ -1640,6 +1642,8 @@ double Busstop::passenger_activity_at_stop (Eventlist* eventlist, Bustrip* trip,
 				riding_coeff.first = time - trip->get_enter_time(); // refers to difference between departures
 				riding_coeff.second = trip->find_crowding_coeff((*onboard_passenger));
 				(*onboard_passenger)->add_to_experienced_crowding_levels(riding_coeff);
+				ODstops* od_stop = (*onboard_passenger)->get_OD_stop();
+				od_stop->record_onboard_experience(*onboard_passenger, trip, time, this, riding_coeff);
 				// update sitting status - if a passenger stands and there is an available seat - allow sitting; sitting priority among pass. already on-board by remaning travel distance
 				int avialable_seats = trip->get_busv()->get_occupancy() < trip->get_busv()->get_number_seats();
 				if (avialable_seats > 0 && (*onboard_passenger)->get_pass_sitting() == false)

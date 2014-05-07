@@ -88,6 +88,54 @@ double Pass_path::calc_total_scheduled_in_vehicle_time (double time)
 	return (sum_in_vehicle_time/60); // minutes
 }
 
+double Pass_path::calc_total_in_vehicle_time (double time, Passenger* pass)
+{
+	IVT.clear();
+	double sum_in_vehicle_time = 0.0;
+	vector<vector <Busstop*>>::iterator iter_alt_transfer_stops = alt_transfer_stops.begin();
+	iter_alt_transfer_stops++; // starting from the second stop
+	for (vector<vector <Busline*>>::iterator iter_alt_lines = alt_lines.begin(); iter_alt_lines < alt_lines.end(); iter_alt_lines++)
+	{
+		double ivtt = 0;
+		
+		if (theParameters->in_vehicle_d2d_indicator == true)
+		{
+			bool has_reached_boarding_stop = false;
+
+			for (vector<Busstop*>::iterator iter_leg_stops = iter_alt_lines->front()->stops.begin(); iter_leg_stops < iter_alt_lines->front()->stops.end(); iter_leg_stops++)
+			{ //the anticipated in vehicle travel time is specific for each leg of the trip
+				if (has_reached_boarding_stop)
+				{
+					double alpha_exp = 0;
+					double anticipated_ivtt = 0;
+					if (pass->any_previous_exp_ivtt(iter_alt_transfer_stops->front(), iter_alt_lines->front(), *iter_leg_stops))
+					{
+						alpha_exp = pass->get_ivtt_alpha_exp(iter_alt_transfer_stops->front(), iter_alt_lines->front(), *iter_leg_stops);
+						anticipated_ivtt = pass->get_anticipated_ivtt(iter_alt_transfer_stops->front(), iter_alt_lines->front(), *iter_leg_stops);
+					}
+					double ivtt_pk = iter_alt_lines->front()->calc_curr_line_ivt(*(iter_leg_stops-1), *iter_leg_stops, alt_transfer_stops.front().front()->get_rti(), time);
+					ivtt += alpha_exp * anticipated_ivtt + (1 - alpha_exp) * ivtt_pk;
+
+					if ((*iter_leg_stops)->get_id() == (iter_alt_transfer_stops+1)->front()->get_id()) break; //Break if the alighting stop is reached
+				}
+				else if ((*iter_leg_stops)->get_id() == iter_alt_transfer_stops->front()->get_id())
+				{
+					has_reached_boarding_stop = true;
+				}
+			}
+		}
+		else
+		{
+			ivtt = iter_alt_lines->front()->calc_curr_line_ivt(iter_alt_transfer_stops->front(), (iter_alt_transfer_stops+1)->front(), alt_transfer_stops.front().front()->get_rti(), time);
+		}
+		IVT.push_back(ivtt);
+		sum_in_vehicle_time += IVT.back();
+		iter_alt_transfer_stops++;
+		iter_alt_transfer_stops++; 
+	}
+	return (sum_in_vehicle_time/60); // minutes
+}
+
 double Pass_path::calc_total_walking_distance()
 {
 	double sum_walking_distance = 0.0;

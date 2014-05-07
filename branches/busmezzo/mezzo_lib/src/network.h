@@ -238,7 +238,7 @@ public:
 
 	// Public transport
 	
-	bool write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10, string name11, string name12, string name13); //<! writes all the bus-related output 
+	bool write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10, string name11, string name12, string name13, string name14); //<! writes all the bus-related output 
 	bool write_path_set (string name1); //!< writes the path-set generated at the initialization process (aimed to be used as an input file for other runs with the same network)
 	bool write_path_set_per_stop (string name1, Busstop* stop);
 	bool write_path_set_per_od (string name1, Busstop* origin_stop, Busstop* detination_stop);
@@ -248,7 +248,9 @@ public:
 	bool readtransitdemand (string name); //!< reads passenger demand for transit services
 	bool readtransitfleet (string name); // !< reads transit vehicle types, vehicle scheduling and dwell time functions
 	bool read_transitday2day (string name); // !< reads info on transit pass. day-to-day memory
+	bool read_IVTT_day2day (string name);
 	bool read_OD_day2day (istream& in); //!< reads day-to-dat info for a particular OD
+	bool read_OD_IVTT (istream& in);
 	bool readbusroute(istream& in); //!< reads a transit route
 	bool readbusstop (istream& in); //!< reads a busstop
 	bool readtransitzones (istream& in); //!< reads a transit travel zone

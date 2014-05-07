@@ -93,6 +93,41 @@ public:
 	double AWT;
 };
 
+class Pass_onboard_experience
+{
+public:
+	Pass_onboard_experience (int pass_id_, int original_origin_, int destination_stop_, int line_id_, int trip_id_, int stop_id_, int leg_id_, double expected_ivt_, double experienced_ivt_):
+							pass_id(pass_id_),original_origin(original_origin_),destination_stop(destination_stop_),line_id(line_id_), trip_id(trip_id_), stop_id(stop_id_), 
+							leg_id(leg_id_), expected_ivt(expected_ivt_), experienced_ivt(experienced_ivt_) {}
+	void write (ostream& out) { out << pass_id << '\t' << original_origin << '\t' << destination_stop << '\t' << line_id << '\t'<< trip_id << '\t' << stop_id << '\t' << leg_id << '\t' << expected_ivt << '\t' << experienced_ivt << endl;}
+	int pass_id;
+	int original_origin;
+	int destination_stop;
+	int line_id;
+	int trip_id;
+	int stop_id;
+	int leg_id;
+	double expected_ivt;
+	double experienced_ivt;
+};
+
+struct SLL
+{
+	Busstop* stop;
+	Busline* line;
+	Busstop* leg;
+
+	bool operator < (const SLL& rhs) const
+	{
+		if (stop != rhs.stop)
+			return stop < rhs.stop;
+		else if (line != rhs.line)
+			return line < rhs.line;
+		else
+			return leg < rhs.leg;
+	}
+};
+
 class ODstops : public Action
 {
 public:
@@ -119,6 +154,7 @@ public:
 	map <Passenger*,list<Pass_boarding_decision>> get_boarding_output () {return output_pass_boarding_decision;}
 	map <Passenger*,list<Pass_alighting_decision>> get_alighting_output () {return output_pass_alighting_decision;}
 	map <Passenger*,list<Pass_waiting_experience>> get_waiting_output () {return output_pass_waiting_experience;}
+	map <Passenger*,list<Pass_onboard_experience>> get_onboard_output () {return output_pass_onboard_experience;}
 	vector <Passenger*> get_passengers_during_simulation () {return passengers_during_simulation;}
 	void add_pass_waiting (Passenger* add_pass) {waiting_passengers.push_back(add_pass);}
 	
@@ -144,20 +180,26 @@ public:
 	void record_passenger_boarding_decision (Passenger* pass, Bustrip* trip, double time, double boarding_probability, bool boarding_decision); //!< creates a log-file for boarding decision related info
 	void record_passenger_alighting_decision (Passenger* pass, Bustrip* trip, double time, Busstop* chosen_alighting_stop, map<Busstop*,pair<double,double>> alighting_MNL); // !< creates a log-file for alighting decision related info
 	void record_waiting_experience (Passenger* pass, Bustrip* trip, double time, int level_of_rti_upon_decision, double projected_RTI, double AWT); // !< creates a log-file for a decision and related waiting time components
+	void record_onboard_experience(Passenger* pass, Bustrip* trip, double time, Busstop* stop, pair<double,double> riding_coeff);
 	void write_boarding_output(ostream & out, Passenger* pass);
 	void write_alighting_output(ostream & out, Passenger* pass);
 	void write_waiting_exp_output(ostream & out, Passenger* pass);
+	void write_onboard_exp_output(ostream & out, Passenger* pass);
 	void write_od_summary(ostream & out);
 	void write_od_summary_without_paths (ostream & out);
 	void calc_pass_measures ();
 
 	//Day2Day
 	void set_anticipated_waiting_time (Busstop* stop, Busline* line, double anticipated_WT);
+	void set_anticipated_ivtt (Busstop* stop, Busline* line, Busstop* leg, double anticipated_IVTT);
 	void set_alpha_RTI (Busstop* stop, Busline* line, double alpha); 
 	void set_alpha_exp (Busstop* stop, Busline* line, double alpha); 
+	void set_ivtt_alpha_exp (Busstop* stop, Busline* line, Busstop* leg, double alpha); 
 	map<pair<Busstop*, Busline*>,double> get_anticipated_waiting_time () {return anticipated_waiting_time;}
 	map<pair<Busstop*, Busline*>,double> get_alpha_RTI () {return alpha_RTI;}
 	map<pair<Busstop*, Busline*>,double> get_alpha_exp () {return alpha_exp;}
+	map<SLL, double> get_anticipated_ivtt () {return anticipated_ivtt;}
+	map<SLL, double> get_ivtt_alpha_exp () {return ivtt_alpha_exp;}
 
 protected:
 	Busstop* origin_stop;
@@ -174,6 +216,7 @@ protected:
 	map <Passenger*,list<Pass_boarding_decision>> output_pass_boarding_decision;
 	map <Passenger*,list<Pass_alighting_decision>> output_pass_alighting_decision;
 	map <Passenger*,list<Pass_waiting_experience>> output_pass_waiting_experience;
+	map <Passenger*,list<Pass_onboard_experience>> output_pass_onboard_experience;
 	vector <Passenger*> passengers_during_simulation;
 	int nr_pass_completed;
 	double avg_tt;
@@ -188,6 +231,8 @@ protected:
 	map<pair<Busstop*, Busline*>,double> anticipated_waiting_time;
 	map<pair<Busstop*, Busline*>,double> alpha_RTI;
 	map<pair<Busstop*, Busline*>,double> alpha_exp;
+	map<SLL,double> anticipated_ivtt;
+	map<SLL,double> ivtt_alpha_exp;
 
 };
 

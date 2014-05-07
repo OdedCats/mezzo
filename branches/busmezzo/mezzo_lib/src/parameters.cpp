@@ -83,6 +83,7 @@ Parameters::Parameters ()
    demand_scale = 1.0;
    choice_set_indicator = 0;
    pass_day_to_day_indicator = 0;
+   in_vehicle_d2d_indicator = 0;
    transfer_coefficient = 0.0; 
    in_vehicle_time_coefficient = 0.0;
    waiting_time_coefficient = 0.0;

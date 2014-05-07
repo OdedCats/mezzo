@@ -11,6 +11,7 @@ class Busline;
 class Busstop;
 class ODstops;
 class ODzone;
+struct SLL;
 
 class Passenger : public Action
 {
@@ -85,6 +86,9 @@ public:
 	double get_alpha_RTI (Busstop* stop, Busline* line);
 	double get_alpha_exp (Busstop* stop, Busline* line);
 	bool any_previous_exp_ODSL (Busstop* stop, Busline* line);
+	double get_anticipated_ivtt (Busstop* stop, Busline* line, Busstop* leg);
+	double get_ivtt_alpha_exp (Busstop* stop, Busline* line, Busstop* leg);
+	bool any_previous_exp_ivtt (Busstop* stop, Busline* line, Busstop* leg);
 	void set_AWT_first_leg_boarding(Busstop* stop, Busline* line);
 
 	double calc_total_waiting_time();
@@ -121,6 +125,8 @@ protected:
 	map<pair<Busstop*, Busline*>,double> anticipated_waiting_time;
 	map<pair<Busstop*, Busline*>,double> alpha_RTI;
 	map<pair<Busstop*, Busline*>,double> alpha_exp;
+	map<SLL, double> anticipated_ivtt;
+	map<SLL, double> ivtt_alpha_exp;
 
 	// relevant only for OD in terms od zones
 	ODzone* o_zone;
