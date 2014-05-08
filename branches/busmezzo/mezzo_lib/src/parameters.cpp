@@ -545,6 +545,13 @@ bool Parameters::read_parameters (istream & in )
 		}
 		in >> pass_day_to_day_indicator;
 		in >> keyword;
+		if (keyword!= "in_vehicle_d2d_indicator=")
+		{
+			cout << "ERROR reading Parameters file, expecting: in_vehicle_d2d_indicator=, read: " << keyword << endl;
+			return false;
+		}
+		in >> in_vehicle_d2d_indicator;
+		in >> keyword;
 		if (keyword!= "transfer_coefficient=")
 		{
 			cout << "ERROR reading Parameters file, expecting: transfer_coefficient=, read: " << keyword << endl;

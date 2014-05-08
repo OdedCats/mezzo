@@ -51,17 +51,20 @@ void Passenger::init (int pass_id, double start_time_, ODstops* OD_stop_)
 	RTI_network_level = random->brandom(theParameters->share_RTI_network);
 	if (theParameters->pass_day_to_day_indicator == true)
 	{
-		for (map<pair<Busstop*, Busline*>,double>::iterator stopline_iter = OD_stop_->get_anticipated_waiting_time().begin(); stopline_iter != OD_stop_->get_anticipated_waiting_time().end(); stopline_iter++)
+		map<pair<Busstop*, Busline*>,double> anticipated_waiting_time = OD_stop_->get_anticipated_waiting_time();
+		for (map<pair<Busstop*, Busline*>,double>::iterator stopline_iter = anticipated_waiting_time.begin(); stopline_iter != anticipated_waiting_time.end(); stopline_iter++)
 		{
 			pair<Busstop*, Busline*> stopline = (*stopline_iter).first;
 			anticipated_waiting_time[stopline] = (*stopline_iter).second;
 		}
-		for (map<pair<Busstop*, Busline*>,double>::iterator stopline_iter = OD_stop_->get_alpha_RTI().begin(); stopline_iter != OD_stop_->get_alpha_RTI().end(); stopline_iter++)
+		map<pair<Busstop*, Busline*>,double> alpha_RTI = OD_stop_->get_alpha_RTI();
+		for (map<pair<Busstop*, Busline*>,double>::iterator stopline_iter = alpha_RTI.begin(); stopline_iter != alpha_RTI.end(); stopline_iter++)
 		{
 			pair<Busstop*, Busline*> stopline = (*stopline_iter).first;
 			alpha_RTI[stopline] = (*stopline_iter).second;
 		}
-		for (map<pair<Busstop*, Busline*>,double>::iterator stopline_iter = OD_stop_->get_alpha_exp().begin(); stopline_iter != OD_stop_->get_alpha_exp().end(); stopline_iter++)
+		map<pair<Busstop*, Busline*>,double> alpha_exp = OD_stop_->get_alpha_exp();
+		for (map<pair<Busstop*, Busline*>,double>::iterator stopline_iter = alpha_exp.begin(); stopline_iter != alpha_exp.end(); stopline_iter++)
 		{
 			pair<Busstop*, Busline*> stopline = (*stopline_iter).first;
 			alpha_exp[stopline] = (*stopline_iter).second;
@@ -69,12 +72,14 @@ void Passenger::init (int pass_id, double start_time_, ODstops* OD_stop_)
 	}
 	if (theParameters->in_vehicle_d2d_indicator == true)
 	{
-		for (map<SLL, double>::iterator sll_iter = OD_stop_->get_anticipated_ivtt().begin(); sll_iter != OD_stop_->get_anticipated_ivtt().end(); sll_iter++)
+		map<SLL, double> anticipated_ivtt = OD_stop_->get_anticipated_ivtt();
+		for (map<SLL, double>::iterator sll_iter = anticipated_ivtt.begin(); sll_iter != anticipated_ivtt.end(); sll_iter++)
 		{
 			SLL stoplineleg = (*sll_iter).first;
 			anticipated_ivtt[stoplineleg] = (*sll_iter).second;
 		}
-		for (map<SLL, double>::iterator sll_iter = OD_stop_->get_ivtt_alpha_exp().begin(); sll_iter != OD_stop_->get_ivtt_alpha_exp().end(); sll_iter++)
+		map<SLL, double> alpha_exp = OD_stop_->get_ivtt_alpha_exp();
+		for (map<SLL, double>::iterator sll_iter = alpha_exp.begin(); sll_iter != alpha_exp.end(); sll_iter++)
 		{
 			SLL stoplineleg = (*sll_iter).first;
 			ivtt_alpha_exp[stoplineleg] = (*sll_iter).second;
