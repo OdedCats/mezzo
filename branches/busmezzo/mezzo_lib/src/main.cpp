@@ -18,11 +18,13 @@
 
 #include "network.h"
 #include "parameters.h"
+#include <windows.h>
 
 class Day;
 
 int main ( int argc, char **argv)
 {
+  SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
   long int seed = 0;
   unsigned int replications = 1;
   if (argc < 2)
@@ -50,6 +52,7 @@ int main ( int argc, char **argv)
 			net1->start(QThread::HighestPriority);
 			net1->wait();
 			net1->saveresults();
+			//cin >> steady_state;
 			/*
 			did++;
 			if(theParameters->calendar.size() < max_days)  //steady-state check

@@ -187,6 +187,7 @@ double Pass_path::calc_total_waiting_time (double time, bool without_first_waiti
 		}
 		sum_walking_times += (((*iter_walk) / avg_walking_speed) * 60); // in seconds
 		pass_arrival_time_at_next_stop = time + (sum_waiting_time*60) + sum_walking_times + sum_IVT;
+		wt_pk = (calc_curr_leg_headway((*iter_alt_lines), alt_transfer_stops_iter, pass_arrival_time_at_next_stop) / 2);
 		first_entrance = false;
 		bool leg_has_RTI;
 		int RTI_availability = theParameters->real_time_info;
@@ -203,7 +204,6 @@ double Pass_path::calc_total_waiting_time (double time, bool without_first_waiti
 			case 0:
 				// all legs are calculated based on headway or time-table
 				leg_has_RTI = false;
-				wt_pk = (calc_curr_leg_headway((*iter_alt_lines), alt_transfer_stops_iter, pass_arrival_time_at_next_stop) / 2);
 				break;
 			case 1:
 				// first leg is calculated based on real-time if it is an alternative of staying at the same stop (stop1==stop2),
@@ -218,13 +218,11 @@ double Pass_path::calc_total_waiting_time (double time, bool without_first_waiti
 					else // using a connected stop
 					{
 						leg_has_RTI = false;
-						wt_pk = (calc_curr_leg_headway((*iter_alt_lines), alt_transfer_stops_iter, pass_arrival_time_at_next_stop) / 2);
 					}
 				}
 				else
 				{
 					leg_has_RTI = false;
-					wt_pk = (calc_curr_leg_headway((*iter_alt_lines), alt_transfer_stops_iter, pass_arrival_time_at_next_stop) / 2);
 					break;
 				}
 
@@ -239,7 +237,6 @@ double Pass_path::calc_total_waiting_time (double time, bool without_first_waiti
 				else
 				{
 					leg_has_RTI = false;
-					wt_pk = (calc_curr_leg_headway((*iter_alt_lines), alt_transfer_stops_iter, pass_arrival_time_at_next_stop) / 2);
 					break;
 				}
 			case 3:
@@ -248,11 +245,11 @@ double Pass_path::calc_total_waiting_time (double time, bool without_first_waiti
 				wt_rti = calc_curr_leg_waiting_RTI((*iter_alt_lines), alt_transfer_stops_iter, pass_arrival_time_at_next_stop, pass);
 				break;
 		}
+
 		if (theParameters->pass_day_to_day_indicator == false) // only for no previous day operations
 		{
 			if (leg_has_RTI == true)
 			{
-				wt_pk = (calc_curr_leg_headway((*iter_alt_lines), alt_transfer_stops_iter, pass_arrival_time_at_next_stop) / 2);
 				leg_waiting_time = theParameters->default_alpha_RTI * wt_rti + (1-theParameters->default_alpha_RTI) * wt_pk; 
 			}
 			else
@@ -260,34 +257,29 @@ double Pass_path::calc_total_waiting_time (double time, bool without_first_waiti
 				leg_waiting_time = wt_pk; // VALID only when RTI level is stable over days
 			}
 		}
-		if (theParameters->pass_day_to_day_indicator == true) // only for Day2Day operations
+		else //if (theParameters->pass_day_to_day_indicator == true) // only for Day2Day operations
 		{
 			double alpha_exp, alpha_RTI;
 			bool previous_exp_ODSL = pass->any_previous_exp_ODSL((*alt_transfer_stops_iter).front(),(*iter_alt_lines).front());
 			if (previous_exp_ODSL == false)
 			{
 				alpha_exp = 0;
+				alpha_RTI = theParameters->default_alpha_RTI;
 			}
 			else
 			{
 				alpha_exp = pass->get_alpha_exp((*alt_transfer_stops_iter).front(),(*iter_alt_lines).front());
+				alpha_RTI = pass->get_alpha_RTI((*alt_transfer_stops_iter).front(),(*iter_alt_lines).front());
 			}
+
 			if (leg_has_RTI == true)
 			{
-				wt_pk = (calc_curr_leg_headway((*iter_alt_lines), alt_transfer_stops_iter, pass_arrival_time_at_next_stop) / 2);
-				if (previous_exp_ODSL == false)
-				{
-					alpha_RTI = theParameters->default_alpha_RTI;
-				}
-				else
-				{
-					alpha_RTI = pass->get_alpha_RTI((*alt_transfer_stops_iter).front(),(*iter_alt_lines).front());
-				}
 				leg_waiting_time = alpha_exp * pass->get_anticipated_waiting_time((*alt_transfer_stops_iter).front(),(*iter_alt_lines).front()) + alpha_RTI * wt_rti + (1-alpha_RTI-alpha_exp)*wt_pk; 	
 			}
 			else
 			{
-				leg_waiting_time = alpha_exp * pass->get_anticipated_waiting_time((*alt_transfer_stops_iter).front(),(*iter_alt_lines).front()) + (1-alpha_exp)*wt_pk; // VALID only when RTI level is stable over days
+				//leg_waiting_time = alpha_exp * pass->get_anticipated_waiting_time((*alt_transfer_stops_iter).front(),(*iter_alt_lines).front()) + (1-alpha_exp)*wt_pk; // VALID only when RTI level is stable over days
+				leg_waiting_time = alpha_exp / (1 - alpha_RTI) * pass->get_anticipated_waiting_time((*alt_transfer_stops_iter).front(),(*iter_alt_lines).front()) + (1 - alpha_exp - alpha_RTI) / (1 - alpha_RTI) * wt_pk; //Changed by Jens 2014-06-24
 			}
 		}
 		sum_waiting_time += leg_waiting_time;

@@ -66,7 +66,25 @@ public:
 	map<Busstop*,pair<double,double>> alighting_MNL;
 };
 
-class Pass_waiting_experience // container object holding output data for passenger boarding decision
+class Pass_connection_decision // container object holding output data for passenger connection decision
+{
+public:
+	Pass_connection_decision (int pass_id_, int original_origin_, int destination_stop_, int stop_id_, double time_, double generation_time_, int chosen_connection_stop_):
+							pass_id(pass_id_), original_origin(original_origin_), destination_stop(destination_stop_), stop_id(stop_id_),time(time_), generation_time(generation_time_), chosen_connection_stop(chosen_connection_stop_) {}
+	virtual ~Pass_connection_decision(); //!< destructor
+	void write (ostream& out) { out << pass_id << '\t' << original_origin << '\t' << destination_stop << '\t' << stop_id<< '\t' << time << '\t'<< generation_time << '\t' << chosen_connection_stop << endl; };
+	void reset () { pass_id = 0; original_origin = 0; destination_stop = 0; stop_id = 0; time = 0;
+	generation_time = 0; }
+	int pass_id;
+	int original_origin;
+	int destination_stop;
+	int stop_id;
+	double time;
+	double generation_time;
+	int chosen_connection_stop;
+};
+
+class Pass_waiting_experience // container object holding output data for passenger waiting experience
 {
 public:
 	Pass_waiting_experience (int pass_id_, int original_origin_, int destination_stop_, int line_id_, int trip_id_, int stop_id_, double time_,	double generation_time_,
@@ -153,6 +171,7 @@ public:
 	void set_min_transfers (int min_transfers_) {min_transfers = min_transfers_;}
 	map <Passenger*,list<Pass_boarding_decision>> get_boarding_output () {return output_pass_boarding_decision;}
 	map <Passenger*,list<Pass_alighting_decision>> get_alighting_output () {return output_pass_alighting_decision;}
+	map <Passenger*,list<Pass_connection_decision>> get_connection_output () {return output_pass_connection_decision;}
 	map <Passenger*,list<Pass_waiting_experience>> get_waiting_output () {return output_pass_waiting_experience;}
 	map <Passenger*,list<Pass_onboard_experience>> get_onboard_output () {return output_pass_onboard_experience;}
 	vector <Passenger*> get_passengers_during_simulation () {return passengers_during_simulation;}
@@ -179,10 +198,12 @@ public:
 	// output-related functions
 	void record_passenger_boarding_decision (Passenger* pass, Bustrip* trip, double time, double boarding_probability, bool boarding_decision); //!< creates a log-file for boarding decision related info
 	void record_passenger_alighting_decision (Passenger* pass, Bustrip* trip, double time, Busstop* chosen_alighting_stop, map<Busstop*,pair<double,double>> alighting_MNL); // !< creates a log-file for alighting decision related info
+	void record_passenger_connection_decision (Passenger* pass, double time, Busstop* chosen_alighting_stop);
 	void record_waiting_experience (Passenger* pass, Bustrip* trip, double time, int level_of_rti_upon_decision, double projected_RTI, double AWT); // !< creates a log-file for a decision and related waiting time components
 	void record_onboard_experience(Passenger* pass, Bustrip* trip, double time, Busstop* stop, pair<double,double> riding_coeff);
 	void write_boarding_output(ostream & out, Passenger* pass);
 	void write_alighting_output(ostream & out, Passenger* pass);
+	void write_connection_output(ostream & out, Passenger* pass);
 	void write_waiting_exp_output(ostream & out, Passenger* pass);
 	void write_onboard_exp_output(ostream & out, Passenger* pass);
 	void write_od_summary(ostream & out);
@@ -215,6 +236,7 @@ protected:
 	// output structures and measures (all output stored by origin zone)
 	map <Passenger*,list<Pass_boarding_decision>> output_pass_boarding_decision;
 	map <Passenger*,list<Pass_alighting_decision>> output_pass_alighting_decision;
+	map <Passenger*,list<Pass_connection_decision>> output_pass_connection_decision;
 	map <Passenger*,list<Pass_waiting_experience>> output_pass_waiting_experience;
 	map <Passenger*,list<Pass_onboard_experience>> output_pass_onboard_experience;
 	vector <Passenger*> passengers_during_simulation;

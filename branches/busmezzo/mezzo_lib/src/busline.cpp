@@ -1533,7 +1533,8 @@ double Busstop::passenger_activity_at_stop (Eventlist* eventlist, Bustrip* trip,
 			riding_coeff.first = time - trip->get_enter_time(); // refers to difference between departures
 			riding_coeff.second = trip->find_crowding_coeff((*alighting_passenger));
 			(*alighting_passenger)->add_to_experienced_crowding_levels(riding_coeff);
-			ODstops* od_stop = (*alighting_passenger)->get_OD_stop();
+			//ODstops* od_stop = (*alighting_passenger)->get_OD_stop();
+			ODstops* od_stop = (*alighting_passenger)->get_original_origin()->get_stop_od_as_origin_per_stop((*alighting_passenger)->get_OD_stop()->get_destination());
 			od_stop->record_onboard_experience(*alighting_passenger, trip, time, this, riding_coeff);
 			Busstop* next_stop;	
 			bool final_stop = false;
@@ -1579,7 +1580,8 @@ double Busstop::passenger_activity_at_stop (Eventlist* eventlist, Bustrip* trip,
 				}
 				(*alighting_passenger)->set_ODstop(new_od); // set the connected stop as passenger's new origin (new OD)
 				ODstops* odstop = (*alighting_passenger)->get_OD_stop();
-				if (odstop->get_waiting_passengers().size() != 0)
+				//if (odstop->get_waiting_passengers().size() != 0) //Why was it like this??
+				if (true)  //Changed by Jens 2014-06-23
 				{
 					if (next_stop->get_id() == this->get_id())  // pass stays at the same stop
 					{
@@ -1599,7 +1601,7 @@ double Busstop::passenger_activity_at_stop (Eventlist* eventlist, Bustrip* trip,
 								pair<Busstop*, Busline*> stopline;
 								stopline.first = this;
 								stopline.second = (*line_iter);
-								//(*alighting_passenger)->set_memory_projected_RTI(this,(*line_iter),(*line_iter)->time_till_next_arrival_at_stop_after_time(this,time));
+								(*alighting_passenger)->set_memory_projected_RTI(this,(*line_iter),(*line_iter)->time_till_next_arrival_at_stop_after_time(this,time));
 								//(*alighting_passenger)->set_AWT_first_leg_boarding();
 							}
 						}
@@ -1642,7 +1644,8 @@ double Busstop::passenger_activity_at_stop (Eventlist* eventlist, Bustrip* trip,
 				riding_coeff.first = time - trip->get_enter_time(); // refers to difference between departures
 				riding_coeff.second = trip->find_crowding_coeff((*onboard_passenger));
 				(*onboard_passenger)->add_to_experienced_crowding_levels(riding_coeff);
-				ODstops* od_stop = (*onboard_passenger)->get_OD_stop();
+				//ODstops* od_stop = (*onboard_passenger)->get_OD_stop();
+				ODstops* od_stop = (*onboard_passenger)->get_original_origin()->get_stop_od_as_origin_per_stop((*onboard_passenger)->get_OD_stop()->get_destination());
 				od_stop->record_onboard_experience(*onboard_passenger, trip, time, this, riding_coeff);
 				// update sitting status - if a passenger stands and there is an available seat - allow sitting; sitting priority among pass. already on-board by remaning travel distance
 				int avialable_seats = trip->get_busv()->get_occupancy() < trip->get_busv()->get_number_seats();

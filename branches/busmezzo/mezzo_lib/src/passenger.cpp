@@ -228,7 +228,7 @@ bool Passenger::execute(Eventlist *eventlist, double time)
 					stopline.second = (*line_iter);
 					if (memory_projected_RTI.count(stopline) == 0)
 					{
-						//this->set_memory_projected_RTI(OD_stop->get_origin(),(*line_iter),(*line_iter)->time_till_next_arrival_at_stop_after_time(OD_stop->get_origin(),time));
+						this->set_memory_projected_RTI(OD_stop->get_origin(),(*line_iter),(*line_iter)->time_till_next_arrival_at_stop_after_time(OD_stop->get_origin(),time));
 						//this->set_AWT_first_leg_boarding();
 					}
 				}
@@ -260,7 +260,9 @@ bool Passenger:: make_boarding_decision (Bustrip* arriving_bus, double time)
 				{
 					level_of_rti_upon_decision = 3;
 				}
-				OD_stop->record_waiting_experience(this, arriving_bus, time, level_of_rti_upon_decision,this->get_memory_projected_RTI(curr_stop,arriving_bus->get_line()),AWT_first_leg_boarding);
+				ODstops* passenger_od = original_origin->get_stop_od_as_origin_per_stop(OD_stop->get_destination()); //Jens changed this 2014-06-24, this enables remembering waiting time not only for the first stop of trip
+				passenger_od->record_waiting_experience(this, arriving_bus, time, level_of_rti_upon_decision,this->get_memory_projected_RTI(curr_stop,arriving_bus->get_line()),AWT_first_leg_boarding);
+				//OD_stop->record_waiting_experience(this, arriving_bus, time, level_of_rti_upon_decision,this->get_memory_projected_RTI(curr_stop,arriving_bus->get_line()),AWT_first_leg_boarding);
 			}
 			break;
 		case 4:
@@ -372,7 +374,7 @@ Busstop* Passenger::make_alighting_decision (Bustrip* boarding_bus, double time)
 			{
 				alighting_MNL[(*iter_p).first].second = (*iter_p).second;
 			}
-			//OD_stop->record_passenger_alighting_decision(this, boarding_bus, time, (*stops_probs).first, alighting_MNL);
+			OD_stop->record_passenger_alighting_decision(this, boarding_bus, time, (*stops_probs).first, alighting_MNL);
 			return ((*stops_probs).first); // rerurn the chosen stop by MNL choice model
 		}
 	}
@@ -475,6 +477,7 @@ Busstop* Passenger::make_connection_decision (double time)
 			{
 				alighting_MNL[(*iter_p).first].second = (*iter_p).second;
 			}
+			OD_stop->record_passenger_connection_decision(this, time, (*stops_probs).first);
 			return ((*stops_probs).first); // return the chosen stop by MNL choice model
 		}
 	}

@@ -55,6 +55,9 @@ Pass_boarding_decision::~Pass_boarding_decision()
 Pass_alighting_decision::~Pass_alighting_decision()
 {}
 
+Pass_connection_decision::~Pass_connection_decision()
+{}
+
 Pass_waiting_experience::~Pass_waiting_experience()
 {}
 
@@ -184,7 +187,7 @@ bool ODstops::execute (Eventlist* eventlist, double curr_time) // generate passe
 					pair<Busstop*, Busline*> stopline;
 					stopline.first = this->get_origin();
 					stopline.second = (*line_iter);
-					//pass->set_memory_projected_RTI(this->get_origin(),(*line_iter),(*line_iter)->time_till_next_arrival_at_stop_after_time(this->get_origin(),curr_time));
+					pass->set_memory_projected_RTI(this->get_origin(),(*line_iter),(*line_iter)->time_till_next_arrival_at_stop_after_time(this->get_origin(),curr_time));
 					//pass->set_AWT_first_leg_boarding();
 				}
 			}
@@ -271,7 +274,9 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus, double time, P
 		boarding_utility = log (boarding_utility);
 		for (vector<Pass_path*>::iterator iter_paths = path_set.begin(); iter_paths < path_set.end(); iter_paths++)
 		{
-			if ((*iter_paths)->get_arriving_bus_rellevant() == false)
+			Busstop* first_boarding_stop = (*iter_paths)->get_alt_transfer_stops()[1].front(); //Added by Jens 2014-06-12 to increase the chance of boarding. Now only paths starting from this stop are evaluated.
+
+			if ((*iter_paths)->get_arriving_bus_rellevant() == false && first_boarding_stop == origin_stop)
 			{
 				// logsum calculation
 				if (check_if_path_is_dominated((*iter_paths), arriving_paths) == false)
@@ -616,12 +621,20 @@ double ODstops::calc_combined_set_utility_for_connection_zone (Passenger* pass, 
 
 void ODstops::record_passenger_boarding_decision (Passenger* pass, Bustrip* trip, double time, double boarding_probability, bool boarding_decision)  // add to output structure boarding decision info
 {
-	output_pass_boarding_decision[pass].push_back(Pass_boarding_decision(pass->get_id(), pass->get_original_origin()->get_id(), pass->get_OD_stop()->get_destination()->get_id(), trip->get_line()->get_id(), trip->get_id() , pass->get_OD_stop()->get_origin()->get_id() , time, pass->get_start_time(), boarding_probability , boarding_decision, boarding_utility, staying_utility)); 
+	int original_origin_id = pass->get_original_origin()->get_id();
+	int destination_id = pass->get_OD_stop()->get_destination()->get_id();
+	int origin_id = pass->get_OD_stop()->get_origin()->get_id();
+	output_pass_boarding_decision[pass].push_back(Pass_boarding_decision(pass->get_id(), original_origin_id, destination_id, trip->get_line()->get_id(), trip->get_id() , origin_id , time, pass->get_start_time(), boarding_probability , boarding_decision, boarding_utility, staying_utility)); 
 }
 
 void ODstops::record_passenger_alighting_decision (Passenger* pass, Bustrip* trip, double time, Busstop* chosen_alighting_stop, map<Busstop*,pair<double,double>> alighting_MNL)  //  add to output structure alighting decision info
 {
 	output_pass_alighting_decision[pass].push_back(Pass_alighting_decision(pass->get_id(), pass->get_original_origin()->get_id(), pass->get_OD_stop()->get_destination()->get_id(), trip->get_line()->get_id(), trip->get_id() , pass->get_OD_stop()->get_origin()->get_id() , time, pass->get_start_time(), chosen_alighting_stop->get_id(), alighting_MNL)); 
+}
+
+void ODstops::record_passenger_connection_decision (Passenger* pass, double time, Busstop* chosen_alighting_stop)  //  add to output structure connection decision info
+{
+	output_pass_connection_decision[pass].push_back(Pass_connection_decision(pass->get_id(), pass->get_original_origin()->get_id(), pass->get_OD_stop()->get_destination()->get_id(), pass->get_OD_stop()->get_origin()->get_id() , time, pass->get_start_time(), chosen_alighting_stop->get_id())); 
 }
 
 void ODstops::record_waiting_experience(Passenger* pass, Bustrip* trip, double time, int level_of_rti_upon_decision, double projected_RTI, double AWT)  //  add to output structure action info
@@ -677,6 +690,14 @@ void ODstops::write_onboard_exp_output(ostream & out, Passenger* pass)
 void ODstops::write_alighting_output(ostream & out, Passenger* pass)
 {
 	for (list <Pass_alighting_decision>::iterator iter = output_pass_alighting_decision[pass].begin(); iter!=output_pass_alighting_decision[pass].end();iter++)
+	{
+		iter->write(out);
+	}
+}
+
+void ODstops::write_connection_output(ostream & out, Passenger* pass)
+{
+	for (list <Pass_connection_decision>::iterator iter = output_pass_connection_decision[pass].begin(); iter!=output_pass_connection_decision[pass].end();iter++)
 	{
 		iter->write(out);
 	}

@@ -238,7 +238,7 @@ public:
 
 	// Public transport
 	
-	bool write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10, string name11, string name12, string name13, string name14); //<! writes all the bus-related output 
+	bool write_busstop_output(string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10, string name11, string name12, string name13, string name14, string name15); //<! writes all the bus-related output 
 	bool write_path_set (string name1); //!< writes the path-set generated at the initialization process (aimed to be used as an input file for other runs with the same network)
 	bool write_path_set_per_stop (string name1, Busstop* stop);
 	bool write_path_set_per_od (string name1, Busstop* origin_stop, Busstop* detination_stop);
@@ -517,7 +517,9 @@ public:
 	  }
 	void saveresults (unsigned int replication = 0)
 	  {
-			theNetwork->writeall(replication);
+			cout << "Saving results" << endl;
+		  theNetwork->writeall(replication);
+		  cout << "Saved and done!" << endl;
 	  }
 	void reset ()
 	{
