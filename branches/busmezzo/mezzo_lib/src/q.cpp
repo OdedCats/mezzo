@@ -37,7 +37,10 @@ void Q::reset()
 	list  <Veh_in_Q>::iterator veh_iter=vehicles.begin();
 	for (veh_iter; veh_iter!=vehicles.end(); )
 	{
-		delete (*veh_iter).second;
+		if (veh_iter->second->get_type() != 4) //Buses should not be deleted!
+		{
+			delete (*veh_iter).second;
+		}
 		veh_iter=vehicles.erase(veh_iter);
 	}
 	viter = vehicles.begin();

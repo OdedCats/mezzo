@@ -117,6 +117,6 @@ public:
   void permute(int n, int* perm);
 };
 
-//extern vector<Random*> theRandomizers;
+extern vector<Random*> theRandomizers;
 
 #endif

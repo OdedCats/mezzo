@@ -51,39 +51,29 @@ void Passenger::init (int pass_id, double start_time_, ODstops* OD_stop_)
 	RTI_network_level = random->brandom(theParameters->share_RTI_network);
 	if (theParameters->pass_day_to_day_indicator == true)
 	{
-		map<pair<Busstop*, Busline*>,double> anticipated_waiting_time = OD_stop_->get_anticipated_waiting_time();
-		for (map<pair<Busstop*, Busline*>,double>::iterator stopline_iter = anticipated_waiting_time.begin(); stopline_iter != anticipated_waiting_time.end(); stopline_iter++)
+		anticipated_waiting_time = OD_stop_->get_anticipated_waiting_time(); //Changed by Jens 2014-06-27, here a local object with the same name was initialized, so the Passenger object was not updated
+		/*for (map<pair<Busstop*, Busline*>,double>::iterator stopline_iter = anticipated_waiting_time.begin(); stopline_iter != anticipated_waiting_time.end(); stopline_iter++)
 		{
 			pair<Busstop*, Busline*> stopline = (*stopline_iter).first;
 			anticipated_waiting_time[stopline] = (*stopline_iter).second;
-		}
-		map<pair<Busstop*, Busline*>,double> alpha_RTI = OD_stop_->get_alpha_RTI();
-		for (map<pair<Busstop*, Busline*>,double>::iterator stopline_iter = alpha_RTI.begin(); stopline_iter != alpha_RTI.end(); stopline_iter++)
+		}*/
+		alpha_RTI = OD_stop_->get_alpha_RTI();
+		/*for (map<pair<Busstop*, Busline*>,double>::iterator stopline_iter = alpha_RTI.begin(); stopline_iter != alpha_RTI.end(); stopline_iter++)
 		{
 			pair<Busstop*, Busline*> stopline = (*stopline_iter).first;
 			alpha_RTI[stopline] = (*stopline_iter).second;
-		}
-		map<pair<Busstop*, Busline*>,double> alpha_exp = OD_stop_->get_alpha_exp();
-		for (map<pair<Busstop*, Busline*>,double>::iterator stopline_iter = alpha_exp.begin(); stopline_iter != alpha_exp.end(); stopline_iter++)
+		}*/
+		alpha_exp = OD_stop_->get_alpha_exp();
+		/*for (map<pair<Busstop*, Busline*>,double>::iterator stopline_iter = alpha_exp.begin(); stopline_iter != alpha_exp.end(); stopline_iter++)
 		{
 			pair<Busstop*, Busline*> stopline = (*stopline_iter).first;
 			alpha_exp[stopline] = (*stopline_iter).second;
-		}
+		}*/
 	}
 	if (theParameters->in_vehicle_d2d_indicator == true)
 	{
-		map<SLL, double> anticipated_ivtt = OD_stop_->get_anticipated_ivtt();
-		for (map<SLL, double>::iterator sll_iter = anticipated_ivtt.begin(); sll_iter != anticipated_ivtt.end(); sll_iter++)
-		{
-			SLL stoplineleg = (*sll_iter).first;
-			anticipated_ivtt[stoplineleg] = (*sll_iter).second;
-		}
-		map<SLL, double> alpha_exp = OD_stop_->get_ivtt_alpha_exp();
-		for (map<SLL, double>::iterator sll_iter = alpha_exp.begin(); sll_iter != alpha_exp.end(); sll_iter++)
-		{
-			SLL stoplineleg = (*sll_iter).first;
-			ivtt_alpha_exp[stoplineleg] = (*sll_iter).second;
-		}
+		anticipated_ivtt = OD_stop_->get_anticipated_ivtt();
+		ivtt_alpha_exp = OD_stop_->get_ivtt_alpha_exp();
 	}
 }
 
@@ -460,7 +450,7 @@ Busstop* Passenger::make_connection_decision (double time)
 	{
 		connecting_probs.push_back((*stops_probs).second);
 	}
-	int transfer_stop_position = random->mrandom(connecting_probs);
+	int transfer_stop_position = theRandomizers[0]->mrandom(connecting_probs);
 	int iter = 0;
 	for (map <Busstop*, double>::iterator stops_probs = candidate_connection_stops_p.begin(); stops_probs != candidate_connection_stops_p.end(); stops_probs++)
 	{
@@ -468,16 +458,16 @@ Busstop* Passenger::make_connection_decision (double time)
 		if (iter == transfer_stop_position)
 		{
 			// constructing a structure for output
-			map<Busstop*,pair<double,double>> alighting_MNL; // utility followed by probability per stop
+			map<Busstop*,pair<double,double>> connecting_MNL; // utility followed by probability per stop
 			for (map <Busstop*, double>::iterator iter_u = candidate_connection_stops_u.begin(); iter_u != candidate_connection_stops_u.end(); iter_u++)
 			{
-				alighting_MNL[(*iter_u).first].first = (*iter_u).second;
+				connecting_MNL[(*iter_u).first].first = (*iter_u).second;
 			}
 			for (map <Busstop*, double>::iterator iter_p = candidate_connection_stops_p.begin(); iter_p != candidate_connection_stops_p.end(); iter_p++)
 			{
-				alighting_MNL[(*iter_p).first].second = (*iter_p).second;
+				connecting_MNL[(*iter_p).first].second = (*iter_p).second;
 			}
-			OD_stop->record_passenger_connection_decision(this, time, (*stops_probs).first);
+			OD_stop->record_passenger_connection_decision(this, time, (*stops_probs).first, connecting_MNL);
 			return ((*stops_probs).first); // return the chosen stop by MNL choice model
 		}
 	}

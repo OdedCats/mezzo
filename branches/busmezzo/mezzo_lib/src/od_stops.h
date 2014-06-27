@@ -69,10 +69,10 @@ public:
 class Pass_connection_decision // container object holding output data for passenger connection decision
 {
 public:
-	Pass_connection_decision (int pass_id_, int original_origin_, int destination_stop_, int stop_id_, double time_, double generation_time_, int chosen_connection_stop_):
-							pass_id(pass_id_), original_origin(original_origin_), destination_stop(destination_stop_), stop_id(stop_id_),time(time_), generation_time(generation_time_), chosen_connection_stop(chosen_connection_stop_) {}
+	Pass_connection_decision (int pass_id_, int original_origin_, int destination_stop_, int stop_id_, double time_, double generation_time_, int chosen_connection_stop_, map<Busstop*,pair<double,double>> connecting_MNL_):
+							pass_id(pass_id_), original_origin(original_origin_), destination_stop(destination_stop_), stop_id(stop_id_),time(time_), generation_time(generation_time_), chosen_connection_stop(chosen_connection_stop_), connecting_MNL(connecting_MNL_) {}
 	virtual ~Pass_connection_decision(); //!< destructor
-	void write (ostream& out) { out << pass_id << '\t' << original_origin << '\t' << destination_stop << '\t' << stop_id<< '\t' << time << '\t'<< generation_time << '\t' << chosen_connection_stop << endl; };
+	void write (ostream& out);
 	void reset () { pass_id = 0; original_origin = 0; destination_stop = 0; stop_id = 0; time = 0;
 	generation_time = 0; }
 	int pass_id;
@@ -82,6 +82,7 @@ public:
 	double time;
 	double generation_time;
 	int chosen_connection_stop;
+	map<Busstop*,pair<double,double>> connecting_MNL;
 };
 
 class Pass_waiting_experience // container object holding output data for passenger waiting experience
@@ -198,7 +199,7 @@ public:
 	// output-related functions
 	void record_passenger_boarding_decision (Passenger* pass, Bustrip* trip, double time, double boarding_probability, bool boarding_decision); //!< creates a log-file for boarding decision related info
 	void record_passenger_alighting_decision (Passenger* pass, Bustrip* trip, double time, Busstop* chosen_alighting_stop, map<Busstop*,pair<double,double>> alighting_MNL); // !< creates a log-file for alighting decision related info
-	void record_passenger_connection_decision (Passenger* pass, double time, Busstop* chosen_alighting_stop);
+	void record_passenger_connection_decision (Passenger* pass, double time, Busstop* chosen_alighting_stop, map<Busstop*,pair<double,double>> connecting_MNL_);
 	void record_waiting_experience (Passenger* pass, Bustrip* trip, double time, int level_of_rti_upon_decision, double projected_RTI, double AWT); // !< creates a log-file for a decision and related waiting time components
 	void record_onboard_experience(Passenger* pass, Bustrip* trip, double time, Busstop* stop, pair<double,double> riding_coeff);
 	void write_boarding_output(ostream & out, Passenger* pass);

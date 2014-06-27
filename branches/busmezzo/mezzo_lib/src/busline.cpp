@@ -899,6 +899,7 @@ bool Bustrip::activate (double time, Route* route, ODpair* odpair, Eventlist* ev
 	next_stop = stops.begin();
 	bool ok = false; // flag to check if all goes ok
 	vector <Start_trip*>::iterator curr_trip, previous_trip; // find the pointer to the current and previous trip
+	if (driving_roster.empty()) cout << "Error: Driving roster empty for trip nr " << id << endl;
 	for (vector <Start_trip*>::iterator trip = driving_roster.begin(); trip < driving_roster.end(); trip++)
 	{
 		if ((*trip)->first == this)

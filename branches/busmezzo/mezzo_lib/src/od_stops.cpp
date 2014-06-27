@@ -632,9 +632,9 @@ void ODstops::record_passenger_alighting_decision (Passenger* pass, Bustrip* tri
 	output_pass_alighting_decision[pass].push_back(Pass_alighting_decision(pass->get_id(), pass->get_original_origin()->get_id(), pass->get_OD_stop()->get_destination()->get_id(), trip->get_line()->get_id(), trip->get_id() , pass->get_OD_stop()->get_origin()->get_id() , time, pass->get_start_time(), chosen_alighting_stop->get_id(), alighting_MNL)); 
 }
 
-void ODstops::record_passenger_connection_decision (Passenger* pass, double time, Busstop* chosen_alighting_stop)  //  add to output structure connection decision info
+void ODstops::record_passenger_connection_decision (Passenger* pass, double time, Busstop* chosen_alighting_stop, map<Busstop*,pair<double,double>> connecting_MNL_)  //  add to output structure connection decision info
 {
-	output_pass_connection_decision[pass].push_back(Pass_connection_decision(pass->get_id(), pass->get_original_origin()->get_id(), pass->get_OD_stop()->get_destination()->get_id(), pass->get_OD_stop()->get_origin()->get_id() , time, pass->get_start_time(), chosen_alighting_stop->get_id())); 
+	output_pass_connection_decision[pass].push_back(Pass_connection_decision(pass->get_id(), pass->get_original_origin()->get_id(), pass->get_OD_stop()->get_destination()->get_id(), pass->get_OD_stop()->get_origin()->get_id() , time, pass->get_start_time(), chosen_alighting_stop->get_id(), connecting_MNL_)); 
 }
 
 void ODstops::record_waiting_experience(Passenger* pass, Bustrip* trip, double time, int level_of_rti_upon_decision, double projected_RTI, double AWT)  //  add to output structure action info
@@ -790,6 +790,18 @@ void Pass_alighting_decision::write (ostream& out)
 		out<< (*iter).second.second << '\t';
 	}
 	out << endl; 
+}
+
+void Pass_connection_decision::write (ostream& out)
+{ 
+	out << pass_id << '\t' << original_origin << '\t' << destination_stop << '\t' << stop_id<< '\t' << time << '\t'<< generation_time << '\t' << chosen_connection_stop << '\t';
+	for (map<Busstop*,pair<double,double>>::iterator iter = connecting_MNL.begin(); iter != connecting_MNL.end(); iter++)
+	{
+		out<< (*iter).first->get_id() << '\t';
+		out<< (*iter).second.first << '\t';
+		out<< (*iter).second.second << '\t';
+	}
+	out << endl;
 }
 
 ODzone::ODzone (int zone_id)

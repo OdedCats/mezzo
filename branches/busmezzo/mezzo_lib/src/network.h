@@ -83,6 +83,8 @@ using namespace std;
 class TurnPenalty;
 class Incident;
 
+//static Random* r1;
+
 class ODRate
 {
 public:
