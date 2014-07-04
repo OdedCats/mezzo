@@ -845,7 +845,7 @@ double Bustrip::calc_departure_time (double time) // calculates departure time f
 				return actual_dispatching_time;
 			}
 		}
-		actual_dispatching_time = Max (time + min_recovery , starttime) + random->lnrandom (mean_error_recovery, std_error_recovery);
+		actual_dispatching_time = Max (time + min_recovery , starttime) + theRandomizers[0]->lnrandom (mean_error_recovery, std_error_recovery);
 		return actual_dispatching_time; // error factor following log normal distribution;
 	}
 }
@@ -876,6 +876,7 @@ bool Bustrip::advance_next_stop (double time, Eventlist* eventlist)
 			vid++;
 			Bus* new_bus=recycler.newBus(); // then generate a new (chained) vehicle 
 			new_bus->set_bustype_attributes ((*next_trip)->first->get_bustype());
+			new_bus->set_bus_id(busv->get_bus_id());
 			(*next_trip)->first->set_busv (new_bus);
 			new_bus->set_curr_trip((*next_trip)->first);
 		}
@@ -919,13 +920,16 @@ bool Bustrip::activate (double time, Route* route, ODpair* odpair, Eventlist* ev
 	else // if it isn't the first trip for this chain 
 	{
 		previous_trip = curr_trip-1;
-		if ((*previous_trip)->first->busv->get_on_trip() == true) // if the assigned bus isn't avaliable 
+		if ((*previous_trip)->first->busv->get_on_trip() == true) // if the assigned bus isn't avaliable
 		{
 			ok=false;
 			return ok;
 		}
 		busv->set_curr_trip(this);	
-	}	
+		time = (*previous_trip)->first->get_last_stop_exit_time(); //Added by Jens 2014-07-03
+		if (busv->get_route() != NULL)
+			cout << "Warning, the route is changing!" << endl;
+	}
 	busv->init(busv->get_id(),4,busv->get_length(),route,odpair,time); // initialize with the trip specific details
 	busv->set_occupancy(random->inverse_gamma(nr_stops_init_occup,init_occup_per_stop));
 	if ( (odpair->get_origin())->insert_veh(busv, calc_departure_time(time))) // insert the bus at the origin at the possible departure time
@@ -1341,12 +1345,12 @@ bool Busstop::execute(Eventlist* eventlist, double time) // is executed by the e
 		record_busstop_visit (entering_trip, entering_trip->get_enter_time()); // document stop-related info
 								// done BEFORE update_last_arrivals in order to calc the headway and BEFORE set_last_stop_exit_time
 		entering_trip->get_busv()->record_busvehicle_location (entering_trip, this, entering_trip->get_enter_time());
-		entering_trip->advance_next_stop(exit_time, eventlist); 
 		entering_trip->set_last_stop_exit_time(exit_time);
 		entering_trip->set_last_stop_visited(this);
 		update_last_arrivals (entering_trip, entering_trip->get_enter_time()); // in order to follow the arrival times (AFTER dwell time is calculated)
 		update_last_departures (entering_trip, exit_time); // in order to follow the departure times (AFTER the dwell time and time point stuff)
 		set_had_been_visited (entering_trip->get_line(), true);
+		entering_trip->advance_next_stop(exit_time, eventlist);
 		expected_bus_arrivals.erase(iter_arrival);
 	}
 	/*
@@ -1464,7 +1468,8 @@ double Busstop::passenger_activity_at_stop (Eventlist* eventlist, Bustrip* trip,
 		{
 			if (stops_rate_dwell[(*destination_stop)] != 0 )
 			{
-				stops_rate_coming[(*destination_stop)] = (random -> poisson ((stops_rate_dwell[(*destination_stop)] * get_time_since_arrival (trip, time)) / 3600.0 )); // randomized the number of new-comers to board that the destination stop
+				//2014-07-03 Jens changed from poisson to poisson1, poisson does not give correct answers!
+				stops_rate_coming[(*destination_stop)] = random -> poisson1 (stops_rate_dwell[(*destination_stop)], get_time_since_arrival (trip, time) / 3600.0 ); // randomized the number of new-comers to board that the destination stop
 				trip->nr_expected_alighting[(*destination_stop)] += int (stops_rate_coming[(*destination_stop)]);
 				stops_rate_waiting[(*destination_stop)] += int(stops_rate_coming[(*destination_stop)]); // the total number of passengers waiting for the destination stop is updated by adding the new-comers
 				nr_waiting [trip->get_line()] += int(stops_rate_coming[(*destination_stop)]);
@@ -1926,6 +1931,8 @@ void Busstop::update_last_departures (Bustrip* trip, double time) // everytime a
 
 double Busstop::get_time_since_arrival (Bustrip* trip, double time) // calculates the headway (between arrivals)
 {  
+	if (last_arrivals.empty()) //Added by Jens 2014-07-03
+		return trip->get_line()->calc_curr_line_headway();
 	double time_since_arrival = time - last_arrivals[trip->get_line()].second;
 	// the headway is defined as the differnece in time between sequential arrivals
 	return time_since_arrival;

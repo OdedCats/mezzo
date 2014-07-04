@@ -144,7 +144,7 @@ Link* Route::nextlink(Link* currentlink)
  {
  	return *iter;
  }
- cout << "Route::nextlink: error! there is no next link! " << endl;
+ cout << "Route::nextlink: error! there is no next link after link " << currentlink->get_id() << "! " << endl;
  return NULL;
 }
 

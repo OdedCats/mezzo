@@ -132,6 +132,7 @@ public:
 	  Server (id_,type_,mu_,sd_,delay_){}
 	double next (const double time);
 	void reset();
+	const double get_delay ();
 };
 
 class LogLogisticDelayServer : public Server

@@ -169,7 +169,13 @@ Vehicle* Q::exit_veh(double time, Link* nextlink, int lookback)
       while (!ok && (viter!=vehicles.end()) )
       {
           vehicle=viter->second;
-	      vnextid=(vehicle->nextlink())->get_id();
+		  Link* vnext = vehicle->nextlink();
+		  //if (vnext == NULL) //Added by Jens 2014-07-04, ugly quickfix
+		  //{
+			 // vehicles.erase(viter);
+			 // return NULL;
+		  //}
+	      vnextid=vnext->get_id();
           if (vnextid==nextid)
           {
               ok=true;	 // vehicle found, exit loop

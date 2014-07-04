@@ -513,6 +513,8 @@ bool Link::enter_veh(Vehicle* veh, double time)
 
 // END BUSSTOP FUNCTIONS
 
+	if (veh->get_curr_link() != this)
+		cout << "Wrong link!" << endl;
 	return queue->enter_veh(veh);
 }
 

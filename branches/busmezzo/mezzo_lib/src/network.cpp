@@ -7108,6 +7108,7 @@ double Network::step(double timestep)
 	while ((time>-1.0) && (time<runtime))       // the big loop
 	{
 		time=eventlist->next();
+		//cout << time << "\t";
 #ifndef _NO_GUI
 		
 		tc=timestamp();
