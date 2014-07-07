@@ -408,7 +408,7 @@ void ODpair::set_rate(double newrate_, double time)
 		{
 			odaction->set_active(true);
 			odaction->set_rate(newrate_);
-			double temp=random->urandom(1,50); // to space out generations
+			double temp=random->urandom(1,150); // to space out generations
 			odaction->book_later(eventlist_,time+temp); 
 		}
 			// if newrate_== 0 as well, nothing changes...
