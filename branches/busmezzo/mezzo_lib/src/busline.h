@@ -39,10 +39,10 @@ class Output_Summary_Line // container object holding output data for busline
 public:
 	virtual ~Output_Summary_Line(); //!< destructor
 	void write (ostream& out, int line_id) { out << line_id <<  '\t'<< line_avg_headway << '\t'<< line_avg_DT << '\t'<< line_avg_abs_deviation << '\t'<< line_avg_waiting_per_stop<< '\t'<< line_total_boarding << '\t'<< line_sd_headway << '\t'
-		<< line_sd_DT << '\t'<< line_on_time << '\t'<< line_early <<'\t'<< line_late << '\t'<< total_pass_riding_time << '\t'<< total_pass_dwell_time << '\t'<< total_pass_waiting_time << '\t'<< total_pass_holding_time << '\t' << control_objective_function << '\t' << endl; }
+		<< line_sd_DT << '\t'<< line_on_time << '\t'<< line_early <<'\t'<< line_late << '\t'<< total_pass_riding_time << '\t'<< total_pass_dwell_time << '\t'<< total_pass_waiting_time << '\t'<< total_pass_holding_time << '\t' << control_objective_function << '\t' << total_travel_time_crowding << '\t' << endl; }
 	void reset () { line_avg_headway = 0;  line_avg_DT = 0; line_avg_abs_deviation = 0; line_avg_waiting_per_stop = 0; line_total_boarding = 0;
 	line_sd_headway = 0; line_sd_DT = 0; line_on_time = 0; line_early = 0; line_late = 0; total_pass_riding_time = 0; total_pass_dwell_time = 0; total_pass_waiting_time = 0; total_pass_holding_time = 0;
-	control_objective_function = 0;}
+	control_objective_function = 0; total_travel_time_crowding = 0;}
 	// line summary measures
 	double line_avg_headway;
 	double line_avg_DT;
@@ -59,6 +59,7 @@ public:
 	double total_pass_waiting_time;
 	double total_pass_holding_time;
 	double control_objective_function;
+	double total_travel_time_crowding;
 };
 
 class Busline_assign // container object holding output data for trip assignments
@@ -238,6 +239,7 @@ public:
 	double calc_departure_time (double time); //!< calculates departure time from origin according to arrival time and schedule (including layover effect)
 	void convert_stops_vector_to_map(); // building stops_map
 	double find_crowding_coeff (Passenger* pass); // returns the crowding coefficeint based on lod factor and pass. seating/standing
+	static double find_crowding_coeff (bool sits, double load_factor); // returns the crowding coefficeint based on lod factor and pass. seating/standing
 
 // output-related functions
 	void write_assign_segments_output(ostream & out);
@@ -281,10 +283,12 @@ class Busstop_Visit // container object holding output data for stop visits
 {
 public:
 	Busstop_Visit (int line_id_, int trip_id_,	int vehicle_id_,	 int stop_id_, double entering_time_,	double sched_arr_time_,	double dwell_time_,	double lateness_,	
-							double exit_time_,double riding_time_, double riding_pass_time_, double time_since_arr_, double time_since_dep_,int nr_alighting_,	int nr_boarding_,	int occupancy_,	int nr_waiting_, double total_waiting_time_, double holding_time_):
+							double exit_time_,double riding_time_, double riding_pass_time_, double crowded_pass_riding_time_, double crowded_pass_dwell_time_, double crowded_pass_holding_time_,
+							double time_since_arr_, double time_since_dep_,int nr_alighting_,	int nr_boarding_,	int occupancy_,	int nr_waiting_, double total_waiting_time_, double holding_time_):
 							line_id(line_id_),trip_id(trip_id_),vehicle_id(vehicle_id_), stop_id(stop_id_),entering_time(entering_time_),sched_arr_time(sched_arr_time_),dwell_time(dwell_time_),
-							lateness(lateness_), exit_time (exit_time_),riding_time (riding_time_), riding_pass_time (riding_pass_time_), time_since_arr(time_since_arr_),time_since_dep(time_since_dep_),nr_alighting(nr_alighting_),nr_boarding(nr_boarding_),occupancy(occupancy_),nr_waiting(nr_waiting_),
-							total_waiting_time(total_waiting_time_),holding_time(holding_time_) {}
+							lateness(lateness_), exit_time (exit_time_),riding_time (riding_time_), riding_pass_time (riding_pass_time_), crowded_pass_riding_time (crowded_pass_riding_time_), 
+							crowded_pass_dwell_time (crowded_pass_dwell_time_), crowded_pass_holding_time (crowded_pass_holding_time_), time_since_arr(time_since_arr_),time_since_dep(time_since_dep_),
+							nr_alighting(nr_alighting_),nr_boarding(nr_boarding_),occupancy(occupancy_),nr_waiting(nr_waiting_), total_waiting_time(total_waiting_time_),holding_time(holding_time_) {}
 	virtual ~Busstop_Visit(); //!< destructor
 	void write (ostream& out) { out << line_id << '\t'<< trip_id << '\t'<< vehicle_id << '\t'<< stop_id<< '\t'<<entering_time << '\t'<< sched_arr_time << '\t'
 		<< dwell_time << '\t'<< lateness << '\t'<< exit_time <<'\t'<< riding_time << '\t' << riding_pass_time << '\t' << time_since_arr << '\t'<< time_since_dep << '\t'<< nr_alighting << '\t'<< nr_boarding 
@@ -303,6 +307,9 @@ public:
 	double exit_time;
 	double riding_time;
 	double riding_pass_time;
+	double crowded_pass_riding_time;
+	double crowded_pass_dwell_time;
+	double crowded_pass_holding_time;
 	double time_since_arr;
 	double time_since_dep;
 	int nr_alighting;
@@ -320,7 +327,7 @@ public:
 	void write (ostream& out, int stop_id, int line_id, string name) { out << stop_id <<  '\t' << name << '\t' << line_id <<  '\t'<<stop_avg_headway << '\t'<< stop_avg_DT << '\t'<< stop_avg_abs_deviation << '\t'<< stop_avg_waiting_per_stop<< '\t'<< stop_total_boarding << '\t'<< stop_sd_headway << '\t'
 		<< stop_sd_DT << '\t'<< stop_on_time << '\t'<< stop_early <<'\t'<< stop_late << '\t' << total_stop_pass_riding_time << '\t' << total_stop_pass_dwell_time << '\t' << total_stop_pass_waiting_time << '\t' << total_stop_pass_holding_time << '\t' << endl; }
 	void reset () { stop_avg_headway = 0; stop_avg_DT = 0; stop_avg_abs_deviation = 0; stop_avg_waiting_per_stop = 0; stop_total_boarding = 0;
-	stop_sd_headway = 0; stop_sd_DT = 0; stop_on_time = 0; stop_early = 0; stop_late = 0; total_stop_pass_riding_time = 0; total_stop_pass_dwell_time = 0; total_stop_pass_waiting_time = 0; total_stop_pass_holding_time = 0;}
+	stop_sd_headway = 0; stop_sd_DT = 0; stop_on_time = 0; stop_early = 0; stop_late = 0; total_stop_pass_riding_time = 0; total_stop_pass_dwell_time = 0; total_stop_pass_waiting_time = 0; total_stop_pass_holding_time = 0; total_stop_travel_time_crowding = 0;}
 	double stop_avg_headway;
 	double stop_avg_DT;
 	double stop_avg_abs_deviation;
@@ -335,6 +342,7 @@ public:
 	double total_stop_pass_dwell_time;
 	double total_stop_pass_waiting_time;
 	double total_stop_pass_holding_time;
+	double total_stop_travel_time_crowding;
 };
 
 class Busstop : public Action
@@ -418,6 +426,8 @@ public:
 // output-related functions
 	void write_output(ostream & out);
 	void record_busstop_visit (Bustrip* trip, double enter_time); //!< creates a log-file for stop-related info
+	static double calc_crowded_travel_time (double travel_time, int nr_riders, int nr_seats);
+	
 	void calculate_sum_output_stop_per_line(int line_id); // calculates for a single line that visits the stop (identified by line_id)
 	int calc_total_nr_waiting ();
 

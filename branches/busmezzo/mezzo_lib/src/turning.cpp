@@ -77,8 +77,8 @@ bool Turning::process_veh(double time)
 		if (check_controlling(time))
 		{
 			Vehicle* veh=inlink->exit_veh(time, outlink, size);
-			//if (veh == NULL) //Added by Jens 2014-07-04, ugly quickfix
-			//	return true;
+			if (veh == NULL) //Added by Jens 2014-07-04, ugly quickfix
+				return true;
 			if (inlink->exit_ok())
 			{
 			delay=server->get_delay(); // get new delay, may be stochastic (2007-10-26)

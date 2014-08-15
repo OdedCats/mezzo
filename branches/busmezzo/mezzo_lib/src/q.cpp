@@ -170,11 +170,11 @@ Vehicle* Q::exit_veh(double time, Link* nextlink, int lookback)
       {
           vehicle=viter->second;
 		  Link* vnext = vehicle->nextlink();
-		  //if (vnext == NULL) //Added by Jens 2014-07-04, ugly quickfix
-		  //{
-			 // vehicles.erase(viter);
-			 // return NULL;
-		  //}
+		  if (vnext == NULL) //Added by Jens 2014-07-04, ugly quickfix
+		  {
+			  vehicles.erase(viter);
+			  return NULL;
+		  }
 	      vnextid=vnext->get_id();
           if (vnextid==nextid)
           {
