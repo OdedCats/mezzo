@@ -1072,6 +1072,26 @@ double Bustrip::find_crowding_coeff (bool sits, double load_factor)
 	}
 }
 
+pair<double, double> Bustrip::crowding_dt_factor (double nr_boarding, double nr_alighting)
+{
+	pair<double, double> crowding_factor;
+	if (busv->get_capacity() == busv->get_number_seats())
+	{
+		crowding_factor.first = 1;
+		crowding_factor.second = 1;
+	}
+	else
+	{
+		double nr_standees_alighting = max(0.0, busv->get_occupancy() - (nr_boarding + nr_alighting) - busv->get_number_seats());
+		double nr_standees_boarding = max(0.0, busv->get_occupancy() - (nr_boarding + nr_alighting)/2 - busv->get_number_seats());
+		double crowdedness_ratio_alighting = nr_standees_alighting / (busv->get_capacity()- busv->get_number_seats());
+		double crowdedness_ratio_boarding = nr_standees_boarding / (busv->get_capacity()- busv->get_number_seats());
+		crowding_factor.second = 1 + 0.75 * pow(crowdedness_ratio_alighting, 2);
+		crowding_factor.first = 1 + 0.75 * pow(crowdedness_ratio_boarding, 2);
+	}
+	return crowding_factor;
+}
+
 /* will be relevant only when time points will be trip-specific
 bool Bustrip::is_trip_timepoint (Busstop* stop)
 {
@@ -1809,6 +1829,9 @@ double Busstop::passenger_activity_at_stop (Eventlist* eventlist, Bustrip* trip,
 double Busstop::calc_dwelltime (Bustrip* trip)  //!< calculates the dwelltime of each bus serving this stop. currently includes: passenger service times ,out of stop, bay/lane		
 {
 	double crowdedness_ratio = 0;
+	pair<double, double> crowding_factor;
+	double alighting_time, boarding_time;
+	int boarding_front_door;
 	bool crowded = 0;
 	double time_front_door, time_rear_door, time_per_other_doors;
 	/* Lin & Wilson version of dwell time function
@@ -1849,22 +1872,29 @@ double Busstop::calc_dwelltime (Bustrip* trip)  //!< calculates the dwelltime of
 			dwelltime = dt_func->dwell_constant + dt_func->boarding_coefficient * nr_boarding + dt_func->alighting_cofficient * nr_alighting;
 			break;
 		case 12:
-			if (trip->get_busv()->get_capacity() == trip->get_busv()->get_number_seats())
-			{
-				crowdedness_ratio = 1;
-			}
-			else
-			{
-				crowdedness_ratio = max(0,(trip->get_busv()->get_occupancy()- trip->get_busv()->get_number_seats())/ (trip->get_busv()->get_capacity()- trip->get_busv()->get_number_seats()));
-			}
-			dwelltime = (dt_func->dwell_constant + dt_func->boarding_coefficient * nr_boarding + dt_func->alighting_cofficient * nr_alighting) * (1 + 0.75 * pow(crowdedness_ratio,2));
+			crowding_factor = trip->crowding_dt_factor(nr_boarding, nr_alighting);
+			dwelltime = dt_func->dwell_constant + dt_func->boarding_coefficient * crowding_factor.first * nr_boarding + dt_func->alighting_cofficient * crowding_factor.second * nr_alighting;
 			break;
 		case 13:
 			dwelltime = (dt_func->dwell_constant + max(dt_func->boarding_coefficient * nr_boarding, dt_func->alighting_cofficient * nr_alighting));
 			break;
 		case 14:
-			crowdedness_ratio = max(0,(trip->get_busv()->get_occupancy()- trip->get_busv()->get_number_seats())/ (trip->get_busv()->get_capacity()- trip->get_busv()->get_number_seats()));
-			dwelltime = (dt_func->dwell_constant + max(dt_func->boarding_coefficient * nr_boarding, dt_func->alighting_cofficient * nr_alighting)) * (1 + 0.75 * pow(crowdedness_ratio,2));
+			crowding_factor = trip->crowding_dt_factor(nr_boarding, nr_alighting);
+			dwelltime = dt_func->dwell_constant + max(dt_func->boarding_coefficient * crowding_factor.first * nr_boarding, dt_func->alighting_cofficient * crowding_factor.second * nr_alighting);
+			break;
+		case 15:
+			crowding_factor = trip->crowding_dt_factor(nr_boarding, nr_alighting);
+			alighting_time = dt_func->alighting_cofficient * crowding_factor.second * nr_alighting;
+			boarding_time = dt_func->boarding_coefficient * crowding_factor.first * nr_boarding;
+			if (alighting_time >= boarding_time)
+			{
+				dwelltime = dt_func->dwell_constant + alighting_time;
+			}
+			else
+			{
+				boarding_front_door = alighting_time / (dt_func->boarding_coefficient * crowding_factor.first);
+				dwelltime = dt_func->dwell_constant + alighting_time + random->urandom(0.5, 1.0) * dt_func->boarding_coefficient * crowding_factor.first * (nr_boarding - boarding_front_door);
+			}
 			break;
 		case 20:
 			if (trip->get_busv()->get_occupancy() > trip->get_busv()->get_number_seats())
@@ -1888,6 +1918,9 @@ double Busstop::calc_dwelltime (Bustrip* trip)  //!< calculates the dwelltime of
 	dwelltime = max (dwelltime + random->nrandom(0, dt_func->dwell_std_error), dt_func->dwell_constant + min_DT + random->nrandom(0, dt_func->dwell_std_error));
 	return dwelltime;
 }
+
+
+
 
 double Busstop::find_exit_time_bus_in_front ()
 {
@@ -2174,24 +2207,37 @@ double Busstop::calc_exiting_time (Eventlist* eventlist, Bustrip* trip, double t
 						return max(ready_to_depart, holding_departure_time);
 				}
 			}
-			// for headway-based (looking both backward and forward and averaging and regarding not started trips)
+			// for headway-based (looking both backward and forward and averaging and regarding not started trips) looking only at real departures
 			case 8:
-			if (trip->get_line()->is_line_timepoint(this) == true && trip->get_line()->check_last_trip(trip) == false && trip->get_line()->check_first_trip(trip) == false) // if it is a time point and it is not the first or last trip
-			{
-					Bustrip* next_trip = trip->get_line()->get_next_trip(trip);
-					Bustrip* previous_trip = trip->get_line()->get_previous_trip(trip);
-					vector <Visit_stop*> :: iterator& next_trip_next_stop = next_trip->get_next_stop();
-					if (next_trip->check_end_trip() == false && previous_trip->check_end_trip() == false) // in case the previous trip hadn't finished yet(otherwise - no base for holding)
+				if (trip->get_line()->is_line_timepoint(this) == true && trip->get_line()->check_last_trip(trip) == false && last_departures[trip->get_line()].second != 0 && this != trip->stops.front()->first) // if it is a time point and it is not the first or last trip or this is not the first stop
+				{
+					Bustrip* previous_trip = last_departures[trip->get_line()].first;
+					
+					vector <Visit_stop*> :: iterator curr_stop; // hold the scheduled time for this trip at this stop
+					for (vector <Visit_stop*> :: iterator trip_stops = trip->stops.begin(); trip_stops < trip->stops.end(); trip_stops++)
 					{
-						vector <Visit_stop*> :: iterator curr_stop; // hold the scheduled time for this trip at this stop
-						for (vector <Visit_stop*> :: iterator trip_stops = next_trip->stops.begin(); trip_stops < next_trip->stops.end(); trip_stops++)
+						if ((*trip_stops)->first->get_id() == this->get_id())
 						{
-							if ((*trip_stops)->first->get_id() == this->get_id())
-							{
-								curr_stop = trip_stops;
-								break;
-							}
+							curr_stop = trip_stops;
+							break;
 						}
+					}
+
+					Bustrip* next_trip = trip->get_line()->get_next_trip(trip);
+					for (vector <Visit_stop*> :: iterator trip_stops = curr_stop; trip_stops != trip->stops.begin(); )
+					{
+						trip_stops--; //To include the first element the decrement is placed here
+						Bustrip* last_trip = (*trip_stops)->first->get_last_trip_departure(trip->get_line());
+						if (last_trip != trip) //If the last trip departure from previous stop was not this trip, then that trip must be next trip
+						{
+							next_trip = last_trip;
+							break;
+						}
+					}
+					vector <Visit_stop*> :: iterator& next_trip_next_stop = next_trip->get_next_stop();
+
+					if (next_trip->check_end_trip() == false && previous_trip->check_end_trip() == false) // in case the next trip and the previous trip hadn't finished yet(otherwise - no base for holding)
+					{
 						double expected_next_arrival;
 						if ((*next_trip_next_stop)->first == trip->get_line()->stops.front())
 							expected_next_arrival = time + (*curr_stop)->second - (*(next_trip_next_stop))->second;

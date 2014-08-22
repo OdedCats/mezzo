@@ -240,6 +240,7 @@ public:
 	void convert_stops_vector_to_map(); // building stops_map
 	double find_crowding_coeff (Passenger* pass); // returns the crowding coefficeint based on lod factor and pass. seating/standing
 	static double find_crowding_coeff (bool sits, double load_factor); // returns the crowding coefficeint based on lod factor and pass. seating/standing
+	pair<double, double> crowding_dt_factor (double nr_boarding, double nr_alighting);
 
 // output-related functions
 	void write_assign_segments_output(ostream & out);
