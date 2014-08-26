@@ -1144,7 +1144,7 @@ Busstop::~Busstop ()
 
 void Busstop::reset()
 {
-	avaliable_length = 0;
+	avaliable_length = length;
 	nr_boarding = 0;
 	nr_alighting = 0;
 	is_origin = false;
@@ -1830,7 +1830,7 @@ double Busstop::calc_dwelltime (Bustrip* trip)  //!< calculates the dwelltime of
 {
 	double crowdedness_ratio = 0;
 	pair<double, double> crowding_factor;
-	double alighting_time, boarding_time;
+	double dwell_constant, alighting_time, boarding_time;
 	int boarding_front_door;
 	bool crowded = 0;
 	double time_front_door, time_rear_door, time_per_other_doors;
@@ -1865,22 +1865,23 @@ double Busstop::calc_dwelltime (Bustrip* trip)  //!< calculates the dwelltime of
 	double bay_coefficient = 4.0;
 	*/
     Dwell_time_function* dt_func = trip->get_bustype()->get_dt_function();
+	dwell_constant = has_bay * dt_func->bay_coefficient + dt_func->over_stop_capacity_coefficient * check_out_of_stop(trip->get_busv()) + dt_func->dwell_constant;
 
 	switch (dt_func->dwell_time_function_form)
 	{
 		case 11:
-			dwelltime = dt_func->dwell_constant + dt_func->boarding_coefficient * nr_boarding + dt_func->alighting_cofficient * nr_alighting;
+			dwelltime = dwell_constant + dt_func->boarding_coefficient * nr_boarding + dt_func->alighting_cofficient * nr_alighting;
 			break;
 		case 12:
 			crowding_factor = trip->crowding_dt_factor(nr_boarding, nr_alighting);
-			dwelltime = dt_func->dwell_constant + dt_func->boarding_coefficient * crowding_factor.first * nr_boarding + dt_func->alighting_cofficient * crowding_factor.second * nr_alighting;
+			dwelltime = dwell_constant + dt_func->boarding_coefficient * crowding_factor.first * nr_boarding + dt_func->alighting_cofficient * crowding_factor.second * nr_alighting;
 			break;
 		case 13:
-			dwelltime = (dt_func->dwell_constant + max(dt_func->boarding_coefficient * nr_boarding, dt_func->alighting_cofficient * nr_alighting));
+			dwelltime = dwell_constant + max(dt_func->boarding_coefficient * nr_boarding, dt_func->alighting_cofficient * nr_alighting);
 			break;
 		case 14:
 			crowding_factor = trip->crowding_dt_factor(nr_boarding, nr_alighting);
-			dwelltime = dt_func->dwell_constant + max(dt_func->boarding_coefficient * crowding_factor.first * nr_boarding, dt_func->alighting_cofficient * crowding_factor.second * nr_alighting);
+			dwelltime = dwell_constant + max(dt_func->boarding_coefficient * crowding_factor.first * nr_boarding, dt_func->alighting_cofficient * crowding_factor.second * nr_alighting);
 			break;
 		case 15:
 			crowding_factor = trip->crowding_dt_factor(nr_boarding, nr_alighting);
@@ -1888,12 +1889,12 @@ double Busstop::calc_dwelltime (Bustrip* trip)  //!< calculates the dwelltime of
 			boarding_time = dt_func->boarding_coefficient * crowding_factor.first * nr_boarding;
 			if (alighting_time >= boarding_time)
 			{
-				dwelltime = dt_func->dwell_constant + alighting_time;
+				dwelltime = dwell_constant + alighting_time;
 			}
 			else
 			{
 				boarding_front_door = alighting_time / (dt_func->boarding_coefficient * crowding_factor.first);
-				dwelltime = dt_func->dwell_constant + alighting_time + random->urandom(0.5, 1.0) * dt_func->boarding_coefficient * crowding_factor.first * (nr_boarding - boarding_front_door);
+				dwelltime = dwell_constant + alighting_time + random->urandom(0.6, 1.0) * dt_func->boarding_coefficient * crowding_factor.first * (nr_boarding - boarding_front_door);
 			}
 			break;
 		case 20:
@@ -1922,17 +1923,17 @@ double Busstop::calc_dwelltime (Bustrip* trip)  //!< calculates the dwelltime of
 
 
 
-double Busstop::find_exit_time_bus_in_front ()
+double Busstop::find_exit_time_bus_in_front () //Fixed by Jens 2014-08-26
 {
-	if (buses_at_stop.empty() == true)
+	if (buses_currently_at_stop.empty() == true)
 	{
 		return 0;
 	}
 	else
 	{
-		map <double,Bus*>::iterator iter_bus = buses_at_stop.end();
+		vector<pair<Bustrip*,double>>::iterator iter_bus = buses_currently_at_stop.end();
 		iter_bus--;
-		return (*iter_bus).first;
+		return iter_bus->second;
 	}
 }
 
@@ -2003,12 +2004,12 @@ double Busstop::get_time_since_departure (Bustrip* trip, double time) // calcula
 double Busstop::calc_exiting_time (Eventlist* eventlist, Bustrip* trip, double time)
 {
 	dwelltime = passenger_activity_at_stop (eventlist, trip,time);
-	/*
+
 	if (can_overtake == false) // if the buses can't overtake at this stop - then it depends on the bus in front
 	{
-		dwelltime = max(dwelltime, find_exit_time_bus_in_front()-time + 1.0);
+		dwelltime = max(dwelltime, find_exit_time_bus_in_front() - time + 1.0);
 	}
-	*/
+
 	double ready_to_depart = time + dwelltime;
 	switch (trip->get_line()->get_holding_strategy())
 	{
@@ -2367,6 +2368,7 @@ void Busstop::calculate_sum_output_stop_per_line(int line_id)
 	output_summary[line_id].total_stop_pass_dwell_time = 0;
 	output_summary[line_id].total_stop_pass_waiting_time = 0;
 	output_summary[line_id].total_stop_pass_holding_time = 0;
+	output_summary[line_id].stop_avg_holding_time = 0;
 	output_summary[line_id].total_stop_travel_time_crowding = 0;
 
 	for (list <Busstop_Visit>::iterator iter1 = output_stop_visits.begin(); iter1!=output_stop_visits.end();iter1++)
@@ -2399,6 +2401,7 @@ void Busstop::calculate_sum_output_stop_per_line(int line_id)
 				output_summary[line_id].total_stop_pass_dwell_time += (*iter1).dwell_time * (*iter1).occupancy;
 				output_summary[line_id].total_stop_pass_waiting_time += ((*iter1).time_since_arr * (*iter1).nr_boarding) / 2;
 				output_summary[line_id].total_stop_pass_holding_time += (*iter1).holding_time * (*iter1).occupancy;
+				output_summary[line_id].total_stop_pass_holding_time += (*iter1).holding_time;
 				output_summary[line_id].total_stop_travel_time_crowding += (*iter1).crowded_pass_riding_time + (*iter1).crowded_pass_dwell_time + (*iter1).crowded_pass_holding_time;
 				if ((*iter1).lateness > 300)
 				{
@@ -2430,6 +2433,7 @@ void Busstop::calculate_sum_output_stop_per_line(int line_id)
 	output_summary[line_id].stop_on_time = output_summary[line_id].stop_on_time/counter;
 	output_summary[line_id].stop_early = output_summary[line_id].stop_early/counter;
 	output_summary[line_id].stop_late = output_summary[line_id].stop_late/counter;
+	output_summary[line_id].stop_avg_holding_time = output_summary[line_id].stop_avg_holding_time/counter;
 
 	// now go over again for SD calculations
 	for (list <Busstop_Visit>::iterator iter1 = output_stop_visits.begin(); iter1!=output_stop_visits.end();iter1++)
