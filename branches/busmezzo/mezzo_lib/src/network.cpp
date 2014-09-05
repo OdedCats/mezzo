@@ -4645,9 +4645,9 @@ bool Network::read_busvehicle(istream& in) // reads a bus vehicle
   Bustype* bty=(*(find_if(bustypes.begin(), bustypes.end(), compare <Bustype> (type_id) )));
   // generate a new bus vehicle
   vid++; // increment the veh id counter, buses are vehicles too
-  Bus* bus=recycler.newBus(); // get a bus vehicle
-  bus->set_bus_id(bv_id);
-  bus->set_bustype_attributes(bty);
+  //Bus* bus=recycler.newBus(); // get a bus vehicle
+  //bus->set_bus_id(bv_id);
+  //bus->set_bustype_attributes(bty);
   in >> bracket;
   if (bracket != '{')
   {
@@ -4664,7 +4664,13 @@ bool Network::read_busvehicle(istream& in) // reads a bus vehicle
 			return false;
 		}
 		Bustrip* btr = *btr_it;
+
+	  //Moved here by Jens 2014-09-05
+	  Bus* bus=recycler.newBus(); // get a bus vehicle
+	  bus->set_bus_id(bv_id);
+	  bus->set_bustype_attributes(bty);
 	  btr->set_busv(bus);
+	  bus->set_curr_trip(btr);
 	  if (i>0) // flag as busy for all trip except the first on the chain
 	  {
 		  btr->get_busv()->set_on_trip(true);
@@ -4672,12 +4678,13 @@ bool Network::read_busvehicle(istream& in) // reads a bus vehicle
 	  btr->set_bustype(bty); 
 	  Start_trip* st = new Start_trip (btr, btr->get_starttime());
 	  driving_roster.push_back(st); // save the driving roster at the vehicle level
+	  busvehicles.push_back (bus);
   }
   for (vector<Start_trip*>::iterator trip = driving_roster.begin(); trip < driving_roster.end(); trip++)
   {
 	(*trip)->first->add_trips(driving_roster); // save the driving roster at the trip level for each trip on the chain
   }
-  busvehicles.push_back (bus);
+  
   in >> bracket;
   if (bracket != '}')
   {

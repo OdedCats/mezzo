@@ -876,11 +876,12 @@ bool Bustrip::advance_next_stop (double time, Eventlist* eventlist)
 		if (busv->get_curr_trip() != (*last_trip)->first) // if there are more trips for this vehicle
 		{
 			vid++;
-			Bus* new_bus=recycler.newBus(); // then generate a new (chained) vehicle 
-			new_bus->set_bustype_attributes ((*next_trip)->first->get_bustype());
-			new_bus->set_bus_id(busv->get_bus_id());
-			(*next_trip)->first->set_busv (new_bus);
-			new_bus->set_curr_trip((*next_trip)->first);
+			//Moved to read_busvehicle by Jens 2014-09-05. This placement caused problems when buses were very late, then a trip could be activated too early and not updated
+			//Bus* new_bus=recycler.newBus(); // then generate a new (chained) vehicle 
+			//new_bus->set_bustype_attributes ((*next_trip)->first->get_bustype());
+			//new_bus->set_bus_id(busv->get_bus_id());
+			//(*next_trip)->first->set_busv (new_bus);
+			//new_bus->set_curr_trip((*next_trip)->first);
 		}
 		busv->advance_curr_trip(time, eventlist); // progress the roster for the vehicle
 		//int pass_id = busv->get_id();
@@ -2240,8 +2241,8 @@ double Busstop::calc_exiting_time (Eventlist* eventlist, Bustrip* trip, double t
 					if (next_trip->check_end_trip() == false && previous_trip->check_end_trip() == false) // in case the next trip and the previous trip hadn't finished yet(otherwise - no base for holding)
 					{
 						double expected_next_arrival;
-						if ((*next_trip_next_stop)->first == trip->get_line()->stops.front())
-							expected_next_arrival = time + (*curr_stop)->second - (*(next_trip_next_stop))->second;
+						if ((*next_trip_next_stop)->first == trip->get_line()->stops.front()) //If the next trip has not started yet
+							expected_next_arrival = max(time, (*(next_trip_next_stop))->second) + (*curr_stop)->second - (*(next_trip_next_stop))->second;
 						else
 							expected_next_arrival = (*(next_trip_next_stop-1))->first->get_last_departure(trip->get_line()) + (*curr_stop)->second - (*(next_trip_next_stop-1))->second; // time at last stop + scheduled travel time between stops
 						double average_curr_headway = ((expected_next_arrival - time) + (time - last_departures[trip->get_line()].second))/2; // average of the headway in front and behind
