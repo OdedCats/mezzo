@@ -625,8 +625,9 @@ Vehicle* const  Link::exit_veh(const double time, Link* const nextlink, const in
 		  {
 		  linkout << time << ' '<< id << ' ' <<veh->get_id() << ' ' << veh->get_entry_time() << ' ' << veh->get_exit_time() <<
 			  ' ' << density() << ' ' << this->queue_percentage<< endl;
-			return veh;
 		  }
+			return veh;
+		  
 		}
 
 	}
@@ -697,7 +698,6 @@ Vehicle*const  Link::exit_veh(const double time)
 			  {
 			  linkout << time << ' '<< id << ' ' <<veh->get_id() << ' ' << veh->get_entry_time() << ' ' << veh->get_exit_time() <<
 				  ' ' << density() << ' ' << this->queue_percentage<< endl;
-				return veh;
 			  }
 			return veh;
 		}
