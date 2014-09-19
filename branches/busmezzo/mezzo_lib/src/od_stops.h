@@ -115,10 +115,10 @@ public:
 class Pass_onboard_experience
 {
 public:
-	Pass_onboard_experience (int pass_id_, int original_origin_, int destination_stop_, int line_id_, int trip_id_, int stop_id_, int leg_id_, double expected_ivt_, double experienced_ivt_):
+	Pass_onboard_experience (int pass_id_, int original_origin_, int destination_stop_, int line_id_, int trip_id_, int stop_id_, int leg_id_, double expected_ivt_, pair<double, double> experienced_ivt_):
 							pass_id(pass_id_),original_origin(original_origin_),destination_stop(destination_stop_),line_id(line_id_), trip_id(trip_id_), stop_id(stop_id_), 
 							leg_id(leg_id_), expected_ivt(expected_ivt_), experienced_ivt(experienced_ivt_) {}
-	void write (ostream& out) { out << pass_id << '\t' << original_origin << '\t' << destination_stop << '\t' << line_id << '\t'<< trip_id << '\t' << stop_id << '\t' << leg_id << '\t' << expected_ivt << '\t' << experienced_ivt << endl;}
+							void write (ostream& out) { out << pass_id << '\t' << original_origin << '\t' << destination_stop << '\t' << line_id << '\t'<< trip_id << '\t' << stop_id << '\t' << leg_id << '\t' << expected_ivt << '\t' << experienced_ivt.first << '\t' << experienced_ivt.second << endl;}
 	int pass_id;
 	int original_origin;
 	int destination_stop;
@@ -127,7 +127,8 @@ public:
 	int stop_id;
 	int leg_id;
 	double expected_ivt;
-	double experienced_ivt;
+	pair<double, double> experienced_ivt;
+	double crowding;
 };
 
 struct SLL

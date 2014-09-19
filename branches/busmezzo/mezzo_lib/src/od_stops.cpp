@@ -659,8 +659,8 @@ void ODstops::record_onboard_experience(Passenger* pass, Bustrip* trip, double t
 			}
 			first_stop_time = (*stop_v)->second;
 	}
-	double experienced_ivt = riding_coeff.first*riding_coeff.second;
-	output_pass_onboard_experience[pass].push_back(Pass_onboard_experience(pass->get_id(), pass->get_original_origin()->get_id(), pass->get_OD_stop()->get_destination()->get_id(), trip->get_line()->get_id(), trip->get_id() , pass->get_OD_stop()->get_origin()->get_id(), stop->get_id(), expected_ivt, experienced_ivt));
+	//double experienced_ivt = riding_coeff.first*riding_coeff.second;
+	output_pass_onboard_experience[pass].push_back(Pass_onboard_experience(pass->get_id(), pass->get_original_origin()->get_id(), pass->get_OD_stop()->get_destination()->get_id(), trip->get_line()->get_id(), trip->get_id() , pass->get_OD_stop()->get_origin()->get_id(), stop->get_id(), expected_ivt, riding_coeff));
 }
 
 void ODstops::write_boarding_output(ostream & out, Passenger* pass)

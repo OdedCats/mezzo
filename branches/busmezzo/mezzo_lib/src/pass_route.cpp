@@ -106,15 +106,17 @@ double Pass_path::calc_total_in_vehicle_time (double time, Passenger* pass)
 			{ //the anticipated in vehicle travel time is specific for each leg of the trip
 				if (has_reached_boarding_stop)
 				{
-					double alpha_exp = 0;
-					double anticipated_ivtt = 0;
+					double leg_ivtt;
 					if (pass->any_previous_exp_ivtt(iter_alt_transfer_stops->front(), iter_alt_lines->front(), *iter_leg_stops))
 					{
-						alpha_exp = pass->get_ivtt_alpha_exp(iter_alt_transfer_stops->front(), iter_alt_lines->front(), *iter_leg_stops);
-						anticipated_ivtt = pass->get_anticipated_ivtt(iter_alt_transfer_stops->front(), iter_alt_lines->front(), *iter_leg_stops);
+						leg_ivtt = pass->get_anticipated_ivtt(iter_alt_transfer_stops->front(), iter_alt_lines->front(), *iter_leg_stops);
 					}
-					double ivtt_pk = iter_alt_lines->front()->calc_curr_line_ivt(*(iter_leg_stops-1), *iter_leg_stops, alt_transfer_stops.front().front()->get_rti(), time);
-					ivtt += alpha_exp * anticipated_ivtt + (1 - alpha_exp) * ivtt_pk;
+					else
+					{
+						leg_ivtt = iter_alt_lines->front()->calc_curr_line_ivt(*(iter_leg_stops-1), *iter_leg_stops, alt_transfer_stops.front().front()->get_rti(), time);
+					}
+					
+					ivtt += leg_ivtt;
 
 					if ((*iter_leg_stops)->get_id() == (iter_alt_transfer_stops+1)->front()->get_id()) break; //Break if the alighting stop is reached
 				}
