@@ -124,89 +124,18 @@ void ODstops::reset()
 
 bool ODstops::execute (Eventlist* eventlist, double curr_time) // generate passengers with this OD and books an event for next passenger generation
 {
-	double headway_to_next_pass;
-	if (curr_time < theParameters->start_pass_generation)
-	{
-		if (check_path_set() == true)
-		{
-			headway_to_next_pass = random -> erandom (arrival_rate / 3600.0); // passenger arrival is assumed to be a poission process (exp headways)
-			if (theParameters->start_pass_generation + headway_to_next_pass < theParameters->stop_pass_generation)
-			{
-				eventlist->add_event(theParameters->start_pass_generation + headway_to_next_pass, this);
-				active = true;
-			}
-		}
-		return true;
-	}
-	if (curr_time >= theParameters->stop_pass_generation)
-	{
-		return true;
-	}
-// called only for generting pass.
-	if (active == true) // generate passenger from the second call, as first initialization call just set time to first passenger
-	{	
-		//Passenger* pass = pass_recycler.newPassenger();
-		Passenger* pass = new Passenger;
-		passengers_during_simulation.push_back(pass);
-		pid++; 
-		pass->init (pid, curr_time, this);
-		pair<Busstop*,double> stop_time;
-		stop_time.first = origin_stop;
-		stop_time.second = curr_time;
-		pass->add_to_selected_path_stop(stop_time);
-		Busstop* connection_stop = pass->make_connection_decision(curr_time);
-		stop_time.first = connection_stop;
-		if (connection_stop->get_id() != origin_stop->get_id()) // if the pass. walks to another stop
-		{
-			// set connected_stop as the new origin
-			if (connection_stop->check_stop_od_as_origin_per_stop(destination_stop) == false)
-			{
-				ODstops* od_stop = new ODstops (connection_stop,destination_stop);
-				connection_stop->add_odstops_as_origin(destination_stop, od_stop);
-				destination_stop->add_odstops_as_destination(connection_stop, od_stop);
-			}
-			pass->set_ODstop(connection_stop->get_stop_od_as_origin_per_stop(destination_stop)); // set this stop as his new origin (new OD)
-			map<Busstop*,double> walk_dis = origin_stop->get_walking_distances();
-			double arrival_time_to_connected_stop = curr_time + walk_dis[connection_stop] / random->nrandom (theParameters->average_walking_speed, theParameters->average_walking_speed/4);
-			pass->execute(eventlist, arrival_time_to_connected_stop);
-			pair<Busstop*,double> stop_time;
-			stop_time.first = connection_stop;
-			stop_time.second = arrival_time_to_connected_stop;
-			pass->add_to_selected_path_stop(stop_time);
-		}
-		else // if the pass. stays at the same stop
-		{
-			waiting_passengers.push_back (pass); // storage the new passenger at the list of waiting passengers with this OD
-			pass->set_arrival_time_at_stop(curr_time);
-			pass->add_to_selected_path_stop(stop_time);
-			if (pass->get_pass_RTI_network_level() == true || this->get_origin()->get_rti() > 0)
-			{
-				vector<Busline*> lines_at_stop = this->get_origin()->get_lines();
-				for (vector <Busline*>::iterator line_iter = lines_at_stop.begin(); line_iter < lines_at_stop.end(); line_iter++)
-				{
-					pair<Busstop*, Busline*> stopline;
-					stopline.first = this->get_origin();
-					stopline.second = (*line_iter);
-					pass->set_memory_projected_RTI(this->get_origin(),(*line_iter),(*line_iter)->time_till_next_arrival_at_stop_after_time(this->get_origin(),curr_time));
-					//pass->set_AWT_first_leg_boarding();
-				}
-			}
-		}
-	}
-	/*
-	for (vector <Passenger*>::iterator wait_pass = waiting_passengers.begin(); wait_pass < waiting_passengers.end(); wait_pass++)
-	{
-		if ((*wait_pass)->get_OD_stop()->get_origin() != this->get_origin() || (*wait_pass)->get_OD_stop()->get_destination() != this->get_destination())
-		{
-			break;
-		}
-	}
-	*/
 	if (check_path_set() == true)
 	{
-		headway_to_next_pass = random -> erandom (arrival_rate / 3600.0); // passenger arrival is assumed to be a poission process (exp headways)
-		eventlist->add_event (curr_time + headway_to_next_pass, this);
-		active = true;
+		curr_time = theParameters->start_pass_generation + random -> erandom (arrival_rate / 3600.0); // passenger arrival is assumed to be a poission process (exp headways)
+		while (curr_time < theParameters->stop_pass_generation)
+		{
+			Passenger* pass = new Passenger;
+			passengers_during_simulation.push_back(pass);
+			pid++; 
+			pass->init (pid, curr_time, this);
+			eventlist->add_event(curr_time, pass);
+			curr_time += random -> erandom (arrival_rate / 3600.0);
+		}
 	}
 	return true;
 }

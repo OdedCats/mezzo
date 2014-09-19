@@ -1655,7 +1655,8 @@ double Busstop::passenger_activity_at_stop (Eventlist* eventlist, Bustrip* trip,
 					{
 						// booking an event to the arrival time at the new stop
 						double arrival_time_connected_stop = time + distances[next_stop] * 60 / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4);
-						(*alighting_passenger)->execute(eventlist,arrival_time_connected_stop);
+						//(*alighting_passenger)->execute(eventlist,arrival_time_connected_stop);
+						eventlist->add_event(arrival_time_connected_stop, *alighting_passenger);
 						pair<Busstop*,double> stop_time;
 						stop_time.first = next_stop;
 						stop_time.second = arrival_time_connected_stop;

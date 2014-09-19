@@ -187,28 +187,87 @@ bool Passenger::any_previous_exp_ivtt (Busstop* stop, Busline* line, Busstop* le
 }
 
 bool Passenger::execute(Eventlist *eventlist, double time)
-// called every time passengers choose to walk to another stop (origin/transfer)
-// puts the passenger at the waiting list at the right timing
-// passengers are already assigned with the connection stop they choose as their origin
 {
 	if (already_walked == false) // just book the event of arriving at the next stop (origin)
 	{
 		already_walked = true;
-		eventlist->add_event(time, this);
+		start(eventlist);
+		//eventlist->add_event(time, this);
 	}
 	else
 	{
-		if (this_is_the_last_stop == true ||  this->get_OD_stop()->check_path_set() == false || OD_stop->get_origin()->get_id() == OD_stop->get_destination()->get_id()) 
-		// this may happend if the passenger walked to his final stop or final destination (zonal)
+		walk(time);
+		//already_walked = false;
+	}
+return true;
+}
+
+void Passenger::walk (double time)
+// called every time passengers choose to walk to another stop (origin/transfer)
+// puts the passenger at the waiting list at the right timing
+// passengers are already assigned with the connection stop they choose as their origin
+{
+	if (this_is_the_last_stop == true ||  this->get_OD_stop()->check_path_set() == false || OD_stop->get_origin()->get_id() == OD_stop->get_destination()->get_id()) 
+	// this may happend if the passenger walked to his final stop or final destination (zonal)
+	{
+		end_time = time;
+		pass_recycler.addPassenger(this); // terminate passenger
+	}
+	else // push passengers at the waiting list of their OD
+	{
+		arrival_time_at_stop = time;
+		OD_stop->add_pass_waiting (this);
+		if (RTI_network_level == true || OD_stop->get_origin()->get_rti() > 0)
 		{
-			end_time = time;
-			pass_recycler.addPassenger(this); // terminate passenger
+			vector<Busline*> lines_at_stop = OD_stop->get_origin()->get_lines();
+			for (vector <Busline*>::iterator line_iter = lines_at_stop.begin(); line_iter < lines_at_stop.end(); line_iter++)
+			{
+				pair<Busstop*, Busline*> stopline;
+				stopline.first = OD_stop->get_origin();
+				stopline.second = (*line_iter);
+				if (memory_projected_RTI.count(stopline) == 0)
+				{
+					this->set_memory_projected_RTI(OD_stop->get_origin(),(*line_iter),(*line_iter)->time_till_next_arrival_at_stop_after_time(OD_stop->get_origin(),time));
+					//this->set_AWT_first_leg_boarding();
+				}
+			}
 		}
-		else // push passengers at the waiting list of their OD
+	}
+}
+
+void Passenger::start (Eventlist* eventlist)
+{
+		pair<Busstop*,double> stop_time;
+		stop_time.first = OD_stop->get_origin();
+		stop_time.second = start_time;
+		add_to_selected_path_stop(stop_time);
+		Busstop* connection_stop = make_connection_decision(start_time);
+		stop_time.first = connection_stop;
+		if (connection_stop->get_id() != OD_stop->get_origin()->get_id()) // if the pass. walks to another stop
 		{
-			arrival_time_at_stop = time;
-			OD_stop->add_pass_waiting (this);
-			if (RTI_network_level == true || OD_stop->get_origin()->get_rti() > 0)
+			// set connected_stop as the new origin
+			if (connection_stop->check_stop_od_as_origin_per_stop(OD_stop->get_destination()) == false)
+			{
+				ODstops* od_stop = new ODstops (connection_stop,OD_stop->get_destination());
+				connection_stop->add_odstops_as_origin(OD_stop->get_destination(), od_stop);
+				OD_stop->get_destination()->add_odstops_as_destination(connection_stop, od_stop);
+			}
+			set_ODstop(connection_stop->get_stop_od_as_origin_per_stop(OD_stop->get_destination())); // set this stop as his new origin (new OD)
+			map<Busstop*,double> walk_dis = OD_stop->get_origin()->get_walking_distances();
+			double arrival_time_to_connected_stop = start_time + walk_dis[connection_stop] / random->nrandom (theParameters->average_walking_speed, theParameters->average_walking_speed/4);
+			eventlist->add_event(arrival_time_to_connected_stop, this);
+			//execute(eventlist, arrival_time_to_connected_stop);
+			pair<Busstop*,double> stop_time;
+			stop_time.first = connection_stop;
+			stop_time.second = arrival_time_to_connected_stop;
+			add_to_selected_path_stop(stop_time);
+		}
+		else // if the pass. stays at the same stop
+		{
+			OD_stop->add_pass_waiting(this); // storage the new passenger at the list of waiting passengers with this OD
+			set_arrival_time_at_stop(start_time);
+			add_to_selected_path_stop(stop_time);
+			if (get_pass_RTI_network_level() == true || OD_stop->get_origin()->get_rti() > 0)
 			{
 				vector<Busline*> lines_at_stop = OD_stop->get_origin()->get_lines();
 				for (vector <Busline*>::iterator line_iter = lines_at_stop.begin(); line_iter < lines_at_stop.end(); line_iter++)
@@ -216,17 +275,11 @@ bool Passenger::execute(Eventlist *eventlist, double time)
 					pair<Busstop*, Busline*> stopline;
 					stopline.first = OD_stop->get_origin();
 					stopline.second = (*line_iter);
-					if (memory_projected_RTI.count(stopline) == 0)
-					{
-						this->set_memory_projected_RTI(OD_stop->get_origin(),(*line_iter),(*line_iter)->time_till_next_arrival_at_stop_after_time(OD_stop->get_origin(),time));
-						//this->set_AWT_first_leg_boarding();
-					}
+					set_memory_projected_RTI(OD_stop->get_origin(),(*line_iter),(*line_iter)->time_till_next_arrival_at_stop_after_time(OD_stop->get_origin(),start_time));
+					//set_AWT_first_leg_boarding();
 				}
 			}
 		}
-		already_walked = false;
-	}
-return true;
 }
 
 bool Passenger:: make_boarding_decision (Bustrip* arriving_bus, double time) 

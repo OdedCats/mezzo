@@ -52,6 +52,8 @@ public:
 	vector <pair<Busstop*,double>> get_selected_path_stops() {return selected_path_stops;}
 
 	bool execute(Eventlist* eventlist, double time); // called every time passengers choose to walk to another stop (origin/transfer), puts the passenger at the waiting list at the right timing
+	void walk(double time);
+	void start(Eventlist* eventlist);
 
 	// Passenger decision processes
 	bool make_boarding_decision (Bustrip* arriving_bus, double time); // boarding decision making 
