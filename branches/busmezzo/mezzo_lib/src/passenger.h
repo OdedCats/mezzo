@@ -17,8 +17,9 @@ class Passenger : public Action
 {
 public:
 	Passenger ();
+	Passenger (int pass_id, double start_time_, ODstops* OD_stop_);
 	~Passenger ();
-	void init (int pass_id, double start_time_, ODstops* OD_stop_);
+	void init ();
 	void init_zone (int pass_id, double start_time_, ODzone* origin_, ODzone* destination_);
 	void reset();
 	

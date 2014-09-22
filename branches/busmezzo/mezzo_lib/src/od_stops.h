@@ -156,6 +156,7 @@ public:
 	ODstops (Busstop* origin_stop_, Busstop* destination_stop_, double arrival_rate_);
 	~ODstops ();
 	void reset ();
+	void delete_passengers();
 	
 	//Gets and Sets:
 	Busstop* get_origin() {return origin_stop;}

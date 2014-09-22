@@ -20,24 +20,7 @@ Passenger::Passenger ()
 	arrival_time_at_stop = 0;
 }
 
-Passenger::~Passenger()
-{
-}
-
-
-void Passenger::reset()
-{
-	boarding_decision = false;
-	already_walked = false;
-	start_time = 0; 
-	end_time = 0;
-	nr_boardings = 0;
-	AWT_first_leg_boarding = 0;
-	this_is_the_last_stop = false;
-	memory_projected_RTI.clear();
-	arrival_time_at_stop = 0;
-}
-void Passenger::init (int pass_id, double start_time_, ODstops* OD_stop_)
+Passenger::Passenger (int pass_id, double start_time_, ODstops* OD_stop_)
 {
 	passenger_id = pass_id;
 	start_time = start_time_;
@@ -45,25 +28,59 @@ void Passenger::init (int pass_id, double start_time_, ODstops* OD_stop_)
 	nr_boardings = 0;
 	original_origin = OD_stop_->get_origin();
 	OD_stop = OD_stop_;
-	AWT_first_leg_boarding = 0;
 	boarding_decision = false;
 	already_walked = false;
+	AWT_first_leg_boarding = 0;
+	random = new (Random);
+	if (randseed != 0)
+	{
+		random->seed(randseed);
+	}
+	else
+	{
+		random->randomize();
+	}
+	memory_projected_RTI.clear();
+	arrival_time_at_stop = 0;
+
+}
+
+Passenger::~Passenger()
+{
+}
+
+
+void Passenger::reset ()
+{
+	boarding_decision = false;
+	already_walked = false;
+	//start_time = 0; 
+	end_time = 0;
+	nr_boardings = 0;
+	AWT_first_leg_boarding = 0;
+	this_is_the_last_stop = false;
+	memory_projected_RTI.clear();
+	arrival_time_at_stop = 0;
+}
+
+void Passenger::init ()
+{
 	RTI_network_level = random->brandom(theParameters->share_RTI_network);
 	if (theParameters->pass_day_to_day_indicator == true)
 	{
-		anticipated_waiting_time = OD_stop_->get_anticipated_waiting_time(); //Changed by Jens 2014-06-27, here a local object with the same name was initialized, so the Passenger object was not updated
+		anticipated_waiting_time = OD_stop->get_anticipated_waiting_time(); //Changed by Jens 2014-06-27, here a local object with the same name was initialized, so the Passenger object was not updated
 		/*for (map<pair<Busstop*, Busline*>,double>::iterator stopline_iter = anticipated_waiting_time.begin(); stopline_iter != anticipated_waiting_time.end(); stopline_iter++)
 		{
 			pair<Busstop*, Busline*> stopline = (*stopline_iter).first;
 			anticipated_waiting_time[stopline] = (*stopline_iter).second;
 		}*/
-		alpha_RTI = OD_stop_->get_alpha_RTI();
+		alpha_RTI = OD_stop->get_alpha_RTI();
 		/*for (map<pair<Busstop*, Busline*>,double>::iterator stopline_iter = alpha_RTI.begin(); stopline_iter != alpha_RTI.end(); stopline_iter++)
 		{
 			pair<Busstop*, Busline*> stopline = (*stopline_iter).first;
 			alpha_RTI[stopline] = (*stopline_iter).second;
 		}*/
-		alpha_exp = OD_stop_->get_alpha_exp();
+		alpha_exp = OD_stop->get_alpha_exp();
 		/*for (map<pair<Busstop*, Busline*>,double>::iterator stopline_iter = alpha_exp.begin(); stopline_iter != alpha_exp.end(); stopline_iter++)
 		{
 			pair<Busstop*, Busline*> stopline = (*stopline_iter).first;
@@ -72,8 +89,8 @@ void Passenger::init (int pass_id, double start_time_, ODstops* OD_stop_)
 	}
 	if (theParameters->in_vehicle_d2d_indicator == true)
 	{
-		anticipated_ivtt = OD_stop_->get_anticipated_ivtt();
-		ivtt_alpha_exp = OD_stop_->get_ivtt_alpha_exp();
+		anticipated_ivtt = OD_stop->get_anticipated_ivtt();
+		ivtt_alpha_exp = OD_stop->get_ivtt_alpha_exp();
 	}
 }
 
@@ -211,7 +228,7 @@ void Passenger::walk (double time)
 	// this may happend if the passenger walked to his final stop or final destination (zonal)
 	{
 		end_time = time;
-		pass_recycler.addPassenger(this); // terminate passenger
+		//pass_recycler.addPassenger(this); // terminate passenger
 	}
 	else // push passengers at the waiting list of their OD
 	{

@@ -552,6 +552,13 @@ bool Parameters::read_parameters (istream & in )
 		}
 		in >> in_vehicle_d2d_indicator;
 		in >> keyword;
+		if (keyword!= "break_criterium=")
+		{
+			cout << "ERROR reading Parameters file, expecting: break_criterium=, read: " << keyword << endl;
+			return false;
+		}
+		in >> break_criterium;
+		in >> keyword;
 		if (keyword!= "transfer_coefficient=")
 		{
 			cout << "ERROR reading Parameters file, expecting: transfer_coefficient=, read: " << keyword << endl;

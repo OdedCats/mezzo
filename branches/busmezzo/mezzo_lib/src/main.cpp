@@ -18,9 +18,8 @@
 
 #include "network.h"
 #include "parameters.h"
+#include "day2day.h"
 //#include <windows.h>
-
-class Day;
 
 int main ( int argc, char **argv)
 {
@@ -48,30 +47,51 @@ int main ( int argc, char **argv)
   net1->init(); // reads the input files
   bool steady_state=false;
   int max_days = 5;
+
+  enum m {wt, ivt};
+  Day2day* d2d = new Day2day(1);
+  float crit[2];
+  crit[wt] = 1000.0f;
+  crit[ivt] = 1000.0f;
+  float theta = theParameters->break_criterium;
+
   if (replications <=1)
   {
-	  //while (steady_state==false)
-	  //{
-			//Day* today = new Day();
-			//theParameters->calendar.push_back(today);
-			net1->start(QThread::HighestPriority);
-			net1->wait();
-			net1->saveresults();
-			//cin >> steady_state;
-			/*
-			did++;
-			if(theParameters->calendar.size() < max_days)  //steady-state check
-			{
-				net1->end_of_day();
-			}
-			else
-			{ 
-				steady_state=true;
-				break;
-			}
-			*/
-		//	steady_state = true;
-		//}
+	for (int day = 1; (crit[wt] >= theta || crit[ivt] >= theta) && day <= 20; day++) //day2day
+	{
+		cout << "Day: " << day << endl;
+
+		crit[wt] = 0.0f;
+		crit[ivt] = 0.0f;
+
+		d2d->update_day(day);
+	  
+		remove("o_passenger_waiting_experience.dat");
+		remove("o_passenger_onboard_experience.dat");
+		remove("o_passenger_alighting.dat");
+		remove("o_passenger_boarding.dat");
+		remove("o_passenger_connection.dat");
+		remove("o_selected_paths.dat");
+
+		net1->start(QThread::HighestPriority);
+		net1->wait();
+		net1->saveresults();
+		net1->reset();
+
+		if (theParameters->pass_day_to_day_indicator == true)
+		{
+			d2d->process_wt_replication();
+			crit[wt] = d2d->process_wt_output();
+		}
+
+		if (theParameters->in_vehicle_d2d_indicator == true)
+		{
+			d2d->process_ivt_replication();
+			crit[ivt] = d2d->process_ivt_output();
+		}
+
+		cout << "Convergence: " << crit[wt] << " " << crit[ivt] << endl;
+	}
   }
   else
   {

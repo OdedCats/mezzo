@@ -15,6 +15,7 @@ QMAKE_LFLAGS += /LARGEADDRESSAWARE
 
 # Input
 HEADERS += src/busline.h \
+		   src/day2day.h \
            src/eventlist.h \
            src/gettime.h \
            src/Graph.h \
@@ -44,6 +45,7 @@ HEADERS += src/busline.h \
            src/pass_route.h
   #         src/Graph.cpp
 SOURCES += src/busline.cpp \
+		   src/day2day.cpp \
            src/eventlist.cpp \
            src/Graph.cpp \
            src/grid.cpp \

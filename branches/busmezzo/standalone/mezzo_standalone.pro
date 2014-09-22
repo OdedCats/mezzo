@@ -14,6 +14,7 @@ QMAKE_LFLAGS += /LARGEADDRESSAWARE
 
 # Input
 HEADERS += ../mezzo_lib/src/busline.h \
+		   ../mezzo_lib/src/day2day.h \
            ../mezzo_lib/src/eventlist.h \
            ../mezzo_lib/src/gettime.h \
            ../mezzo_lib/src/Graph.h \
@@ -43,6 +44,7 @@ HEADERS += ../mezzo_lib/src/busline.h \
             ./mezzo_lib/src/pass_route.h
 #           ../mezzo_lib/src/Graph.cpp
 SOURCES += ../mezzo_lib/src/busline.cpp \
+		   ../mezzo_lib/src/day2day.cpp \
            ../mezzo_lib/src/eventlist.cpp \
            ../mezzo_lib/src/Graph.cpp \
            ../mezzo_lib/src/grid.cpp \

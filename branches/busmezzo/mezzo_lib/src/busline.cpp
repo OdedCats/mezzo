@@ -1606,7 +1606,7 @@ double Busstop::passenger_activity_at_stop (Eventlist* eventlist, Bustrip* trip,
 				stop_time.second = time;
 				(*alighting_passenger)->add_to_selected_path_stop(stop_time);
 				(*alighting_passenger)->set_end_time(time);
-				pass_recycler.addPassenger(*alighting_passenger); // terminate passenger
+				//pass_recycler.addPassenger(*alighting_passenger); // terminate passenger
 			}		
 			if (final_stop == false)
 			{

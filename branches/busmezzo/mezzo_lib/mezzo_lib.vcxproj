@@ -67,6 +67,7 @@ nmake release</NMakeReBuildCommandLine>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\busline.cpp" />
+    <ClCompile Include="src\day2day.cpp" />
     <ClCompile Include="src\eventlist.cpp" />
     <ClCompile Include="src\Graph.cpp" />
     <ClCompile Include="src\grid.cpp" />
@@ -95,6 +96,7 @@ nmake release</NMakeReBuildCommandLine>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\busline.h" />
+    <ClInclude Include="src\day2day.h" />
     <ClInclude Include="src\eventlist.h" />
     <ClInclude Include="src\gettime.h" />
     <ClInclude Include="src\Graph.h" />

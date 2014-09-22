@@ -106,7 +106,7 @@ void ODstops::set_ivtt_alpha_exp (Busstop* stop, Busline* line, Busstop* leg, do
 void ODstops::reset()
 {
 	min_transfers = 100;
-	active = false;
+	//active = false;
 	/*
 	for (vector <Passenger*>::iterator iter_pass = waiting_passengers.begin(); iter_pass < waiting_passengers.end();)
 	{
@@ -119,22 +119,52 @@ void ODstops::reset()
 	output_pass_boarding_decision.clear();
 	output_pass_alighting_decision.clear();
 	output_pass_waiting_experience.clear();
+	//passengers_during_simulation.clear();
+	if (theParameters->pass_day_to_day_indicator == true || theParameters->in_vehicle_d2d_indicator == true)
+	{
+		for (vector <Passenger*>::iterator iter_pass = passengers_during_simulation.begin(); iter_pass < passengers_during_simulation.end(); iter_pass++)
+		{
+			(*iter_pass)->reset();
+		}
+	}
+	else
+	{
+		delete_passengers();
+	}
+}
+
+void ODstops::delete_passengers()
+{
+	for (vector <Passenger*>::iterator iter_pass = passengers_during_simulation.begin(); iter_pass < passengers_during_simulation.end(); iter_pass++)
+	{
+		delete *iter_pass;
+	}
 	passengers_during_simulation.clear();
+	active = false;
 }
 
 bool ODstops::execute (Eventlist* eventlist, double curr_time) // generate passengers with this OD and books an event for next passenger generation
 {
-	if (check_path_set() == true)
+	if (check_path_set() == true && active == false)
 	{
+		active = true;
 		curr_time = theParameters->start_pass_generation + random -> erandom (arrival_rate / 3600.0); // passenger arrival is assumed to be a poission process (exp headways)
 		while (curr_time < theParameters->stop_pass_generation)
 		{
-			Passenger* pass = new Passenger;
+			Passenger* pass = new Passenger(pid, curr_time, this);
 			passengers_during_simulation.push_back(pass);
 			pid++; 
-			pass->init (pid, curr_time, this);
+			pass->init();
 			eventlist->add_event(curr_time, pass);
 			curr_time += random -> erandom (arrival_rate / 3600.0);
+		}
+	}
+	else
+	{
+		for (vector <Passenger*>::iterator iter_pass = passengers_during_simulation.begin(); iter_pass < passengers_during_simulation.end(); iter_pass++)
+		{
+			(*iter_pass)->init();
+			eventlist->add_event((*iter_pass)->get_start_time(),*iter_pass);
 		}
 	}
 	return true;
