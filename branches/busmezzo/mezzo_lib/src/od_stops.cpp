@@ -118,7 +118,9 @@ void ODstops::reset()
 	waiting_passengers.clear();
 	output_pass_boarding_decision.clear();
 	output_pass_alighting_decision.clear();
+	output_pass_connection_decision.clear();
 	output_pass_waiting_experience.clear();
+	output_pass_onboard_experience.clear();
 	//passengers_during_simulation.clear();
 	if (theParameters->pass_day_to_day_indicator == true || theParameters->in_vehicle_d2d_indicator == true)
 	{

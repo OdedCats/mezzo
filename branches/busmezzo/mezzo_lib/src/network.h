@@ -58,6 +58,7 @@
 #include "passenger.h"
 #include "od_stops.h"
 #include "pass_route.h"
+#include "day2day.h"
 
 // inclusions for the GUI
 #ifndef _NO_GUI
@@ -250,9 +251,13 @@ public:
 	bool readtransitdemand (string name); //!< reads passenger demand for transit services
 	bool readtransitfleet (string name); // !< reads transit vehicle types, vehicle scheduling and dwell time functions
 	bool read_transitday2day (string name); // !< reads info on transit pass. day-to-day memory
+	bool read_transitday2day(map<ODSL, Travel_time>& ivt_map);
 	bool read_IVTT_day2day (string name);
+	bool read_IVTT_day2day(map<ODSLL, Travel_time>& ivt_map);
 	bool read_OD_day2day (istream& in); //!< reads day-to-dat info for a particular OD
+	bool read_OD_day2day (pair<const ODSL, Travel_time>& wt_row);
 	bool read_OD_IVTT (istream& in);
+	bool read_OD_IVTT (pair<const ODSLL, Travel_time>& wt_row);
 	bool readbusroute(istream& in); //!< reads a transit route
 	bool readbusstop (istream& in); //!< reads a busstop
 	bool readtransitzones (istream& in); //!< reads a transit travel zone
@@ -526,6 +531,11 @@ public:
 	void reset ()
 	{
 		theNetwork->reset();
+	}
+	void reset_d2d(map<ODSL, Travel_time>& wt_map, map<ODSLL, Travel_time>& ivt_map)
+	{
+		theNetwork->read_transitday2day(wt_map);
+		theNetwork->read_IVTT_day2day(ivt_map);
 	}
 	 ~NetworkThread () 
 	  {

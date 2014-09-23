@@ -61,6 +61,7 @@ void Passenger::reset ()
 	this_is_the_last_stop = false;
 	memory_projected_RTI.clear();
 	arrival_time_at_stop = 0;
+	OD_stop = original_origin->get_stop_od_as_origin_per_stop (OD_stop->get_destination());
 }
 
 void Passenger::init ()

@@ -2240,7 +2240,7 @@ bool Network::read_passenger_rates_format3 (istream& in) // reads the passenger 
   ODstops* od_stop = new ODstops (bs_o, bs_d, arrival_rate);
   //ODstops* od_stop = bs_o->get_stop_od_as_origin_per_stop(bs_d);
   od_stop->set_arrival_rate(arrival_rate* theParameters->demand_scale);
-  //odstops.push_back(od_stop);
+  odstops.push_back(od_stop);
   odstops_demand.push_back(od_stop);
   bs_o->add_odstops_as_origin(bs_d, od_stop);
   bs_d->add_odstops_as_destination(bs_o, od_stop);
@@ -4350,6 +4350,7 @@ bool Network::read_transit_path(istream& in)
 		ODstops* od_stop = new ODstops (bs_o,bs_d); 
 		bs_o->add_odstops_as_origin(bs_d, od_stop);
 		bs_d->add_odstops_as_destination(bs_o, od_stop);
+		odstops.push_back(od_stop);
 	}
 	ODstops* od_pair = bs_o->get_stop_od_as_origin_per_stop(bs_d);
 	od_pair->add_paths(path);
@@ -4388,6 +4389,16 @@ bool Network::read_transitday2day(string name)
 	return true;
 }
 
+bool Network::read_transitday2day(map<ODSL, Travel_time>& wt_map)
+{
+	for (map<ODSL, Travel_time>::iterator row = wt_map.begin(); row != wt_map.end(); row++)
+	{
+		read_OD_day2day(*row);
+	}
+
+	return true;
+}
+
 bool Network::read_IVTT_day2day(string name)
 {
 	ifstream in(name.c_str()); // open input file
@@ -4415,6 +4426,16 @@ bool Network::read_IVTT_day2day(string name)
 			return false;
 		} 
 	}
+	return true;
+}
+
+bool Network::read_IVTT_day2day(map<ODSLL, Travel_time>& ivt_map)
+{
+	for (map<ODSLL, Travel_time>::iterator row = ivt_map.begin(); row != ivt_map.end(); row++)
+	{
+		read_OD_IVTT(*row);
+	}
+
 	return true;
 }
 
@@ -4447,6 +4468,32 @@ bool Network::read_OD_day2day (istream& in)
 	return true;
 }
 
+enum k {EXP, PK, RTI, anticip, anticip_EXP};
+enum l {e0, e1, crowding, e3, e4};
+
+bool Network::read_OD_day2day (pair<const ODSL, Travel_time>& wt_row) 
+{
+	const int& origin_stop_id = wt_row.first.orig;
+	const int& destination_stop_id = wt_row.first.dest;
+	const int& stop_id = wt_row.first.stop;
+	const int& line_id = wt_row.first.line;
+	double anticipated_waiting_time = wt_row.second.tt[anticip_EXP];
+	double alpha_RTI = wt_row.second.alpha[RTI];
+	double alpha_exp = wt_row.second.alpha[EXP];
+
+	Busstop* bs_o = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (origin_stop_id) )));	
+	Busstop* bs_d = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (destination_stop_id) )));
+	Busstop* bs_s = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (stop_id) )));
+	Busline* bl = (*(find_if(buslines.begin(), buslines.end(), compare <Busline> (line_id) )));
+
+	ODstops* od_stop = bs_o->get_stop_od_as_origin_per_stop(bs_d);
+	od_stop->set_anticipated_waiting_time(bs_s, bl, anticipated_waiting_time);
+	od_stop->set_alpha_RTI(bs_s, bl, alpha_RTI);
+	od_stop->set_alpha_exp(bs_s, bl, alpha_exp);
+
+	return true;
+}
+
 bool Network::read_OD_IVTT (istream& in) 
 {
 	char bracket;
@@ -4473,6 +4520,28 @@ bool Network::read_OD_IVTT (istream& in)
 		cout << "readfile::read_transit_path scanner jammed at " << bracket;
 		return false;
 	}
+	return true;
+}
+
+bool Network::read_OD_IVTT (pair<const ODSLL, Travel_time>& ivt_row) 
+{
+	const int& origin_stop_id = ivt_row.first.orig;
+	const int& destination_stop_id = ivt_row.first.dest;
+	const int& stop_id = ivt_row.first.stop;
+	const int& line_id = ivt_row.first.line;
+	const int& leg_id = ivt_row.first.leg;
+	double anticipated_in_vehicle_time = ivt_row.second.tt[anticip];
+	double alpha_exp = ivt_row.second.alpha[EXP];
+	
+	Busstop* bs_o = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (origin_stop_id) )));	
+	Busstop* bs_d = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (destination_stop_id) )));
+	Busstop* bs_s = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (stop_id) )));
+	Busline* bl = (*(find_if(buslines.begin(), buslines.end(), compare <Busline> (line_id) )));
+	Busstop* bs_l = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (leg_id) )));
+	ODstops* od_stop = bs_o->get_stop_od_as_origin_per_stop(bs_d);
+	od_stop->set_anticipated_ivtt(bs_s, bl, bs_l, anticipated_in_vehicle_time);
+	od_stop->set_ivtt_alpha_exp(bs_s, bl, bs_l, alpha_exp);
+	
 	return true;
 }
 

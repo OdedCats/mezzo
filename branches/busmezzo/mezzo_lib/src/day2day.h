@@ -123,6 +123,8 @@ public:
 	float process_ivt_output ();
 	map<ODSL, Travel_time>& process_wt_replication ();
 	map<ODSLL, Travel_time>& process_ivt_replication ();
+	map<ODSL, Travel_time>& get_wt_rec () {return wt_rec;}
+	map<ODSLL, Travel_time>& get_ivt_rec () {return ivt_rec;}
 };
 
 #endif

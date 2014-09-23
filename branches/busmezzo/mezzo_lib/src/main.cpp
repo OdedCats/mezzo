@@ -76,7 +76,6 @@ int main ( int argc, char **argv)
 		net1->start(QThread::HighestPriority);
 		net1->wait();
 		net1->saveresults();
-		net1->reset();
 
 		if (theParameters->pass_day_to_day_indicator == true)
 		{
@@ -89,6 +88,9 @@ int main ( int argc, char **argv)
 			d2d->process_ivt_replication();
 			crit[ivt] = d2d->process_ivt_output();
 		}
+
+		net1->reset_d2d(d2d->get_wt_rec(), d2d->get_ivt_rec());
+		net1->reset();
 
 		cout << "Convergence: " << crit[wt] << " " << crit[ivt] << endl;
 	}
