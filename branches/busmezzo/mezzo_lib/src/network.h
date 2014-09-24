@@ -375,6 +375,8 @@ protected:
 //	map<int,map<int, vector<Busline*>>> direct_lines; // contains all direct lines between a couple of stops
 	map<Busstop*,vector<Busstop*>> consecutive_stops; // contains all the stops that can be reached within no transfer per stop
 
+	Day2day* day2day;
+
 	//Shortest path graph
 #ifndef _USE_VAR_TIMES
 	Graph<double, GraphNoInfo<double> > * graph;

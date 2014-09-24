@@ -120,6 +120,7 @@ Network::Network()
 	linkinfo=new LinkTimeInfo();
 	eventlist=new Eventlist;
 	no_ass_links=0;
+	day2day = new Day2day(1);
 }
 
 Network::~Network()
@@ -7181,35 +7182,85 @@ bool Network::run(int period)
 double Network::step(double timestep)
 // same as run, but more stripped down. Called every timestep by the GUI
 {
-	double t0=timestamp();
-	double timer = 1200;
-#ifndef _NO_GUI
-	double tc; // current time
-#endif //_NO_GUI  
-	double next_an_update=t0+timestep;   // when to exit
-	while ((time>-1.0) && (time<runtime))       // the big loop
+	if (theParameters->pass_day_to_day_indicator == 0 && theParameters->in_vehicle_d2d_indicator == 0)
 	{
-		time=eventlist->next();
-		//cout << time << "\t";
+		double t0=timestamp();
+		double timer = 1200;
+#ifndef _NO_GUI
+		double tc; // current time
+#endif //_NO_GUI  
+		double next_an_update=t0+timestep;   // when to exit
+		while ((time>-1.0) && (time<runtime))       // the big loop
+		{
+			time=eventlist->next();
+			//cout << time << "\t";
 #ifndef _NO_GUI
 		
-		tc=timestamp();
+			tc=timestamp();
 		
-		if (tc > next_an_update)  // the time has come for the next animation update
-		{
-			drawing->draw(pm,wm);
-			return time;
-		} 
+			if (tc > next_an_update)  // the time has come for the next animation update
+			{
+				drawing->draw(pm,wm);
+				return time;
+			} 
 		
 #endif //_NO_GUI  
-
-		if (time >= timer) //Jens 2014
-		{
-			cout << "Time: " << timer << endl;
-			timer += 1200;
 		}
+		return time;
 	}
-	return time;
+	else
+	{
+		enum m {wt, ivt};
+		float crit[2];
+		crit[wt] = 1000.0f;
+		crit[ivt] = 1000.0f;
+		float theta = theParameters->break_criterium;
+		map<ODSL, Travel_time> wt_rec; //the record of waiting time data
+		map<ODSLL, Travel_time> ivt_rec; //the record of in-vehicle time data
+
+		for (int day = 1; (crit[wt] >= theta || crit[ivt] >= theta) && day <= 20; day++) //day2day
+		{
+			cout << "Day: " << day << endl;
+
+			if (day > 1)
+			{
+				read_transitday2day(wt_rec);
+				read_IVTT_day2day(ivt_rec);
+				reset();
+			}
+
+			crit[wt] = 0.0f;
+			crit[ivt] = 0.0f;
+
+			day2day->update_day(day);
+
+			double timer = 1200; 
+			while ((time>-1.0) && (time<runtime))       // the big loop
+			{
+				time=eventlist->next();
+				//cout << time << "\t";
+
+				if (time >= timer) //Jens 2014
+				{
+					cout << "Time: " << timer << endl;
+					timer += 1200;
+				}
+			}
+
+			if (theParameters->pass_day_to_day_indicator == true)
+			{
+				crit[wt] = insert(wt_rec, day2day->process_wt_replication(odstops, wt_rec)); //insert result from day2day learning in data container
+			}
+
+			if (theParameters->in_vehicle_d2d_indicator == true)
+			{
+				crit[ivt] = insert(ivt_rec, day2day->process_ivt_replication(odstops, ivt_rec)); //insert result from day2day learning in data container
+			}
+
+			cout << "Convergence: " << crit[wt] << " " << crit[ivt] << endl;
+		}
+		return time;
+	}
 }
 
 

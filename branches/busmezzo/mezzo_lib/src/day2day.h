@@ -2,8 +2,11 @@
 #define DAY2DAY_
 
 #include <map>
+#include "od_stops.h"
 
 using namespace std;
+
+
 
 struct ODSL //structure for comparing ODSL combinations
 {
@@ -93,13 +96,14 @@ struct Travel_time //structure for saving and adding data
 	}
 } ;
 
+template <typename id_type> float insert (map<id_type, Travel_time>& ODSL_reg, map<id_type, Travel_time>& ODSL_data); //Method for inserting data for one day into record
+template float insert (map<ODSL, Travel_time>& ODSL_reg, map<ODSL, Travel_time>& ODSL_data);
+template float insert (map<ODSLL, Travel_time>& ODSL_reg, map<ODSLL, Travel_time>& ODSL_data);
+
 class Day2day
 {
 private:
-	map<ODSL, Travel_time> wt_rec; //the record of ODSL data
 	map<ODSL, Travel_time> wt_day; //record of ODSL data for the current day
-
-	map<ODSLL, Travel_time> ivt_rec; //the record of ODSL data
 	map<ODSLL, Travel_time> ivt_day; //record of ODSL data for the current day
 
 	float wt_alpha_base[3];
@@ -119,12 +123,8 @@ private:
 public:
 	Day2day (int nr_of_reps_);
 	void update_day (int d);
-	float process_wt_output ();
-	float process_ivt_output ();
-	map<ODSL, Travel_time>& process_wt_replication ();
-	map<ODSLL, Travel_time>& process_ivt_replication ();
-	map<ODSL, Travel_time>& get_wt_rec () {return wt_rec;}
-	map<ODSLL, Travel_time>& get_ivt_rec () {return ivt_rec;}
+	map<ODSL, Travel_time>& process_wt_replication (vector<ODstops*>& odstops, map<ODSL, Travel_time> wt_rec);
+	map<ODSLL, Travel_time>& process_ivt_replication (vector<ODstops*>& odstops, map<ODSLL, Travel_time> ivt_rec);
 };
 
 #endif
