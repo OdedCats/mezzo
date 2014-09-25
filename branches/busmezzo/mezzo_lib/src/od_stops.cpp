@@ -122,7 +122,7 @@ void ODstops::reset()
 	output_pass_waiting_experience.clear();
 	output_pass_onboard_experience.clear();
 	//passengers_during_simulation.clear();
-	if (theParameters->pass_day_to_day_indicator == true || theParameters->in_vehicle_d2d_indicator == true)
+	if (theParameters->pass_day_to_day_indicator > 0 || theParameters->in_vehicle_d2d_indicator > 0)
 	{
 		for (vector <Passenger*>::iterator iter_pass = passengers_during_simulation.begin(); iter_pass < passengers_during_simulation.end(); iter_pass++)
 		{

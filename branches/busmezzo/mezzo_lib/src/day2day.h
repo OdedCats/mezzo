@@ -10,6 +10,7 @@ using namespace std;
 
 struct ODSL //structure for comparing ODSL combinations
 {
+	int pid;
 	int orig;
 	int dest;
 	int stop;
@@ -17,12 +18,14 @@ struct ODSL //structure for comparing ODSL combinations
 
 	bool operator == (const ODSL& rhs) const
 	{
-		return (orig == rhs.orig && dest == rhs.dest && stop == rhs.stop && line == rhs.line);
+		return (pid == rhs.pid && orig == rhs.orig && dest == rhs.dest && stop == rhs.stop && line == rhs.line);
 	}
 
 	bool operator < (const ODSL& rhs) const
 	{
-		if (orig != rhs.orig)
+		if (pid != rhs.pid)
+			return pid < rhs.pid;
+		else if (orig != rhs.orig)
 			return orig < rhs.orig;
 		else if (dest != rhs.dest)
 			return dest < rhs.dest;
@@ -35,6 +38,7 @@ struct ODSL //structure for comparing ODSL combinations
 
 struct ODSLL
 {
+	int pid;
 	int orig;
 	int dest;
 	int stop;
@@ -43,12 +47,14 @@ struct ODSLL
 
 	bool operator == (const ODSLL& rhs) const
 	{
-		return (orig == rhs.orig && dest == rhs.dest && stop == rhs.stop && line == rhs.line && leg == rhs.leg);
+		return (pid == rhs.pid && orig == rhs.orig && dest == rhs.dest && stop == rhs.stop && line == rhs.line && leg == rhs.leg);
 	}
 
 	bool operator < (const ODSLL& rhs) const
 	{
-		if (orig != rhs.orig)
+		if (pid != rhs.pid)
+			return pid < rhs.pid;
+		else if (orig != rhs.orig)
 			return orig < rhs.orig;
 		else if (dest != rhs.dest)
 			return dest < rhs.dest;
@@ -115,7 +121,8 @@ private:
 	int nr_of_reps;
 	int day;
 	bool aggregate;
-	bool individual;
+	bool individual_wt;
+	bool individual_ivt;
 
 	void calc_anticipated_wt (Travel_time& row);
 	void calc_anticipated_ivt (Travel_time& row);

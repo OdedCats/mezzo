@@ -89,6 +89,7 @@ public:
 	double get_alpha_RTI (Busstop* stop, Busline* line);
 	double get_alpha_exp (Busstop* stop, Busline* line);
 	bool any_previous_exp_ODSL (Busstop* stop, Busline* line);
+	void set_anticipated_ivtt (Busstop* stop, Busline* line, Busstop* leg, double anticipated_ivt);
 	double get_anticipated_ivtt (Busstop* stop, Busline* line, Busstop* leg);
 	double get_ivtt_alpha_exp (Busstop* stop, Busline* line, Busstop* leg);
 	bool any_previous_exp_ivtt (Busstop* stop, Busline* line, Busstop* leg);

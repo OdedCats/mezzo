@@ -18,18 +18,6 @@ float &operator / (const Travel_time& lhs, const Travel_time& rhs)
 	return quotient;
 };
 
-//ostream& operator << (ostream& stream, const ODSL& data)
-//{
-//    stream << data.orig << "\t" << data.dest << "\t" << data.stop << "\t" << data.line;
-//    return stream;
-//};
-//
-//ostream& operator << (ostream& stream, const ODSLL& data)
-//{
-//	stream << data.orig << "\t" << data.dest << "\t" << data.stop << "\t" << data.line << "\t" << data.leg;
-//    return stream;
-//};
-
 template <typename id_type>
 map<id_type, Travel_time>& operator << (map<id_type, Travel_time>& ODSLreg, pair<const id_type, Travel_time>& row) //if existing ODSL is found, data is replaced else a new row is inserted
 {
@@ -130,7 +118,16 @@ Day2day::Day2day (int nr_of_reps_)
 
 	nr_of_reps = nr_of_reps_;
 	aggregate = false;
-	individual = false;
+
+	if (theParameters->pass_day_to_day_indicator == 2)
+		individual_wt = true;
+	else
+		individual_wt = false;
+
+	if (theParameters->in_vehicle_d2d_indicator == 2)
+		individual_ivt = true;
+	else
+		individual_ivt = false;
 }
 
 void Day2day::update_day (int d)
@@ -143,91 +140,6 @@ void Day2day::update_day (int d)
 	wt_day.clear();
 	ivt_day.clear();
 }
-
-//float Day2day::process_wt_output ()
-//{
-//		float crit = insert(wt_rec, wt_day);
-//		wt_day.clear(); //clear the current day data container
-//
-//		//write file output
-//		ofstream wt_day2day_file;
-//		wt_day2day_file.open("transit_day2day.dat");
-//		wt_day2day_file << "ODS: " << wt_rec.size() << endl;
-//		for (map<ODSL, Travel_time>::iterator odsl = wt_rec.begin(); odsl != wt_rec.end(); odsl++)
-//		{
-//			wt_day2day_file << "{\t" << odsl->first << "\t" << odsl->second.tt[anticip_EXP] << "\t" << odsl->second.alpha[RTI] << "\t" << odsl->second.alpha[EXP] << "\t}" << endl;
-//		}
-//		wt_day2day_file.close();
-//
-//		return crit;
-//}
-//
-//float Day2day::process_ivt_output ()
-//{
-//		float crit = insert(ivt_rec, ivt_day);
-//		ivt_day.clear(); //clear the current day data container
-//
-//		//write file output
-//		ofstream ivt_day2day_file;
-//		ivt_day2day_file.open("transit_day2day_onboard.dat");
-//		ivt_day2day_file << "ODS: " << ivt_rec.size() << endl;
-//		for (map<ODSLL, Travel_time>::iterator odsl = ivt_rec.begin(); odsl != ivt_rec.end(); odsl++)
-//		{
-//			ivt_day2day_file << "{\t" << odsl->first << "\t" << odsl->second.tt[anticip] << "\t" << odsl->second.alpha[EXP] << "\t}" << endl;
-//		}
-//		ivt_day2day_file.close();
-//
-//		return crit;
-//}
-
-//map<ODSL, Travel_time>& Day2day::process_wt_replication ()
-//{
-//	map<ODSL, Travel_time> wt_rep; //record of ODSL data for the current replication
-//
-//	string str;
-//	ifstream wt_experience_file;
-//	wt_experience_file.open("o_passenger_waiting_experience.dat"); //open file
-//
-//	while (!wt_experience_file.eof()) //read file until the end of it
-//	{
-//		//read file
-//		int pid, orig, dest, stop, line;
-//		Travel_time wt;
-//		wt_experience_file >> pid >> orig >> dest >> line >> str >> stop >> str >> str >> wt.tt[PK] >> wt.counter >> wt.tt[RTI] >> wt.tt[EXP] >> str;
-//		if (aggregate)
-//		{
-//			orig = 0;
-//			dest = 0;
-//		}
-//		if (individual)
-//		{
-//			orig = pid;
-//			dest = 0;
-//		}
-//		const ODSL wt_odsl = {orig, dest, stop, line};
-//
-//		//insert base values and replace when previous experience found
-//		insert_alphas(wt_odsl, wt, wt_rec, wt_alpha_base, day);
-//
-//		//calculate anticipated waiting time and add to experience for this replication
-//		calc_anticipated_wt(wt);
-//		pair<const ODSL, Travel_time> wt_row (wt_odsl, wt);
-//		wt_rep += wt_row; //if existing ODSL is found, data is added, else a new row is inserted
-//	}
-//
-//	wt_experience_file.close(); //close file
-//
-//	if (nr_of_reps > 1)
-//	{
-//		wt_day += wt_rep; //add repetition to day data
-//	}
-//	else
-//	{
-//		wt_day = wt_rep;
-//	}
-//
-//	return wt_day;
-//}
 
 map<ODSL, Travel_time>& Day2day::process_wt_replication (vector<ODstops*>& odstops, map<ODSL, Travel_time> wt_rec)
 {
@@ -254,15 +166,16 @@ map<ODSL, Travel_time>& Day2day::process_wt_replication (vector<ODstops*>& odsto
 
 				if (aggregate)
 				{
+					pid = 0;
 					orig = 0;
 					dest = 0;
 				}
-				if (individual)
+				if (!individual_wt)
 				{
-					orig = pid;
-					dest = 0;
+					pid = 0;
 				}
-				const ODSL wt_odsl = {orig, dest, stop, line};
+
+				const ODSL wt_odsl = {pid, orig, dest, stop, line};
 
 				//insert base values and replace when previous experience found
 				insert_alphas(wt_odsl, wt, wt_rec, wt_alpha_base, day);
@@ -286,55 +199,6 @@ map<ODSL, Travel_time>& Day2day::process_wt_replication (vector<ODstops*>& odsto
 
 	return wt_day;
 }
-
-//map<ODSLL, Travel_time>& Day2day::process_ivt_replication ()
-//{
-//	map<ODSLL, Travel_time> ivt_rep; //record of ODSL data for the current replication
-//
-//	string str;
-//	ifstream ivt_experience_file;
-//	ivt_experience_file.open("o_passenger_onboard_experience.dat"); //open file
-//
-//	while (!ivt_experience_file.eof()) //read file until the end of it
-//	{
-//		//read file
-//		int pid, orig, dest, stop, line, leg;
-//		Travel_time ivt;
-//		ivt_experience_file >> pid >> orig >> dest >> line >> str >> stop >> leg >> ivt.tt[PK] >> ivt.tt[EXP] >> ivt.tt[crowding];
-//		if (aggregate)
-//		{
-//			orig = 0;
-//			dest = 0;
-//		}
-//		if (individual)
-//		{
-//			orig = pid;
-//			dest = 0;
-//		}
-//		const ODSLL ivt_odsl = {orig, dest, stop, line, leg};
-//
-//		//insert base values and replace when previous experience found
-//		insert_alphas(ivt_odsl, ivt, ivt_rec, ivt_alpha_base, day);
-//
-//		//calculate anticipated in-vehicle time and add to experience for this replication
-//		calc_anticipated_ivt(ivt);
-//		pair<const ODSLL, Travel_time> ivt_row (ivt_odsl, ivt);
-//		ivt_rep += ivt_row; //if existing ODSL is found, data is added, else a new row is inserted
-//	}
-//
-//	ivt_experience_file.close(); //close file
-//
-//	if (nr_of_reps > 1)
-//	{
-//		ivt_day += ivt_rep; //add repetition to day data
-//	}
-//	else
-//	{
-//		ivt_day = ivt_rep;
-//	}
-//
-//	return ivt_day;
-//}
 
 map<ODSLL, Travel_time>& Day2day::process_ivt_replication (vector<ODstops*>& odstops, map<ODSLL, Travel_time> ivt_rec)
 {
@@ -365,12 +229,11 @@ map<ODSLL, Travel_time>& Day2day::process_ivt_replication (vector<ODstops*>& ods
 					orig = 0;
 					dest = 0;
 				}
-				if (individual)
+				if (!individual_ivt)
 				{
-					orig = pid;
-					dest = 0;
+					pid = 0;
 				}
-				const ODSLL ivt_odsl = {orig, dest, stop, line, leg};
+				const ODSLL ivt_odsl = {pid, orig, dest, stop, line, leg};
 
 				//insert base values and replace when previous experience found
 				insert_alphas(ivt_odsl, ivt, ivt_rec, ivt_alpha_base, day);

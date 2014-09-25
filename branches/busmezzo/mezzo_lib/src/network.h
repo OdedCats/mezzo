@@ -256,8 +256,10 @@ public:
 	bool read_IVTT_day2day(map<ODSLL, Travel_time>& ivt_map);
 	bool read_OD_day2day (istream& in); //!< reads day-to-dat info for a particular OD
 	bool read_OD_day2day (pair<const ODSL, Travel_time>& wt_row);
+	bool read_pass_day2day (pair<const ODSL, Travel_time>& wt_row);
 	bool read_OD_IVTT (istream& in);
 	bool read_OD_IVTT (pair<const ODSLL, Travel_time>& wt_row);
+	bool read_pass_IVTT (pair<const ODSLL, Travel_time>& wt_row);
 	bool readbusroute(istream& in); //!< reads a transit route
 	bool readbusstop (istream& in); //!< reads a busstop
 	bool readtransitzones (istream& in); //!< reads a transit travel zone
@@ -533,11 +535,6 @@ public:
 	void reset ()
 	{
 		theNetwork->reset();
-	}
-	void reset_d2d(map<ODSL, Travel_time>& wt_map, map<ODSLL, Travel_time>& ivt_map)
-	{
-		theNetwork->read_transitday2day(wt_map);
-		theNetwork->read_IVTT_day2day(ivt_map);
 	}
 	 ~NetworkThread () 
 	  {

@@ -168,8 +168,8 @@ public:
    int demand_format;
    double demand_scale; // !< currently for demand format 1 only - multiplies the hourly arrival rate
    int choice_set_indicator; //!< 0 indicates process path-set generation; 1 indicates read path-set input file
-   bool pass_day_to_day_indicator; // 0 if irrelevant; 1 indicates read pass memory input file and incorporate it in the choice model
-   bool in_vehicle_d2d_indicator; // 0 if irrelevant; 1 indicates read pass memory input file and incorporate it in the choice model
+   int pass_day_to_day_indicator; // 0 if irrelevant; 1 indicates read pass memory input and incorporate it on OD level; 2 indicates passenger specific memory
+   int in_vehicle_d2d_indicator; // 0 if irrelevant; 1 indicates read pass memory input and incorporate it on OD level; 2 indicates passenger specific memory
    double break_criterium;
    double transfer_coefficient;
    double in_vehicle_time_coefficient;

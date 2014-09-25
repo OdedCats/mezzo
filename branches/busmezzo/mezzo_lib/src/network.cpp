@@ -4392,9 +4392,19 @@ bool Network::read_transitday2day(string name)
 
 bool Network::read_transitday2day(map<ODSL, Travel_time>& wt_map)
 {
-	for (map<ODSL, Travel_time>::iterator row = wt_map.begin(); row != wt_map.end(); row++)
+	if (theParameters->pass_day_to_day_indicator == 1)
 	{
-		read_OD_day2day(*row);
+		for (map<ODSL, Travel_time>::iterator row = wt_map.begin(); row != wt_map.end(); row++)
+		{
+			read_OD_day2day(*row);
+		}
+	}
+	else if (theParameters->pass_day_to_day_indicator == 2)
+	{
+		for (map<ODSL, Travel_time>::iterator row = wt_map.begin(); row != wt_map.end(); row++)
+		{
+			read_pass_day2day(*row);
+		}
 	}
 
 	return true;
@@ -4432,9 +4442,19 @@ bool Network::read_IVTT_day2day(string name)
 
 bool Network::read_IVTT_day2day(map<ODSLL, Travel_time>& ivt_map)
 {
-	for (map<ODSLL, Travel_time>::iterator row = ivt_map.begin(); row != ivt_map.end(); row++)
+	if (theParameters->in_vehicle_d2d_indicator == 1)
 	{
-		read_OD_IVTT(*row);
+		for (map<ODSLL, Travel_time>::iterator row = ivt_map.begin(); row != ivt_map.end(); row++)
+		{
+			read_OD_IVTT(*row);
+		}
+	}
+	else if (theParameters->in_vehicle_d2d_indicator == 2)
+	{
+		for (map<ODSLL, Travel_time>::iterator row = ivt_map.begin(); row != ivt_map.end(); row++)
+		{
+			read_pass_IVTT(*row);
+		}
 	}
 
 	return true;
@@ -4495,6 +4515,33 @@ bool Network::read_OD_day2day (pair<const ODSL, Travel_time>& wt_row)
 	return true;
 }
 
+bool Network::read_pass_day2day (pair<const ODSL, Travel_time>& wt_row)
+{
+	const int& pass_id = wt_row.first.pid;
+	const int& origin_stop_id = wt_row.first.orig;
+	const int& destination_stop_id = wt_row.first.dest;
+	const int& stop_id = wt_row.first.stop;
+	const int& line_id = wt_row.first.line;
+	double anticipated_waiting_time = wt_row.second.tt[anticip_EXP];
+	double alpha_RTI = wt_row.second.alpha[RTI];
+	double alpha_exp = wt_row.second.alpha[EXP];
+
+	Busstop* bs_o = *(find_if(busstops.begin(), busstops.end(), compare <Busstop> (origin_stop_id) ));	
+	Busstop* bs_d = *(find_if(busstops.begin(), busstops.end(), compare <Busstop> (destination_stop_id) ));
+	Busstop* bs_s = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (stop_id) )));
+	Busline* bl = *(find_if(buslines.begin(), buslines.end(), compare <Busline> (line_id) ));
+
+	ODstops* od_stop = bs_o->get_stop_od_as_origin_per_stop(bs_d);
+	vector<Passenger*> passengers = od_stop->get_passengers_during_simulation();
+	Passenger* p = *find_if(passengers.begin(), passengers.end(), compare<Passenger>(pass_id));
+
+	p->set_anticipated_waiting_time(bs_s, bl, anticipated_waiting_time);
+	p->set_alpha_RTI(bs_s, bl, alpha_RTI);
+	p->set_alpha_exp(bs_s, bl, alpha_exp);
+
+	return true;
+}
+
 bool Network::read_OD_IVTT (istream& in) 
 {
 	char bracket;
@@ -4541,7 +4588,31 @@ bool Network::read_OD_IVTT (pair<const ODSLL, Travel_time>& ivt_row)
 	Busstop* bs_l = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (leg_id) )));
 	ODstops* od_stop = bs_o->get_stop_od_as_origin_per_stop(bs_d);
 	od_stop->set_anticipated_ivtt(bs_s, bl, bs_l, anticipated_in_vehicle_time);
-	od_stop->set_ivtt_alpha_exp(bs_s, bl, bs_l, alpha_exp);
+	
+	return true;
+}
+
+bool Network::read_pass_IVTT (pair<const ODSLL, Travel_time>& ivt_row) 
+{
+	const int& pass_id = ivt_row.first.pid;
+	const int& origin_stop_id = ivt_row.first.orig;
+	const int& destination_stop_id = ivt_row.first.dest;
+	const int& stop_id = ivt_row.first.stop;
+	const int& line_id = ivt_row.first.line;
+	const int& leg_id = ivt_row.first.leg;
+	double anticipated_in_vehicle_time = ivt_row.second.tt[anticip];
+	double alpha_exp = ivt_row.second.alpha[EXP];
+	
+	Busstop* bs_o = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (origin_stop_id) )));	
+	Busstop* bs_d = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (destination_stop_id) )));
+	Busstop* bs_s = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (stop_id) )));
+	Busline* bl = (*(find_if(buslines.begin(), buslines.end(), compare <Busline> (line_id) )));
+	Busstop* bs_l = (*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (leg_id) )));
+
+	ODstops* od_stop = bs_o->get_stop_od_as_origin_per_stop(bs_d);
+	vector<Passenger*> passengers = od_stop->get_passengers_during_simulation();
+	Passenger* p = *find_if(passengers.begin(), passengers.end(), compare<Passenger>(pass_id));
+	p->set_anticipated_ivtt(bs_s, bl, bs_l, anticipated_in_vehicle_time);
 	
 	return true;
 }
@@ -5987,7 +6058,7 @@ bool Network::readparameters(string name)
 	assert (inputfile);
 	if (theParameters->read_parameters(inputfile))
 	{
-		if (theParameters->pass_day_to_day_indicator == 1)
+		if (theParameters->pass_day_to_day_indicator == true)
 			SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
 		inputfile.close();
 		return true;
@@ -6670,11 +6741,11 @@ double Network::executemaster(QPixmap * pm_,QMatrix * wm_)
 	{
 		this->read_transit_path_sets (workingdir +"path_set_generation.dat");
 	}
-	if (theParameters->pass_day_to_day_indicator ==1)
+	if (theParameters->pass_day_to_day_indicator == 1)
 	{
 		this->read_transitday2day (workingdir +"transit_day2day.dat");
 	}
-	if (theParameters->in_vehicle_d2d_indicator ==1)
+	if (theParameters->in_vehicle_d2d_indicator == 1)
 	{
 		this->read_IVTT_day2day (workingdir +"transit_day2day_onboard.dat");
 	}
@@ -6765,11 +6836,11 @@ double Network::executemaster()
 	{
 		this->read_transit_path_sets (workingdir +"path_set_generation.dat");
 	}
-	if (theParameters->pass_day_to_day_indicator ==1)
+	if (theParameters->pass_day_to_day_indicator == 1)
 	{
 		this->read_transitday2day (workingdir +"transit_day2day.dat");
 	}
-	if (theParameters->in_vehicle_d2d_indicator ==1)
+	if (theParameters->in_vehicle_d2d_indicator == 1)
 	{
 		this->read_IVTT_day2day (workingdir +"transit_day2day_onboard.dat");
 	}
@@ -7247,12 +7318,12 @@ double Network::step(double timestep)
 				}
 			}
 
-			if (theParameters->pass_day_to_day_indicator == true)
+			if (theParameters->pass_day_to_day_indicator > 0)
 			{
 				crit[wt] = insert(wt_rec, day2day->process_wt_replication(odstops, wt_rec)); //insert result from day2day learning in data container
 			}
 
-			if (theParameters->in_vehicle_d2d_indicator == true)
+			if (theParameters->in_vehicle_d2d_indicator > 0)
 			{
 				crit[ivt] = insert(ivt_rec, day2day->process_ivt_replication(odstops, ivt_rec)); //insert result from day2day learning in data container
 			}

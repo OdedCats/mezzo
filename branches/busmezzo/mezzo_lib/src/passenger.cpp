@@ -67,7 +67,7 @@ void Passenger::reset ()
 void Passenger::init ()
 {
 	RTI_network_level = random->brandom(theParameters->share_RTI_network);
-	if (theParameters->pass_day_to_day_indicator == true)
+	if (theParameters->pass_day_to_day_indicator == 1)
 	{
 		anticipated_waiting_time = OD_stop->get_anticipated_waiting_time(); //Changed by Jens 2014-06-27, here a local object with the same name was initialized, so the Passenger object was not updated
 		/*for (map<pair<Busstop*, Busline*>,double>::iterator stopline_iter = anticipated_waiting_time.begin(); stopline_iter != anticipated_waiting_time.end(); stopline_iter++)
@@ -88,10 +88,9 @@ void Passenger::init ()
 			alpha_exp[stopline] = (*stopline_iter).second;
 		}*/
 	}
-	if (theParameters->in_vehicle_d2d_indicator == true)
+	if (theParameters->in_vehicle_d2d_indicator == 1)
 	{
 		anticipated_ivtt = OD_stop->get_anticipated_ivtt();
-		ivtt_alpha_exp = OD_stop->get_ivtt_alpha_exp();
 	}
 }
 
@@ -145,6 +144,30 @@ double Passenger::get_memory_projected_RTI (Busstop* stop, Busline* line)
 	return memory_projected_RTI[stopline];
 }
 
+void Passenger::set_anticipated_waiting_time (Busstop* stop, Busline* line, double anticipated_WT)
+{
+	pair<Busstop*, Busline*> stopline;
+	stopline.first = stop;
+	stopline.second = line;
+	anticipated_waiting_time[stopline] = anticipated_WT;
+}
+
+void Passenger::set_alpha_RTI (Busstop* stop, Busline* line, double alpha)
+{
+	pair<Busstop*, Busline*> stopline;
+	stopline.first = stop;
+	stopline.second = line;
+	alpha_RTI[stopline] = alpha;
+}
+
+void Passenger::set_alpha_exp (Busstop* stop, Busline* line, double alpha)
+{
+	pair<Busstop*, Busline*> stopline;
+	stopline.first = stop;
+	stopline.second = line;
+	alpha_exp[stopline] = alpha;
+}
+
 double Passenger::get_anticipated_waiting_time (Busstop* stop, Busline* line)
 {
 	pair<Busstop*, Busline*> stopline;
@@ -175,6 +198,15 @@ bool Passenger::any_previous_exp_ODSL (Busstop* stop, Busline* line)
 	stopline.first = stop;
 	stopline.second = line;
 	return alpha_exp.count(stopline);
+}
+
+void Passenger::set_anticipated_ivtt (Busstop* stop, Busline* line, Busstop* leg, double anticipated_ivt)
+{
+	SLL stoplineleg;
+	stoplineleg.stop = stop;
+	stoplineleg.line = line;
+	stoplineleg.leg = leg;
+	anticipated_ivtt[stoplineleg] = anticipated_ivt;
 }
 
 double Passenger::get_anticipated_ivtt (Busstop* stop, Busline* line, Busstop* leg)
