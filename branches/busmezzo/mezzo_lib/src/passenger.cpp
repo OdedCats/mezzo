@@ -42,7 +42,7 @@ Passenger::Passenger (int pass_id, double start_time_, ODstops* OD_stop_)
 	}
 	memory_projected_RTI.clear();
 	arrival_time_at_stop = 0;
-
+	this_is_the_last_stop = false;
 }
 
 Passenger::~Passenger()
@@ -54,7 +54,12 @@ void Passenger::reset ()
 {
 	boarding_decision = false;
 	already_walked = false;
-	//start_time = 0; 
+
+	double new_start_time = 0; 
+	while (new_start_time <= theParameters->start_pass_generation || new_start_time > theParameters->stop_pass_generation)
+		new_start_time = start_time + theRandomizers[0]->urandom(-300, 300); //The passengers should arrive at stops a little bit randomly, otherwise they might face the exact same situation every day
+	start_time = new_start_time;
+
 	end_time = 0;
 	nr_boardings = 0;
 	AWT_first_leg_boarding = 0;
@@ -62,11 +67,16 @@ void Passenger::reset ()
 	memory_projected_RTI.clear();
 	arrival_time_at_stop = 0;
 	OD_stop = original_origin->get_stop_od_as_origin_per_stop (OD_stop->get_destination());
+
+	selected_path_stops.clear();
+	selected_path_trips.clear();
+	experienced_crowding_levels.clear();
+	waiting_time_due_denied_boarding.clear();
 }
 
 void Passenger::init ()
 {
-	RTI_network_level = random->brandom(theParameters->share_RTI_network);
+	RTI_network_level = theRandomizers[0]->brandom(theParameters->share_RTI_network);
 	if (theParameters->pass_day_to_day_indicator == 1)
 	{
 		anticipated_waiting_time = OD_stop->get_anticipated_waiting_time(); //Changed by Jens 2014-06-27, here a local object with the same name was initialized, so the Passenger object was not updated
@@ -173,7 +183,7 @@ double Passenger::get_anticipated_waiting_time (Busstop* stop, Busline* line)
 	pair<Busstop*, Busline*> stopline;
 	stopline.first = stop;
 	stopline.second = line;
-	return anticipated_waiting_time[stopline];
+	return anticipated_waiting_time[stopline] / 60; //in minutes
 }
 
 double Passenger::get_alpha_RTI (Busstop* stop, Busline* line)
@@ -304,7 +314,7 @@ void Passenger::start (Eventlist* eventlist)
 			}
 			set_ODstop(connection_stop->get_stop_od_as_origin_per_stop(OD_stop->get_destination())); // set this stop as his new origin (new OD)
 			map<Busstop*,double> walk_dis = OD_stop->get_origin()->get_walking_distances();
-			double arrival_time_to_connected_stop = start_time + walk_dis[connection_stop] / random->nrandom (theParameters->average_walking_speed, theParameters->average_walking_speed/4);
+			double arrival_time_to_connected_stop = start_time + walk_dis[connection_stop] / theRandomizers[0]->nrandom (theParameters->average_walking_speed, theParameters->average_walking_speed/4);
 			eventlist->add_event(arrival_time_to_connected_stop, this);
 			//execute(eventlist, arrival_time_to_connected_stop);
 			pair<Busstop*,double> stop_time;
@@ -344,23 +354,28 @@ bool Passenger:: make_boarding_decision (Bustrip* arriving_bus, double time)
 		case 3:
 			// use the od based on last stop on record (in case of connections)
 			boarding_prob = od->calc_boarding_probability(arriving_bus->get_line(), time, this);
-			boarding_decision = random ->brandom(boarding_prob);
-			//OD_stop->record_passenger_boarding_decision (this, arriving_bus, time, boarding_prob, boarding_decision);
+			boarding_decision = theRandomizers[0]->brandom(boarding_prob);
+			OD_stop->record_passenger_boarding_decision (this, arriving_bus, time, boarding_prob, boarding_decision);
 			if (boarding_decision == 1)
 			{
-				int level_of_rti_upon_decision = curr_stop->get_rti();
-				if (RTI_network_level == 1)
-				{
-					level_of_rti_upon_decision = 3;
-				}
-				ODstops* passenger_od = original_origin->get_stop_od_as_origin_per_stop(OD_stop->get_destination()); //Jens changed this 2014-06-24, this enables remembering waiting time not only for the first stop of trip
-				passenger_od->record_waiting_experience(this, arriving_bus, time, level_of_rti_upon_decision,this->get_memory_projected_RTI(curr_stop,arriving_bus->get_line()),AWT_first_leg_boarding);
-				//OD_stop->record_waiting_experience(this, arriving_bus, time, level_of_rti_upon_decision,this->get_memory_projected_RTI(curr_stop,arriving_bus->get_line()),AWT_first_leg_boarding);
+				rejected_lines.clear();
+				//int level_of_rti_upon_decision = curr_stop->get_rti(); //Everything moved to other places by Jens
+				//if (RTI_network_level == 1)
+				//{
+				//	level_of_rti_upon_decision = 3;
+				//}
+				////ODstops* passenger_od = original_origin->get_stop_od_as_origin_per_stop(OD_stop->get_destination()); //Jens changed this 2014-06-24, this enables remembering waiting time not only for the first stop of trip
+				////passenger_od->record_waiting_experience(this, arriving_bus, time, level_of_rti_upon_decision,this->get_memory_projected_RTI(curr_stop,arriving_bus->get_line()),AWT_first_leg_boarding);
+				////OD_stop->record_waiting_experience(this, arriving_bus, time, level_of_rti_upon_decision,this->get_memory_projected_RTI(curr_stop,arriving_bus->get_line()),AWT_first_leg_boarding);
+			}
+			else
+			{
+				rejected_lines.push_back(arriving_bus->get_line()->get_id());
 			}
 			break;
 		case 4:
 			boarding_prob = calc_boarding_probability_zone(arriving_bus->get_line(), curr_stop, time);
-			boarding_decision = random ->brandom(boarding_prob);
+			boarding_decision = theRandomizers[0] ->brandom(boarding_prob);
 			o_zone->record_passenger_boarding_decision_zone(this, arriving_bus, time, boarding_prob, boarding_decision);
 	}
 	if (boarding_decision == true)
@@ -368,6 +383,45 @@ bool Passenger:: make_boarding_decision (Bustrip* arriving_bus, double time)
 		nr_boardings++;
 	}
 	return boarding_decision;
+}
+
+//void Passenger::set_left_behind(double time)
+//{
+//	if (!left_behind_before) //If this is the first time the passenger was left behind
+//	{
+//		first_bus_arrival_time = time;
+//		left_behind_before = true;
+//	}
+//}
+
+void Passenger::record_waiting_experience(Bustrip* arriving_bus, double time)
+{
+	if(theParameters->demand_format == 3)
+	{
+		Busstop* curr_stop = OD_stop->get_origin();
+		bool left_behind_before = !empty_denied_boarding() && curr_stop->get_id() == get_last_denied_boarding_stop_id();
+		double experienced_WT;
+		if (left_behind_before)
+		{
+			double first_bus_arrival_time = waiting_time_due_denied_boarding.back().second;
+			/*for (vector<pair<Busstop*,double>>::iterator denied_boarding = waiting_time_due_denied_boarding.end(); denied_boarding > waiting_time_due_denied_boarding.begin();)
+			{
+				denied_boarding--;
+				if (denied_boarding->first->get_id() != curr_stop->get_id())
+					break;
+				first_bus_arrival_time = denied_boarding->second;
+			}*/
+			experienced_WT = (first_bus_arrival_time - get_arrival_time_at_stop()) + 3.5 * (time - first_bus_arrival_time);
+		}
+		else
+		{
+			experienced_WT = time - get_arrival_time_at_stop();
+		}
+		
+		ODstops* passenger_od = original_origin->get_stop_od_as_origin_per_stop(OD_stop->get_destination());
+		passenger_od->record_waiting_experience(this, arriving_bus, time, experienced_WT, curr_stop->get_rti(), this->get_memory_projected_RTI(curr_stop,arriving_bus->get_line()), AWT_first_leg_boarding, waiting_time_due_denied_boarding.size());
+		//left_behind_before = false;
+	}
 }
 
 Busstop* Passenger::make_alighting_decision (Bustrip* boarding_bus, double time) // assuming that all passenger paths involve only direct trips
@@ -450,7 +504,7 @@ Busstop* Passenger::make_alighting_decision (Bustrip* boarding_bus, double time)
 	{
 		alighting_probs.push_back((*stops_probs).second);
 	}
-	int transfer_stop_position = random->mrandom(alighting_probs);
+	int transfer_stop_position = theRandomizers[0]->mrandom(alighting_probs);
 	int iter = 0;
 	for (map <Busstop*, double>::iterator stops_probs = candidate_transfer_stops_p.begin(); stops_probs != candidate_transfer_stops_p.end(); stops_probs++)
 	{
@@ -524,7 +578,7 @@ Busstop* Passenger::make_connection_decision (double time)
 				if ((*connected_stop)->get_id() == OD_stop->get_destination()->get_id())
 				// in case it is the final destination for this passeneger
 				{
-					candidate_connection_stops_u[(*connected_stop)] = theParameters->walking_time_coefficient * (*path_iter)->get_walking_distances().front() / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4);
+					candidate_connection_stops_u[(*connected_stop)] = theParameters->walking_time_coefficient * (*path_iter)->get_walking_distances().front() / theRandomizers[0]->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4);
 					// the only utility component is the CT (walking time) till the destination
 				}	 
 				else
@@ -602,7 +656,7 @@ Busstop* Passenger::make_first_stop_decision (double time)
 					vector<vector<Busstop*>> alt_stops = (*path_iter)->get_alt_transfer_stops();
 					vector<vector<Busstop*>>::iterator stops_iter = alt_stops.begin();
 					// taking into account the walking distances from the origin to the origin stop and from the last stop till the final destination
-					candidate_origin_stops_u[(*o_stop_iter).first] += exp(theParameters->walking_time_coefficient * origin_walking_distances[(*o_stop_iter).first]/ random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4) + theParameters->walking_time_coefficient * destination_walking_distances[(*d_stop_iter).first]/ random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4) + possible_od->calc_combined_set_utility_for_connection ((*path_iter)->get_walking_distances().front(), time, this));
+					candidate_origin_stops_u[(*o_stop_iter).first] += exp(theParameters->walking_time_coefficient * origin_walking_distances[(*o_stop_iter).first]/ theRandomizers[0]->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4) + theParameters->walking_time_coefficient * destination_walking_distances[(*d_stop_iter).first]/ theRandomizers[0]->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4) + possible_od->calc_combined_set_utility_for_connection ((*path_iter)->get_walking_distances().front(), time, this));
 				}
 			}
 			candidate_origin_stops_u[(*o_stop_iter).first] = log (candidate_origin_stops_u[(*o_stop_iter).first]);
@@ -625,7 +679,7 @@ Busstop* Passenger::make_first_stop_decision (double time)
 	{
 		origin_probs.push_back((*stops_probs).second);
 	}
-	int origin_stop_position = random->mrandom(origin_probs);
+	int origin_stop_position = theRandomizers[0]->mrandom(origin_probs);
 	int iter = 0;
 	for (map <Busstop*, double>::iterator stops_probs = candidate_origin_stops_p.begin(); stops_probs != candidate_origin_stops_p.end(); stops_probs++)
 	{
@@ -655,7 +709,7 @@ map<Busstop*,double> Passenger::sample_walking_distances (ODzone* zone)
 	map <Busstop*,pair<double,double>> stop_distances = zone->get_stop_distances();
 	for (map <Busstop*,pair<double,double>>::iterator stop_iter = stop_distances.begin(); stop_iter != stop_distances.end(); stop_iter++)
 	{
-			walking_distances[(*stop_iter).first] = random->nrandom((*stop_iter).second.first, (*stop_iter).second.second);
+			walking_distances[(*stop_iter).first] = theRandomizers[0]->nrandom((*stop_iter).second.first, (*stop_iter).second.second);
 	}
 	return walking_distances;
 }
@@ -711,7 +765,7 @@ double Passenger::calc_boarding_probability_zone (Busline* arriving_bus, Busstop
 					{
 						if ((*iter_first_leg_lines)->get_id() == arriving_bus->get_id()) // if the arriving bus is a possible first leg for this path alternative
 						{
-						path_utility = (*iter_paths)->calc_arriving_utility(time, this) + theParameters->waiting_time_coefficient * (destination_walking_distances[(*iter_d_stops).first] / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4));
+						path_utility = (*iter_paths)->calc_arriving_utility(time, this) + theParameters->waiting_time_coefficient * (destination_walking_distances[(*iter_d_stops).first] / theRandomizers[0]->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4));
 							// including the walking time from the last stop till the final destination
 							boarding_utility += exp(path_utility); 
 							arriving_paths.push_back((*iter_paths));
@@ -731,7 +785,7 @@ double Passenger::calc_boarding_probability_zone (Busline* arriving_bus, Busstop
 				if ((*iter_paths)->get_arriving_bus_rellevant() == false)
 				{
 					// logsum calculation
-				path_utility = (*iter_paths)->calc_waiting_utility((*iter_paths)->get_alt_transfer_stops().begin(), time, false, this) + theParameters->walking_time_coefficient * (destination_walking_distances[(*iter_d_stops).first] / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4));
+				path_utility = (*iter_paths)->calc_waiting_utility((*iter_paths)->get_alt_transfer_stops().begin(), time, false, this) + theParameters->walking_time_coefficient * (destination_walking_distances[(*iter_d_stops).first] / theRandomizers[0]->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4));
 					// including the walking time from the last stop till the final destination
 					staying_utility += exp(path_utility);
 				}
@@ -810,7 +864,7 @@ Busstop* Passenger::make_alighting_decision_zone (Bustrip* boarding_bus, double 
 	{
 		alighting_probs.push_back((*stops_probs).second);
 	}
-	int transfer_stop_position = random->mrandom(alighting_probs);
+	int transfer_stop_position = theRandomizers[0]->mrandom(alighting_probs);
 	int iter = 0;
 	for (map <Busstop*, double>::iterator stops_probs = candidate_transfer_stops_p.begin(); stops_probs != candidate_transfer_stops_p.end(); stops_probs++)
 	{
@@ -844,7 +898,7 @@ Busstop* Passenger::make_connection_decision_zone (double time)
 	{
 		if (destination_walking_distances[OD_stop->get_origin()] < theParameters->max_walking_distance)
 		{
-			u_walk_directly = theParameters->walking_time_coefficient * destination_walking_distances[OD_stop->get_origin()] / random->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4);
+			u_walk_directly = theParameters->walking_time_coefficient * destination_walking_distances[OD_stop->get_origin()] / theRandomizers[0]->nrandom(theParameters->average_walking_speed, theParameters->average_walking_speed/4);
 		}
 	}
 	map <Busstop*,pair<double,double>> distances = d_zone->get_stop_distances();
@@ -884,7 +938,7 @@ Busstop* Passenger::make_connection_decision_zone (double time)
 	// perform choice
 
 	// first - decide whether to walk directly to the destination or continue the trnasit trip
-	this_is_the_last_stop = random ->brandom(OD_stop->calc_binary_logit(u_walk_directly,u_continue_transit_trip)); 
+	this_is_the_last_stop = theRandomizers[0] ->brandom(OD_stop->calc_binary_logit(u_walk_directly,u_continue_transit_trip)); 
 	if (this_is_the_last_stop == true)
 	{
 		pair<Busstop*,double> stop_time;
@@ -899,7 +953,7 @@ Busstop* Passenger::make_connection_decision_zone (double time)
 	{
 		connecting_probs.push_back((*stops_probs).second);
 	}
-	int transfer_stop_position = random->mrandom(connecting_probs);
+	int transfer_stop_position = theRandomizers[0]->mrandom(connecting_probs);
 	int iter = 0;
 	for (map <Busstop*, double>::iterator stops_probs = candidate_connection_stops_p.begin(); stops_probs != candidate_connection_stops_p.end(); stops_probs++)
 	{
@@ -1022,6 +1076,13 @@ double Passenger::calc_total_waiting_time_due_to_denied_boarding()
 	}
 	return total_walking_time_due_to_denied_boarding;
 }
+
+bool Passenger::line_is_rejected(int id) 
+{
+	vector<int>::iterator it = find(rejected_lines.begin(),rejected_lines.end(), id); 
+	return it != rejected_lines.end();
+}
+
 
 void Passenger::write_selected_path(ostream& out)
 {

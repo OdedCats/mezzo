@@ -148,6 +148,7 @@ public:
 #endif //_NO_GUI
 	double executemaster(); //!< without GUI
 	int reset(); //!< resets the simulation to 0, clears all the state variables. returns runtime
+	void delete_passengers(); //Delete all passengers
 	void end_of_simulation(double time); //!< finalise all the temp values into containers (linktimes)
 	double step(double timestep); //!< executes one step of simulation, called by the gui, returns current value of time
 	bool writeall(unsigned int repl=0); //writes the output, appends replication number to output files
@@ -288,9 +289,11 @@ public:
   vector<vector<Busline*>> compose_line_sequence (Busstop* destination);  // compose the list of direct lines between each pair of intermediate stops
   vector<vector<Busstop*>> compose_stop_sequence ();  // compose the list of stops in path definiton structure
  void find_all_paths (); // goes over all OD pairs to generate their path choice set
+ void find_all_paths_fast ();
  void find_all_paths_with_OD_for_generation ();
 //  void find_recursive_connection (Busstop* origin, Busstop* destination); // search recursively for a path (forward - from origin to destination) WITHOUT walking links
   void find_recursive_connection_with_walking (Busstop* origin, Busstop* destination); // search recursively for a path (forward - from origin to destination) WITH walking links
+  void find_recursive_connection_with_walking (Busstop* origin); // search recursively for paths (forward - from origin) WITH walking links
   void merge_paths_by_stops (Busstop* origin_stop, Busstop* destination_stop);  // merge paths with same lines for all legs (only different transfer stops)
   void merge_paths_by_common_lines (Busstop* origin_stop, Busstop* destination_stop);  // merge paths with lines that have identical route between consecutive stops
   bool compare_same_lines_paths (Pass_path* path1, Pass_path* path2); // checks if two paths are identical in terms of lines
@@ -528,13 +531,16 @@ public:
 	  }
 	void saveresults (unsigned int replication = 0)
 	  {
-			cout << "Saving results" << endl;
+		  cout << "Saving results" << endl;
 		  theNetwork->writeall(replication);
 		  cout << "Saved and done!" << endl;
 	  }
 	void reset ()
 	{
+		cout << "Resetting" << endl;
+		theNetwork->delete_passengers();
 		theNetwork->reset();
+		cout << "Reset done!" << endl;
 	}
 	 ~NetworkThread () 
 	  {

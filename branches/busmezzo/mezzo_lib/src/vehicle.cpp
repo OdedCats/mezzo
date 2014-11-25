@@ -113,7 +113,7 @@ VehicleRecycler::	~VehicleRecycler()
 void Bus::reset ()
 {
 	occupancy = 0;
-	on_trip = false;
+	on_trip = true;
 	type = 4;
 	output_vehicle.clear();
 }

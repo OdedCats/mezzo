@@ -121,6 +121,7 @@ void ODstops::reset()
 	output_pass_connection_decision.clear();
 	output_pass_waiting_experience.clear();
 	output_pass_onboard_experience.clear();
+	paths_tt.clear();
 	//passengers_during_simulation.clear();
 	if (theParameters->pass_day_to_day_indicator > 0 || theParameters->in_vehicle_d2d_indicator > 0)
 	{
@@ -150,7 +151,7 @@ bool ODstops::execute (Eventlist* eventlist, double curr_time) // generate passe
 	if (check_path_set() == true && active == false)
 	{
 		active = true;
-		curr_time = theParameters->start_pass_generation + random -> erandom (arrival_rate / 3600.0); // passenger arrival is assumed to be a poission process (exp headways)
+		curr_time = theParameters->start_pass_generation + theRandomizers[0]->erandom(arrival_rate / 3600.0); // passenger arrival is assumed to be a poission process (exp headways)
 		while (curr_time < theParameters->stop_pass_generation)
 		{
 			Passenger* pass = new Passenger(pid, curr_time, this);
@@ -158,7 +159,7 @@ bool ODstops::execute (Eventlist* eventlist, double curr_time) // generate passe
 			pid++; 
 			pass->init();
 			eventlist->add_event(curr_time, pass);
-			curr_time += random -> erandom (arrival_rate / 3600.0);
+			curr_time += theRandomizers[0]->erandom(arrival_rate / 3600.0);
 		}
 	}
 	else
@@ -242,7 +243,8 @@ double ODstops::calc_boarding_probability (Busline* arriving_bus, double time, P
 				// logsum calculation
 				if (check_if_path_is_dominated((*iter_paths), arriving_paths) == false)
 				{
-					path_utility = (*iter_paths)->calc_waiting_utility((*iter_paths)->get_alt_transfer_stops().begin(), time, false, pass);
+					//path_utility = (*iter_paths)->calc_waiting_utility((*iter_paths)->get_alt_transfer_stops().begin(), time, false, pass); //Changed by Jens 2014-10-16, transfer penalty is added to disutility of staying to help passengers make up their mind faster
+					path_utility = (*iter_paths)->calc_waiting_utility((*iter_paths)->get_alt_transfer_stops().begin(), time, false, pass) + random->nrandom(theParameters->transfer_coefficient, theParameters->transfer_coefficient / 4);
 					set_utilities[(*iter_paths)].first = false;
 					set_utilities[(*iter_paths)].second = path_utility;
 					staying_utility += exp(path_utility);
@@ -598,11 +600,11 @@ void ODstops::record_passenger_connection_decision (Passenger* pass, double time
 	output_pass_connection_decision[pass].push_back(Pass_connection_decision(pass->get_id(), pass->get_original_origin()->get_id(), pass->get_OD_stop()->get_destination()->get_id(), pass->get_OD_stop()->get_origin()->get_id() , time, pass->get_start_time(), chosen_alighting_stop->get_id(), connecting_MNL_)); 
 }
 
-void ODstops::record_waiting_experience(Passenger* pass, Bustrip* trip, double time, int level_of_rti_upon_decision, double projected_RTI, double AWT)  //  add to output structure action info
+void ODstops::record_waiting_experience(Passenger* pass, Bustrip* trip, double time, double experienced_WT, int level_of_rti_upon_decision, double projected_RTI, double AWT, int nr_missed)  //  add to output structure action info
 {
 	double expected_WT_PK = (trip->get_line()->calc_curr_line_headway())/2; // in seconds
-	double experienced_WT = time - pass->get_arrival_time_at_stop();
-	output_pass_waiting_experience[pass].push_back(Pass_waiting_experience(pass->get_id(), pass->get_original_origin()->get_id(), pass->get_OD_stop()->get_destination()->get_id(), trip->get_line()->get_id(), trip->get_id() , pass->get_OD_stop()->get_origin()->get_id() , time, pass->get_start_time(), expected_WT_PK, level_of_rti_upon_decision, projected_RTI ,experienced_WT, AWT)); 
+	//double experienced_WT = time - pass->get_arrival_time_at_stop();
+	output_pass_waiting_experience[pass].push_back(Pass_waiting_experience(pass->get_id(), pass->get_original_origin()->get_id(), pass->get_OD_stop()->get_destination()->get_id(), trip->get_line()->get_id(), trip->get_id() , pass->get_OD_stop()->get_origin()->get_id() , time, pass->get_start_time(), expected_WT_PK, level_of_rti_upon_decision, projected_RTI ,experienced_WT, AWT, nr_missed)); 
 }
 
 void ODstops::record_onboard_experience(Passenger* pass, Bustrip* trip, double time, Busstop* stop, pair<double,double> riding_coeff)

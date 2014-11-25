@@ -89,12 +89,12 @@ class Pass_waiting_experience // container object holding output data for passen
 {
 public:
 	Pass_waiting_experience (int pass_id_, int original_origin_, int destination_stop_, int line_id_, int trip_id_, int stop_id_, double time_,	double generation_time_,
-							double expected_WT_PK_, bool RTI_level_available_ ,double projected_WT_RTI_, double experienced_WT_, double AWT_):
+							double expected_WT_PK_, bool RTI_level_available_, double projected_WT_RTI_, double experienced_WT_, double AWT_, int nr_missed_):
 							pass_id(pass_id_),original_origin(original_origin_),destination_stop(destination_stop_),line_id(line_id_),trip_id(trip_id_), stop_id(stop_id_),time(time_),generation_time(generation_time_),expected_WT_PK(expected_WT_PK_),RTI_level_available(RTI_level_available_),projected_WT_RTI(projected_WT_RTI_),
-							experienced_WT(experienced_WT_),AWT(AWT_) {}
+							experienced_WT(experienced_WT_),AWT(AWT_),nr_missed(nr_missed_) {}
 	virtual ~Pass_waiting_experience(); //!< destructor
 	void write (ostream& out) { out << pass_id << '\t' << original_origin << '\t' << destination_stop << '\t' << line_id << '\t'<< trip_id << '\t'<< stop_id<< '\t'<< time << '\t'<< generation_time << '\t' << expected_WT_PK << '\t'
-		<< RTI_level_available << '\t'<< projected_WT_RTI << '\t'<< experienced_WT <<'\t'<< AWT <<'\t'<< endl; }
+		<< RTI_level_available << '\t'<< projected_WT_RTI << '\t'<< experienced_WT <<'\t'<< AWT <<'\t'<< nr_missed <<'\t'<< endl; }
 	void reset () { pass_id = 0; original_origin = 0; destination_stop = 0; line_id = 0; trip_id = 0; stop_id = 0; time = 0;
 	generation_time = 0; expected_WT_PK = 0; RTI_level_available = 0; projected_WT_RTI = 0; experienced_WT = 0; AWT = 0;}
 	int pass_id;
@@ -103,6 +103,7 @@ public:
 	int line_id;
 	int trip_id;
 	int stop_id;
+	int nr_missed; //Nr of missed buses due to overcrowding
 	double time;
 	double generation_time;
 	double expected_WT_PK;
@@ -202,7 +203,7 @@ public:
 	void record_passenger_boarding_decision (Passenger* pass, Bustrip* trip, double time, double boarding_probability, bool boarding_decision); //!< creates a log-file for boarding decision related info
 	void record_passenger_alighting_decision (Passenger* pass, Bustrip* trip, double time, Busstop* chosen_alighting_stop, map<Busstop*,pair<double,double>> alighting_MNL); // !< creates a log-file for alighting decision related info
 	void record_passenger_connection_decision (Passenger* pass, double time, Busstop* chosen_alighting_stop, map<Busstop*,pair<double,double>> connecting_MNL_);
-	void record_waiting_experience (Passenger* pass, Bustrip* trip, double time, int level_of_rti_upon_decision, double projected_RTI, double AWT); // !< creates a log-file for a decision and related waiting time components
+	void record_waiting_experience (Passenger* pass, Bustrip* trip, double time, double experienced_WT, int level_of_rti_upon_decision, double projected_RTI, double AWT, int nr_missed); // !< creates a log-file for a decision and related waiting time components
 	void record_onboard_experience(Passenger* pass, Bustrip* trip, double time, Busstop* stop, pair<double,double> riding_coeff);
 	void write_boarding_output(ostream & out, Passenger* pass);
 	void write_alighting_output(ostream & out, Passenger* pass);

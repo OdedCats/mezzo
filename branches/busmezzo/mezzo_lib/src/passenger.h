@@ -80,6 +80,8 @@ public:
 	int get_last_denied_boarding_stop_id ();
 	bool empty_denied_boarding ();
 	void remove_last_trip_selected_path_trips () {selected_path_trips.pop_back();}
+	void record_waiting_experience(Bustrip* arriving_bus, double time);
+	//void set_left_behind(double time);
 
 	//Day2Day
 	void set_anticipated_waiting_time (Busstop* stop, Busline* line, double anticipated_WT);
@@ -100,6 +102,7 @@ public:
 	double calc_total_walking_time();
 	double calc_IVT_crowding();
 	double calc_total_waiting_time_due_to_denied_boarding();
+	bool line_is_rejected(int id); //If the passenger has rejected line with id the function returns true
 
 protected:
 	int passenger_id;
@@ -120,8 +123,11 @@ protected:
 	vector <pair<Bustrip*,double>> selected_path_trips; // trips and corresponding boarding times
 	vector <pair<double,double>> experienced_crowding_levels; // IVT and corresponding crowding levels (route segment level)
 	vector <pair<Busstop*,double>> waiting_time_due_denied_boarding; // stops at which the pass. experienced denied boarding and the corresponding time at which it was experienced
+	vector<int> rejected_lines; //To keep track of the lines that the passenger chose not to board earlier, these should not be regarded next time
 	bool RTI_network_level;
 	double arrival_time_at_stop;
+	//double first_bus_arrival_time; //Used to calculate weighted waiting time in case the first bus is full
+	//bool left_behind_before;
 	map<pair<Busstop*, Busline*>,double> memory_projected_RTI; 
 	double AWT_first_leg_boarding;
 	

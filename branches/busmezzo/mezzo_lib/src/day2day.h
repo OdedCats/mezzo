@@ -117,7 +117,10 @@ private:
 
 	float kapa[4];
 
-	float v;
+	float v; //salience parameter
+	float v_c; //crowding salience parameter
+	float v1; //trust parameter
+	float r; //recency parameter
 	int nr_of_reps;
 	int day;
 	bool aggregate;
@@ -127,9 +130,31 @@ private:
 	void calc_anticipated_wt (Travel_time& row);
 	void calc_anticipated_ivt (Travel_time& row);
 
+	int nr_of_passengers;
+	int nr_of_changes;
+	int nr_of_legs;
+	double total_waiting_time;
+	double total_wt_pk;
+	double total_wt_rti;
+	double total_wt_exp;
+	double total_wt_anticip;
+	int total_nr_missed;
+	double total_in_vehicle_time;
+	double total_ivt_pk;
+	double total_ivt_exp;
+	double total_ivt_anticip;
+	double total_crowding;
+	double total_acrowding;
+	int nr_on_line_2;
+
 public:
 	Day2day (int nr_of_reps_);
+	void set_salience(float v_) {v = v_;};
+	void set_crowding_salience(float v_c_) {v_c = v_c_;};
+	void set_trust(float v1_) {v1 = v1_;};
+	void set_recency(float r_) {r = r_;};
 	void update_day (int d);
+	void write_output (string filename);
 	map<ODSL, Travel_time>& process_wt_replication (vector<ODstops*>& odstops, map<ODSL, Travel_time> wt_rec);
 	map<ODSLL, Travel_time>& process_ivt_replication (vector<ODstops*>& odstops, map<ODSLL, Travel_time> ivt_rec);
 };

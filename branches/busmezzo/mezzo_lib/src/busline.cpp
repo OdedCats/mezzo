@@ -899,6 +899,7 @@ bool Bustrip::activate (double time, Route* route, ODpair* odpair, Eventlist* ev
 {
 	// inserts the bus at the origin of the route
 	// if the assigned bus isn't avaliable at the scheduled time, then the trip is activated by Bus::advance_curr_trip as soon as it is done with the previous trip
+	double first_dispatch_time = time;
 	eventlist = eventlist_;
 	next_stop = stops.begin();
 	bool ok = false; // flag to check if all goes ok
@@ -929,13 +930,16 @@ bool Bustrip::activate (double time, Route* route, ODpair* odpair, Eventlist* ev
 			return ok;
 		}
 		busv->set_curr_trip(this);	
-		time = (*previous_trip)->first->get_last_stop_exit_time(); //Added by Jens 2014-07-03
-		if (busv->get_route() != NULL)
-			cout << "Warning, the route is changing!" << endl;
+		first_dispatch_time = (*previous_trip)->first->get_last_stop_exit_time(); //Added by Jens 2014-07-03
+		/*if (busv->get_route() != NULL)
+			cout << "Warning, the route is changing!" << endl;*/
 	}
+	double dispatch_time = calc_departure_time(first_dispatch_time);
+	if (dispatch_time < time)
+		cout << "Warning, dispatch time is before current time for bus trip " << id << endl;
 	busv->init(busv->get_id(),4,busv->get_length(),route,odpair,time); // initialize with the trip specific details
 	busv->set_occupancy(random->inverse_gamma(nr_stops_init_occup,init_occup_per_stop));
-	if ( (odpair->get_origin())->insert_veh(busv, calc_departure_time(time))) // insert the bus at the origin at the possible departure time
+	if ( (odpair->get_origin())->insert_veh(busv, dispatch_time)) // insert the bus at the origin at the possible departure time
 	{
   		busv->set_on_trip(true); // turn on indicator for bus on a trip
 		ok = true;
@@ -1740,6 +1744,7 @@ double Busstop::passenger_activity_at_stop (Eventlist* eventlist, Bustrip* trip,
 						{
 							// if the bus is not completly full - then the passenger boards
 							// currently - alighting decision is made when boarding
+							(*check_pass)->record_waiting_experience(trip, time);
 							nr_boarding++;
 							pair<Bustrip*,double> trip_time;
 							trip_time.first = trip;
@@ -2403,7 +2408,7 @@ void Busstop::calculate_sum_output_stop_per_line(int line_id)
 				output_summary[line_id].total_stop_pass_dwell_time += (*iter1).dwell_time * (*iter1).occupancy;
 				output_summary[line_id].total_stop_pass_waiting_time += ((*iter1).time_since_arr * (*iter1).nr_boarding) / 2;
 				output_summary[line_id].total_stop_pass_holding_time += (*iter1).holding_time * (*iter1).occupancy;
-				output_summary[line_id].total_stop_pass_holding_time += (*iter1).holding_time;
+				//output_summary[line_id].total_stop_pass_holding_time += (*iter1).holding_time;
 				output_summary[line_id].total_stop_travel_time_crowding += (*iter1).crowded_pass_riding_time + (*iter1).crowded_pass_dwell_time + (*iter1).crowded_pass_holding_time;
 				if ((*iter1).lateness > 300)
 				{
