@@ -243,7 +243,7 @@ bool Passenger::any_previous_exp_ivtt (Busstop* stop, Busline* line, Busstop* le
 	stoplineleg.stop = stop;
 	stoplineleg.line = line;
 	stoplineleg.leg = leg;
-	return ivtt_alpha_exp.count(stoplineleg);
+	return anticipated_ivtt.count(stoplineleg);
 }
 
 bool Passenger::execute(Eventlist *eventlist, double time)

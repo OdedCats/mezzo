@@ -70,6 +70,7 @@ struct ODSLL
 struct Travel_time //structure for saving and adding data
 {
 	int counter;
+	int day;
 	float tt[5];
 	float alpha[3];
 	float convergence;
@@ -149,12 +150,13 @@ private:
 
 public:
 	Day2day (int nr_of_reps_);
+	void reset ();
 	void set_salience(float v_) {v = v_;};
 	void set_crowding_salience(float v_c_) {v_c = v_c_;};
 	void set_trust(float v1_) {v1 = v1_;};
 	void set_recency(float r_) {r = r_;};
 	void update_day (int d);
-	void write_output (string filename);
+	void write_output (string filename, string addition);
 	map<ODSL, Travel_time>& process_wt_replication (vector<ODstops*>& odstops, map<ODSL, Travel_time> wt_rec);
 	map<ODSLL, Travel_time>& process_ivt_replication (vector<ODstops*>& odstops, map<ODSLL, Travel_time> ivt_rec);
 };

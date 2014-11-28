@@ -25,9 +25,11 @@ map<id_type, Travel_time>& operator << (map<id_type, Travel_time>& ODSLreg, pair
 	if (odsl_sum != ODSLreg.end())
 	{
 		row.second.convergence = row.second / odsl_sum->second;
+		row.second.day++;
 		odsl_sum->second = row.second;
 	}
 	else
+		row.second.day = 1;
 		ODSLreg.insert(row);
 	return ODSLreg;
 };
@@ -83,6 +85,7 @@ void insert_alphas (const id_type& tt_odsl, Travel_time& tt, map<id_type, Travel
 	tt.alpha[0] = alpha_base[0];
 	tt.alpha[1] = alpha_base[1];
 	tt.alpha[2] = alpha_base[2];
+	tt.day = 1;
 
 	tt.counter = 1;
 	tt.convergence = 2.0f;
@@ -97,6 +100,7 @@ void insert_alphas (const id_type& tt_odsl, Travel_time& tt, map<id_type, Travel
 			tt.alpha[RTI] = odsl->second.alpha[RTI];
 			tt.alpha[EXP] = odsl->second.alpha[EXP];
 			tt.alpha[PK] = odsl->second.alpha[PK];
+			tt.day = odsl->second.day + 1;
 		}
 	}
 };
@@ -131,6 +135,12 @@ Day2day::Day2day (int nr_of_reps_)
 		individual_ivt = false;
 }
 
+void Day2day::reset ()
+{
+	wt_day.clear();
+	ivt_day.clear();
+}
+
 void Day2day::update_day (int d)
 {
 	kapa[RTI] = sqrt(1.0f/d);
@@ -142,7 +152,7 @@ void Day2day::update_day (int d)
 	ivt_day.clear();
 }
 
-void Day2day::write_output (string filename)
+void Day2day::write_output (string filename, string addition)
 {
 	map<ODSL, Travel_time> temp_output;
 	for (map<ODSL, Travel_time>::iterator row = wt_day.begin(); row != wt_day.end(); row++)
@@ -185,7 +195,8 @@ void Day2day::write_output (string filename)
 	out1 << average_in_vehicle_time << "\t" << average_ivt_pk << "\t" << average_ivt_exp << "\t" << average_ivt_anticip << "\t";
 	out1 << average_travel_time << "\t" << nr_on_line_2 << "\t";
 	out1.precision(2);
-	out1 << average_nr_of_changes << "\t" << total_crowding / nr_of_legs << "\t" << total_acrowding / nr_of_legs << "\t" << average_nr_missed << endl;
+	out1 << average_nr_of_changes << "\t" << total_crowding / nr_of_legs << "\t" << total_acrowding / nr_of_legs << "\t" << average_nr_missed << "\t";
+	out1 << addition << endl;
 }
 
 map<ODSL, Travel_time>& Day2day::process_wt_replication (vector<ODstops*>& odstops, map<ODSL, Travel_time> wt_rec)
@@ -358,7 +369,7 @@ void Day2day::calc_anticipated_wt (Travel_time& row)
 	if (awtEXP >= 0) //If there is prior experience
 	{
 		awtG = alphaRTI * wtRTI + alphaEXP * awtEXP + alphaPK * wtPK;
-		float kapaAWT = 1 / pow(1 + day / pow(abs(awtEXP / wtEXP - 1) + 1, v), r);
+		float kapaAWT = 1 / pow(1 + row.day / pow(abs(awtEXP / wtEXP - 1) + 1, v), r);
 		awtEXP = (1 - kapaAWT) * awtEXP + kapaAWT * wtEXP;
 	}
 	else
@@ -407,14 +418,14 @@ void Day2day::calc_anticipated_ivt (Travel_time& row)
 	//calc aivt
 	if (aivtEXP >= 0)  //If there is prior experience
 	{
-		float kapaAWT = 1 / (1 + day / pow(abs(aivtEXP / ivtEXP - 1) + 1, v));
+		float kapaAWT = 1 / (1 + row.day / pow(abs(aivtEXP / ivtEXP - 1) + 1, v));
 		aivtEXP = (1 - kapaAWT) * aivtEXP + kapaAWT * ivtEXP;
 	}
 	else
 	{
 		aivtEXP = ivtEXP;
 	}
-	float kapaCrowd = 1 / (1 + day / pow(abs(acrowdingEXP / crowdingEXP - 1) + 1, v_c));
+	float kapaCrowd = 1 / (1 + row.day / pow(abs(acrowdingEXP / crowdingEXP - 1) + 1, v_c));
 	acrowdingEXP = (1 - kapaCrowd) * acrowdingEXP + kapaCrowd * crowdingEXP;
 
 	//calc temporary trust parameters for the alphas, to decide for which alpha trust should increase

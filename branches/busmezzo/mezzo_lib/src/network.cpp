@@ -6237,7 +6237,7 @@ bool Network::readparameters(string name)
 	assert (inputfile);
 	if (theParameters->read_parameters(inputfile))
 	{
-		if (theParameters->pass_day_to_day_indicator == true)
+		if (theParameters->pass_day_to_day_indicator)
 			SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
 		inputfile.close();
 		return true;
@@ -7469,6 +7469,7 @@ double Network::step(double timestep)
 		float theta = theParameters->break_criterium;
 		map<ODSL, Travel_time> wt_rec; //the record of waiting time data
 		map<ODSLL, Travel_time> ivt_rec; //the record of in-vehicle time data
+		day2day->reset();
 
 		for (int day = 1; (crit[wt] >= theta || crit[ivt] >= theta) && day <= 20; day++) //day2day
 		{
@@ -7509,7 +7510,8 @@ double Network::step(double timestep)
 				crit[ivt] = insert(ivt_rec, day2day->process_ivt_replication(odstops, ivt_rec)); //insert result from day2day learning in data container
 			}
 
-			day2day->write_output(workingdir + "o_convergence.dat");
+			string addition = to_string((long double)crit[wt]) + "\t" + to_string((long double)crit[ivt]);
+			day2day->write_output(workingdir + "o_convergence.dat", addition);
 			cout << "Convergence: " << crit[wt] << " " << crit[ivt] << endl;
 		}
 		return time;

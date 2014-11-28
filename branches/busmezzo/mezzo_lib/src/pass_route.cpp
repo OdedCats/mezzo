@@ -98,7 +98,7 @@ double Pass_path::calc_total_in_vehicle_time (double time, Passenger* pass)
 	{
 		double ivtt = 0;
 		
-		if (theParameters->in_vehicle_d2d_indicator == true)
+		if (theParameters->in_vehicle_d2d_indicator)
 		{
 			bool has_reached_boarding_stop = false;
 

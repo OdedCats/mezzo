@@ -138,6 +138,11 @@ void ODstops::reset()
 
 void ODstops::delete_passengers()
 {
+	anticipated_waiting_time.clear();
+	alpha_RTI.clear();
+	alpha_exp.clear();
+	anticipated_ivtt.clear();
+	ivtt_alpha_exp.clear();
 	for (vector <Passenger*>::iterator iter_pass = passengers_during_simulation.begin(); iter_pass < passengers_during_simulation.end(); iter_pass++)
 	{
 		delete *iter_pass;
