@@ -36,11 +36,7 @@ int main ( int argc, char **argv)
 	replications=atoi(argv[2]);
    if (argc > 3)
 	  seed=atoi(argv[3]);
-  Random::create(1);
-  if (seed != 0)
-  {
-		theRandomizers[0]->seed(seed);
-  }
+ 
    // NEW started using threads for future parallel runs. 
    // However, global vars need to be moved local to run more than one thread at a time to avoid data conflicts.
   NetworkThread* net1 = new NetworkThread(argv[1],1,seed);

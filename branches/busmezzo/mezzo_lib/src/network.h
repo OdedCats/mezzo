@@ -381,6 +381,9 @@ protected:
 	map<Busstop*,vector<Busstop*>> consecutive_stops; // contains all the stops that can be reached within no transfer per stop
 
 	Day2day* day2day;
+	map<ODSL, Travel_time> wt_rec; //the record of waiting time data
+	map<ODSLL, Travel_time> ivt_rec; //the record of in-vehicle time data
+	int day;
 
 	//Shortest path graph
 #ifndef _USE_VAR_TIMES
@@ -517,6 +520,11 @@ public:
 	NetworkThread (string masterfile,int threadnr = 1,long int seed=0):masterfile_(masterfile),threadnr_(threadnr),seed_(seed) 
 		{
 			theNetwork= new Network();
+			 
+			 if (seed != 0)
+			 {
+				theRandomizers[0]->seed(seed);
+			 }
 			if (seed_)
 					theNetwork->seed(seed_);
 		}

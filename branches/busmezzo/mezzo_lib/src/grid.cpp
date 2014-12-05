@@ -127,6 +127,21 @@ void MOE::report_value(double time) // for flows
  		    *value_iter=static_cast <double> (value_obs); 		 	
 }
 
+void MOE::report_values(double value, double time) // for passenger flows per day
+{
+	 	if (time < value_update)
+ 		{
+ 		 	value_period++;
+ 		 	values.push_back(0.0); // add a new interval to the list
+ 		 	value_iter++;
+ 		 	value_obs=0;
+			value_update=0;
+ 		}
+ 		value_obs += value;
+ 		*value_iter=static_cast <double> (value_obs);
+		value_update = time;
+}
+
 double MOE::get_value(int index)
 {
   if (values.empty())

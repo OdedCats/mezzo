@@ -120,6 +120,7 @@ Network::Network()
 	linkinfo=new LinkTimeInfo();
 	eventlist=new Eventlist;
 	no_ass_links=0;
+	Random::create(1);
 }
 
 Network::~Network()
@@ -311,6 +312,8 @@ int Network::reset()
 
 void Network::delete_passengers()
 {
+	day = 1;
+	day2day->update_day(1);
 	for (vector<ODstops*>::iterator odstops_iter = odstops.begin(); odstops_iter < odstops.end(); odstops_iter++)
 	{		
 		(*odstops_iter)->delete_passengers();
@@ -6920,6 +6923,8 @@ double Network::executemaster(QPixmap * pm_,QMatrix * wm_)
 	{
 		this->read_transit_path_sets (workingdir +"path_set_generation.dat");
 	}
+	day = 1;
+	day2day = new Day2day(1);
 	if (theParameters->pass_day_to_day_indicator == 1)
 	{
 		this->read_transitday2day (workingdir +"transit_day2day.dat");
@@ -7015,6 +7020,7 @@ double Network::executemaster()
 	{
 		this->read_transit_path_sets (workingdir +"path_set_generation.dat");
 	}
+	day = 1;
 	day2day = new Day2day(1);
 	if (theParameters->pass_day_to_day_indicator >= 1)
 	{
@@ -7430,18 +7436,17 @@ bool Network::run(int period)
 
 }
 
-
 double Network::step(double timestep)
 // same as run, but more stripped down. Called every timestep by the GUI
 {
+	double t0=timestamp();
+#ifndef _NO_GUI
+	double tc; // current time
+#endif //_NO_GUI  
+	double next_an_update=t0+timestep;   // when to exit
+
 	if (theParameters->pass_day_to_day_indicator == 0 && theParameters->in_vehicle_d2d_indicator == 0)
 	{
-		double t0=timestamp();
-		double timer = 1200;
-#ifndef _NO_GUI
-		double tc; // current time
-#endif //_NO_GUI  
-		double next_an_update=t0+timestep;   // when to exit
 		while ((time>-1.0) && (time<runtime))       // the big loop
 		{
 			time=eventlist->next();
@@ -7467,25 +7472,16 @@ double Network::step(double timestep)
 		crit[wt] = 1000.0f;
 		crit[ivt] = 1000.0f;
 		float theta = theParameters->break_criterium;
-		map<ODSL, Travel_time> wt_rec; //the record of waiting time data
-		map<ODSLL, Travel_time> ivt_rec; //the record of in-vehicle time data
-		day2day->reset();
-
-		for (int day = 1; (crit[wt] >= theta || crit[ivt] >= theta) && day <= 20; day++) //day2day
+		//map<ODSL, Travel_time> wt_rec; //the record of waiting time data
+		//map<ODSLL, Travel_time> ivt_rec; //the record of in-vehicle time data
+		//day2day->reset();
+		bool iter = true;
+		while (iter) //day2day
 		{
 			cout << "Day: " << day << endl;
 
-			if (day > 1)
-			{
-				read_transitday2day(wt_rec);
-				read_IVTT_day2day(ivt_rec);
-				reset();
-			}
-
 			crit[wt] = 0.0f;
 			crit[ivt] = 0.0f;
-
-			day2day->update_day(day);
 
 			double timer = 1200; 
 			while ((time>-1.0) && (time<runtime))       // the big loop
@@ -7498,6 +7494,18 @@ double Network::step(double timestep)
 					cout << "Time: " << timer << endl;
 					timer += 1200;
 				}
+
+#ifndef _NO_GUI
+		
+				tc=timestamp();
+		
+				if (tc > next_an_update)  // the time has come for the next animation update
+				{
+					drawing->draw(pm,wm);
+					return time;
+				} 
+		
+#endif //_NO_GUI
 			}
 
 			if (theParameters->pass_day_to_day_indicator > 0)
@@ -7513,11 +7521,26 @@ double Network::step(double timestep)
 			string addition = to_string((long double)crit[wt]) + "\t" + to_string((long double)crit[ivt]);
 			day2day->write_output(workingdir + "o_convergence.dat", addition);
 			cout << "Convergence: " << crit[wt] << " " << crit[ivt] << endl;
+
+			day++;
+			day2day->update_day(day);
+			if ((crit[wt] >= theta || crit[ivt] >= theta) && day <= 20)
+			{
+				reset();
+				read_transitday2day(wt_rec);
+				read_IVTT_day2day(ivt_rec);
+			}
+			else
+			{
+				iter = false; //break the while loop when one of the criteria has been reached
+			}
 		}
+		wt_rec.clear();
+		ivt_rec.clear();
+
 		return time;
 	}
 }
-
 
 #ifndef _NO_GUI
 // Graphical funcitons

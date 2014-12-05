@@ -63,6 +63,7 @@ class MOE
 	void fill_missing (const int nr_periods,const double default_value);
  	void report_value(double value, double time); // used to report values that are averaged
  	void report_value(double time); // used to report counts such as flows
+	void report_values(double value, double time); // used to report passenger flows
   double get_value(int index);
   double get_last_value();
   double get_min();

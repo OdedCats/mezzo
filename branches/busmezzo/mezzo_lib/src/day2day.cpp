@@ -118,8 +118,14 @@ Day2day::Day2day (int nr_of_reps_)
 	ivt_alpha_base[PK] = 1.0f;
 	ivt_alpha_base[crowding] = 1.0f;
 
+	day = 1;
 	v = 2.0f;
 	r = 1.0f;
+
+	kapa[RTI] = 1.0f;
+	kapa[EXP] = 1.0f;
+	kapa[PK] = 1.0f;
+	kapa[anticip] = 1.0f;
 
 	nr_of_reps = nr_of_reps_;
 	aggregate = false;

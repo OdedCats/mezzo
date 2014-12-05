@@ -196,7 +196,10 @@ public:
 	void write_densities(ostream & out,int nrperiods ) {out << id << "\t" ; moe_density->fill_missing (nrperiods, 0);
 														moe_density->write_values(out,nrperiods);}
 	void write_density(ostream & out, int index ) {moe_density->write_value(out,index);}
-	int max_moe_size() {return _MAX(moe_speed->get_size(), _MAX (moe_inflow->get_size(),_MAX(moe_outflow->get_size(),_MAX(moe_queue->get_size(),moe_density->get_size()))));}
+	void write_passengers(ostream & out,int nrperiods ) {out << id << "\t" ; moe_passengers->fill_missing (nrperiods, 0);
+														moe_passengers->write_values(out,nrperiods);}
+	void write_passenger(ostream & out, int index ) {moe_passengers->write_value(out,index);}
+	int max_moe_size() {return _MAX(moe_speed->get_size(), _MAX (moe_inflow->get_size(),_MAX(moe_outflow->get_size(),_MAX(moe_queue->get_size(),_MAX(moe_density->get_size(),moe_passengers->get_size())))));}
 	void add_blocked_exit() {nr_exits_blocked++;}
 	void remove_blocked_exit() {nr_exits_blocked--;}
 
@@ -250,6 +253,7 @@ protected:
 	MOE* moe_outflow;
 	MOE* moe_queue;
 	MOE* moe_density;
+	MOE* moe_passengers;
 	// Newly added for Assignment matrix
 	map < int , map <odval, map <int,int>,less_odval > > ass_matrix; // assignment matrix which is indexed as follows:
 	// ass_matrix [linkflow_period] [od_pair] [od_period]
