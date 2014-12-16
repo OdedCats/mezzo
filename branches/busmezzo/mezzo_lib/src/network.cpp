@@ -2245,8 +2245,22 @@ bool Network::read_passenger_rates_format3 (istream& in) // reads the passenger 
   	return false;
   }
   in >> origin_stop_id >> destination_stop_id >> arrival_rate; // 
-  Busstop* bs_o=(*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (origin_stop_id) ))); 
-  Busstop* bs_d=(*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (destination_stop_id) ))); 
+  //Busstop* bs_o=(*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (origin_stop_id) )));
+  vector<Busstop*>::iterator bs_o_it = find_if(busstops.begin(), busstops.end(), compare <Busstop> (origin_stop_id) );
+  if (bs_o_it == busstops.end())
+  {
+		cout << "Bus stop " << origin_stop_id << " not found.";
+		return false;
+  }
+  Busstop* bs_o = *bs_o_it;
+  //Busstop* bs_d=(*(find_if(busstops.begin(), busstops.end(), compare <Busstop> (destination_stop_id) ))); 
+  vector<Busstop*>::iterator bs_d_it = find_if(busstops.begin(), busstops.end(), compare <Busstop> (destination_stop_id) );
+  if (bs_d_it == busstops.end())
+  {
+	  cout << "Bus stop " << destination_stop_id << " not found.";
+ 	  return false;
+  }
+  Busstop* bs_d = *bs_d_it;
   
   ODstops* od_stop = new ODstops (bs_o, bs_d, arrival_rate);
   //ODstops* od_stop = bs_o->get_stop_od_as_origin_per_stop(bs_d);
@@ -2926,9 +2940,11 @@ void Network::find_all_paths_fast ()
 	cout << "Filtering paths..." << endl;
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{
+		cout << (*basic_origin)->get_name() << endl;
 		static_filtering_rules(*basic_origin);
 	}
 	// apply dominancy rules
+	cout << "Applying dominancy rules..." << endl;
 	for (vector <Busstop*>::iterator basic_origin = busstops.begin(); basic_origin < busstops.end(); basic_origin++)
 	{	
 		dominancy_rules(*basic_origin);
@@ -3588,7 +3604,7 @@ void Network::static_filtering_rules (Busstop* stop)
 					for (map <Busline*,bool>::iterator delete_iter = lines_to_be_deleted.begin(); delete_iter != lines_to_be_deleted.end(); delete_iter++)	
 					// delete all the lines that did not fulfill the maybe worthwhile to wait rule
 					{
-						vector<Busline*>::iterator line_to_delete;
+						vector<Busline*>::iterator line_to_delete = (*line_set_iter).end();
 						for (vector<Busline*>::iterator lines_iter = (*line_set_iter).begin(); lines_iter < (*line_set_iter).end(); lines_iter++)
 						{
 							if ((*delete_iter).first->get_id() == (*lines_iter)->get_id() && (*delete_iter).second == true)
@@ -3597,7 +3613,7 @@ void Network::static_filtering_rules (Busstop* stop)
 								break;
 							}
 						}
-						if ((*delete_iter).second == true)
+						if ((*delete_iter).second == true && line_to_delete != (*line_set_iter).end())
 						{
 							(*line_set_iter).erase(line_to_delete);
 						}
