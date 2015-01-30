@@ -621,8 +621,13 @@ Vehicle* const  Link::exit_veh(const double time, Link* const nextlink, const in
 	      veh->add_meters(length);
 	      moe_outflow->report_value(time);
 	      moe_speed->report_value((length/traveltime),time);
-		  linkout << time << ' '<< id << ' ' <<veh->get_id() << ' ' << veh->get_entry_time() << ' ' << veh->get_exit_time() << endl;
+		  if (use_ass_matrix)
+		  {
+		  linkout << time << ' '<< id << ' ' <<veh->get_id() << ' ' << veh->get_entry_time() << ' ' << veh->get_exit_time() <<
+			  ' ' << density() << ' ' << this->queue_percentage<< endl;
+		  }
 			return veh;
+		  
 		}
 
 	}
@@ -689,6 +694,11 @@ Vehicle*const  Link::exit_veh(const double time)
 	   		veh->add_meters(length);
 	   		 moe_outflow->report_value(time);
 	   		 moe_speed->report_value((length/traveltime),time);
+			  if (use_ass_matrix)
+			  {
+			  linkout << time << ' '<< id << ' ' <<veh->get_id() << ' ' << veh->get_entry_time() << ' ' << veh->get_exit_time() <<
+				  ' ' << density() << ' ' << this->queue_percentage<< endl;
+			  }
 			return veh;
 		}
 	}
