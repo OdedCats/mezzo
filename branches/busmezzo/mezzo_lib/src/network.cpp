@@ -2405,7 +2405,7 @@ bool Network::readbusstops_distances_format2 (istream& in)
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readsbusstop_distances scanner jammed at " << bracket;
+		cout << "readfile::readsbusstop_distances scanner jammed at " << bracket << ", expected } in stop list at " << name;
 		return false;
 	}
 	in >> bracket;
@@ -2427,13 +2427,13 @@ bool Network::readbusstops_distances_format2 (istream& in)
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readsbusstop_distances scanner jammed at " << bracket;
+		cout << "readfile::readsbusstop_distances scanner jammed at " << bracket << ", expected } after matrix at " << name;
 		return false;
 	}
 	in >> bracket;
 	if (bracket != '}')
 	{
-		cout << "readfile::readsbusstop_distances scanner jammed at " << bracket;
+		cout << "readfile::readsbusstop_distances scanner jammed at " << bracket << ", expected } at end at " << name;
 		return false;
 	}
 	return true;

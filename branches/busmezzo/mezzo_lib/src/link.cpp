@@ -38,7 +38,14 @@ Link::Link(int id_, Node* in_, Node* out_, int length_, int nr_lanes_, Sdfunc* s
 	moe_outflow=new MOE(theParameters->moe_outflow_update, (3600.0/theParameters->moe_outflow_update));
 	moe_queue=new MOE(theParameters->moe_queue_update);
 	moe_density=new MOE(theParameters->moe_density_update);
-	moe_passengers=new MOE(0.0);
+	if (theParameters->pass_day_to_day_indicator > 0)
+	{
+		moe_passengers=new MOE(0.0);
+	}
+	else
+	{
+		moe_passengers=new MOE(theParameters->moe_density_update);
+	}
   blocked_until=-1.0; // -1.0 = not blocked, -2.0 = blocked until further notice, other value= blocked until value
   nr_exits_blocked=0; // set by the turning movements if they are blocked
   freeflowtime=(length/(sdfunc->speed(0.0)));
@@ -505,7 +512,14 @@ bool Link::enter_veh(Vehicle* veh, double time)
 	{
 		// Calc time to stop
 		Bus* bus =  (Bus*)(veh); // so we can do Bus operations
-		moe_passengers->report_values(bus->get_occupancy(), time);
+		if (theParameters->pass_day_to_day_indicator > 0)
+		{
+			moe_passengers->report_values(bus->get_occupancy(), time);
+		}
+		else
+		{
+			moe_passengers->report_passengers(bus->get_occupancy(), time);
+		}
 		//vector <Start_trip*>::iterator curr_trip = bus->get_curr_trip();
 		Bustrip* trip = bus->get_curr_trip();
 		if (trip->check_end_trip() == false)
